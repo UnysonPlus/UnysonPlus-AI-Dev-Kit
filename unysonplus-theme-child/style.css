@@ -1,0 +1,14 @@
+/*
+Theme Name: UnysonPlus Child Starter
+Theme URI: https://github.com/UnysonPlus
+Template: unysonplus-theme
+Author: UnysonPlus
+Author URI: https://github.com/UnysonPlus
+Description: Starter child theme for building a UnysonPlus site. Copy this folder, rename to your site slug, edit this header (Theme Name / Text Domain), and activate. Ships a polished-chrome design/design.json that auto-imports on activation. Design lives in Theme Settings + design.json; only last-resort chrome CSS lives in assets/chrome.css.
+Version: 1.0.0
+Text Domain: unysonplus-child-starter
+*/
+
+/* This file is the child theme HEADER (required by WordPress). Do not put design
+   CSS here — the parent style is enqueued separately in functions.php, and bespoke
+   chrome CSS goes in assets/chrome.css. Prefer Theme-Settings options over CSS. */

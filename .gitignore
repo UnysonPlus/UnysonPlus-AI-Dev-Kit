@@ -1,0 +1,21 @@
+# ── Assembled at runtime by assemble.ps1 — never committed ─────────────
+# These come from their own repos / release zips; keeping them out of this
+# repo avoids drift and keeps the kit small. Run `pwsh assemble.ps1` to fill.
+/unysonplus/
+/unysonplus-theme/
+/UnysonPlus-HTML-to-Wordpress-Conversion/
+/UnysonPlus-Site-Converter-Extension/
+
+# Keep the empty target dirs visible in git (their contents are ignored above)
+!/unysonplus/.gitkeep
+!/unysonplus-theme/.gitkeep
+!/UnysonPlus-HTML-to-Wordpress-Conversion/.gitkeep
+!/UnysonPlus-Site-Converter-Extension/.gitkeep
+
+# ── Tooling junk ───────────────────────────────────────────────────────
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+/tools/measure/out/
+*.tmp

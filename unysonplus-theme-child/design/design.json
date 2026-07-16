@@ -1,0 +1,10 @@
+{
+  "_fw_settings_export": {
+    "format_version": 1,
+    "scope": "design",
+    "theme_id": "unysonplus",
+    "note": "PLACEHOLDER — replace by exporting a configured reference (see README.md). Empty values = no-op.",
+    "media_stripped": true
+  },
+  "values": {}
+}
