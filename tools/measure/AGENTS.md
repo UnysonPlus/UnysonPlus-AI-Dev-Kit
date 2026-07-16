@@ -4,7 +4,7 @@ Run after EVERY change. It loads the mockup + dev at the same width, extracts a 
 metric set from each DOM, and prints a pass/fail diff table.
 
 ```
-node measure.mjs "file:///D:/Web Dev/test-sites/<site>/mockup/index.html" "http://localhost/<site>/" --width 1440
+node measure.mjs "file:///<abs-path-to>/mockup/index.html" "http://localhost/<site>/" --width 1440
 ```
 
 - Tune the `METRICS` selector map so each metric resolves on BOTH the mockup and the

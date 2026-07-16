@@ -1,5 +1,14 @@
 # UnysonPlus AI Dev Kit — start here (AI agents)
 
+> **Repo hygiene — READ FIRST.** This is a **public, generic** repo. It must contain
+> **no site-specific anything** — never mention or commit the name, content, mockup,
+> URLs, or code of any actual site built with the kit. All site-specific work lives in
+> that site's own folder (its install / `demo-pages/<name>` / `test-sites/<name>`),
+> never here. Update this repo **only** for changes to the process, the option
+> reference, the harness, the starter, or the tooling — i.e. **algorithm/kit updates**,
+> not site builds. Examples use neutral placeholders (`<site>`, `<abs-path-to>`).
+
+
 You are building (or polishing) a **WordPress site or demo** on the **UnysonPlus**
 plugin + **unysonplus-theme** parent theme, usually to match a **source mockup**.
 This kit exists for one reason:

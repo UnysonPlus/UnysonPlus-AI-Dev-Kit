@@ -8,17 +8,20 @@
  *
  *   node measure.mjs <mockupUrl> <devUrl> [--width 1440] [--json]
  *
- * mockupUrl may be a file:// path to the mockup HTML; devUrl the localhost site.
- * Requires Playwright (installed in ../../ or in D:/Web Dev/pw-screens).
+ * mockupUrl may be a file:// path to the mockup HTML; devUrl the dev site URL.
+ * Requires Playwright: run `npm i` in this folder (see package.json). To reuse a
+ * Playwright installed elsewhere, set env PLAYWRIGHT_PATH to its module path.
  */
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
 let chromium;
-for (const p of ['playwright', 'D:/Web Dev/pw-screens/node_modules/playwright']) {
+const candidates = ['playwright'];
+if (process.env.PLAYWRIGHT_PATH) { candidates.push(process.env.PLAYWRIGHT_PATH); }
+for (const p of candidates) {
   try { ({ chromium } = require(p)); break; } catch {}
 }
-if (!chromium) { console.error('Playwright not found. `npm i playwright` in the kit or use pw-screens.'); process.exit(1); }
+if (!chromium) { console.error('Playwright not found. Run `npm i` in tools/measure (or set PLAYWRIGHT_PATH).'); process.exit(1); }
 
 const args = process.argv.slice(2);
 const [mockupUrl, devUrl] = args.filter(a => !a.startsWith('--'));

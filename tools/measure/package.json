@@ -1,0 +1,9 @@
+{
+  "name": "unysonplus-parity-harness",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Design-parity measurement harness (mockup vs dev).",
+  "bin": { "measure": "measure.mjs" },
+  "devDependencies": { "playwright": "^1.44.0" }
+}

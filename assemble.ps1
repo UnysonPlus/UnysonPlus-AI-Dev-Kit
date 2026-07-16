@@ -24,12 +24,15 @@
 param(
     [ValidateSet('local','github')]
     [string]$Source = 'local',
-    [string]$WorkDevRoot = 'D:\Web Dev',
+    # -Source local expects the plugin + parent theme working copies to be SIBLINGS
+    # of this kit folder (i.e. in the kit's parent dir). Override with -WorkDevRoot.
+    [string]$WorkDevRoot = '',
     [string]$GithubOrg   = 'https://github.com/UnysonPlus'
 )
 
 $ErrorActionPreference = 'Stop'
 $Kit = $PSScriptRoot
+if (-not $WorkDevRoot) { $WorkDevRoot = Split-Path $Kit -Parent }
 
 function Sync-Dir($from, $to) {
     if (-not (Test-Path $from)) { throw "source not found: $from" }

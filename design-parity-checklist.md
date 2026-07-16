@@ -12,7 +12,7 @@ How to verify the dev site matches the mockup **numerically**, not by eye.
 Run it:
 
 ```
-node tools/measure/measure.mjs "file:///D:/Web Dev/test-sites/<site>/mockup/index.html" "http://localhost/<site>/" --width 1440
+node tools/measure/measure.mjs "file:///<abs-path-to>/mockup/index.html" "http://localhost/<site>/" --width 1440
 ```
 
 The selector map in `measure.mjs` (`METRICS`) is editable per project — tune the
