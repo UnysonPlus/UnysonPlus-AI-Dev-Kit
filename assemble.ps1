@@ -11,8 +11,9 @@
 
     Two modes:
       -Source local   (default on the maintainer's machine): copy the plugin +
-                      parent theme from the working copies under D:\Web Dev, and
-                      clone the two service repos from GitHub.
+                      parent theme from the working copies (siblings of this kit;
+                      override with -WorkDevRoot), and clone the two service repos
+                      from GitHub.
       -Source github  : download the latest full-plugin release zip + git clone
                       the theme and the two service repos. Use this on any other
                       developer's machine.

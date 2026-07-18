@@ -27,7 +27,7 @@ Read this file, then `PLAYBOOK.md`, before touching a site.
 | `design-parity-checklist.md` | The metric set + the measurement algorithm (mockup ⟷ dev, ±2px tolerance). |
 | `unysonplus-theme-child/` | The **child-theme starter** you copy + rename per site. Ships a polished-chrome `design/design.json` so header/footer/container are ~90% right on activation. |
 | `tools/measure/measure.mjs` | The measurement harness. Run it after every change. |
-| `unysonplus/` · `unysonplus-theme/` | The plugin + parent theme. **Assembled, gitignored** — see `assemble.ps1`. Read them for options/shortcode shapes; the working-copy source of truth lives at `D:\Web Dev\unysonplus*`. |
+| `unysonplus/` · `unysonplus-theme/` | The plugin + parent theme. **Assembled, gitignored** — see `assemble.ps1`. Read them for options/shortcode shapes; the working-copy source of truth is your local plugin/theme repos (siblings of this kit — see `assemble.ps1 -WorkDevRoot`). |
 | `UnysonPlus-HTML-to-Wordpress-Conversion/` · `UnysonPlus-Site-Converter-Extension/` | The **automated** conversion pipeline (capture service + converter). This manual kit shares their standards; keep them in sync. |
 
 Assembled folders are empty until you run `pwsh assemble.ps1` (see that file).
@@ -60,7 +60,12 @@ tolerance. **Measure — never eyeball.**
   option, use it. Only fall back to the child theme's `assets/chrome.css` for
   things no option covers, and record those as enhancement candidates.
 - **Don't hand-edit the assembled folders** (`unysonplus/`, `unysonplus-theme/`).
-  Edit the working-copy sources under `D:\Web Dev` and re-`assemble`.
+  Edit the working-copy sources (the plugin/theme repos, siblings of this kit — see
+  `assemble.ps1 -WorkDevRoot`) and re-`assemble`.
+- **Keep the kit current.** Run `pwsh update.ps1` (pull kit + re-assemble sources +
+  refresh harness deps) so you build against the latest plugin/theme/playbook, not a
+  stale snapshot; `pwsh update.ps1 -Check` reports whether updates exist without changing
+  anything.
 - **Per-site work happens in a copy of `unysonplus-theme-child/`**, renamed to the
   site slug.
 - Keep this kit's docs and the two conversion repos **in sync** — a standard added

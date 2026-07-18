@@ -34,17 +34,21 @@ if (!mockupUrl || !devUrl) { console.error('usage: node measure.mjs <mockupUrl> 
  * dev (unysonplus-theme) DOM, and what to read. Edit per project as needed —
  * multiple selectors are tried in order; first match wins.
  */
+// dev selectors are tuned to unysonplus-theme's real markup (header root #masthead,
+// inner row .header-main; footer root #colophon; image logo .site-logo, custom
+// icon+text logo .site-logo__text). mock selectors are generic guesses — TUNE them
+// per project to the mockup's actual DOM (the dev side should already resolve).
 const METRICS = [
   { key: 'container_maxwidth', tol: 4, read: 'width',
-    mock: ['.wrap', '.container', 'main > .container', 'body'], dev: ['.fw-container', '.container'] },
+    mock: ['.max-w-7xl', '.wrap', '.container', 'main > .container', 'body'], dev: ['.fw-container', '.container'] },
   { key: 'header_height', tol: 3, read: 'height',
-    mock: ['header', '.site', '.nav'], dev: ['.site-header .header-main', '.site-header'] },
+    mock: ['#navbar', 'header', 'nav', '.site', '.nav'], dev: ['#masthead', '.header-main', '.site-header'] },
   { key: 'logo_width', tol: 4, read: 'width',
-    mock: ['.brand img', 'header img', '.logo img'], dev: ['.site-logo', '.header-element--logo img'] },
+    mock: ['.brand img', 'header img', '.logo img', 'header a > span'], dev: ['.site-logo', '.site-logo__text', '.header-element--logo'] },
   { key: 'logo_height', tol: 4, read: 'height',
-    mock: ['.brand img', 'header img', '.logo img'], dev: ['.site-logo', '.header-element--logo img'] },
+    mock: ['.brand img', 'header img', '.logo img', 'header a > span'], dev: ['.site-logo', '.site-logo__text', '.header-element--logo'] },
   { key: 'footer_height', tol: 8, read: 'height',
-    mock: ['footer'], dev: ['.footer', 'footer'] },
+    mock: ['footer'], dev: ['#colophon', '.site-footer', 'footer'] },
   { key: 'h1_fontsize', tol: 2, read: 'fontSize',
     mock: ['h1'], dev: ['h1'] },
   { key: 'body_fontsize', tol: 1, read: 'fontSize',
