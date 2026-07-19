@@ -7,13 +7,6 @@
 /UnysonPlus-HTML-to-Wordpress-Conversion/
 /UnysonPlus-Site-Converter-Extension/
 
-# Keep the empty target dirs visible in git (their contents are ignored above)
-!/unysonplus/.gitkeep
-!/unysonplus-theme/.gitkeep
-!/unysonplus-theme-child/.gitkeep
-!/UnysonPlus-HTML-to-Wordpress-Conversion/.gitkeep
-!/UnysonPlus-Site-Converter-Extension/.gitkeep
-
 # ── Tooling junk ───────────────────────────────────────────────────────
 node_modules/
 *.log
