@@ -23,7 +23,7 @@ Read this file, then `PLAYBOOK.md`, before touching a site.
 | Folder / file | What it is |
 |---|---|
 | `PLAYBOOK.md` | **The build process.** The outside-in order you must follow. |
-| `docs/theme-settings-reference.md` | **Every** Theme Settings option catalogued (Colors/Typography/Layout/Header/Footer/Site-UX/Misc/Blog/Pages). Configure the design from these — do **not** reach for CSS first. Bespoke CSS goes in Misc → Custom CSS (`misc_custom_css`). |
+| `docs/theme-settings/README.md` | **Every** Theme Settings option catalogued (Colors/Typography/Layout/Header/Footer/Site-UX/Misc/Blog/Pages). Configure the design from these — do **not** reach for CSS first. Bespoke CSS goes in Misc → Custom CSS (`misc_custom_css`). |
 | `docs/shortcodes/` | Per-shortcode **atts reference** — the page-builder JSON shape for each shortcode, + the node-model in `README.md` (section/column/leaf, shared wrapper blocks). **Read these instead of plugin source** to generate builder JSON. |
 | `docs/option-types/` | Per-option-type **value shapes** (multi-picker, background-pro, compact color, typography, unit-input, …) — the exact JSON to store for any option/att. |
 | `docs/animation-engine/` | Per-**module** effect shapes (hover, text-effects, scroll-motion, parallax, …) — the `fx`-block JSON to animate a node. Extension ships inactive. |
@@ -34,7 +34,7 @@ Read this file, then `PLAYBOOK.md`, before touching a site.
 | `tools/measure/compare.mjs` | Region-by-region **ensemble** — header↔header, each section↔section, footer↔footer, scored by geometry + pixelmatch + Resemble.js + a DOM-structure diff (fail-loud). |
 | `tools/measure/props.mjs` | Full-body **property diff** — walks both bodies, matches elements by text/region, reports NAMED computed-style deltas (caught the site-wide Inter→Open Sans miss). |
 | `unysonplus/` · `unysonplus-theme/` | The plugin + parent theme. **Assembled, gitignored** — see `assemble.ps1`. Read them for options/shortcode shapes; the working-copy source of truth is your local plugin/theme repos (siblings of this kit — see `assemble.ps1 -WorkDevRoot`). |
-| `UnysonPlus-HTML-to-Wordpress-Conversion/` · `UnysonPlus-Site-Converter-Extension/` | The **automated** conversion pipeline (capture service + converter). This manual kit shares their standards; keep them in sync. |
+| `UnysonPlus-Capture-Service/` · `UnysonPlus-Site-Converter-Extension/` | The **automated** conversion pipeline (capture service + converter). This manual kit shares their standards; keep them in sync. |
 
 Assembled folders are empty until you run `pwsh assemble.ps1` (see that file).
 
@@ -51,6 +51,10 @@ WordPress with the UnysonPlus plugin AND the unysonplus-theme parent active** �
   WordPress at `http://localhost:8888` with both active). Then use `http://localhost:8888/` as the dev
   URL. If the user already has their own WordPress, point them at **START-HERE.md → "First: a WordPress
   to build into" → Option B** to install the plugin + theme, and use their site URL instead.
+- **Classic Editor is required too.** Whenever the UnysonPlus plugin is installed, the **Classic
+  Editor** plugin must be installed AND active (Unyson's page builder + meta boxes need the classic
+  editor, not Gutenberg). `wp-env` installs it via `.wp-env.json`; on a BYO install, run
+  `wp plugin install classic-editor --activate` (or Plugins → Add New).
 - **Critical:** the plugin MUST be the **release bundle / assembled `./unysonplus`** (all 21 extensions).
   A `git clone` of the `UnysonPlus` repo is **core-only** (blog + update) — it activates cleanly but has
   **no page builder and no shortcodes**, so nothing can be built. Never install the site from a clone of
@@ -64,10 +68,14 @@ The failure mode this kit fixes: building **inside-out** (patching the logo, the
 the hero, then a table, then back to the logo) and **guessing sizes** from
 screenshots. That never converges. Instead — **convert first, then refine:**
 
-0. **Convert first (automated, token-free).** Run the **Site Converter** on the source
-   (see `PLAYBOOK.md` Phase 0) — it deterministically maps structure → shortcodes and tokens
-   → presets, so you refine a real page, not a blank one. Read its **conversion report** to see
-   what it mapped vs. fell back on. **Close *this site's* delta with native options /
+0. **Convert first (automated, token-free) — for a URL, RUN THE CAPTURE SERVICE; don't ask for files.**
+   `cd tools/design-capture && npm install` (once), then `node capture.mjs "<url>" <out>`. It renders
+   the page in a real browser, so ONE url gives you the full **rendered DOM** (JS-built content + inline
+   SVGs — never ask the user for these), the **downloaded media**, AND **computed styles** — then maps
+   structure → shortcodes and tokens → presets, so you refine a real page, not a blank one. Skipping
+   this and hand-building from scratch is what forces asking for assets the capture already had. (Only
+   fall back to a manual bundle when there's no URL / no Node+Playwright.) Read its **conversion report**
+   to see what it mapped vs. fell back on. **Close *this site's* delta with native options /
    `misc_custom_css` — do NOT edit the shared Site Converter to fix one site.** A whole *class* of
    misses (a pattern it mis-maps everywhere) is a converter-*algorithm* change, which is a
    **maintainer/contributor** task — it needs the converter repos and the fix must be **upstreamed**
@@ -80,7 +88,7 @@ screenshots. That never converges. Instead — **convert first, then refine:**
    structure, spacing scale, color tokens, type scale. The mockup is the spec.
 2. **Lock the chrome + container to measured parity FIRST**, using **native theme
    options** (General → Layout width; every Header option; every Footer option —
-   see `docs/theme-settings-reference.md`). Header + footer + container must pass
+   see `docs/theme-settings/README.md`). Header + footer + container must pass
    the parity check **before any section is built**.
 3. **Build the section / row skeleton** — correct widths, paddings, gaps.
    Structure before content.

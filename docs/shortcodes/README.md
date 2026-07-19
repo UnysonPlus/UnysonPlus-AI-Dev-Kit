@@ -81,4 +81,4 @@ atts. Filenames are the shortcode folder name (kebab); the tag is dashes→under
 
 **Colors on elements:** use the compact color-preset field (`{predefined:'text-<slug>'|'bg-<slug>',custom}`),
 not raw hex — see `../option-types/compact-color.md`. **Value shapes** for option types live in
-`../option-types/`. **Theme Settings** (global design) live in `../theme-settings-reference.md`.
+`../option-types/`. **Theme Settings** (global design) live in `../theme-settings/README.md`.

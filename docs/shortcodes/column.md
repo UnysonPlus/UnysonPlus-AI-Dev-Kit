@@ -14,15 +14,15 @@ column wrapper if the width is unrecognized.
 
 | key | type | default | notes |
 |---|---|---|---|
-| `content_h` | select | `'default'` | horizontal align of contents: `default`/`left`/`center`/`right`/`between` |
-| `content_v` | select | `'default'` | vertical align: `default`/`top`/`center`/`bottom`/`end` |
+| `content_h` | image-picker (responsive) | `'default'` | horizontal align of contents: `default` (Default) `start` (Left) `center` (Center) `end` (Right) `between` (Space Between) `around` (Space Around) `evenly` (Space Evenly) |
+| `content_v` | image-picker (responsive) | `'default'` | content vertical align: `default` (Top / Default) `center` (Middle) `end` (Bottom) `between` (Space Between) |
 | `content_direction` | select | `'column'` | `'column'` stacks; `'row'` lays contents INLINE side-by-side |
 | `content_gap` | responsive | `{base:'',md:'',lg:''}` | gap between contents (spacing-scale slug) |
 | `border_preset` | select | `''` | a Theme-Settings **box preset** class (e.g. a glass/card preset) on the column |
 | `inner_class` | string | `''` | **Inner Wrapper Class** — a class on a div wrapping ALL column contents (use for a boxed card that must wrap an `icon_box` + `button`, or a flex-row button group) |
 | `bg_color` | compact color | `{predefined:'',custom:''}` | column background |
 | `full_height` | select | `'no'` | `yes` = fill row height |
-| `align_self` | select | `'default'` | override cross-axis alignment |
+| `align_self` | image-picker (responsive) | `'default'` | column vertical align vs row siblings: `default` (Default / Stretched) `start` (Top) `center` (Middle) `end` (Bottom) |
 | `w_phone`/`w_tablet`/`w_desktop` | select | `'default'` | per-device width override |
 | `offset_phone`/`offset_tablet`/`offset_desktop` | select | `'none'` | per-device offset |
 | `mobile_order` | string | `''` | reorder on mobile |

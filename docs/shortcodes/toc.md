@@ -6,7 +6,7 @@ An auto-generated, clickable outline of the page's headings, built client-side. 
 | key | type | default | value shape / choices | what it does |
 |---|---|---|---|---|
 | `title` | text | `'Table of Contents'` | string | Heading above the list. Empty = no title. |
-| `levels` | checkboxes | `{h2,h3}` | `{ h1..h6 : true }` | Which heading tags to list. |
+| `levels` | checkboxes | `{h2,h3}` | map of `h1` `h2` `h3` `h4` `h5` `h6` → `true` (e.g. `{ "h2": true, "h3": true }`) | Which heading tags to list. |
 | `hierarchical` | switch | `'yes'` | `yes` \| `no` | Indent sub-headings (nested) vs one flat list. |
 | `min_headings` | text | `'2'` | integer string | Hide the whole box if fewer matching headings exist. |
 | `numeration` | select | `'decimal_nested'` | `none` `decimal_nested` `decimal` `roman` `upper_alpha` `bullets` | How each item is marked. |

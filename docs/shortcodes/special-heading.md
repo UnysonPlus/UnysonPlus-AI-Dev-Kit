@@ -20,7 +20,7 @@ An overline + title + subtitle heading block with per-element alignment, color a
 | `overline_container` | select | `''` | `''` `pill` `pill-outline` `underline` | Optional shape around the overline. |
 | `element_spacing` | select | `''` | `''` (normal) `tight` `relaxed` | Vertical spacing between the three lines. |
 | `block_max_width` | unit-input | `{value:'',unit:'px'}` | `{value,unit}` units `px % rem em ch vw` | Constrain the whole heading block width. |
-| `display_size` | select | `''` | `''` `display-1`…`display-6` | Enlarge title visually, keeping its tag. |
+| `display_size` | select | `''` | `''` (Default / from tag) `display-1` (largest) `display-2` `display-3` `display-4` `display-5` `display-6` | Enlarge title visually, keeping its tag. |
 | `title_max_width` | unit-input | `{value:'',unit:'px'}` | `{value,unit}` units `px % rem em ch vw` | Constrain the title line length only. |
 | `subtitle_size` | font-size preset | `''` | preset slug (see `README.md` font sizes) | Named size for the subtitle. |
 | `subtitle_max_width` | unit-input | `{value:'',unit:'rem'}` | `{value,unit}` units `px rem em ch % vw` | Constrain the subtitle line length. |

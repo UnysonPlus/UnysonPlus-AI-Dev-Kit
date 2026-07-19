@@ -39,6 +39,8 @@ const OT = PLUGIN && join(PLUGIN, 'framework/includes/option-types');
 const MOD = PLUGIN && join(PLUGIN, 'framework/extensions/animation-engine/modules');
 const EXT = PLUGIN && join(PLUGIN, 'framework/extensions');
 const THOPT = THEME && join(THEME, 'framework-customizations/theme/options');
+const COMP = PLUGIN && join(PLUGIN, 'framework/extensions/shortcodes/includes/theme-settings'); // preset/component + misc UIs
+const PRESETS = PLUGIN && join(PLUGIN, 'framework/includes/presets');                             // preset default scales
 
 // shortcodes whose source dir isn't shortcodes/shortcodes/<name>
 const SC_OVERRIDE = {
@@ -85,13 +87,27 @@ function sourcesFor(docRel) {
     ].filter(existsSync);
     return { kind: 'extension', src };
   }
-  if (docRel === 'theme-settings-reference.md') {
-    const src = [
-      ...glob(THOPT || '', /\.php$/),
-      PLUGIN && join(PLUGIN, 'framework/includes/presets/color-presets.php'),
-      PLUGIN && join(PLUGIN, 'framework/extensions/shortcodes/includes/theme-settings/components-color.php'),
-      PLUGIN && join(PLUGIN, 'framework/extensions/shortcodes/includes/theme-settings/miscellaneous-custom-css.php'),
-    ].filter(p => p && existsSync(p));
+  if (folder === 'theme-settings') {
+    const t = (f) => THOPT && join(THOPT, f);
+    const c = (f) => COMP && join(COMP, f);
+    const p = (f) => PRESETS && join(PRESETS, f);
+    const MAP = {
+      colors:       [c('components-color.php'), p('color-presets.php')],
+      typography:   [c('components-typography.php'), t('general-typography.php'), t('general-fonts.php')],
+      buttons:      [c('components-buttons.php'), p('button-presets.php')],
+      boxes:        [c('components-box.php'), c('components-section-styles.php'), c('components-patterns.php'), c('components-table.php')],
+      spacing:      [c('components-spacing.php'), p('spacing-presets.php')],
+      general:      [t('general-settings.php'), t('general-base.php'), t('general-layout.php'), t('general-sidebar.php')],
+      header:       glob(THOPT || '', /^header-.*\.php$/),
+      footer:       glob(THOPT || '', /^footer-.*\.php$/),
+      blog:         glob(THOPT || '', /^blog-.*\.php$/),
+      pages:        [...glob(THOPT || '', /^pages-.*\.php$/), t('page-options.php'), t('post-options.php'), t('general-pages.php')],
+      'site-ux':    glob(THOPT || '', /^site-wide-ux-.*\.php$/),
+      social:       [t('general-social.php'), t('social-settings.php')],
+      misc:         [t('misc.php'), ...glob(COMP || '', /^miscellaneous-.*\.php$/)],
+      woocommerce:  [t('woocommerce-settings.php')],
+    };
+    const src = (MAP[base] || []).filter(Boolean).filter(existsSync);
     return { kind: 'theme-settings', src };
   }
   return { kind: 'unknown', src: [] };
@@ -104,7 +120,7 @@ const rel = (p) => p.replace(PLUGIN || '\0', '{plugin}').replace(THEME || '\0', 
 function allDocs() {
   const out = [];
   for (const f of readdirSync(DOCS)) if (f.endsWith('.md')) out.push(f);            // top-level (theme-settings-reference)
-  for (const d of ['shortcodes', 'option-types', 'animation-engine', 'extensions'])
+  for (const d of ['shortcodes', 'option-types', 'animation-engine', 'extensions', 'theme-settings'])
     for (const f of lsMd(d)) out.push(`${d}/${f}`);
   return out.sort();
 }

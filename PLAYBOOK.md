@@ -13,11 +13,19 @@ Metrics: `design-parity-checklist.md`.
 
 ## Phase 0 — Convert (automated first pass)
 
-**Don't hand-build from a blank page — run the Site Converter first.** It maps sections →
-shortcodes and design tokens → presets deterministically, so you start from a real page, not zero.
+**Don't hand-build from a blank page, and don't ask the user for source files — for a URL, run the
+capture service FIRST, automatically.** `capture.mjs` renders the page in a real browser, so a single
+URL gets you the **full rendered DOM** (JS-built content + inline SVGs — you never need to ask for
+them), the **downloaded media**, AND the **computed styles** (exact colors/spacing that no static HTML
+carries), then maps sections → shortcodes and tokens → presets. This is the default first move — do it
+before any hand-building. One-time setup: `cd tools/design-capture && npm install` (Playwright + deps).
+Only fall back to a manual bundle (Phase 0b) when there's **no URL**, or Node/Playwright isn't available.
+
+> **Lesson baked in:** skipping this and hand-building from scratch is what forces you to ask the user
+> for assets (SVGs, the hero video) that the capture already had. Capture first, *then* refine.
 
 ```
-# URL path — the capture service (UnysonPlus-HTML-to-Wordpress-Conversion/tools/design-capture):
+# URL path — the capture service (UnysonPlus-Capture-Service/tools/design-capture):
 node capture.mjs "<source-url>" <outdir>        # → pages.json, presets.json, theme-settings.json,
                                                 #    design-config.json, media.json, convert-bundle.zip,
                                                 #    + conversion-report.csv/html, style-coverage.csv
@@ -38,7 +46,7 @@ Import the bundle into the dev site (the `site-converter` extension's import), t
      from upstream and `update.ps1` may clobber it. Instead **record the miss** (the report already
      flags it) and, with the site owner's consent, **share the report upstream** so a maintainer fixes
      the pattern for everyone. *If you ARE a converter contributor* (you have the
-     `UnysonPlus-HTML-to-Wordpress-Conversion` + `UnysonPlus-Site-Converter-Extension` repos), improve
+     `UnysonPlus-Capture-Service` + `UnysonPlus-Site-Converter-Extension` repos), improve
      the algorithm there and mirror the change to BOTH paths: JS (`to-pages.mjs`/`capture-extract.mjs`)
      AND PHP (`class-fw-site-converter-mapper.php`/`-stitch.php`) — see CLAUDE.md's conversion-report
      workflow.
@@ -49,6 +57,16 @@ The converter reliably gets **typography, colors, and chrome structure**; it sti
 design — that's the delta Phases 1–3 (below) close, applied to its output instead of a blank page.
 
 ## Phase 0b — Read the mockup's OUTER layers first (when NOT converting)
+
+**Source artifacts — capture the RENDERED DOM, and get BOTH files.** For a JS-rendered / SPA source
+(React, Next, Vue…), `view-source` is only the hydration shell — the real content and inline SVGs
+aren't there yet. So capture the **rendered DOM**: in browser DevTools, right-click the `<html>` node
+→ *Copy → Copy outerHTML* (page at the top, default state, scrolled through once so lazy sections
+load) → save as `devtools.html`. **Provide BOTH `devtools.html` (primary — the JS-built content +
+inline SVGs) AND `view-source.html`** (original markup, `<head>`/meta, embedded data the rendered copy
+can lose), plus the real media and a **reference screenshot** (ground truth for "does it match").
+Neither static file carries *computed* styles, so when feasible prefer the capture service
+(`capture.mjs <url>`), which renders in a browser AND reads `getComputedStyle`.
 
 Before anything, open the mockup HTML/CSS and extract the **frame tokens** (write
 them down — they are the spec you build to):
@@ -112,7 +130,7 @@ Build the page structure before content, in the page builder (or via the builder
 
 ## Rules
 
-- **Native options before CSS.** If it's in `docs/theme-settings-reference.md`, use it.
+- **Native options before CSS.** If it's in `docs/theme-settings/README.md`, use it.
 - **Measure, don't eyeball.** Run the harness after each phase; never "looks right".
 - **Outside-in.** Frame → sections → elements. Never patch an inner element before the
   frame passes parity.
@@ -123,7 +141,7 @@ Build the page structure before content, in the page builder (or via the builder
 
 ## Relationship to the automated pipeline
 
-`UnysonPlus-HTML-to-Wordpress-Conversion` (capture service) and
+`UnysonPlus-Capture-Service` (capture service) and
 `UnysonPlus-Site-Converter-Extension` do this **automatically** (URL/file → sections →
 shortcodes + presets). This manual playbook and those tools must share the **same
 standards** — colors/typography/buttons/boxes as Theme-Settings presets that elements

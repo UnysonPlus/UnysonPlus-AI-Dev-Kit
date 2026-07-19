@@ -32,6 +32,9 @@ Already run WordPress locally? Just install + activate these two, then use your 
   update); the release zip is the full plugin with the page builder + all shortcodes.
 - **unysonplus-theme (parent)** — <https://github.com/UnysonPlus/UnysonPlus-Theme> → *Code → Download ZIP*
   → *Appearance → Themes → Add New → Upload*.
+- **Classic Editor** — install + activate it from *Plugins → Add New* (search "Classic Editor").
+  UnysonPlus's page builder and meta boxes need the classic editor, not the Gutenberg block editor.
+  (Option A's `wp-env` installs it automatically.)
 
 That is the entire setup. Everything after this, the agent does.
 
@@ -45,7 +48,12 @@ into a fully functional WordPress site using the UnysonPlus framework.
 - The source files I downloaded (mockup, images, video) are in: [PATH TO YOUR FILES]
 - Create the dev site at: [DEV SITE URL — e.g. http://localhost/mysite/]
 
-Start by reading the kit's AGENTS.md and PLAYBOOK.md, then follow them exactly.
+Read the kit's AGENTS.md and PLAYBOOK.md and follow them. Do Phase 0 FIRST when I gave a URL:
+run the capture service — `node capture.mjs "<url>" <out>` in the assembled
+UnysonPlus-Capture-Service/tools/design-capture (one-time `npm install` there) — to grab
+the rendered DOM + media + computed styles, then import that bundle with the site-converter extension
+and refine. Don't hand-build from scratch, and don't ask me for assets (SVGs, video…) the capture
+already has.
 ```
 
 ### Example (filled in)
@@ -58,8 +66,30 @@ into a fully functional WordPress site using the UnysonPlus framework.
 - The source files I downloaded are in: C:\dev\mockups\acme
 - Create the dev site at: http://localhost/acme/
 
-Start by reading the kit's AGENTS.md and PLAYBOOK.md, then follow them exactly.
+Read the kit's AGENTS.md and PLAYBOOK.md and follow them. Do Phase 0 FIRST when I gave a URL:
+run the capture service — `node capture.mjs "<url>" <out>` in the assembled
+UnysonPlus-Capture-Service/tools/design-capture (one-time `npm install` there) — to grab
+the rendered DOM + media + computed styles, then import that bundle with the site-converter extension
+and refine. Don't hand-build from scratch, and don't ask me for assets (SVGs, video…) the capture
+already has.
 ```
+
+## Source files — the "bundle" (what goes in that folder)
+
+The **"source files I downloaded are in …"** folder is a small **source bundle**. Put in it:
+
+| File | Why |
+|---|---|
+| `devtools.html` | **The rendered DOM** — browser DevTools → right-click `<html>` → *Copy → Copy outerHTML* (page at top, scrolled once). Primary source: has the JS-built content + inline SVGs a `view-source` misses. |
+| `view-source.html` | The original served markup — catches `<head>`/fonts/meta + embedded data the rendered copy can lose. |
+| `video.mp4`, images | The **real media** the page loads from external URLs — so they're sideloaded and used, not hot-linked. |
+| `screenshot.png` | The reference image — ground truth for "does it match". |
+
+That **same folder, zipped, is a valid upload** for the Site Converter's *Upload a file* (Unyson+ →
+Convert): it picks the rendered HTML and sideloads the media (matched into the markup by filename). So
+one bundle feeds either path — the **agent** (this kit) or the **deterministic converter** (Phase 0).
+(Best of all when feasible: give the agent the live **URL** + run `capture.mjs`, which also reads
+computed styles.)
 
 ## What happens next (so you know it's working)
 

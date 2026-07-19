@@ -57,7 +57,12 @@ into a fully functional WordPress site using the UnysonPlus framework.
 - The source files I downloaded (mockup, images, video) are in: [PATH TO YOUR FILES]
 - Create the dev site at: [DEV SITE URL — e.g. http://localhost/mysite/]
 
-Start by reading the kit's AGENTS.md and PLAYBOOK.md, then follow them exactly.
+Read the kit's AGENTS.md and PLAYBOOK.md and follow them. Do Phase 0 FIRST when I gave a URL:
+run the capture service — `node capture.mjs "<url>" <out>` in the assembled
+UnysonPlus-Capture-Service/tools/design-capture (one-time `npm install` there) — to grab
+the rendered DOM + media + computed styles, then import that bundle with the site-converter extension
+and refine. Don't hand-build from scratch, and don't ask me for assets (SVGs, video…) the capture
+already has.
 ```
 
 ## What's inside
@@ -66,7 +71,7 @@ Start by reading the kit's AGENTS.md and PLAYBOOK.md, then follow them exactly.
 |---|---|
 | `AGENTS.md` | AI entry point — purpose, layout, the process. |
 | `PLAYBOOK.md` | The outside-in build process (frame → sections → elements). |
-| `docs/theme-settings-reference.md` | **Every** Theme Settings option (Colors/Typography/Layout/Header/Footer/Misc/Blog/Pages) — configure the design from these, not CSS. |
+| `docs/theme-settings/README.md` | **Every** Theme Settings option (Colors/Typography/Layout/Header/Footer/Misc/Blog/Pages) — configure the design from these, not CSS. |
 | `design-parity-checklist.md` | Metric set + the measurement algorithm. |
 | `tools/measure/measure.mjs` | Frame-metric parity harness (mockup ⟷ dev, pass/fail). |
 | `tools/measure/compare.mjs` | Region-by-region ensemble (geometry + pixelmatch + Resemble.js + DOM-structure). |
@@ -77,7 +82,7 @@ Start by reading the kit's AGENTS.md and PLAYBOOK.md, then follow them exactly.
 **Assembled (gitignored — never committed, filled by `assemble.ps1`):**
 `unysonplus/` (full plugin), `unysonplus-theme/` (parent theme),
 `unysonplus-theme-child/` (child-theme **starter** — copy per site; ships polished-chrome
-`design.json`), `UnysonPlus-HTML-to-Wordpress-Conversion/` + `UnysonPlus-Site-Converter-Extension/`
+`design.json`), `UnysonPlus-Capture-Service/` + `UnysonPlus-Site-Converter-Extension/`
 (the automated conversion pipeline this kit shares standards with).
 
 ## Why assemble instead of submodules

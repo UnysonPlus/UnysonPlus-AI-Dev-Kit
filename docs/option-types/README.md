@@ -31,5 +31,5 @@ a choice-key string. **checkboxes** → `{'<choice>':true|false}`. **slider/rang
 **text/short-text** → string. **wp-editor** → HTML string. **upload** → `{attachment_id,url}`.
 **Container types** (`multi`, `multi-inline`, `popover`, `popup`) store their inner-options' flattened values.
 
-See also: `../theme-settings-reference.md` (which option uses which type) and `../shortcodes/`
+See also: `../theme-settings/README.md` (which option uses which type) and `../shortcodes/`
 (shortcode atts).

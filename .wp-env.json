@@ -1,7 +1,10 @@
 {
   "$schema": "https://raw.githubusercontent.com/WordPress/gutenberg/trunk/schemas/json/wp-env.json",
   "core": null,
-  "plugins": [ "./unysonplus" ],
+  "plugins": [
+    "./unysonplus",
+    "https://downloads.wordpress.org/plugin/classic-editor.zip"
+  ],
   "themes": [ "./unysonplus-theme", "./unysonplus-theme-child" ],
   "port": 8888,
   "config": {

@@ -2,7 +2,7 @@
 
 One overview per plugin extension: what it is, whether it's active by default, and what it
 **provides** (cross-linked to the granular refs). These are summaries — the exact atts/option
-shapes live in `../shortcodes/`, `../option-types/`, `../theme-settings-reference.md`, and
+shapes live in `../shortcodes/`, `../option-types/`, `../theme-settings/README.md`, and
 `../animation-engine/`.
 
 | Extension | Active by default | Provides (agent-facing) |
@@ -10,7 +10,7 @@ shapes live in `../shortcodes/`, `../option-types/`, `../theme-settings-referenc
 | **shortcodes** | **yes** (core) | The page-builder + all core shortcodes → `../shortcodes/` |
 | **snippets** | **yes** | Reusable code/HTML snippets |
 | `animation-engine` | **no** (activate in Extensions) | 21 effect modules → `../animation-engine/`; 6 shortcodes (gallery-3d, image-sequence, model-viewer, svg-draw, svg-morph, webgl-object) |
-| `megamenu` | no | Mega-menu builder for header nav (see `../theme-settings-reference.md` Header → Menu) |
+| `megamenu` | no | Mega-menu builder for header nav (see `../theme-settings/README.md` Header → Menu) |
 | `forms` | no | `[contact-form]` + a form-builder option type (needs `builder` + `mailer`) |
 | `portfolio` | no | `portfolio` CPT + `portfolio` / `project-gallery` shortcodes |
 | `breadcrumbs` | no | `[breadcrumbs]` shortcode + schema.org BreadcrumbList |

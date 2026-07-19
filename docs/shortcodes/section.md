@@ -10,13 +10,13 @@ shared `common` + `fx` blocks (see `README.md`); its atts below. Section spacing
 |---|---|---|---|
 | `variant` | string | `''` | reserved |
 | `is_fullwidth` | bool | `false` | `true` = edge-to-edge; container caps content otherwise |
-| `container_width` | multi-picker | `{preset:'inherit'}` | `{preset:'inherit'|'wide'|'narrow'}` or `{preset:'custom',custom:{custom_width:{value,unit}}}` |
+| `container_width` | multi-picker | `{preset:'inherit'}` | preset: `inherit` (Inherit / global width) `narrow` (Narrow 768px) `medium` (Medium 896px) `wide` (Wide 1024px) `custom` (Custom…) — `{preset:'custom',custom:{custom_width:{value,unit}}}` for Custom |
 | `bg_color` | compact color | `{predefined:'',custom:''}` | quick solid background (prefer `background` for full control) |
 | `background` | background-pro | see below | color / gradient / image / **video** layers — see `../option-types/background-pro.md` |
 | `padding_top` / `padding_bottom` | spacing-scale | `''` | e.g. `'pt-section'`, `'pb-sectionlarge'`, or responsive `{base,md,lg}` |
-| `min_height` | multi-picker | `{preset:'auto',custom:{custom_height:{value:'',unit:'px'}}}` | section min height |
-| `content_valign` | select | `'top'` | `top`/`center`/`bottom` |
-| `column_halign` | select | `'default'` | horizontal align of columns |
+| `min_height` | multi-picker | `{preset:'auto',custom:{custom_height:{value:'',unit:'px'}}}` | preset: `auto` (Auto / fit content) `40vh` (40% of viewport) `60vh` (60% of viewport) `80vh` (80% of viewport) `100vh` (Full viewport / 100vh) `custom` (Custom…) |
+| `content_valign` | select | `'top'` | columns vertical align (option id `column_valign`): `stretch` (Default / Stretched) `top` `center` `bottom` |
+| `column_halign` | select | `'default'` | columns horizontal align: `default` (Left / Default) `center` `right` `between` (Space Between) `around` (Space Around) `evenly` (Space Evenly) |
 | `gap` / `gap_x` / `gap_y` | string | `''` | column gap overrides |
 | `background_color` / `background_image` / `video` / `bleed_illustration` | legacy | `''` / bgImage / `''` | keep present (empty) for validation |
 | `bleed_layout` | object | `{bleed_enabled:'no',yes:{}}` | edge-bleed illustration |

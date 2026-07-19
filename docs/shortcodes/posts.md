@@ -32,13 +32,29 @@ A data-driven query grid: pulls content from the WordPress post DB (`WP_Query`) 
 | `fallback_image_url` | text | `''` | URL string | Shown when a post has no featured image. |
 | `card_padding` | select | `'regular'` | `none` `compact` `regular` `spacious` | Card density. |
 | `text_align` | select | `'left'` | `left` `center` `right` | Card text alignment. |
+| `image_width_ratio` | select | `'40-60'` | `30-70` (30% / 70%) `40-60` (40% / 60%) `50-50` (50% / 50%) `60-40` (60% / 40%) | Image / content width ratio (side / alternating / hero card styles). |
+| `image_vertical_align` | select | `'stretch'` | `top` `center` `stretch` | Image vertical align (side / alternating card styles). |
+| `content_vertical_align` | select | `'top'` | `top` `center` `bottom` `space-between` (Justify) | Content vertical align (side / alternating card styles). |
+| `slider_arrows_position` | select | `'outside'` | `inside` `outside` `above` `hidden` | Slider arrow position (slider layout). |
+| `slider_dots_position` | select | `'below'` | `below` `overlay-bottom` (Overlay) `hidden` | Slider dots position (slider layout). |
+| `slider_autoplay` | switch | `'no'` | `'yes'` \| `'no'` | Slider autoplay (slider layout). |
+| `slider_interval` | short-text | `'5000'` | integer (ms) | Slider autoplay interval (slider layout). |
+| `slider_loop` | switch | `'yes'` | `'yes'` \| `'no'` | Slider loop (slider layout). |
 | `element_order` | addable-box | image, cats, title, meta, excerpt, readmore | array of `{slug,enabled}` | Reorder/toggle card blocks. |
 | `title_tag` | select | `'h3'` | `h2` `h3` `h4` `h5` `div` | Title HTML tag. |
 | `meta_items` | checkboxes | `{date:true,author:true}` | map of `date` `author` `comments` `reading_time` | Meta bar contents. |
+| `meta_layout` | select | `'inline-dot'` | `inline-dot` (Inline · dot) `inline-pipe` (Inline \| pipe) `inline-icons` (Inline with icons) `stacked` (one per line) | Meta bar layout. |
+| `cat_position` | select | `'above-title'` | `above-title` `below-title` `in-meta` `image-overlay-top-left` `image-overlay-top-right` `image-overlay-bottom-left` `image-overlay-bottom-right` | Where the category badges sit. |
+| `card_style_mobile` | select | `'inherit'` | `inherit` (from desktop) + any `card_style` key | Mobile Card Style Override. |
+| `date_format` | select | `'wp'` | `wp` (WordPress default) `relative` (e.g. "2 days ago") `long` (March 5, 2026) `short` (05/03/2026) | Post date format. |
 | `excerpt_length` | short-text | `'25'` | integer (words) | Excerpt trim length. |
 | `readmore_style` | select | `'text-link'` | `button` `text-link` `arrow-only` | Read-more style. |
 | `readmore_text` | text | `'Read more'` | string | Read-more label. |
 | `pagination_type` | image-picker | `'none'` | `none` `numeric` `prev_next` `ajax_loadmore` `infinite` | Pagination strategy. |
+| `pagination_position` | select | `'below-grid'` | `below-grid` (Below grid) `above-grid` (Above grid) `both` | Pagination position (numeric / prev_next). |
+| `pagination_align` | select | `'center'` | `left` `center` `right` | Pagination alignment (numeric / prev_next / ajax_loadmore). |
+| `filters_position` | select | `'above-grid'` | `above-grid` `left-sidebar` `right-sidebar` | AJAX filter bar position (when `live_filters` on). |
+| `cache_hours` | select | `'12'` | `1` (1 hour) `6` (6 hours) `12` (12 hours) `24` (24 hours / 1 day) | Cache lifespan (when `cache_output` on). |
 | `live_filters` | switch | `'no'` | `'yes'` \| `'no'` | AJAX category filter bar. |
 | `cache_output` | switch | `'no'` | `'yes'` \| `'no'` | Cache rendered HTML in a transient. |
 | `no_results_text` | text | `'Sorry, no posts matched your criteria.'` | string | Empty-state message. |

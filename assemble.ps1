@@ -7,7 +7,7 @@
         unysonplus/                              full plugin (all extensions)
         unysonplus-theme/                        parent theme
         unysonplus-theme-child/                  child-theme starter (copy per site)
-        UnysonPlus-HTML-to-Wordpress-Conversion/ capture service + AI companion
+        UnysonPlus-Capture-Service/ capture service + AI companion
         UnysonPlus-Site-Converter-Extension/     site-converter extension
 
     Two modes:
@@ -86,7 +86,7 @@ if ($Source -eq 'local') {
 
 # 4. + 5. Service repos (always cloned)
 Write-Host "[4/5] capture service"
-Clone-Or-Pull 'UnysonPlus-HTML-to-Wordpress-Conversion' "$Kit\UnysonPlus-HTML-to-Wordpress-Conversion"
+Clone-Or-Pull 'UnysonPlus-Capture-Service' "$Kit\UnysonPlus-Capture-Service"
 Write-Host "[5/5] site-converter extension"
 Clone-Or-Pull 'UnysonPlus-Site-Converter-Extension' "$Kit\UnysonPlus-Site-Converter-Extension"
 
