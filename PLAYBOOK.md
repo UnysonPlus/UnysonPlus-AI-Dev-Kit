@@ -50,8 +50,11 @@ Import the bundle into the dev site (the `site-converter` extension's import), t
      the algorithm there and mirror the change to BOTH paths: JS (`to-pages.mjs`/`capture-extract.mjs`)
      AND PHP (`class-fw-site-converter-mapper.php`/`-stitch.php`) — see CLAUDE.md's conversion-report
      workflow.
-3. **Re-run** the converter → the report + parity should improve. Each pass makes it smarter, so the
-   next site needs less manual fixing.
+3. **Re-run** the converter → the report + parity should improve. To **preserve parts you've already
+   accepted**, pass `--skip-header` / `--skip-footer` / `--skip-sections=<s_index list>` (or
+   `--only-sections=<list>`, using the `s_index` from `conversion-report.csv`) so the re-convert only
+   touches the bands you're still iterating on. Each pass makes it smarter, so the next site needs less
+   manual fixing.
 
 The converter reliably gets **typography, colors, and chrome structure**; it still misses **bespoke**
 design — that's the delta Phases 1–3 (below) close, applied to its output instead of a blank page.
