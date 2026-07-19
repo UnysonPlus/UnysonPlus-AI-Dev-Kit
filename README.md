@@ -14,7 +14,15 @@ eyeballing.
 git clone https://github.com/UnysonPlus/UnysonPlus-AI-Dev-Kit
 cd UnysonPlus-AI-Dev-Kit
 pwsh assemble.ps1 -Source github     # populates plugin/theme/service repos (see below)
+npx @wordpress/env start             # boots WordPress at http://localhost:8888 with the plugin + theme active
 ```
+
+That gives you a running WordPress (via [`wp-env`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/) —
+needs Docker + Node) with the **full** UnysonPlus plugin (from the latest release) and the parent theme
+already active, ready for the agent to build into. Already have your own WordPress (Local/XAMPP/MAMP)?
+Skip `wp-env` and instead install the plugin ([latest release zip](https://github.com/UnysonPlus/UnysonPlus/releases/latest)
+— **not** a git clone of the repo, which is core-only) + the [parent theme](https://github.com/UnysonPlus/UnysonPlus-Theme),
+then point the kickoff prompt at your site URL. Full walkthrough: **[`START-HERE.md`](START-HERE.md)**.
 
 On the maintainer's machine (plugin + theme working copies present as siblings of this kit):
 
@@ -47,6 +55,7 @@ into a fully functional WordPress site using the UnysonPlus framework.
 
 - The UnysonPlus AI Dev Kit is set up at: [PATH TO THIS KIT FOLDER]
 - The source files I downloaded (mockup, images, video) are in: [PATH TO YOUR FILES]
+- Create the dev site at: [DEV SITE URL — e.g. http://localhost/mysite/]
 
 Start by reading the kit's AGENTS.md and PLAYBOOK.md, then follow them exactly.
 ```
@@ -57,15 +66,18 @@ Start by reading the kit's AGENTS.md and PLAYBOOK.md, then follow them exactly.
 |---|---|
 | `AGENTS.md` | AI entry point — purpose, layout, the process. |
 | `PLAYBOOK.md` | The outside-in build process (frame → sections → elements). |
-| `docs/header-footer-reference.md` | Every Header/Footer **theme option** — configure chrome from these, not CSS. |
+| `docs/theme-settings-reference.md` | **Every** Theme Settings option (Colors/Typography/Layout/Header/Footer/Misc/Blog/Pages) — configure the design from these, not CSS. |
 | `design-parity-checklist.md` | Metric set + the measurement algorithm. |
-| `tools/measure/measure.mjs` | Parity harness (mockup ⟷ dev, pass/fail). |
-| `unysonplus-theme-child/` | Child-theme **starter** (copy per site; ships polished-chrome `design.json`). |
+| `tools/measure/measure.mjs` | Frame-metric parity harness (mockup ⟷ dev, pass/fail). |
+| `tools/measure/compare.mjs` | Region-by-region ensemble (geometry + pixelmatch + Resemble.js + DOM-structure). |
+| `tools/measure/props.mjs` | Full-body property diff — named computed-style deltas per element. |
 | `assemble.ps1` | Populates the assembled folders below. |
+| `.wp-env.json` | One-command WordPress: mounts the assembled plugin + parent theme + child starter into a `wp-env` install (`npx @wordpress/env start`). Run `assemble` first. |
 
 **Assembled (gitignored — never committed, filled by `assemble.ps1`):**
 `unysonplus/` (full plugin), `unysonplus-theme/` (parent theme),
-`UnysonPlus-HTML-to-Wordpress-Conversion/` + `UnysonPlus-Site-Converter-Extension/`
+`unysonplus-theme-child/` (child-theme **starter** — copy per site; ships polished-chrome
+`design.json`), `UnysonPlus-HTML-to-Wordpress-Conversion/` + `UnysonPlus-Site-Converter-Extension/`
 (the automated conversion pipeline this kit shares standards with).
 
 ## Why assemble instead of submodules

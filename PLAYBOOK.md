@@ -1,15 +1,54 @@
 # PLAYBOOK — building a UnysonPlus site/demo from a mockup
 
-The process that gets a mockup **right on the first pass**. Build **outside-in**,
-**measure** at every step, and **configure with native options** before writing CSS.
+The process gets a mockup **right on the first pass** by **converting first, then refining** —
+let the deterministic Site Converter do the bulk mapping (token-free), then measure the gap and
+close it with native options. Build **outside-in**, **measure** at every step, **native options
+before CSS**.
 
-Prereq: run `pwsh assemble.ps1` so `unysonplus/` + `unysonplus-theme/` + the two
-conversion repos are populated. Options reference: `docs/header-footer-reference.md`.
-Metrics + tolerances: `design-parity-checklist.md`.
+Prereq: `pwsh assemble.ps1` populates the two conversion repos + (with `-WithSource`) the
+plugin/theme. Shape references: `docs/` (shortcodes / option-types / theme-settings / animation-engine).
+Metrics: `design-parity-checklist.md`.
 
 ---
 
-## Phase 0 — Read the mockup's OUTER layers first
+## Phase 0 — Convert (automated first pass)
+
+**Don't hand-build from a blank page — run the Site Converter first.** It maps sections →
+shortcodes and design tokens → presets deterministically, so you start from a real page, not zero.
+
+```
+# URL path — the capture service (UnysonPlus-HTML-to-Wordpress-Conversion/tools/design-capture):
+node capture.mjs "<source-url>" <outdir>        # → pages.json, presets.json, theme-settings.json,
+                                                #    design-config.json, media.json, convert-bundle.zip,
+                                                #    + conversion-report.csv/html, style-coverage.csv
+# File path — the site-converter extension's PHP Mapper/Stitch (for a saved HTML file).
+```
+Import the bundle into the dev site (the `site-converter` extension's import), then:
+
+1. **Read the conversion report FIRST.** It traces every source element → the shortcode it became
+   and flags **`fallback`** (code_block catch-alls), **`opportunity`** (a richer role it could've
+   used), **`styling drop`**, and over-large/under-segmented sections. That report IS your task list.
+2. **Two kinds of gap, fixed two ways:**
+   - **This site's misses** (bespoke bits the converter can't infer) → fix via native options /
+     `misc_custom_css`, using the `docs/` shape references (Phases 1–3 below). This is the normal
+     site-build work.
+   - **Systematic misses** (a whole *class* it mis-maps — e.g. feature cards → `code_block` instead
+     of `icon_box`) → that's a **converter-algorithm** fix, and it only helps if it lands
+     **upstream**. **Do NOT fork your local converter to patch one build** — the change would diverge
+     from upstream and `update.ps1` may clobber it. Instead **record the miss** (the report already
+     flags it) and, with the site owner's consent, **share the report upstream** so a maintainer fixes
+     the pattern for everyone. *If you ARE a converter contributor* (you have the
+     `UnysonPlus-HTML-to-Wordpress-Conversion` + `UnysonPlus-Site-Converter-Extension` repos), improve
+     the algorithm there and mirror the change to BOTH paths: JS (`to-pages.mjs`/`capture-extract.mjs`)
+     AND PHP (`class-fw-site-converter-mapper.php`/`-stitch.php`) — see CLAUDE.md's conversion-report
+     workflow.
+3. **Re-run** the converter → the report + parity should improve. Each pass makes it smarter, so the
+   next site needs less manual fixing.
+
+The converter reliably gets **typography, colors, and chrome structure**; it still misses **bespoke**
+design — that's the delta Phases 1–3 (below) close, applied to its output instead of a blank page.
+
+## Phase 0b — Read the mockup's OUTER layers first (when NOT converting)
 
 Before anything, open the mockup HTML/CSS and extract the **frame tokens** (write
 them down — they are the spec you build to):
@@ -65,11 +104,15 @@ Build the page structure before content, in the page builder (or via the builder
    `render_as_code=false` so it renders as real markup and the layout keeps moving.
    Swap it for the real shortcode once the surrounding page is right. This keeps a
    difficult element from blocking the whole build.
-3. **Measure** again; polish element spacing/typography last.
+3. **Measure** again; polish element spacing/typography last. For a full-page check,
+   run `tools/measure/compare.mjs "<mockup>" "<dev>" --out ./parity` — the region-by-region
+   **ensemble** (geometry + pixelmatch + Resemble.js + DOM-structure) flags missing/extra/short
+   bands *and* missing content (links/icons/CTAs). Use the **live source URL** as the mockup.
+   See `design-parity-checklist.md`.
 
 ## Rules
 
-- **Native options before CSS.** If it's in `docs/header-footer-reference.md`, use it.
+- **Native options before CSS.** If it's in `docs/theme-settings-reference.md`, use it.
 - **Measure, don't eyeball.** Run the harness after each phase; never "looks right".
 - **Outside-in.** Frame → sections → elements. Never patch an inner element before the
   frame passes parity.

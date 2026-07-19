@@ -1,9 +1,14 @@
 {
   "name": "unysonplus-parity-harness",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
-  "description": "Design-parity measurement harness (mockup vs dev).",
-  "bin": { "measure": "measure.mjs" },
-  "devDependencies": { "playwright": "^1.44.0" }
+  "description": "Design-parity harness — frame metrics (measure.mjs), region-by-region ensemble (compare.mjs: geometry + pixelmatch + Resemble.js + DOM-structure), and full-body property diff (props.mjs).",
+  "bin": { "measure": "measure.mjs", "compare": "compare.mjs", "props": "props.mjs" },
+  "devDependencies": {
+    "playwright": "^1.44.0",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0",
+    "resemblejs": "^5.0.0"
+  }
 }

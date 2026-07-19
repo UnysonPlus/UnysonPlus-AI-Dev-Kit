@@ -1,0 +1,1595 @@
+{
+  "generated_against": {
+    "unysonplus": "2.15.58",
+    "unysonplus-theme": "2.3.114",
+    "synced": "2026-07-18"
+  },
+  "docs": {
+    "animation-engine/backgrounds.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/backgrounds/includes/backgrounds-settings.php"
+      ],
+      "hash": "42793d60d032d7fea8315936709d2722",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/confetti.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/confetti/confetti.php"
+      ],
+      "hash": "6d85a269574fb61cecf89887fb08e96d",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/cursor.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/cursor/includes/cursor-settings.php"
+      ],
+      "hash": "19638a79bb2f3e03481c28cd9033cdbe",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/flip-card.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/flip-card/includes/flip-card-settings.php"
+      ],
+      "hash": "1a063d42f14a2b5935eaf79ed77224d9",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/horizontal-scroll.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/horizontal-scroll/horizontal-scroll.php"
+      ],
+      "hash": "bd360ee8e512250f904b09638876a716",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/hover.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/hover/includes/hover-settings.php"
+      ],
+      "hash": "abe4e3ab3b977794eba4a67d39b35d6f",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/marquee.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/marquee/includes/marquee-settings.php"
+      ],
+      "hash": "a71bfe21f9d305592e1d1de0918a1fc1",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/motion-path.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/motion-path/includes/motion-path-settings.php"
+      ],
+      "hash": "7db4c516db8f7a6acdd12a8c39bc674a",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/page-transitions.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/page-transitions/includes/page-transitions-settings.php"
+      ],
+      "hash": "0694e151e08ab0c4bb55c7cd3e8a105c",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/parallax.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/parallax/includes/parallax-settings.php"
+      ],
+      "hash": "01de6af79aa5ccb4abe19098faf34e03",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/physics.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/physics/includes/physics-settings.php"
+      ],
+      "hash": "16e64462b9be3a417d580c20ef2bfba3",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/preloader.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/preloader/includes/preloader-settings.php"
+      ],
+      "hash": "dd823051092722fafa55857accc74626",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/scroll-color-shift.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/scroll-color-shift/scroll-color-shift.php"
+      ],
+      "hash": "7d0dd603e78611faafdc0c2ac85eab55",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/scroll-loop.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/scroll-loop/includes/scroll-loop-settings.php"
+      ],
+      "hash": "9797b0211d8aa7327f1697119a737aef",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/scroll-motion.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/scroll-motion/includes/scroll-motion-settings.php"
+      ],
+      "hash": "482eb36de1d3e6bbf3d076886a9848a7",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/scroll-progress.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/scroll-progress/scroll-progress.php"
+      ],
+      "hash": "8f72de73b9354b3fcc004e66f1c7d2b0",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/scroll-reveal.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/scroll-reveal/includes/scroll-reveal-settings.php"
+      ],
+      "hash": "2db2c570b08cdfccbb7f19597aea8ab1",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/scroll-text-highlight.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/scroll-text-highlight/scroll-text-highlight.php"
+      ],
+      "hash": "924e4160bc33cc6dd2e5b0236e1fa92d",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/scrollytelling.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/scrollytelling/includes/scrollytelling-settings.php"
+      ],
+      "hash": "d12b432d48075cf144ea2de29abbf5f2",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/sticky-stack.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/sticky-stack/sticky-stack.php"
+      ],
+      "hash": "141713292373bb2507756391dd239495",
+      "synced": "2026-07-18"
+    },
+    "animation-engine/text-effects.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/text-effects/includes/text-effects-settings.php"
+      ],
+      "hash": "593a6282b8e556aa9526e87a1bc0bd53",
+      "synced": "2026-07-18"
+    },
+    "extensions/animation-engine.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/manifest.php"
+      ],
+      "hash": "af53ec58904ccac03a69c312d10d121d",
+      "synced": "2026-07-18"
+    },
+    "extensions/asset-optimizer.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/asset-optimizer/manifest.php",
+        "{plugin}/framework/extensions/asset-optimizer/settings-options.php"
+      ],
+      "hash": "43ef0a800a05dbe997a8e5ecbc89ab35",
+      "synced": "2026-07-18"
+    },
+    "extensions/blog.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/blog/manifest.php"
+      ],
+      "hash": "9ec44fb53b054dc1dfebe7fb6f12276f",
+      "synced": "2026-07-18"
+    },
+    "extensions/breadcrumbs.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/breadcrumbs/manifest.php",
+        "{plugin}/framework/extensions/breadcrumbs/settings-options.php"
+      ],
+      "hash": "f4f781556ebc87a728559e8c534b23a3",
+      "synced": "2026-07-18"
+    },
+    "extensions/builder.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/builder/manifest.php",
+        "{plugin}/framework/extensions/builder/config.php"
+      ],
+      "hash": "f9725f4fa63839613800924e3efb6061",
+      "synced": "2026-07-18"
+    },
+    "extensions/chat.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/chat/manifest.php"
+      ],
+      "hash": "91c267ce37a2235505987f7e51e5a343",
+      "synced": "2026-07-18"
+    },
+    "extensions/custom-fields.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/custom-fields/manifest.php"
+      ],
+      "hash": "64766e8564c7eb9b6f604f4274735113",
+      "synced": "2026-07-18"
+    },
+    "extensions/forms.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/forms/manifest.php",
+        "{plugin}/framework/extensions/forms/config.php",
+        "{plugin}/framework/extensions/forms/settings-options.php"
+      ],
+      "hash": "aff1bfe1a1e978b9994b882f1c244903",
+      "synced": "2026-07-18"
+    },
+    "extensions/live-editor.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/live-editor/manifest.php"
+      ],
+      "hash": "6f3151aafd34ff614e1d0e5703f1653b",
+      "synced": "2026-07-18"
+    },
+    "extensions/mailer.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/mailer/manifest.php"
+      ],
+      "hash": "ce956532e8443c409c2930237943cede",
+      "synced": "2026-07-18"
+    },
+    "extensions/megamenu.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/megamenu/manifest.php",
+        "{plugin}/framework/extensions/megamenu/config.php",
+        "{plugin}/framework/extensions/megamenu/options/column.php",
+        "{plugin}/framework/extensions/megamenu/options/default.php",
+        "{plugin}/framework/extensions/megamenu/options/item.php",
+        "{plugin}/framework/extensions/megamenu/options/row.php"
+      ],
+      "hash": "cbd6807b00c59c0cb18fd037fe53af7f",
+      "synced": "2026-07-18"
+    },
+    "extensions/portfolio.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/portfolio/manifest.php",
+        "{plugin}/framework/extensions/portfolio/config.php",
+        "{plugin}/framework/extensions/portfolio/settings-options.php"
+      ],
+      "hash": "61c18a0e9b3a52a888f3442aa3fdd6a7",
+      "synced": "2026-07-18"
+    },
+    "extensions/post-types.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/post-types/manifest.php"
+      ],
+      "hash": "1027ffb089cd92522ab1f6efd90804a8",
+      "synced": "2026-07-18"
+    },
+    "extensions/shortcodes.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/manifest.php",
+        "{plugin}/framework/extensions/shortcodes/settings-options.php"
+      ],
+      "hash": "c051b2c9c21452c84df43767bba445dc",
+      "synced": "2026-07-18"
+    },
+    "extensions/sidebars.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/sidebars/manifest.php",
+        "{plugin}/framework/extensions/sidebars/config.php",
+        "{plugin}/framework/extensions/sidebars/settings-options.php"
+      ],
+      "hash": "c88d2f0784aab9f1d2b6195677a2a92a",
+      "synced": "2026-07-18"
+    },
+    "extensions/site-converter.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/site-converter/manifest.php"
+      ],
+      "hash": "eab56e9cf2b284aec29fbdf1929286f0",
+      "synced": "2026-07-19"
+    },
+    "extensions/snippets.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/snippets/manifest.php"
+      ],
+      "hash": "62eb5ef0fc39d9db20bc85ced379171e",
+      "synced": "2026-07-18"
+    },
+    "extensions/template-library.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/template-library/manifest.php"
+      ],
+      "hash": "c53ecceb16b72953ed52cf5a6bd86bc5",
+      "synced": "2026-07-18"
+    },
+    "extensions/update.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/update/manifest.php",
+        "{plugin}/framework/extensions/update/config.php"
+      ],
+      "hash": "381b411f0b715a3fa2253b9493daf543",
+      "synced": "2026-07-18"
+    },
+    "extensions/woocommerce.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/woocommerce/manifest.php",
+        "{plugin}/framework/extensions/woocommerce/settings-options.php"
+      ],
+      "hash": "a756d4284bc958edfe5faa34353820af",
+      "synced": "2026-07-18"
+    },
+    "option-types/addable-box.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/addable-box/class-fw-option-type-addable-box.php"
+      ],
+      "hash": "1a8c27f674544f9e76dea8658cddca56",
+      "synced": "2026-07-18"
+    },
+    "option-types/addable-option.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/addable-option/class-fw-option-type-addable-option.php"
+      ],
+      "hash": "346988e5ee2813eb698f7c584e559f09",
+      "synced": "2026-07-18"
+    },
+    "option-types/addable-popup.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/addable-popup/class-fw-option-type-addable-popup.php"
+      ],
+      "hash": "4c9c389cfeefe29d7a1f17ca1d7134c9",
+      "synced": "2026-07-18"
+    },
+    "option-types/background-image.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/background-image/class-fw-option-type-background-image.php"
+      ],
+      "hash": "0cb058bb6c088ced4fa95fa6181e4eae",
+      "synced": "2026-07-18"
+    },
+    "option-types/background-pro.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/background-pro/class-fw-option-type-background-pro.php"
+      ],
+      "hash": "02b36c61af8c1b1bfcfc3f32ee0de460",
+      "synced": "2026-07-18"
+    },
+    "option-types/border-presets.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/border-presets/class-fw-option-type-border-presets.php"
+      ],
+      "hash": "5455583f0a340629ff76806b7daa42d4",
+      "synced": "2026-07-18"
+    },
+    "option-types/border-style-picker.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/border-style-picker/class-fw-option-type-border-style-picker.php"
+      ],
+      "hash": "c457d56f711167d4558fae75bf9aa709",
+      "synced": "2026-07-18"
+    },
+    "option-types/box-shadow.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/box-shadow/class-fw-option-type-box-shadow.php"
+      ],
+      "hash": "e74ff477b3cf759bb8ba8ad2ee738ec4",
+      "synced": "2026-07-18"
+    },
+    "option-types/button-hover-animation.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/button-hover-animation/class-fw-option-type-button-hover-animation.php"
+      ],
+      "hash": "c54dfd839476dbab79778f0e7751f0ae",
+      "synced": "2026-07-18"
+    },
+    "option-types/button-presets.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/button-presets/class-fw-option-type-button-presets.php"
+      ],
+      "hash": "9300952f6387cfe3bf87b870860d7523",
+      "synced": "2026-07-18"
+    },
+    "option-types/button-style-picker.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/button-style-picker/class-fw-option-type-button-style-picker.php"
+      ],
+      "hash": "f47698af59fa38cac944c0b5d7ddee64",
+      "synced": "2026-07-18"
+    },
+    "option-types/code-editor.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/code-editor/class-fw-option-type-code-editor.php"
+      ],
+      "hash": "a549a4c5d3087502787e49e576f6e2d8",
+      "synced": "2026-07-18"
+    },
+    "option-types/color-picker.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/color-picker/class-fw-option-type-color-picker.php"
+      ],
+      "hash": "d589b8e61fbed2709740f11b8e93fe5e",
+      "synced": "2026-07-18"
+    },
+    "option-types/column-split.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/column-split/class-fw-option-type-column-split.php"
+      ],
+      "hash": "db7b42285465385a48dec9a6b168585e",
+      "synced": "2026-07-18"
+    },
+    "option-types/compact-color.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/predefined-colors-color-picker-compact/class-fw-option-type-predefined-colors-color-picker-compact.php"
+      ],
+      "hash": "92966ed72f7382ad364ebb851170a413",
+      "synced": "2026-07-18"
+    },
+    "option-types/date-picker.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/date-picker/class-fw-option-type-wp-date-picker.php"
+      ],
+      "hash": "b86c3c2369e69d6e61c3a47e56c3a221",
+      "synced": "2026-07-18"
+    },
+    "option-types/datetime-picker.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/datetime-picker/class-fw-option-type-datetime-picker.php"
+      ],
+      "hash": "f9111103a2f47dcb45682a8f14dfe3a8",
+      "synced": "2026-07-18"
+    },
+    "option-types/datetime-range.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/datetime-range/class-fw-option-type-datetime-range.php"
+      ],
+      "hash": "e5f9791bf00ef2bc53d5fab26b4c1228",
+      "synced": "2026-07-18"
+    },
+    "option-types/fw-multi-inline.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/fw-multi-inline/class-fw-option-type-fw-multi-inline.php"
+      ],
+      "hash": "f3c168d77f6bd2f3d50a4404da644fc2",
+      "synced": "2026-07-18"
+    },
+    "option-types/gradient-v2.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/gradient-v2/class-fw-option-type-gradient-v2.php"
+      ],
+      "hash": "0360228879cef0498cbb43982f3aa493",
+      "synced": "2026-07-18"
+    },
+    "option-types/gradient.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/gradient/class-fw-option-type-gradient.php"
+      ],
+      "hash": "4556e064187d6b0eb78f28f9033703f9",
+      "synced": "2026-07-18"
+    },
+    "option-types/icon-v2.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/icon-v2/class-fw-option-type-icon-v2.php"
+      ],
+      "hash": "27623681b93390136d2cc84233f62b45",
+      "synced": "2026-07-18"
+    },
+    "option-types/icon-v3.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/icon-v3/class-fw-option-type-icon-v3.php"
+      ],
+      "hash": "8a2b83aca1869289f492970543f6f33f",
+      "synced": "2026-07-18"
+    },
+    "option-types/icon.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/icon/class-fw-option-type-icon.php"
+      ],
+      "hash": "5c0e94cc1d79f2f4611319c2a24b64ee",
+      "synced": "2026-07-18"
+    },
+    "option-types/image-picker.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/image-picker/class-fw-option-type-image-picker.php"
+      ],
+      "hash": "74a09109a5b4623c47c181dc2530f7d8",
+      "synced": "2026-07-18"
+    },
+    "option-types/map.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/map/class-fw-option-type-map.php"
+      ],
+      "hash": "8f2934329310dd497d3695eca0735ffc",
+      "synced": "2026-07-18"
+    },
+    "option-types/multi-inline.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/multi-inline/class-fw-option-type-multi-inline.php"
+      ],
+      "hash": "4029067fcd4b943e05f81eedaf11ca4c",
+      "synced": "2026-07-18"
+    },
+    "option-types/multi-picker.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/multi-picker/class-fw-option-type-multi-picker.php"
+      ],
+      "hash": "e8e904eadaa8e1d52c32f17e905dc3b5",
+      "synced": "2026-07-18"
+    },
+    "option-types/multi-select.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/multi-select/class-fw-option-type-multi-select.php"
+      ],
+      "hash": "818a1bcf712112f1c150b6a9a76e8ec2",
+      "synced": "2026-07-18"
+    },
+    "option-types/multi-upload.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/multi-upload/class-fw-option-type-multi-upload.php"
+      ],
+      "hash": "578a45b8fd8ee52e4d6383657a7f22af",
+      "synced": "2026-07-18"
+    },
+    "option-types/multi.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/multi/class-fw-option-type-multi.php"
+      ],
+      "hash": "0517789f82d448dac4e8b8811fc9206c",
+      "synced": "2026-07-18"
+    },
+    "option-types/oembed.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/oembed/class-fw-option-type-oembed.php"
+      ],
+      "hash": "e7146c018a2b55ea409605da5d50bec0",
+      "synced": "2026-07-18"
+    },
+    "option-types/popover.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/popover/class-fw-option-type-popover.php"
+      ],
+      "hash": "8906253e106fcc4b3bc46dd1f7a93dfd",
+      "synced": "2026-07-18"
+    },
+    "option-types/popup.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/popup/class-fw-option-type-popup.php"
+      ],
+      "hash": "30a41d12f60a93d9a4f715c9a5bf52e1",
+      "synced": "2026-07-18"
+    },
+    "option-types/position-box.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/position-box/class-fw-option-type-position-box.php"
+      ],
+      "hash": "b7edcb4100125efd80d3e1a8fe50d7b4",
+      "synced": "2026-07-18"
+    },
+    "option-types/predefined-colors-color-picker.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/predefined-colors-color-picker/class-fw-option-type-predefined-colors-color-picker.php"
+      ],
+      "hash": "89622c0c43de77db2eabe842279ebd61",
+      "synced": "2026-07-18"
+    },
+    "option-types/predefined-colors.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/predefined-colors/class-fw-option-type-predefined-colors.php"
+      ],
+      "hash": "d3008f6851916bd19d2054defaa37652",
+      "synced": "2026-07-18"
+    },
+    "option-types/radio-text.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/radio-text/class-fw-option-type-radio-text.php"
+      ],
+      "hash": "5e1cbdd0e37279e1795c43b3eee8552e",
+      "synced": "2026-07-18"
+    },
+    "option-types/range-slider.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/range-slider/class-fw-option-type-range-slider.php"
+      ],
+      "hash": "95a2461b9017072739d88193349654e5",
+      "synced": "2026-07-18"
+    },
+    "option-types/responsive.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/responsive/class-fw-option-type-responsive.php"
+      ],
+      "hash": "3308f63743195349c78d16476398baec",
+      "synced": "2026-07-18"
+    },
+    "option-types/rgba-color-picker.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/rgba-color-picker/class-fw-option-type-rgba-color-picker.php"
+      ],
+      "hash": "39bd6a507b19c47944ca2d74ebe95f59",
+      "synced": "2026-07-18"
+    },
+    "option-types/slider.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/slider/class-fw-option-type-short-slider.php",
+        "{plugin}/framework/includes/option-types/slider/class-fw-option-type-slider.php"
+      ],
+      "hash": "7ae18b6829170f0396a07cdc1854d42c",
+      "synced": "2026-07-18"
+    },
+    "option-types/spacing.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/spacing/class-fw-option-type-spacing.php"
+      ],
+      "hash": "7e697c46451eeb48ac97b0a3c9a37f47",
+      "synced": "2026-07-18"
+    },
+    "option-types/split-slider.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/split-slider/class-fw-option-type-split-slider.php"
+      ],
+      "hash": "4afdd75ab2780c9fec38ebbd7281690a",
+      "synced": "2026-07-18"
+    },
+    "option-types/switch.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/switch/class-fw-option-type-switch.php"
+      ],
+      "hash": "5e04e3baf94d027fbf0e39bcb49940a0",
+      "synced": "2026-07-18"
+    },
+    "option-types/table-presets.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/table-presets/class-fw-option-type-table-presets.php"
+      ],
+      "hash": "5de2a1ec548b075018869e0264be0199",
+      "synced": "2026-07-18"
+    },
+    "option-types/table-style-picker.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/table-style-picker/class-fw-option-type-table-style-picker.php"
+      ],
+      "hash": "bd90cf485542bd1ae0c0579ddfde4e96",
+      "synced": "2026-07-18"
+    },
+    "option-types/typography-v2.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/typography-v2/class-fw-option-type-typography-v2.php"
+      ],
+      "hash": "4fda5f0413d368f39a31d529bd7368c5",
+      "synced": "2026-07-18"
+    },
+    "option-types/typography.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/typography/class-fw-option-type-typography.php"
+      ],
+      "hash": "723fab115aa3a09a1214f75740bde1b8",
+      "synced": "2026-07-18"
+    },
+    "option-types/unit-input.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/unit-input/class-fw-option-type-unit-input.php"
+      ],
+      "hash": "597be9a59ec0d69db195eddc397bd970",
+      "synced": "2026-07-18"
+    },
+    "option-types/upload.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/upload/class-fw-option-type-upload.php"
+      ],
+      "hash": "6b90ef43c2cc765f7cb34b0a5724be56",
+      "synced": "2026-07-18"
+    },
+    "option-types/wp-editor.md": {
+      "kind": "option-type",
+      "src": [
+        "{plugin}/framework/includes/option-types/wp-editor/class-fw-option-type-wp-editor.php"
+      ],
+      "hash": "85f0dfbb66fe6be50b3bfbc20192689a",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/accordion.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/accordion/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/accordion/options.php"
+      ],
+      "hash": "894fbc1ab6e80d067cd93fa9c7c928b9",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/animated-heading.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/animated-heading/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/animated-heading/options.php"
+      ],
+      "hash": "48499402907bf185e4387852d541b9e0",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/announcement-pill.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/announcement-pill/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/announcement-pill/options.php"
+      ],
+      "hash": "952f64271e1399aebc619e0f97a7b4a5",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/audio-player.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/audio-player/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/audio-player/options.php"
+      ],
+      "hash": "3fefb051a69db1da9741f0176552716a",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/author-box.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/author-box/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/author-box/options.php"
+      ],
+      "hash": "5f5b62cdf18e870221be60959aabe691",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/avatar.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/avatar/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/avatar/options.php"
+      ],
+      "hash": "1737e21f1139c862c046a8701660cce6",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/before-after.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/before-after/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/before-after/options.php"
+      ],
+      "hash": "5ec9f682b26227d4125a2d70dfb1f599",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/bleed-section.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/bleed-section/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/bleed-section/options.php"
+      ],
+      "hash": "682219c283128a7c605c34b02ed80863",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/blockquote.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/blockquote/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/blockquote/options.php"
+      ],
+      "hash": "940a39c2dae317c11d781f68ebc48682",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/business-info.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/business-info/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/business-info/options.php"
+      ],
+      "hash": "1fd633c89a0fcd65f399b09add7e111a",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/button.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/button/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/button/options.php"
+      ],
+      "hash": "7b66aa3b67f096b0c6d57bfa7af8afbc",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/calendar.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/calendar/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/calendar/options.php"
+      ],
+      "hash": "55f2e8161d3c0e97af9e6f55b4ae3cee",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/call-to-action.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/call-to-action/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/call-to-action/options.php"
+      ],
+      "hash": "bbdb2dfbfc7b661bd7438c6b9aa84bb1",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/carousel.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/carousel/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/carousel/options.php"
+      ],
+      "hash": "ba112e2a1cc190043891abf45eeb7c02",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/code-block.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/code-block/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/code-block/options.php"
+      ],
+      "hash": "ad5de5c1a3b421d264c4de040ba26ad7",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/column.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/column/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/column/options.php"
+      ],
+      "hash": "b6abc7a4dbbc7b13ed42bacdbaa102e0",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/comparison-table.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/comparison-table/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/comparison-table/options.php"
+      ],
+      "hash": "c3311a56dc3734d6d82b3cd741e608fc",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/contact-form.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/forms/extensions/contact-forms/shortcodes/contact-form/config.php",
+        "{plugin}/framework/extensions/forms/extensions/contact-forms/shortcodes/contact-form/options.php"
+      ],
+      "hash": "cbb79a6d6bfc5308f525c7e86731d246",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/container.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/container/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/container/options.php"
+      ],
+      "hash": "6b9fff48c3fe0ed4136ed689aadba75a",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/countdown.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/countdown/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/countdown/options.php"
+      ],
+      "hash": "7e12ea69ea61ff1e31663977d3c6707d",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/counter.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/counter/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/counter/options.php"
+      ],
+      "hash": "ee8b95baf62696a5548f08a6a4eeb882",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/divider.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/divider/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/divider/options.php"
+      ],
+      "hash": "529cc0266bc64b6cc3ded6f794bfc047",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/feature-list.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/feature-list/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/feature-list/options.php"
+      ],
+      "hash": "c90f6706709e3b14cb2f472dfc0a0bfa",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/featured-image.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/featured-image/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/featured-image/options.php"
+      ],
+      "hash": "9ec633e47835a9a65f78cf721b227dc3",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/flexbox.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/flexbox/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/flexbox/options.php"
+      ],
+      "hash": "9757d9fbd33598aa059b68c9c1d7a436",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/flip-box.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/flip-box/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/flip-box/options.php"
+      ],
+      "hash": "34fe2681b8bc58d54d5eb115a171a966",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/gallery-3d.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/shortcodes/gallery-3d/config.php",
+        "{plugin}/framework/extensions/animation-engine/shortcodes/gallery-3d/options.php"
+      ],
+      "hash": "94c8223c4929c7e23a2eb0a37843519a",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/gallery.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/gallery/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/gallery/options.php"
+      ],
+      "hash": "6dfdcae0a8c837db7ebe56d686d90f47",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/highlight-text.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/highlight-text/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/highlight-text/options.php"
+      ],
+      "hash": "bc35aa11a7638b41dca1ce0329fc2372",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/icon-box.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/icon-box/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/icon-box/options.php"
+      ],
+      "hash": "6a27688332a0a11c0d71a86976d617cb",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/icon.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/icon/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/icon/options.php"
+      ],
+      "hash": "8ff405d0419a2ae2b5cf55f35b7d3e36",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/image-box.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/image-box/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/image-box/options.php"
+      ],
+      "hash": "d1674d3d1c67d458bef0e6be08dc1002",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/image-content.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/image-content/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/image-content/options.php"
+      ],
+      "hash": "f77c64b17c0bbdbda2fa02039a8ec26f",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/image-hotspots.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/image-hotspots/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/image-hotspots/options.php"
+      ],
+      "hash": "360006ececc895fd36a46b1e36f06c5b",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/image-sequence.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/shortcodes/image-sequence/config.php",
+        "{plugin}/framework/extensions/animation-engine/shortcodes/image-sequence/options.php"
+      ],
+      "hash": "7ef0cb29c93a9d9202824bd111f0a1d3",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/image.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/media-image/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/media-image/options.php"
+      ],
+      "hash": "7e4cd9585e6ef1ce7e0ef9ed95ba4f8f",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/logo-grid.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/logo-grid/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/logo-grid/options.php"
+      ],
+      "hash": "5a983c2a5ab6eb7e473bbafc8185256c",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/lottie.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/lottie/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/lottie/options.php"
+      ],
+      "hash": "06ae328aeb39294ac1374d128e26689b",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/map.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/map/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/map/options.php"
+      ],
+      "hash": "44978cabce5ad6c2e653f507149a1c25",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/masonry-section.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/masonry-section/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/masonry-section/options.php"
+      ],
+      "hash": "c78006cf9739a74c875e7c6fcc515538",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/media-video.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/media-video/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/media-video/options.php"
+      ],
+      "hash": "551503a7538832883786699edfbd187b",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/menu-toggle.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/menu-toggle/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/menu-toggle/options.php"
+      ],
+      "hash": "94053c6627bdabf308831245f155ee4a",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/modal-popup.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/modal-popup/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/modal-popup/options.php"
+      ],
+      "hash": "dc2130e1cac1e5a57970c0b06a3115c9",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/model-viewer.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/shortcodes/model-viewer/config.php",
+        "{plugin}/framework/extensions/animation-engine/shortcodes/model-viewer/options.php"
+      ],
+      "hash": "c3b56a6075f8932b35eba2ab03d22500",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/nav-menu.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/nav-menu/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/nav-menu/options.php"
+      ],
+      "hash": "77139b104f92be2b7068d40d20d69b17",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/newsletter.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/newsletter/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/newsletter/options.php"
+      ],
+      "hash": "1169be878bb17e74f78ee4c452112498",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/notification.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/notification/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/notification/options.php"
+      ],
+      "hash": "3e0072b347adc27a3f6b21ede26710c9",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/portfolio.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/portfolio/shortcodes/portfolio/config.php",
+        "{plugin}/framework/extensions/portfolio/shortcodes/portfolio/options.php"
+      ],
+      "hash": "8f4e6e0d8a2a71fa3af040516182aa89",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/post-author.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-author/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-author/options.php"
+      ],
+      "hash": "52242dd378835330f563a5f5f596074c",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/post-carousel.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-carousel/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-carousel/options.php"
+      ],
+      "hash": "f9199ec5bb005167a80b7fed95a1b7ca",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/post-content.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-content/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-content/options.php"
+      ],
+      "hash": "3791ae4a3142e3e67be0762a8abdf54f",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/post-date.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-date/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-date/options.php"
+      ],
+      "hash": "7fa69f262c3624e2d8b479765bcea907",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/post-excerpt.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-excerpt/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-excerpt/options.php"
+      ],
+      "hash": "c11f098b56c1580aad56c8220cf3cc05",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/post-meta.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-meta/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-meta/options.php"
+      ],
+      "hash": "e912b6ff8506ebadb479d831355d2904",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/post-terms.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-terms/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-terms/options.php"
+      ],
+      "hash": "3a37b9800093b7dc8c5d71eb870ae820",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/post-title.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-title/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/post-title/options.php"
+      ],
+      "hash": "58a3f7b161273ea565038b65330c53c7",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/posts.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/posts/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/posts/options.php"
+      ],
+      "hash": "ef01647558ba02937a929ae74baaded3",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/pricing-table.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/pricing-table/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/pricing-table/options.php"
+      ],
+      "hash": "89b8ccbe2669e33c26413dff357ff5a8",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/progress.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/progress/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/progress/options.php"
+      ],
+      "hash": "8c27198f4fa7169bcc9df8147cacb286",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/project-gallery.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/portfolio/shortcodes/project-gallery/config.php",
+        "{plugin}/framework/extensions/portfolio/shortcodes/project-gallery/options.php"
+      ],
+      "hash": "3ecdb4ab02cbc338eeb2d1bfec2d4e23",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/scroll-indicator.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/scroll-indicator/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/scroll-indicator/options.php"
+      ],
+      "hash": "3dff3d742e3f13d52dd7a5d47d78025e",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/scroll-to-top.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/scroll-to-top/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/scroll-to-top/options.php"
+      ],
+      "hash": "815c36d37f6cc54fb4ac764ff60bdc20",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/section.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/section/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/section/options.php"
+      ],
+      "hash": "d469e4aac70106f03cd391f3ba76da73",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/site-logo.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/site-logo/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/site-logo/options.php"
+      ],
+      "hash": "821b095dcd7365cc4e0733868399394d",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/site-search.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/site-search/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/site-search/options.php"
+      ],
+      "hash": "75cd96c3e0552aa40ae0307ca5fa76bf",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/social-icons.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/social-icons/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/social-icons/options.php"
+      ],
+      "hash": "f048f687b8d13610727f030035343512",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/social-share.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/social-share/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/social-share/options.php"
+      ],
+      "hash": "21131d34774ba7827dcd87e2b882fc12",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/special-heading.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/special-heading/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/special-heading/options.php"
+      ],
+      "hash": "32fcc8fa4e853beb81bbb88e26915e3b",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/star-rating.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/star-rating/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/star-rating/options.php"
+      ],
+      "hash": "b0787fbaea91ef30a470bc877a12dfaa",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/steps.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/steps/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/steps/options.php"
+      ],
+      "hash": "9f47ec584d384c46a755c23c272a9ed0",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/svg-draw.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/shortcodes/svg-draw/config.php",
+        "{plugin}/framework/extensions/animation-engine/shortcodes/svg-draw/options.php"
+      ],
+      "hash": "7dddc46397124e416380d2a49832579e",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/svg-morph.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/shortcodes/svg-morph/config.php",
+        "{plugin}/framework/extensions/animation-engine/shortcodes/svg-morph/options.php"
+      ],
+      "hash": "8a0bbf9169bf4c52537783e600249ec7",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/table.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/table/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/table/options.php"
+      ],
+      "hash": "ad71d1dcf49ecc9a08a9a060ea148719",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/tabs.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/tabs/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/tabs/options.php"
+      ],
+      "hash": "e990980733fedcdc3ebd8222b88145c8",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/tag-list.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/tag-list/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/tag-list/options.php"
+      ],
+      "hash": "2145a442b28eea2bbed372be541e83ae",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/team-member.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/team-member/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/team-member/options.php"
+      ],
+      "hash": "6665b9178ed1baab9eaa5529448f6618",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/testimonials.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/testimonials/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/testimonials/options.php"
+      ],
+      "hash": "0b19e16326b62e64d82d37098d200477",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/text-block.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/text-block/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/text-block/options.php"
+      ],
+      "hash": "d500ac56653ab880d4a1c87584975d0c",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/text-expander.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/text-expander/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/text-expander/options.php"
+      ],
+      "hash": "d461734e608921e1ae034cf851a4894d",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/timeline.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/timeline/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/timeline/options.php"
+      ],
+      "hash": "1c81e6f5b0a62632a65c5d3355c527fd",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/toc.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/toc/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/toc/options.php"
+      ],
+      "hash": "62051ace03ac27edc2d964c91e756e18",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/tooltip.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/tooltip/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/tooltip/options.php"
+      ],
+      "hash": "c8ed1e18699f3ac936f8f5014596e2b4",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/video-popup.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/video-popup/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/video-popup/options.php"
+      ],
+      "hash": "0a1e3a2202363cc91afd20fe81f144f3",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/webgl-object.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/shortcodes/webgl-object/config.php",
+        "{plugin}/framework/extensions/animation-engine/shortcodes/webgl-object/options.php"
+      ],
+      "hash": "540d216a2c05245f29ed6d33b42af7fa",
+      "synced": "2026-07-18"
+    },
+    "shortcodes/widget-area.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/widget-area/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/widget-area/options.php"
+      ],
+      "hash": "93e5b7b4a6f6e595fcd859f02289443b",
+      "synced": "2026-07-18"
+    },
+    "theme-settings-reference.md": {
+      "kind": "theme-settings",
+      "src": [
+        "{plugin}-theme/framework-customizations/theme/options/bingo-reviews-options.php",
+        "{plugin}-theme/framework-customizations/theme/options/blog-archives.php",
+        "{plugin}-theme/framework-customizations/theme/options/blog-card.php",
+        "{plugin}-theme/framework-customizations/theme/options/blog-index.php",
+        "{plugin}-theme/framework-customizations/theme/options/blog-settings.php",
+        "{plugin}-theme/framework-customizations/theme/options/blog-single-extras.php",
+        "{plugin}-theme/framework-customizations/theme/options/blog-single-hero.php",
+        "{plugin}-theme/framework-customizations/theme/options/blog-single.php",
+        "{plugin}-theme/framework-customizations/theme/options/casino-reviews-options.php",
+        "{plugin}-theme/framework-customizations/theme/options/demo-2.php",
+        "{plugin}-theme/framework-customizations/theme/options/demo-box.php",
+        "{plugin}-theme/framework-customizations/theme/options/demo.php",
+        "{plugin}-theme/framework-customizations/theme/options/footer-copyright.php",
+        "{plugin}-theme/framework-customizations/theme/options/footer-layout.php",
+        "{plugin}-theme/framework-customizations/theme/options/footer-main.php",
+        "{plugin}-theme/framework-customizations/theme/options/footer-post.php",
+        "{plugin}-theme/framework-customizations/theme/options/footer-pre.php",
+        "{plugin}-theme/framework-customizations/theme/options/footer-settings.php",
+        "{plugin}-theme/framework-customizations/theme/options/footer-widgets.php",
+        "{plugin}-theme/framework-customizations/theme/options/general-base.php",
+        "{plugin}-theme/framework-customizations/theme/options/general-fonts.php",
+        "{plugin}-theme/framework-customizations/theme/options/general-layout.php",
+        "{plugin}-theme/framework-customizations/theme/options/general-pages.php",
+        "{plugin}-theme/framework-customizations/theme/options/general-settings.php",
+        "{plugin}-theme/framework-customizations/theme/options/general-sidebar.php",
+        "{plugin}-theme/framework-customizations/theme/options/general-social.php",
+        "{plugin}-theme/framework-customizations/theme/options/general-typography.php",
+        "{plugin}-theme/framework-customizations/theme/options/header-bottombar.php",
+        "{plugin}-theme/framework-customizations/theme/options/header-identity.php",
+        "{plugin}-theme/framework-customizations/theme/options/header-layout.php",
+        "{plugin}-theme/framework-customizations/theme/options/header-main.php",
+        "{plugin}-theme/framework-customizations/theme/options/header-mega-menu.php",
+        "{plugin}-theme/framework-customizations/theme/options/header-menu.php",
+        "{plugin}-theme/framework-customizations/theme/options/header-settings.php",
+        "{plugin}-theme/framework-customizations/theme/options/header-topbar.php",
+        "{plugin}-theme/framework-customizations/theme/options/misc.php",
+        "{plugin}-theme/framework-customizations/theme/options/page-options.php",
+        "{plugin}-theme/framework-customizations/theme/options/pages-hero.php",
+        "{plugin}-theme/framework-customizations/theme/options/pages-layout.php",
+        "{plugin}-theme/framework-customizations/theme/options/pages-settings.php",
+        "{plugin}-theme/framework-customizations/theme/options/post-options.php",
+        "{plugin}-theme/framework-customizations/theme/options/settings.php",
+        "{plugin}-theme/framework-customizations/theme/options/site-wide-ux-dark-mode.php",
+        "{plugin}-theme/framework-customizations/theme/options/site-wide-ux-preloader.php",
+        "{plugin}-theme/framework-customizations/theme/options/site-wide-ux-scroll-top.php",
+        "{plugin}-theme/framework-customizations/theme/options/site-wide-ux-scroll.php",
+        "{plugin}-theme/framework-customizations/theme/options/site-wide-ux-settings.php",
+        "{plugin}-theme/framework-customizations/theme/options/social-settings.php",
+        "{plugin}-theme/framework-customizations/theme/options/woocommerce-settings.php",
+        "{plugin}/framework/includes/presets/color-presets.php",
+        "{plugin}/framework/extensions/shortcodes/includes/theme-settings/components-color.php",
+        "{plugin}/framework/extensions/shortcodes/includes/theme-settings/miscellaneous-custom-css.php"
+      ],
+      "hash": "18d7349f606cfaa58e922ee261ee30d1",
+      "synced": "2026-07-18"
+    }
+  }
+}

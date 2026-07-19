@@ -6,6 +6,7 @@
 
         unysonplus/                              full plugin (all extensions)
         unysonplus-theme/                        parent theme
+        unysonplus-theme-child/                  child-theme starter (copy per site)
         UnysonPlus-HTML-to-Wordpress-Conversion/ capture service + AI companion
         UnysonPlus-Site-Converter-Extension/     site-converter extension
 
@@ -56,14 +57,16 @@ function Clone-Or-Pull($repo, $to) {
 
 Write-Host "Assembling UnysonPlus-AI-Dev-Kit (source: $Source)"
 
-# 1. Plugin (full) + parent theme
+# 1. Plugin (full) + parent theme + child-theme starter
 if ($Source -eq 'local') {
-    Write-Host "[1/4] plugin  <- $WorkDevRoot\unysonplus"
-    Sync-Dir "$WorkDevRoot\unysonplus"       "$Kit\unysonplus"
-    Write-Host "[2/4] theme   <- $WorkDevRoot\unysonplus-theme"
-    Sync-Dir "$WorkDevRoot\unysonplus-theme" "$Kit\unysonplus-theme"
+    Write-Host "[1/5] plugin  <- $WorkDevRoot\unysonplus"
+    Sync-Dir "$WorkDevRoot\unysonplus"             "$Kit\unysonplus"
+    Write-Host "[2/5] theme   <- $WorkDevRoot\unysonplus-theme"
+    Sync-Dir "$WorkDevRoot\unysonplus-theme"       "$Kit\unysonplus-theme"
+    Write-Host "[3/5] child   <- $WorkDevRoot\unysonplus-theme-child"
+    Sync-Dir "$WorkDevRoot\unysonplus-theme-child" "$Kit\unysonplus-theme-child"
 } else {
-    Write-Host "[1/4] plugin  <- latest UnysonPlus release zip"
+    Write-Host "[1/5] plugin  <- latest UnysonPlus release zip"
     $api = 'https://api.github.com/repos/UnysonPlus/UnysonPlus/releases/latest'
     $rel = Invoke-RestMethod -Uri $api -Headers @{ 'User-Agent' = 'unysonplus-ai-dev-kit' }
     $asset = $rel.assets | Where-Object { $_.name -like '*.zip' } | Select-Object -First 1
@@ -75,14 +78,16 @@ if ($Source -eq 'local') {
     $inner = Get-ChildItem "$Kit\_pluginzip" -Directory | Select-Object -First 1
     Move-Item $inner.FullName "$Kit\unysonplus"
     Remove-Item -Recurse -Force "$Kit\_pluginzip"
-    Write-Host "[2/4] theme   <- clone UnysonPlus-Theme"
-    Clone-Or-Pull 'UnysonPlus-Theme' "$Kit\unysonplus-theme"
+    Write-Host "[2/5] theme   <- clone UnysonPlus-Theme"
+    Clone-Or-Pull 'UnysonPlus-Theme'       "$Kit\unysonplus-theme"
+    Write-Host "[3/5] child   <- clone UnysonPlus-Theme-Child"
+    Clone-Or-Pull 'UnysonPlus-Theme-Child' "$Kit\unysonplus-theme-child"
 }
 
-# 3. + 4. Service repos (always cloned)
-Write-Host "[3/4] capture service"
+# 4. + 5. Service repos (always cloned)
+Write-Host "[4/5] capture service"
 Clone-Or-Pull 'UnysonPlus-HTML-to-Wordpress-Conversion' "$Kit\UnysonPlus-HTML-to-Wordpress-Conversion"
-Write-Host "[4/4] site-converter extension"
+Write-Host "[5/5] site-converter extension"
 Clone-Or-Pull 'UnysonPlus-Site-Converter-Extension' "$Kit\UnysonPlus-Site-Converter-Extension"
 
 Write-Host "`nDone. The kit is assembled. See PLAYBOOK.md to build a site."
