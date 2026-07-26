@@ -14,12 +14,12 @@ Empty / unset:
 ## Fields
 | key | type | notes |
 |---|---|---|
-| `type` | string | The icon kind: `none` \| `icon-font` \| `custom-upload` \| `emoji` \| `svg` \| `lottie`. Default `"none"`. Drives which other keys are present. |
+| `type` | string | The icon kind: `none` \| `icon-font` \| `custom-upload` \| `emoji` \| `svg` \| `lottie` \| `rive`. Default `"none"`. Drives which other keys are present. (`lottie`/`rive` require the Animated Icons extension.) |
 | `icon-class` | string | **icon-font only.** The font-icon class, e.g. `"fa fa-star"`, `"dashicons dashicons-book"`. (On the resolved/render value the engine also adds `icon-class-without-root`, `pack-name`, `pack-css-uri`.) |
 | `attachment-id` / `url` | int \| string | **custom-upload (and svg upload) only.** WP attachment id + its URL (`false` when unset). |
 | `char` | string | **emoji only.** The emoji character. |
 | `svg-source` | string | **svg only.** `library` \| `upload` \| `inline`. Plus `svg-id` (library pick), `markup` (sanitized inline/uploaded SVG), and `attachment-id`/`url` when applicable. |
-| `src` / `trigger` / `speed` | string / string / float | **lottie only.** Animation URL; `trigger` ∈ `loop`\|`once`\|`hover`\|`click` (default `loop`); `speed` 0–8 (default `1`). |
+| `src` / `trigger` / `speed` | string / string / float | **lottie & rive.** `src` = the `.json` (lottie) or `.riv` (rive) URL; `trigger` ∈ `loop`\|`once`\|`hover`\|`click` (default `loop`); `speed` 0–8 (default `1`, **lottie only**). Both kinds require the Animated Icons extension. |
 
 ## Notes / gotchas
 - **Default value is `{ "type": "none" }`** (the `_get_defaults` array also seeds empty `icon-class`/`pack-*` keys, but the effective empty state is `type:none`).

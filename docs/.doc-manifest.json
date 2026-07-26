@@ -122,8 +122,8 @@
       "src": [
         "{plugin}/framework/extensions/animation-engine/modules/scroll-motion/includes/scroll-motion-settings.php"
       ],
-      "hash": "482eb36de1d3e6bbf3d076886a9848a7",
-      "synced": "2026-07-19"
+      "hash": "2ff4a3da2c51428b96f0e7234d3fd4c3",
+      "synced": "2026-07-24"
     },
     "animation-engine/scroll-progress.md": {
       "kind": "ae-module",
@@ -154,8 +154,8 @@
       "src": [
         "{plugin}/framework/extensions/animation-engine/modules/scrollytelling/includes/scrollytelling-settings.php"
       ],
-      "hash": "d12b432d48075cf144ea2de29abbf5f2",
-      "synced": "2026-07-19"
+      "hash": "cb12f8a3fd495c6d756890850304de41",
+      "synced": "2026-07-24"
     },
     "animation-engine/sticky-stack.md": {
       "kind": "ae-module",
@@ -178,8 +178,8 @@
       "src": [
         "{plugin}/framework/extensions/animation-engine/manifest.php"
       ],
-      "hash": "af53ec58904ccac03a69c312d10d121d",
-      "synced": "2026-07-19"
+      "hash": "dc79e94e672caeeb4a189ab27df848b8",
+      "synced": "2026-07-24"
     },
     "extensions/asset-optimizer.md": {
       "kind": "extension",
@@ -187,8 +187,8 @@
         "{plugin}/framework/extensions/asset-optimizer/manifest.php",
         "{plugin}/framework/extensions/asset-optimizer/settings-options.php"
       ],
-      "hash": "43ef0a800a05dbe997a8e5ecbc89ab35",
-      "synced": "2026-07-19"
+      "hash": "8151e07fc01e1410a90d9459101a51da",
+      "synced": "2026-07-24"
     },
     "extensions/blog.md": {
       "kind": "extension",
@@ -239,8 +239,8 @@
         "{plugin}/framework/extensions/forms/config.php",
         "{plugin}/framework/extensions/forms/settings-options.php"
       ],
-      "hash": "aff1bfe1a1e978b9994b882f1c244903",
-      "synced": "2026-07-19"
+      "hash": "eb6635f63893a20638db18f197ed485d",
+      "synced": "2026-07-24"
     },
     "extensions/live-editor.md": {
       "kind": "extension",
@@ -278,8 +278,8 @@
         "{plugin}/framework/extensions/portfolio/config.php",
         "{plugin}/framework/extensions/portfolio/settings-options.php"
       ],
-      "hash": "61c18a0e9b3a52a888f3442aa3fdd6a7",
-      "synced": "2026-07-19"
+      "hash": "650dda3e6135d9718c147e58b3f9e3ee",
+      "synced": "2026-07-23"
     },
     "extensions/post-types.md": {
       "kind": "extension",
@@ -295,8 +295,8 @@
         "{plugin}/framework/extensions/shortcodes/manifest.php",
         "{plugin}/framework/extensions/shortcodes/settings-options.php"
       ],
-      "hash": "c051b2c9c21452c84df43767bba445dc",
-      "synced": "2026-07-19"
+      "hash": "9781229b2c4fa26a5a6f76fdcfb9d3ab",
+      "synced": "2026-07-24"
     },
     "extensions/sidebars.md": {
       "kind": "extension",
@@ -313,8 +313,8 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "eab56e9cf2b284aec29fbdf1929286f0",
-      "synced": "2026-07-19"
+      "hash": "a01c2b5bb1484073ad7c4393fd58dc70",
+      "synced": "2026-07-24"
     },
     "extensions/snippets.md": {
       "kind": "extension",
@@ -329,8 +329,8 @@
       "src": [
         "{plugin}/framework/extensions/template-library/manifest.php"
       ],
-      "hash": "c53ecceb16b72953ed52cf5a6bd86bc5",
-      "synced": "2026-07-19"
+      "hash": "70822e2959fe51d2eaab23b5b74c18de",
+      "synced": "2026-07-24"
     },
     "extensions/update.md": {
       "kind": "extension",
@@ -347,8 +347,8 @@
         "{plugin}/framework/extensions/woocommerce/manifest.php",
         "{plugin}/framework/extensions/woocommerce/settings-options.php"
       ],
-      "hash": "a756d4284bc958edfe5faa34353820af",
-      "synced": "2026-07-19"
+      "hash": "d2e9c897c30705573e7034417466c75a",
+      "synced": "2026-07-24"
     },
     "option-types/addable-box.md": {
       "kind": "option-type",
@@ -363,8 +363,8 @@
       "src": [
         "{plugin}/framework/includes/option-types/addable-option/class-fw-option-type-addable-option.php"
       ],
-      "hash": "346988e5ee2813eb698f7c584e559f09",
-      "synced": "2026-07-19"
+      "hash": "18982ac464ee65f726ee01c7015434c7",
+      "synced": "2026-07-25"
     },
     "option-types/addable-popup.md": {
       "kind": "option-type",
@@ -524,15 +524,15 @@
         "{plugin}/framework/includes/option-types/icon-v2/class-fw-option-type-icon-v2.php"
       ],
       "hash": "27623681b93390136d2cc84233f62b45",
-      "synced": "2026-07-19"
+      "synced": "2026-07-26"
     },
     "option-types/icon-v3.md": {
       "kind": "option-type",
       "src": [
         "{plugin}/framework/includes/option-types/icon-v3/class-fw-option-type-icon-v3.php"
       ],
-      "hash": "8a2b83aca1869289f492970543f6f33f",
-      "synced": "2026-07-19"
+      "hash": "f154adb45425ddd2666d7becedfa23ef",
+      "synced": "2026-07-26"
     },
     "option-types/icon.md": {
       "kind": "option-type",
@@ -540,7 +540,7 @@
         "{plugin}/framework/includes/option-types/icon/class-fw-option-type-icon.php"
       ],
       "hash": "5c0e94cc1d79f2f4611319c2a24b64ee",
-      "synced": "2026-07-19"
+      "synced": "2026-07-26"
     },
     "option-types/image-picker.md": {
       "kind": "option-type",
@@ -659,8 +659,8 @@
       "src": [
         "{plugin}/framework/includes/option-types/range-slider/class-fw-option-type-range-slider.php"
       ],
-      "hash": "95a2461b9017072739d88193349654e5",
-      "synced": "2026-07-19"
+      "hash": "f322e05bf5de27056832b583933141c8",
+      "synced": "2026-07-24"
     },
     "option-types/responsive.md": {
       "kind": "option-type",
@@ -684,8 +684,8 @@
         "{plugin}/framework/includes/option-types/slider/class-fw-option-type-short-slider.php",
         "{plugin}/framework/includes/option-types/slider/class-fw-option-type-slider.php"
       ],
-      "hash": "7ae18b6829170f0396a07cdc1854d42c",
-      "synced": "2026-07-19"
+      "hash": "a505ea931323307b68ceb2fc3bacd4a8",
+      "synced": "2026-07-24"
     },
     "option-types/spacing.md": {
       "kind": "option-type",
@@ -782,8 +782,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/animated-heading/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/animated-heading/options.php"
       ],
-      "hash": "48499402907bf185e4387852d541b9e0",
-      "synced": "2026-07-19"
+      "hash": "23ab0a80b3747362ec944eb7039c75aa",
+      "synced": "2026-07-24"
     },
     "shortcodes/announcement-pill.md": {
       "kind": "shortcode",
@@ -836,8 +836,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/bleed-section/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/bleed-section/options.php"
       ],
-      "hash": "682219c283128a7c605c34b02ed80863",
-      "synced": "2026-07-19"
+      "hash": "7624f6e123f950ff7189ca64eff0d5a5",
+      "synced": "2026-07-24"
     },
     "shortcodes/blockquote.md": {
       "kind": "shortcode",
@@ -863,8 +863,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/button/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/button/options.php"
       ],
-      "hash": "7b66aa3b67f096b0c6d57bfa7af8afbc",
-      "synced": "2026-07-19"
+      "hash": "f56f996def21c40702b075dcd2bd8a7b",
+      "synced": "2026-07-24"
     },
     "shortcodes/calendar.md": {
       "kind": "shortcode",
@@ -908,8 +908,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/column/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/column/options.php"
       ],
-      "hash": "b6abc7a4dbbc7b13ed42bacdbaa102e0",
-      "synced": "2026-07-19"
+      "hash": "d2efa4ac2d98894226256464fd1089df",
+      "synced": "2026-07-24"
     },
     "shortcodes/comparison-table.md": {
       "kind": "shortcode",
@@ -917,8 +917,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/comparison-table/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/comparison-table/options.php"
       ],
-      "hash": "c3311a56dc3734d6d82b3cd741e608fc",
-      "synced": "2026-07-19"
+      "hash": "8d6bb536b5fd49e3b2badda5f44ba026",
+      "synced": "2026-07-24"
     },
     "shortcodes/contact-form.md": {
       "kind": "shortcode",
@@ -971,8 +971,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/feature-list/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/feature-list/options.php"
       ],
-      "hash": "c90f6706709e3b14cb2f472dfc0a0bfa",
-      "synced": "2026-07-19"
+      "hash": "807a182ee10197cded287d10aace2a90",
+      "synced": "2026-07-24"
     },
     "shortcodes/featured-image.md": {
       "kind": "shortcode",
@@ -980,8 +980,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/featured-image/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/featured-image/options.php"
       ],
-      "hash": "9ec633e47835a9a65f78cf721b227dc3",
-      "synced": "2026-07-19"
+      "hash": "d5fda1b129112e7c611868fe913319e6",
+      "synced": "2026-07-24"
     },
     "shortcodes/flexbox.md": {
       "kind": "shortcode",
@@ -998,8 +998,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/flip-box/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/flip-box/options.php"
       ],
-      "hash": "34fe2681b8bc58d54d5eb115a171a966",
-      "synced": "2026-07-19"
+      "hash": "e2d0cf66b302bd23fac272f156e2c3d6",
+      "synced": "2026-07-24"
     },
     "shortcodes/gallery-3d.md": {
       "kind": "shortcode",
@@ -1007,8 +1007,8 @@
         "{plugin}/framework/extensions/animation-engine/shortcodes/gallery-3d/config.php",
         "{plugin}/framework/extensions/animation-engine/shortcodes/gallery-3d/options.php"
       ],
-      "hash": "94c8223c4929c7e23a2eb0a37843519a",
-      "synced": "2026-07-19"
+      "hash": "21ac541581bda77579f5d623052a767f",
+      "synced": "2026-07-25"
     },
     "shortcodes/gallery.md": {
       "kind": "shortcode",
@@ -1016,8 +1016,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/gallery/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/gallery/options.php"
       ],
-      "hash": "6dfdcae0a8c837db7ebe56d686d90f47",
-      "synced": "2026-07-19"
+      "hash": "05fc7df4cfbfbfdb521b4e7d7d6144cc",
+      "synced": "2026-07-24"
     },
     "shortcodes/highlight-text.md": {
       "kind": "shortcode",
@@ -1043,8 +1043,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/icon/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/icon/options.php"
       ],
-      "hash": "8ff405d0419a2ae2b5cf55f35b7d3e36",
-      "synced": "2026-07-19"
+      "hash": "a74b7a85b9aebe2b37354e324a747e61",
+      "synced": "2026-07-24"
     },
     "shortcodes/image-box.md": {
       "kind": "shortcode",
@@ -1052,8 +1052,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/image-box/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/image-box/options.php"
       ],
-      "hash": "d1674d3d1c67d458bef0e6be08dc1002",
-      "synced": "2026-07-19"
+      "hash": "64368a64b0d9b8a0306d9877a8c61d9b",
+      "synced": "2026-07-24"
     },
     "shortcodes/image-content.md": {
       "kind": "shortcode",
@@ -1061,8 +1061,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/image-content/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/image-content/options.php"
       ],
-      "hash": "f77c64b17c0bbdbda2fa02039a8ec26f",
-      "synced": "2026-07-19"
+      "hash": "f3729e77f6ccb41df786ffcbce41ca1e",
+      "synced": "2026-07-24"
     },
     "shortcodes/image-hotspots.md": {
       "kind": "shortcode",
@@ -1088,8 +1088,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/media-image/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/media-image/options.php"
       ],
-      "hash": "7e4cd9585e6ef1ce7e0ef9ed95ba4f8f",
-      "synced": "2026-07-19"
+      "hash": "ad70d8e33f9d688551d74dee76a14004",
+      "synced": "2026-07-24"
     },
     "shortcodes/logo-grid.md": {
       "kind": "shortcode",
@@ -1196,8 +1196,8 @@
         "{plugin}/framework/extensions/portfolio/shortcodes/portfolio/config.php",
         "{plugin}/framework/extensions/portfolio/shortcodes/portfolio/options.php"
       ],
-      "hash": "8f4e6e0d8a2a71fa3af040516182aa89",
-      "synced": "2026-07-19"
+      "hash": "72653768c24684465c5f73f2440f36fd",
+      "synced": "2026-07-23"
     },
     "shortcodes/post-author.md": {
       "kind": "shortcode",
@@ -1214,8 +1214,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/post-carousel/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/post-carousel/options.php"
       ],
-      "hash": "f9199ec5bb005167a80b7fed95a1b7ca",
-      "synced": "2026-07-19"
+      "hash": "5875690ec74e74f5087290cece4608ad",
+      "synced": "2026-07-24"
     },
     "shortcodes/post-content.md": {
       "kind": "shortcode",
@@ -1277,8 +1277,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/posts/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/posts/options.php"
       ],
-      "hash": "ef01647558ba02937a929ae74baaded3",
-      "synced": "2026-07-19"
+      "hash": "32cc93fc3fe373372484a79f8868bdfc",
+      "synced": "2026-07-24"
     },
     "shortcodes/pricing-table.md": {
       "kind": "shortcode",
@@ -1286,8 +1286,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/pricing-table/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/pricing-table/options.php"
       ],
-      "hash": "89b8ccbe2669e33c26413dff357ff5a8",
-      "synced": "2026-07-19"
+      "hash": "b126c224bf9db20bd51376fdd94ea1c5",
+      "synced": "2026-07-24"
     },
     "shortcodes/progress.md": {
       "kind": "shortcode",
@@ -1305,7 +1305,7 @@
         "{plugin}/framework/extensions/portfolio/shortcodes/project-gallery/options.php"
       ],
       "hash": "3ecdb4ab02cbc338eeb2d1bfec2d4e23",
-      "synced": "2026-07-19"
+      "synced": "2026-07-23"
     },
     "shortcodes/scroll-indicator.md": {
       "kind": "shortcode",
@@ -1376,8 +1376,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/special-heading/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/special-heading/options.php"
       ],
-      "hash": "32fcc8fa4e853beb81bbb88e26915e3b",
-      "synced": "2026-07-19"
+      "hash": "5307c6b29ead261105fb91808a9cf2fe",
+      "synced": "2026-07-24"
     },
     "shortcodes/star-rating.md": {
       "kind": "shortcode",
@@ -1385,8 +1385,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/star-rating/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/star-rating/options.php"
       ],
-      "hash": "b0787fbaea91ef30a470bc877a12dfaa",
-      "synced": "2026-07-19"
+      "hash": "2080a9e703b4975285d0f0d538a531e6",
+      "synced": "2026-07-24"
     },
     "shortcodes/steps.md": {
       "kind": "shortcode",
@@ -1430,8 +1430,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/tabs/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/tabs/options.php"
       ],
-      "hash": "e990980733fedcdc3ebd8222b88145c8",
-      "synced": "2026-07-19"
+      "hash": "cf8449df748b00e43dab6f9049cc0a65",
+      "synced": "2026-07-24"
     },
     "shortcodes/tag-list.md": {
       "kind": "shortcode",
@@ -1457,8 +1457,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/testimonials/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/testimonials/options.php"
       ],
-      "hash": "0b19e16326b62e64d82d37098d200477",
-      "synced": "2026-07-19"
+      "hash": "ec4d9f0a5ed1f74757e31c3227c17e45",
+      "synced": "2026-07-24"
     },
     "shortcodes/text-block.md": {
       "kind": "shortcode",
@@ -1484,8 +1484,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/timeline/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/timeline/options.php"
       ],
-      "hash": "1c81e6f5b0a62632a65c5d3355c527fd",
-      "synced": "2026-07-19"
+      "hash": "caf47c5c64fb7349794f2ba735ba498d",
+      "synced": "2026-07-24"
     },
     "shortcodes/toc.md": {
       "kind": "shortcode",
@@ -1572,8 +1572,8 @@
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/components-color.php",
         "{plugin}/framework/includes/presets/color-presets.php"
       ],
-      "hash": "474088d7c806ded083b366bbda051682",
-      "synced": "2026-07-19"
+      "hash": "5da93ac59068425ff034c39c0ce3b768",
+      "synced": "2026-07-24"
     },
     "theme-settings/footer.md": {
       "kind": "theme-settings",
@@ -1586,8 +1586,8 @@
         "{plugin}-theme/framework-customizations/theme/options/footer-settings.php",
         "{plugin}-theme/framework-customizations/theme/options/footer-widgets.php"
       ],
-      "hash": "744a086b384f9258691fa8795c6d9c4f",
-      "synced": "2026-07-19"
+      "hash": "78cbf3ad35fcbcfc1e11d687604cdde8",
+      "synced": "2026-07-25"
     },
     "theme-settings/general.md": {
       "kind": "theme-settings",
@@ -1597,8 +1597,8 @@
         "{plugin}-theme/framework-customizations/theme/options/general-layout.php",
         "{plugin}-theme/framework-customizations/theme/options/general-sidebar.php"
       ],
-      "hash": "b4a4875361f12334c4bb66553e7898fe",
-      "synced": "2026-07-19"
+      "hash": "83ac3b037f4f9cbbe41e0e21b2c9fc10",
+      "synced": "2026-07-25"
     },
     "theme-settings/header.md": {
       "kind": "theme-settings",
@@ -1612,8 +1612,8 @@
         "{plugin}-theme/framework-customizations/theme/options/header-settings.php",
         "{plugin}-theme/framework-customizations/theme/options/header-topbar.php"
       ],
-      "hash": "f6226209fc9cd43f00ccbf9c0ff60846",
-      "synced": "2026-07-19"
+      "hash": "5c80431e3c85df31ba999fa0757c0afb",
+      "synced": "2026-07-24"
     },
     "theme-settings/misc.md": {
       "kind": "theme-settings",
@@ -1643,8 +1643,8 @@
         "{plugin}-theme/framework-customizations/theme/options/post-options.php",
         "{plugin}-theme/framework-customizations/theme/options/general-pages.php"
       ],
-      "hash": "ed88a964ab85332a13637a961455905f",
-      "synced": "2026-07-19"
+      "hash": "1c99186e2734bf67f06d47cef7a01cfb",
+      "synced": "2026-07-24"
     },
     "theme-settings/site-ux.md": {
       "kind": "theme-settings",
@@ -1683,8 +1683,8 @@
         "{plugin}-theme/framework-customizations/theme/options/general-typography.php",
         "{plugin}-theme/framework-customizations/theme/options/general-fonts.php"
       ],
-      "hash": "20eed12a4fb17e14f4a8cec85f504571",
-      "synced": "2026-07-19"
+      "hash": "c14669366dc297b3689d2ec0fb273d81",
+      "synced": "2026-07-24"
     },
     "theme-settings/woocommerce.md": {
       "kind": "theme-settings",
@@ -1693,6 +1693,77 @@
       ],
       "hash": "258948e0c1b130e2785770f6e7745e85",
       "synced": "2026-07-19"
+    },
+    "shortcodes/project-details.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/portfolio/shortcodes/project-details/config.php",
+        "{plugin}/framework/extensions/portfolio/shortcodes/project-details/options.php"
+      ],
+      "hash": "80ecdffb2040e2629716d58ae8c18633",
+      "synced": "2026-07-23"
+    },
+    "shortcodes/project-results.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/portfolio/shortcodes/project-results/config.php",
+        "{plugin}/framework/extensions/portfolio/shortcodes/project-results/options.php"
+      ],
+      "hash": "d9879731094b9cb72b0acafd33dc6ba3",
+      "synced": "2026-07-23"
+    },
+    "shortcodes/project-testimonial.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/portfolio/shortcodes/project-testimonial/config.php",
+        "{plugin}/framework/extensions/portfolio/shortcodes/project-testimonial/options.php"
+      ],
+      "hash": "f6ae55a508e5103b378cd6201e645456",
+      "synced": "2026-07-23"
+    },
+    "shortcodes/project-nav.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/portfolio/shortcodes/project-nav/config.php",
+        "{plugin}/framework/extensions/portfolio/shortcodes/project-nav/options.php"
+      ],
+      "hash": "bb4d048c2bff941aec502d57173d05f2",
+      "synced": "2026-07-23"
+    },
+    "shortcodes/related-projects.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/portfolio/shortcodes/related-projects/config.php",
+        "{plugin}/framework/extensions/portfolio/shortcodes/related-projects/options.php"
+      ],
+      "hash": "2c7a5f216230c56ef0285ae46c27e9e9",
+      "synced": "2026-07-23"
+    },
+    "theme-settings/portfolio.md": {
+      "kind": "theme-settings",
+      "src": [
+        "{plugin}-theme/framework-customizations/theme/options/portfolio-archive.php",
+        "{plugin}-theme/framework-customizations/theme/options/portfolio-settings.php",
+        "{plugin}-theme/framework-customizations/theme/options/portfolio-single.php"
+      ],
+      "hash": "0821791228b945d8033d425edfb5887a",
+      "synced": "2026-07-23"
+    },
+    "animation-engine/motion-sequence.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/motion-sequence/motion-sequence.php"
+      ],
+      "hash": "7fa19df06b4424820249541e9bda5572",
+      "synced": "2026-07-24"
+    },
+    "extensions/animated-icons.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/animated-icons/manifest.php"
+      ],
+      "hash": "aee6e7b5207b86a0e9c2d177b4ac59cf",
+      "synced": "2026-07-26"
     }
   }
 }
