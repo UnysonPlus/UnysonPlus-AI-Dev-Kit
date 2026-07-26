@@ -1,5 +1,10 @@
 # icon-v2
 
+> **RETIRED — use [`icon`](./icon.md).** The `icon-v2` id is no longer registered (it resolves to the
+> Undefined option type). There is one icon option type now: **`icon`**. This page is kept only to
+> explain the value shape, which `icon` shares. Never declare `'type' => 'icon-v2'` in new code.
+
+
 An icon PICKER: choose a Font-Awesome / pack glyph, an uploaded image, an emoji, or an SVG (library / pasted / uploaded). Used for logo icon, `icon_text`/`icon_box` icons, social profile icons, menu toggles. `icon`, `icon-v2` and `icon-v3` all run ONE modern engine (they differ only in `get_type()`), so they share a value shape; the animated kinds (`lottie`/`rive`) light up when the Animated Icons extension is active. The legacy `icon` type stored a bare class string, still tolerated.
 
 ## Stored value shape

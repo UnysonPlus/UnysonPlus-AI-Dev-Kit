@@ -295,8 +295,8 @@
         "{plugin}/framework/extensions/shortcodes/manifest.php",
         "{plugin}/framework/extensions/shortcodes/settings-options.php"
       ],
-      "hash": "9781229b2c4fa26a5a6f76fdcfb9d3ab",
-      "synced": "2026-07-24"
+      "hash": "20cebda4fd759d787544dca61b458ffc",
+      "synced": "2026-07-26"
     },
     "extensions/sidebars.md": {
       "kind": "extension",
@@ -531,7 +531,7 @@
       "src": [
         "{plugin}/framework/includes/option-types/icon-v3/class-fw-option-type-icon-v3.php"
       ],
-      "hash": "f154adb45425ddd2666d7becedfa23ef",
+      "hash": "7c1f94ca0c021a814ad005f66abd14cc",
       "synced": "2026-07-26"
     },
     "option-types/icon.md": {

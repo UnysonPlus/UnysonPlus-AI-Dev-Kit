@@ -1,5 +1,11 @@
 # icon-v3
 
+> **RETIRED as an id — use [`icon`](./icon.md).** `icon-v3` is no longer a registered option type
+> (it resolves to Undefined). The modern engine CLASS still lives in this folder and is what `icon`
+> runs, but you declare `'type' => 'icon'`, never `'icon-v3'`. This page documents the engine's value
+> shape (which `icon` uses).
+
+
 A modern multi-source icon picker: font icon, uploaded image, emoji, inline/library/uploaded SVG, or Lottie animation. The canonical icon engine — also backs the legacy `icon` and `icon-v2` ids.
 
 ## Stored value shape

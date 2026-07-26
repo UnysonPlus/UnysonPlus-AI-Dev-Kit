@@ -1,6 +1,6 @@
 # icon
 
-The icon picker. The `icon` id has been RECLAIMED to run the canonical modern engine (icon-v3): merged Icons/Custom tabs, Emoji, Animated (Lottie), SVG upload, favorites. The stored value is a typed object whose keys depend on `type`.
+**THE icon option type** — `icon-v2` and `icon-v3` are retired, so `'type' => 'icon'` is the only one to use. It runs the canonical modern picker (merged Icons/Custom tabs, Emoji, SVG upload, favorites, and — with the Animated Icons extension — Animated/Lottie/Rive). The engine class physically lives in the icon-v3 folder; `icon` subclasses it. The stored value is a typed object whose keys depend on `type`.
 
 ## Stored value shape
 ```json
