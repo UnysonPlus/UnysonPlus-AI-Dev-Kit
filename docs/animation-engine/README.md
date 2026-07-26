@@ -1,5 +1,7 @@
 # Animation Engine — effects by module
 
+> 📖 **Human manual (live, always current):** [Animation Engine on the UnysonPlus docs](https://unysonplus.github.io/animation-engine) — module pages with live playgrounds. These kit files are the AI-optimized reference; the live manual is the human companion.
+
 The `animation-engine` extension adds motion to elements/sections/site. **It ships INACTIVE** —
 activate it in Unyson+ → Extensions before any of this renders. One file per module here; open the
 one you need.
@@ -22,7 +24,7 @@ key is usually `effect`, but some modules use `mode` or `role` (noted per file).
 | `flip_card` | — | `flip-card.md` |
 | `scroll_reveal` | `mode` | `scroll-reveal.md` |
 | `scroll_text_highlight` | `mode` | `scroll-text-highlight.md` |
-| `scrollytelling` / `sticky_stack` | `mode` | `scrollytelling.md`, `sticky-stack.md` (Section only) |
+| `scrollytelling` / `sticky_stack` / `motion_sequence` | `mode` | `scrollytelling.md`, `sticky-stack.md`, `motion-sequence.md` (Section only) |
 
 ## Not on the fx block (configured elsewhere — see each file)
 
@@ -35,7 +37,7 @@ key is usually `effect`, but some modules use `mode` or `role` (noted per file).
 
 ## All modules
 `backgrounds` · `confetti` · `cursor` · `flip-card` · `horizontal-scroll` · `hover` · `marquee` ·
-`motion-path` · `page-transitions` · `parallax` · `physics` · `preloader` · `scroll-color-shift` ·
+`motion-path` · `motion-sequence` · `page-transitions` · `parallax` · `physics` · `preloader` · `scroll-color-shift` ·
 `scroll-loop` · `scroll-motion` · `scroll-progress` · `scroll-reveal` · `scroll-text-highlight` ·
 `scrollytelling` · `sticky-stack` · `text-effects`
 

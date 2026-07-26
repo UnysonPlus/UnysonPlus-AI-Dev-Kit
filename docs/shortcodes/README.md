@@ -1,5 +1,7 @@
 # Page-builder shortcodes — node model + index
 
+> 📖 **Human manual (live, always current):** [Shortcodes on the UnysonPlus docs](https://unysonplus.github.io/docs/shortcodes/overview) — prose, screenshots of each element's option panels, and live playgrounds. These kit files are the AI-optimized reference; the live manual is the human companion.
+
 How to build a UnysonPlus page-builder page as **JSON**, without reading plugin source. A page
 is a **JSON array of `section` nodes**; each file in this folder documents one shortcode's
 **shortcode-specific atts**. The shared wrapper blocks (below) are carried by *every* node — the
@@ -55,13 +57,27 @@ Values are **spacing-scale utility classes** (e.g. `mb-block`, `pt-section`), NO
 
 ## Build & import
 
-```js
-// tree = [ section, section, … ]  →  write JSON, then:
-fw_set_db_post_option($pid, 'page-builder', ['json' => $json, 'builder_active' => true]);
-$html = do_shortcode( fw()->backend->option_type('page-builder')->json_to_shortcodes($json) );
+**Use the helper — don't store the value by hand.** [`tools/upw-build-pages.php`](../../tools/upw-build-pages.php)
+(`upw_build_page($idOrSlug, $title, $tree)`) writes the builder value correctly and leaves the page
+editable in the visual builder. Full recipe + the storage rules: [`docs/building-pages.md`](../building-pages.md).
+
+```php
+require __DIR__ . '/../../tools/upw-build-pages.php';
+$tree = array( upw_section(array( upw_column('1_1', array(
+  upw_element('special_heading', array('title'=>'Hi','heading'=>'h2')),
+)))) );
+echo upw_build_page('my-page', 'My Page', $tree);   // slug (created if missing) or numeric ID
 ```
-Set atts VERBATIM — the builder validates against `fw_get_options_values_from_input`, so every
-sub-shape must be present (that's why the wrapper blocks above are always included).
+
+> ⚠️ **Do NOT use `fw_set_db_post_option($pid, 'page-builder', …)` to store the tree** — its input
+> sanitizer empties the value (the page then renders nothing). The reliable path (encoded in the
+> helper): delete the builder meta first, then write the flat `fw:opt:ext:pb:page-builder:json`
+> **and** `builder_active` keys **and** the `fw_options['page-builder']` aggregate; update the post row
+> with `$wpdb` (not `wp_update_post`, which re-syncs on `save_post`); and don't render at build time.
+> See [`docs/building-pages.md`](../building-pages.md) for why.
+
+Set atts VERBATIM — the builder validates each item against `fw_get_options_values_from_input`, so
+every sub-shape must be present (that's why the wrapper blocks above are always included).
 
 ## Index (this folder)
 

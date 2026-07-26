@@ -1,5 +1,7 @@
 # Option types — stored value shapes
 
+> 📖 **Human manual (live, always current):** [Option types on the UnysonPlus docs](https://unysonplus.github.io/docs/options/option-types). These kit files are the AI-optimized reference; the live manual is the human companion.
+
 The reusable **value shapes** behind Theme Settings options and shortcode atts. When a reference
 says an option is type `compact color` or `multi-picker`, this folder tells you the exact JSON to
 store. One file per type.

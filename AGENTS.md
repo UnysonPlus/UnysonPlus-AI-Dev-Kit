@@ -18,6 +18,41 @@ This kit exists for one reason:
 
 Read this file, then `PLAYBOOK.md`, before touching a site.
 
+## Four things this kit lets you do
+
+An all-in-one toolkit for working with UnysonPlus — pick the surface that matches the task:
+
+1. **Build** a site from a prompt — [`docs/build-a-site.md`](docs/build-a-site.md) (workflow) +
+   [`docs/building-pages.md`](docs/building-pages.md) + [`tools/upw-build-pages.php`](tools/upw-build-pages.php) (compose pages programmatically).
+2. **Convert** an existing site into UnysonPlus — the capture service + Site Converter pipeline
+   (see the converter folders below and [`docs/extending.md`](docs/extending.md)).
+3. **Extend** the framework — new shortcodes, option types, extensions — [`docs/extending.md`](docs/extending.md).
+4. **Know** the rules — [`docs/conventions.md`](docs/conventions.md) + the reference docs under `docs/`
+   (one per shortcode / option type / animation module / extension / Theme Settings tab).
+
+Matching a source **mockup** to 95–100% (below) is the most demanding form of #1 — its outside-in,
+measure-don't-eyeball discipline applies to every build.
+
+### Human manual (live docs) — deep-links
+
+These kit `docs/` are the AI-optimized reference (flat, every choice listed, generic). The **human**
+companion — prose, screenshots of each option panel, live playgrounds — is the published manual at
+**https://unysonplus.github.io**. It's the source of truth for humans and is always current; link to
+it rather than bundling it. Section landings:
+
+| Kit reference | Live manual |
+|---|---|
+| `docs/shortcodes/` | https://unysonplus.github.io/docs/shortcodes/overview |
+| `docs/option-types/` | https://unysonplus.github.io/docs/options/option-types |
+| `docs/extensions/` | https://unysonplus.github.io/docs/extensions/overview |
+| `docs/theme-settings/` | https://unysonplus.github.io/theme |
+| `docs/animation-engine/` | https://unysonplus.github.io/animation-engine |
+| Page builder / dynamic content | https://unysonplus.github.io/docs/page-builder · https://unysonplus.github.io/docs/dynamic-content |
+| Guides | https://unysonplus.github.io/guides |
+
+(The manual has its own page structure — link to the section landing above and navigate, rather than
+guessing a per-page slug.)
+
 ## What's in the kit
 
 | Folder / file | What it is |
@@ -33,6 +68,10 @@ Read this file, then `PLAYBOOK.md`, before touching a site.
 | `tools/measure/measure.mjs` | The frame-metric harness (container/header/logo/footer/type). Run after every change. |
 | `tools/measure/compare.mjs` | Region-by-region **ensemble** — header↔header, each section↔section, footer↔footer, scored by geometry + pixelmatch + Resemble.js + a DOM-structure diff (fail-loud). |
 | `tools/measure/props.mjs` | Full-body **property diff** — walks both bodies, matches elements by text/region, reports NAMED computed-style deltas (caught the site-wide Inter→Open Sans miss). |
+| `tools/upw-build-pages.php` · `docs/building-pages.md` | **Compose UnysonPlus builder pages programmatically** (sections/columns/elements + Animation Engine effects) via `wp eval-file` in ~15 lines, leaving the page EDITABLE in the visual builder. Read the doc first — it documents the builder-value storage rules. For any page — test, demo, or real. |
+| `docs/build-a-site.md` | The **prompt → UnysonPlus site** workflow: how to go from "build me an X site" to a finished site (Theme Settings tokens → compose pages → wire animations → verify). The orchestration layer over the reference docs. |
+| `docs/conventions.md` | The **generalized UnysonPlus conventions** every build must follow (color presets, clean DOM, heading order, links, replaceable media, option-value shapes). Public, site-agnostic. |
+| `docs/extending.md` | **Create / convert shortcodes, option types, and extensions** — where things live + the conventions (thumbnail icon spec, settings-page layout, migrations, keep-docs-in-sync). |
 | `unysonplus/` · `unysonplus-theme/` | The plugin + parent theme. **Assembled, gitignored** — see `assemble.ps1`. Read them for options/shortcode shapes; the working-copy source of truth is your local plugin/theme repos (siblings of this kit — see `assemble.ps1 -WorkDevRoot`). |
 | `UnysonPlus-Capture-Service/` · `UnysonPlus-Site-Converter-Extension/` | The **automated** conversion pipeline (capture service + converter). This manual kit shares their standards; keep them in sync. |
 

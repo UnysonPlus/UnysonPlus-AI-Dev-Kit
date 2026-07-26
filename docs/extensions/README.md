@@ -1,5 +1,7 @@
 # Extensions — overview index
 
+> 📖 **Human manual (live, always current):** [Extensions on the UnysonPlus docs](https://unysonplus.github.io/docs/extensions/overview). These kit files are the AI-optimized reference; the live manual is the human companion.
+
 One overview per plugin extension: what it is, whether it's active by default, and what it
 **provides** (cross-linked to the granular refs). These are summaries — the exact atts/option
 shapes live in `../shortcodes/`, `../option-types/`, `../theme-settings/README.md`, and

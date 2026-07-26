@@ -1,5 +1,7 @@
 # Theme Settings — reference index
 
+> 📖 **Human manual (live, always current):** [Theme Settings on the UnysonPlus docs](https://unysonplus.github.io/theme). These kit files are the AI-optimized reference; the live manual is the human companion.
+
 Everything under **Unyson+ → Theme Settings**, one file per tab. Configure a site's **design from
 these options first** (colors, typography, buttons, boxes, spacing, chrome) — reach for CSS only for
 what no option covers (and that goes in **Misc → Custom CSS**, see `misc.md`).
