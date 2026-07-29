@@ -8,7 +8,7 @@ ACTIVE**.
 
 ## Effects / styles
 
-39 `effect` keys, grouped in the picker:
+40 `effect` keys, grouped in the picker:
 - **Reveal:** `blur` · `mask` · `split_reveal` · `slide` · `skew` · `fill_sweep` · `image_mask` ·
   `outline_fill` · `strikebox` · `marker`
 - **Motion:** `bounce` · `float` · `wave` · `jitter` · `letter_jump` · `scale` · `breathing` ·
@@ -16,7 +16,7 @@ ACTIVE**.
 - **Decode & Type:** `scramble` · `random` · `matrix` · `typewriter` · `splitflap` · `countup` ·
   `rotating_words`
 - **Color & Glow:** `chromatic` · `color_wave` · `gradient_flow` · `neon` · `rainbow` · `shimmer` ·
-  `glitch`
+  `spotlight_text` · `glitch`
 - **Type & 3D:** `expand_spacing` · `vf_weight` · `width_sweep` · `flip3d`
 
 ## Value shape
@@ -43,6 +43,7 @@ ACTIVE**.
 | `scramble` | `duration` 1.2, `trigger` `["view"]` |
 | `typewriter` | `speed` 55 (ms/char), `caret` `yes`, `loop` `no`, `trigger` `["view"]` |
 | `shimmer` | **`color_a` COLOR** #8a8f98, **`color_b` COLOR** #ffffff, `speed` 3 |
+| `spotlight_text` | **`color_a` COLOR** #8a8f98 (dim/base), **`color_b` COLOR** #ffffff (spotlight), `radius` 180 `[60–400 px]`, `softness` 60 `[0–100 %]` — a radial gradient clipped to the glyphs that tracks the **live pointer** (writes `--tt-x`/`--tt-y` on pointermove; recenters on leave). Whole text block (no char split). Reduced-motion → **static centered** gradient (CSS-only, no move handlers) |
 | `gradient_flow` | **`color_a`** #ff6b6b, **`color_b`** #6a8dff, **`color_c`** #17c964, `speed` 4 |
 | `wave` | `amplitude` 6, `speed` 1.4 |
 | `glitch` | `trigger` `hover` `[hover/always]`, `intensity` 3 |

@@ -170,8 +170,8 @@
       "src": [
         "{plugin}/framework/extensions/animation-engine/modules/text-effects/includes/text-effects-settings.php"
       ],
-      "hash": "593a6282b8e556aa9526e87a1bc0bd53",
-      "synced": "2026-07-19"
+      "hash": "3184ef091a731f77efc3ea825ed40bc0",
+      "synced": "2026-07-29"
     },
     "extensions/animation-engine.md": {
       "kind": "extension",
@@ -1771,6 +1771,22 @@
         "{plugin}/framework/extensions/animation-engine/modules/smooth-scroll/smooth-scroll.php"
       ],
       "hash": "ea93d40626c6d8fa7f992e16156ce02a",
+      "synced": "2026-07-29"
+    },
+    "animation-engine/viewport-units.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/viewport-units/viewport-units.php"
+      ],
+      "hash": "cb0cd91314e50ca9f67143284d67f8e9",
+      "synced": "2026-07-29"
+    },
+    "animation-engine/scroll-var.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/scroll-var/scroll-var.php"
+      ],
+      "hash": "d3e65b0d72fddeda00c148e41d14374d",
       "synced": "2026-07-29"
     }
   }
