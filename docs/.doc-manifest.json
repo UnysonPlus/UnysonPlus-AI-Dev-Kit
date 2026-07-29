@@ -230,7 +230,7 @@
         "{plugin}/framework/extensions/custom-fields/manifest.php"
       ],
       "hash": "64766e8564c7eb9b6f604f4274735113",
-      "synced": "2026-07-19"
+      "synced": "2026-07-29"
     },
     "extensions/forms.md": {
       "kind": "extension",
@@ -287,7 +287,7 @@
         "{plugin}/framework/extensions/post-types/manifest.php"
       ],
       "hash": "1027ffb089cd92522ab1f6efd90804a8",
-      "synced": "2026-07-19"
+      "synced": "2026-07-29"
     },
     "extensions/shortcodes.md": {
       "kind": "extension",
