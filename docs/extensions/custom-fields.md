@@ -1,8 +1,8 @@
 # custom-fields extension
 
 An ACF-style, no-code **custom-field builder** built on Unyson's existing meta-box + option-type
-plumbing. Ships **active by default**, adds no extra plugin, and stores every value to **native post
-meta** — read it anywhere with `fw_get_field( $name, $post_id )`.
+plumbing. Ships **inactive by default** (enable it under Unyson+ → Extensions), adds no extra plugin,
+and stores every value to **native post meta** — read it anywhere with `fw_get_field( $name, $post_id )`.
 
 ## Built-in vs ACF (AI guidance)
 
@@ -53,6 +53,24 @@ Each field maps to an Unyson option type; the value shape is that option type's 
 | Color | `color-picker` | `string` (hex, e.g. `#3366ff`) |
 | Date | `date-picker` | `string` in the picker's display format — **`DD-MM-YYYY`** (e.g. `29-07-2026`), stored as-entered (**not** ISO). This is the `date-picker` option type's air-datepicker default (`dateFormat: 'dd-MM-yyyy'`); parse accordingly (e.g. `DateTime::createFromFormat('d-m-Y', $v)`) |
 | Repeater (rows of sub-fields) | `addable-box` | `array` of **rows**; each row is `{ subfield_name => value }` using each sub-field's own shape |
+| Code / HTML | `code-editor` | `string` (raw source). Per-field **Language** (`htmlmixed`/`css`/`javascript`/`php`/`json`/`xml`) and **height** |
+| Slider (number) | `slider` | `int`/`float` (single value). Per-field min / max / step / default |
+| Range (from - to) | `range-slider` | `array{ from: number, to: number }` |
+| Measurement (value + unit) | `unit-input` | `array{ value: string, unit: string }`. Units come from a comma-separated per-field list (first = default) |
+| Embed (video / media URL) | `oembed` | `string` (the source URL). Render with `wp_oembed_get()` / `do_shortcode('[embed]…')` |
+| Icon | `icon` | `array{ type: 'none'\|'icon-font'\|'custom-upload', 'icon-class': string, 'pack-name': string\|false, 'pack-css-uri': string\|false }` (plus `attachment-id`/`url` when `custom-upload`) |
+| Image choice (visual radio) | `image-picker` | `string` (the chosen choice key). Choices are a per-field `value \| image URL` line list |
+| **Related posts** | `multi-select` (`population: posts`) | `array` of **post IDs** (ordered). Per-field source post types + max items |
+| **Taxonomy terms** | `multi-select` (`population: taxonomy`) | `array` of **term IDs**. Per-field source taxonomies + max items |
+| **Users** | `multi-select` (`population: users`) | `array` of **user identifiers**. Per-field source roles + max items (defaults to 1) |
+| Date & time | `datetime-picker` | `string` in the per-field format (default `Y/m/d H:i`) |
+| Time | `time-picker` | `string` in the per-field format (default `H:i`) |
+| Date range (from - to) | `datetime-range` | `array` (empty when unset) |
+| Color (theme preset) | `predefined-colors-color-picker-compact` | `array{ predefined: string, custom: string }` — **not** a bare hex. Resolve `predefined` to `var(--color-{slug})` (strip the `text-`/`bg-` prefix); `custom` is a hex; preset wins when both are set |
+| Color with transparency | `rgba-color-picker` | `string` (e.g. `rgba(0,0,0,.5)`) |
+| Location (map) | `map` | `array{ coordinates: { lat: float, lng: float } }`. **Degrades to a plain `text` field (value `string`) when no Google Maps API key is configured** |
+| List (repeating single value) | `addable-option` | `array` of `string` (one per row). Rows are single-line or textarea per the field's Multi-line setting |
+| Repeater (rows edited in a popup) | `addable-popup` | Same shape as Repeater — `array` of rows — but rows are edited in a modal |
 
 Notes on shapes:
 
@@ -62,7 +80,15 @@ Notes on shapes:
 - **Checkboxes** stores a **presence map** of only the ticked choices (`array_keys()` gives the list);
   unticked choices are absent, not `false`.
 - **Repeater** sub-fields are a focused subset (text, textarea, wysiwyg, number, url, email, image,
-  file, gallery, color, date, switch, checkbox) — **no nested repeaters or choice fields**.
+  file, gallery, **oembed, icon, datetime, time**, color, date, switch, checkbox) — **no nested
+  repeaters or choice fields**. Both repeater variants share the same `name | Label | type` line syntax.
+- **Relationship fields** (Related posts / Taxonomy terms / Users) are Unyson's `multi-select` in its
+  `posts` / `taxonomy` / `users` population modes: an AJAX-searched picker. Set **Maximum items** to
+  `1` for a single relationship; the value is still an array, so read `$ids[0]`. Leaving **source**
+  empty means "any" rather than "none".
+- **Color (theme preset)** follows the plugin-wide colour convention: elements CONSUME theme presets
+  rather than one-off hexes. Prefer it over the plain Color field for anything that should track
+  Theme Settings.
 
 ## Create a Field Group via the extension
 

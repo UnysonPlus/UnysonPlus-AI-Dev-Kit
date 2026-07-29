@@ -229,7 +229,7 @@
       "src": [
         "{plugin}/framework/extensions/custom-fields/manifest.php"
       ],
-      "hash": "64766e8564c7eb9b6f604f4274735113",
+      "hash": "90a0c17a266ec7f8ec63c791b1495bc0",
       "synced": "2026-07-29"
     },
     "extensions/forms.md": {
@@ -286,7 +286,7 @@
       "src": [
         "{plugin}/framework/extensions/post-types/manifest.php"
       ],
-      "hash": "1027ffb089cd92522ab1f6efd90804a8",
+      "hash": "6835ec1ef101599094905062444db3c8",
       "synced": "2026-07-29"
     },
     "extensions/shortcodes.md": {
