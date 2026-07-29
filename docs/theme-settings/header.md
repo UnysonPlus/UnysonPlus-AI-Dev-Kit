@@ -30,6 +30,8 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
 - `alt` — **Type** `text`. **Default** `''`. Alt text; falls back to Site Title.
 - `width` — **Type** `unit-input` (units `px`,`rem`,`em`). **Default** `{value:'',unit:'px'}`. Empty = auto to header height.
 
+> **Logo images are portable (no cross-site 404s).** Every logo image — Simple `image`/`image_2x`/`sticky`/`mobile`/`transparent`, and the Footer Logo element — is **re-resolved from its `attachment_id` on the CURRENT site at render time** (`unysonplus_upload_option_src()`), never the URL stored at save time. If the attachment isn't present on this site (cloned/migrated/deployed), the logo falls back to the **text logo** instead of emitting a dead URL. **Implication for builders:** to ship a logo with a demo / cloned / starter site, **sideload the image into the target site's Media Library** (so a real `attachment_id` exists there) — do NOT rely on a hardcoded URL or an attachment id from another install. **SVG logos are fully supported**: uploads are sanitized + flattened (Illustrator `<style>`/class exports → presentation attributes), PostScript font names normalized, negative radii fixed, and SVG attachments get metadata/preview (shortcodes ext ≥ 1.12.7). Outline text in Illustrator (Type → Create Outlines) for font-independent fidelity.
+
 #### Custom Logo Layout sub-options (revealed when `logo_type = custom`)
 - `site_title` — **Type** `text`. **Default** `get_bloginfo('name')`. Synced with Settings → General → Site Title.
 - `tagline_text` — **Type** `text`. **Default** `''`. Synced with Settings → General → Tagline.
@@ -38,6 +40,7 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
 
   | value | label |
   |---|---|
+  | `icon-only` | Icon only (no text) |
   | `inline-left` | Inline — icon left |
   | `inline-right` | Inline — icon right |
   | `stacked-left` | Stacked — icon left |
@@ -45,7 +48,7 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
   | `eyebrow-left` | Eyebrow — icon left |
   | `eyebrow-right` | Eyebrow — icon right |
 
-  Inline = icon+title only (no tagline); Stacked = title with tagline under it; Eyebrow = small uppercase tagline above title.
+  Icon only = just the Logo Icon, no visible text (the Site Title renders as a screen-reader-only accessible name; falls back to the text wordmark when no icon is picked); Inline = icon+title only (no tagline); Stacked = title with tagline under it; Eyebrow = small uppercase tagline above title.
 - `logo_icon_frame` — **Type** `image-picker`. **Default** `none`. `blank:false`. **Choices**:
 
   | value | label |

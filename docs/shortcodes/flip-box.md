@@ -74,7 +74,7 @@ A two-sided 3D card that flips on hover or click. Front: icon + title + text (or
   "back_image": "",
   "back_color": { "predefined": "", "custom": "" },
   "font_size_preset": "",
-  "button_style": "",
+  "button_style": "btn-primary",
   "button_size": ""
 }
 ```

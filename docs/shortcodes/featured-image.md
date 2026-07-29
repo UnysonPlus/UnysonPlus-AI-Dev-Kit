@@ -8,6 +8,7 @@ Outputs the current post / page's featured image at a chosen registered size, op
 | `image_size` | select | `'large'` | `thumbnail` `medium` `large` `full` (+ any registered intermediate sizes) | Which registered image size to output. |
 | `link_to` | select | `'none'` | `none` `post` `file` | Wrap the image in no link, a link to the post/page, or a link to the full image file. |
 | `text_align` | alignment | `''` (inherit) | `''` `left` `center` `right` | Horizontal alignment of the image within its column. |
+| `image_style` | image-style-picker | `''` | `''` (none) · `imgs-rounded` · `imgs-circle` · `imgs-portrait-card` · `imgs-monochrome` · `imgs-duotone` · `imgs-diagonal` · `imgs-hexagon` · `imgs-cinematic` | Preset visual treatment (shape / filter) applied to the image. |
 
 ## Ready-to-use example (the atts object)
 ```json

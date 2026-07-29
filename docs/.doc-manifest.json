@@ -295,7 +295,7 @@
         "{plugin}/framework/extensions/shortcodes/manifest.php",
         "{plugin}/framework/extensions/shortcodes/settings-options.php"
       ],
-      "hash": "20cebda4fd759d787544dca61b458ffc",
+      "hash": "88fca04d3858e636ef221d322aec0e24",
       "synced": "2026-07-26"
     },
     "extensions/sidebars.md": {
@@ -1764,6 +1764,14 @@
       ],
       "hash": "aee6e7b5207b86a0e9c2d177b4ac59cf",
       "synced": "2026-07-26"
+    },
+    "animation-engine/smooth-scroll.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/smooth-scroll/smooth-scroll.php"
+      ],
+      "hash": "ea93d40626c6d8fa7f992e16156ce02a",
+      "synced": "2026-07-29"
     }
   }
 }

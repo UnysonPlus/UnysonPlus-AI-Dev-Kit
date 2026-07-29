@@ -7,6 +7,7 @@ A single standalone icon (font icon, Lucide SVG, emoji or custom SVG) with an op
 |---|---|---|---|---|
 | `icon` | icon-v2 | see Notes | icon-v2 object | The glyph to display — the main content of the shortcode. |
 | `title` | text | `''` | string | Optional hover tooltip; also the accessible label. Leave empty for decorative icons. |
+| `aria_label` | text | `''` | string | Screen-reader label for a **meaningful** icon that has no visible Title/text. Leave empty for decorative icons (they stay hidden from assistive tech). |
 | `bg_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Background color behind the icon (`kind: bg`). |
 | `title_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Color applied to the title text (`kind: text`). |
 | `icon_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Icon glyph color (font icons only, `kind: text`). |
@@ -17,6 +18,7 @@ A single standalone icon (font icon, Lucide SVG, emoji or custom SVG) with an op
 {
   "icon": { "type": "svg", "svg-source": "library", "svg-id": "lucide/star" },
   "title": "",
+  "aria_label": "",
   "bg_color": { "predefined": "", "custom": "" },
   "title_color": { "predefined": "", "custom": "" },
   "icon_color": { "predefined": "", "custom": "" },

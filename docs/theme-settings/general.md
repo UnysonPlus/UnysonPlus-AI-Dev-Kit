@@ -109,6 +109,10 @@ Stored under the `general_layout` multi key. Groups are editor-only wrappers; le
 
 - **Notes**: drives the `--radius` tokens on cards, buttons, inputs, images.
 
+### Border Color — `layout_border_color`
+- **Type**: compact color-preset (`sc_color_field_compact`, kind `bg`) · **Default**: `{ predefined:'', custom:'' }` (blank = subtle 10% black)
+- **Notes**: global color for borders, dividers, cards and inputs — drives the `--color-border` token (~21 consumers in the theme). A preset choice emits a live-linked `var(--color-{slug})`; a custom value emits the hex/rgba; blank keeps the `rgba(0,0,0,.1)` default.
+
 ### Reading Width (no sidebar) — `layout_prose_width`
 - **Type**: unit-input (units: rem, px, em) · **Default**: `{ value:'', unit:'rem' }` · min 0
 - **Notes**: caps content width of single posts/pages with no sidebar. Blank = none.

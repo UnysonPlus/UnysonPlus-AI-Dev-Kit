@@ -17,6 +17,7 @@ A feature-comparison matrix — plans across the top, feature rows down the side
 | `text_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Cell text (`kind: text`). |
 | `border_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Border color (`kind: bg`). |
 | `font_size_preset` | font-size preset | `''` | preset slug | Named font-size preset. |
+| `product_schema` | switch | `'no'` | `yes` \| `no` | Emit **Product** / **Offer** JSON-LD for the compared items so search engines read them as products. |
 
 ### column object (`columns[]`)
 `name` (text, default `'Plan'`), `price` (text — e.g. `"$29 / mo"`), `badge` (text — optional ribbon), `featured` (switch `'yes'`/`'no'`, default `'no'`), `button_text` (text), `button_url` (text), `button_target` (switch `'_blank'`/`'_self'`, default `'_self'`).

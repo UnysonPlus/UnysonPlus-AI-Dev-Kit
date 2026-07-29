@@ -23,8 +23,10 @@ column wrapper if the width is unrecognized.
 | `bg_color` | compact color | `{predefined:'',custom:''}` | column background |
 | `full_height` | select | `'no'` | `yes` = fill row height |
 | `align_self` | image-picker (responsive) | `'default'` | column vertical align vs row siblings: `default` (Default / Stretched) `start` (Top) `center` (Middle) `end` (Bottom) |
-| `w_phone`/`w_tablet`/`w_desktop` | select | `'default'` | per-device width override |
-| `offset_phone`/`offset_tablet`/`offset_desktop` | select | `'none'` | per-device offset |
+| `col_width` | responsive | `{base:'default',md:'',lg:''}` | per-device **width override** (blank inherits the base/node width). Replaces the old `w_phone`/`w_tablet`/`w_desktop`. |
+| `col_offset` | responsive | `{base:'none',md:'',lg:''}` | per-device left **offset** (push). Replaces the old `offset_phone`/`offset_tablet`/`offset_desktop`. |
+| `max_width` | unit-input | `{value:'',unit:'px'}` | cap the column's **max width** (units `px`/`%`/`rem`/…); empty = uncapped. |
+| `content_order` | responsive | `{base:'no',md:'',lg:''}` | **reverse** the column order per device (`yes`/`no`) — e.g. image-first on desktop, text-first on mobile. |
 | `mobile_order` | string | `''` | reorder on mobile |
 | `position` / `z_index` | string | `''` | CSS position / z-index |
 | `spacing` | spacing block | see `README.md` | margin/padding (scale classes) — e.g. `margin.bottom:'mb-...'` for vertical gutter |
@@ -35,8 +37,9 @@ column wrapper if the width is unrecognized.
 { "type":"column", "width":"1_3", "_items":[ /* leaves */ ], "atts":{
   "full_height":"no", "bg_color":{"predefined":"","custom":""},
   "spacing":{"margin":{"all":"","top":"","right":"","bottom":"","left":""},"padding":{"all":"","top":"","right":"","bottom":"","left":""},"advanced":{"md":{"margin":{"all":"","top":"","right":"","bottom":"","left":""},"padding":{"all":"","top":"","right":"","bottom":"","left":""}},"lg":{"margin":{"all":"","top":"","right":"","bottom":"","left":""},"padding":{"all":"","top":"","right":"","bottom":"","left":""}}}},
-  "mobile_order":"", "w_phone":"default", "w_tablet":"default", "w_desktop":"default",
-  "offset_phone":"none", "offset_tablet":"none", "offset_desktop":"none", "align_self":"default",
+  "mobile_order":"", "col_width":{"base":"default","md":"","lg":""},
+  "col_offset":{"base":"none","md":"","lg":""}, "max_width":{"value":"","unit":"px"},
+  "content_order":{"base":"no","md":"","lg":""}, "align_self":"default",
   "content_v":"default", "content_h":"center", "content_direction":"column", "content_gap":{"base":"","md":"","lg":""},
   "position":"", "z_index":"", "border_preset":"", "inner_class":"",
   "animation":{"enable":"no","yes":{"effect":"","speed_preset":"","advanced_tweaks_heading":"","delay":0,"custom_duration":0,"repeat_count":1,"loop_forever":"no","replay_on_scroll":"no","easing":""}},

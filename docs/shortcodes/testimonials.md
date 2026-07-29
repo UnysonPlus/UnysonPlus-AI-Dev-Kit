@@ -23,6 +23,7 @@ A multi-item testimonial widget with swappable designs (carousel, grid, marquee,
 | `text_color` / `bg_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Wrapper text / background color. |
 | `font_size_preset` | font-size preset | `''` | preset slug | Named body font-size preset. |
 | `quote_color` / `author_name_color` / `author_job_color` / `site_link_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Per-part color overrides. |
+| `reviews_schema` | switch | `'no'` | `yes` \| `no` | Emit **Review** / **Rating** JSON-LD (with `Person`/`Organization` authors) so search engines read the testimonials as reviews. |
 
 ## Ready-to-use example (the atts object)
 ```json

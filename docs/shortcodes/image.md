@@ -12,6 +12,7 @@ A single responsive image with sizing, loading priority, and an optional link. L
 | `link` | text | `''` | URL | Wrap the image in a link. Empty = plain image. |
 | `target` | switch | `'_self'` | `'_blank'` \| `'_self'` | Open the link in a new window. |
 | `bg_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Background color (`kind: bg`). |
+| `image_style` | image-style-picker | `''` | `''` (none) · `imgs-rounded` · `imgs-circle` · `imgs-portrait-card` · `imgs-monochrome` · `imgs-duotone` · `imgs-diagonal` · `imgs-hexagon` · `imgs-cinematic` | Preset visual treatment (shape / filter) applied to the image. |
 
 ## Ready-to-use example (the atts object)
 ```json

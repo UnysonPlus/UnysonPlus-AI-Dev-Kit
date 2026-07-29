@@ -1,0 +1,198 @@
+<?php
+/**
+ * ============================================================================
+ * OPTIONAL — ONLY for a SECTION-LIKE (container) element.
+ * ============================================================================
+ *
+ * NOTE THE `.example` SUFFIX. This file is deliberately NOT loadable. The
+ * loader looks for `class-fw-shortcode-{folder-name}.php`, and if that file
+ * exists but does not define the matching class it emits a PHP warning on
+ * every page load. Drop the `.example` only when you have actually filled it
+ * in, and rename the file to match your folder:
+ *
+ *     class-fw-shortcode-{your-folder-name}.php
+ *
+ * ----------------------------------------------------------------------------
+ * DO YOU NEED THIS FILE?
+ * ----------------------------------------------------------------------------
+ * NO — for a LEAF element (a heading, a button, a slider, a card, a gallery:
+ * anything that renders content and holds no builder rows). A leaf needs only
+ * config.php + options.php + views/view.php (+ static.php + static/). The
+ * loader auto-discovers the folder; there is nothing to register. This is the
+ * overwhelmingly common case, and it is what the rest of this template is.
+ *
+ * YES — for a SECTION-LIKE element: one that lives at the ROOT of the page
+ * and HOLDS rows and columns, behaving like the built-in `[section]`. Wiring
+ * it makes the element automatically participate in the section sorter,
+ * Save-as-Template, section export/import, the items corrector, and full-page
+ * templates.
+ *
+ * You write only files inside your own folder. Everything discovers the type
+ * through the hooks below.
+ *
+ * ----------------------------------------------------------------------------
+ * SUBSTITUTIONS
+ *   {your_type}   snake_case tag — the FOLDER NAME with dashes turned into
+ *                 underscores. A folder `hero-banner` is the tag `hero_banner`.
+ *   {YourType}    Studly_Case fragment for the class name (Hero_Banner)
+ * ----------------------------------------------------------------------------
+ *
+ * Everything below is commented out. Uncomment, substitute, rename the file.
+ */
+
+/*
+
+if ( ! defined( 'FW' ) ) {
+	die( 'Forbidden' );
+}
+
+class FW_Shortcode_{YourType} extends FW_Shortcode {
+
+	public function _init() {
+
+		// LAZY registration — loads the page-builder item class when the
+		// editor page renders. Fires once per editor admin page.
+		add_action(
+			'fw_option_type_builder:page-builder:register_items',
+			array( $this, '_action_register_builder_item_types' )
+		);
+
+		// EAGER registration — THE MOST-BITTEN TRAP. This tells every
+		// admin-ajax handler, plus the items corrector, that {your_type} is
+		// section-like. Without it the type is only known on the editor-RENDER
+		// lifecycle, so saving as a Section template hangs on a spinner,
+		// importing a section .json is rejected, and post-save item
+		// correction silently mangles the tree — because an admin-ajax
+		// request never fires the action above.
+		add_filter( 'fw_section_like_types', array( $this, '_filter_register_section_like' ) );
+
+		// Exposes this type's options schema, defaults, title template and
+		// l10n to the editor's per-type data bundle.
+		add_filter( 'fw_ext:shortcodes:collect_shortcodes_data', array( $this, '_filter_add_data' ) );
+	}
+
+	public function _filter_register_section_like( $types ) {
+		if ( is_array( $types ) && ! in_array( '{your_type}', $types, true ) ) {
+			$types[] = '{your_type}';
+		}
+		return $types;
+	}
+
+	public function _filter_add_data( $structure ) {
+		$structure['{your_type}'] = $this->get_item_data();
+		return $structure;
+	}
+
+	public function _action_register_builder_item_types() {
+		if ( fw_ext( 'page-builder' ) ) {
+			// `require`, NOT `require_once` — the action fires once per
+			// request, and the file's bottom-line register_item_type() call
+			// depends on running each time.
+			require $this->get_declared_path(
+				'/includes/page-builder-{your_type}-item/class-page-builder-{your_type}-item.php'
+			);
+		}
+	}
+
+	public function get_shortcode_config() {
+		$config = $this->get_config( 'page_builder' );
+
+		// Prefer this element's own icon; fall back to the built-in section's
+		// so the thumbnail is never blank while you are still designing one.
+		$icon = $this->locate_path( '/static/img/page_builder.svg' );
+		if ( ! $icon ) {
+			$section = fw_ext( 'shortcodes' )->get_shortcode( 'section' );
+			if ( $section ) {
+				$icon = $section->locate_path( '/static/img/page_builder.svg' );
+			}
+		}
+		if ( $icon && file_exists( $icon ) ) {
+			$icon = file_get_contents( $icon );
+		}
+
+		return array_merge(
+			array(
+				'tab'            => __( 'Layout Elements', 'fw' ),
+				'title'          => __( '{Your Type Label}', 'fw' ),
+				'description'    => __( '{One-line description}', 'fw' ),
+				'title_template' => null,
+				'icon'           => $icon,
+			),
+			( is_array( $config ) ? $config : array() )
+		);
+	}
+
+	public function get_item_data() {
+		$data    = array();
+		$options = $this->get_options();
+
+		if ( $options ) {
+			fw()->backend->enqueue_options_static( $options );
+			$data['options']        = $this->transform_options( $options );
+			$data['default_values'] = fw_get_options_values_from_input( $options, array() );
+		}
+
+		$config = $this->get_shortcode_config();
+		if ( isset( $config['popup_size'] ) ) {
+			$data['popup_size'] = $config['popup_size'];
+		}
+		if ( isset( $config['popup_header_elements'] ) ) {
+			$data['header_elements'] = $config['popup_header_elements'];
+		}
+
+		$data['title']          = $config['title'];
+		$data['title_template'] = $config['title_template'];
+		$data['tag']            = '{your_type}';
+		$data['l10n']           = array(
+			'edit'      => __( 'Edit', 'fw' ),
+			'duplicate' => __( 'Duplicate', 'fw' ),
+			'remove'    => __( 'Remove', 'fw' ),
+			'collapse'  => __( 'Collapse', 'fw' ),
+		);
+
+		return $data;
+	}
+
+	private function transform_options( $options ) {
+		$transformed = array();
+		foreach ( $options as $id => $option ) {
+			if ( is_int( $id ) ) {
+				$transformed[] = $option;
+			} else {
+				$transformed[] = array( $id => $option );
+			}
+		}
+		return $transformed;
+	}
+}
+
+*/
+
+/**
+ * ----------------------------------------------------------------------------
+ * WHAT YOU DO **NOT** WRITE FOR A SECTION-LIKE ELEMENT
+ * ----------------------------------------------------------------------------
+ * All of this is auto-wired by the two hooks above. Touching any of it is a
+ * sign you have gone off the path:
+ *
+ *   · the section-like registry, the section-like factory view, the item
+ *     corrector, the section sorter, the templates feature
+ *   · a save-as-template button, a sort-sections row, import/export handling,
+ *     hierarchy validation
+ *   · registering the page-builder item's CSS/JS — the parent class
+ *     auto-locates includes/page-builder-{your_type}-item/static/{css,js}/
+ *   · ANY file outside your own folder
+ *
+ * ----------------------------------------------------------------------------
+ * OTHER PITFALLS
+ * ----------------------------------------------------------------------------
+ * · Shortcode tag != item type. By default the item class's
+ *   get_shortcode_slug() returns get_type(). Override it in the item class
+ *   only in the rare case they differ.
+ * · Stay self-contained. Copying a pattern from another element is fine;
+ *   `require`-ing PHP from another element's folder at runtime creates
+ *   load-order coupling. Shared helpers belong in the extension's includes/.
+ * · view.php receives `$content` — the rendered inner rows/columns. Echo it
+ *   inside your wrapper, or the element swallows everything the user puts in
+ *   it.
+ */

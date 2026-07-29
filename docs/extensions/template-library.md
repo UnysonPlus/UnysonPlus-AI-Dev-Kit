@@ -1,6 +1,6 @@
 # template-library extension
 
-A browsable catalog of premade page-builder templates — sections, columns and whole pages — that install into the builder's Templates menu ready to drop in. **Active by default:** no (enable it under Extensions). Version: 1.0.9.
+A browsable catalog of premade page-builder templates — sections, columns and whole pages — that install into the builder's Templates menu ready to drop in. **Active by default:** no (enable it under Extensions).
 
 ## Provides
 

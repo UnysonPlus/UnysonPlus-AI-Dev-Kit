@@ -1,6 +1,6 @@
 # forms extension
 
-A drag-and-drop **contact-form builder** plus the `[contact-form]` shortcode/element to place forms on any page. **Active by default:** yes. Version: 2.0.39.
+A drag-and-drop **contact-form builder** plus the `[contact-form]` shortcode/element to place forms on any page. **Active by default:** yes.
 
 ## Provides
 

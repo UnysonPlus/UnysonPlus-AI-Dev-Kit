@@ -4,9 +4,41 @@ Authoritative reference for every Footer option (Theme Settings → Footer). Sub
 
 ---
 
+## Mapping a design's footer to the four bars (do this FIRST)
+
+The footer is **four stacked bars, top→bottom: Pre-Footer → Main Footer → Post-Footer → Copyright.** Before setting any option, break the source/design footer into its **bands** (full-width horizontal strips) and assign each to a bar.
+
+**Two hard rules:**
+1. **Order is sacred** — bars always render Pre→Main→Post→Copyright, so assign bands so the design's *top-to-bottom order is preserved*. Never reorder.
+2. **Copyright = the LAST band** (© line / legal links) — always its own bar (`copyright_settings.enabled='yes'`). Copyright auto-aligns by column count: **1 col = centered · 2 cols = left + right · 3 cols = left + center + right** (e.g. legal `text` left + a policy `menu` right = 2 columns).
+
+**Anchor on Main Footer, fill outward:** the primary content band (the biggest multi-column grid — logo + link columns / widgets) → **Main Footer**; a band *above* it → **Pre-Footer**; a band *below* it (above ©) → **Post-Footer**.
+
+| Bands (incl. ©) | Pre | Main | Post | Copyright |
+|---|---|---|---|---|
+| **1** (just ©) | — | — | — | ✓ |
+| **2** (grid + ©) | — | grid | — | ✓ |
+| **3** | top band | grid | — | ✓ *(or Main + Post + © if the band is below the grid)* |
+| **4+** | top band | grid | secondary rows | ✓ |
+
+**More bands than bars?** First stack several **single-column** bands as **vertical elements inside one bar's single column** (elements stack). Only when you have **5+ structurally-distinct (multi-column) grids** above the copyright that can't stack — register **extra bars** (see *Extra footer bars* below); never cram a distinct band into the Copyright tab.
+
+**Column setup per bar:**
+- **Multi-column grid** → set Number of Columns + ratio. If the columns are *content-sized with `space-between`* (a brand block beside content-hugging link lists — the 12-grid can't express it), turn **Auto Width On** (`<prefix>_auto='yes'`) + set **Distribution** (`<prefix>_justify`, usually `between`).
+- **Single content row** (badge strip, centered link cloud, disclaimer box) → **1 column** (auto-centers), one element per band, stacked.
+
+**Common footer shapes:** *Minimal* (© only) → Copyright. *Classic corporate* (column grid + ©) → Main + Copyright. *CTA/brand on top* → Pre + Main + Copyright. *Secondary bottom row* (social/lang/app-badges) → Main + Post + Copyright. *Compliance-heavy* (columns + badges + disclaimer + ©) → Main + Post (stacked) + Copyright.
+
+---
+
 ## Footer Layout (`footer-layout.php`) — overall footer chrome
 
-Top-level leaves plus three grouped sections (`group_footer_colors`, `group_footer_border`, `group_footer_spacing`; group ids are containers only, not stored).
+Top-level leaves plus grouped sections (`group_footer_mode`, `group_footer_colors`, `group_footer_border`, `group_footer_spacing`; group ids are containers only, not stored).
+
+### Overlay on Last Section — `footer_overlay_last_section` (`group_footer_mode`)
+- **Type**: `switch` — `yes` / `no`
+- **Default**: `no`
+- **Notes**: When `yes`, the footer is pinned to the bottom of the page's LAST full-height section and **overlaid** on it (adds `footer--overlay` to `#colophon`), instead of rendering as a separate band below the page — removing any blank tail after a pinned last section (cinematic / scroll-story pages). A tiny inline runtime measures the footer height (`--footer-overlay-h`) and only engages (`footer--overlay-on`, which pulls the footer up + sets `z-index`) when the last section is **≥ 70vh tall**; otherwise it stays a normal band. Changes POSITIONING only — the footer background defaults to **transparent** in overlay mode (the scene shows through), so set a `footer_background` scrim + `footer_text_color`/`footer_link_color` for legibility, and make the last section hold (not fade) at its end.
 
 ### Background — `footer_background`
 - **Type**: `background-pro` (`disable: ['video']`)
@@ -119,9 +151,37 @@ Each count `N` reveals:
     | `f5-2-3` | 2/5 + 3/5 |
 
     A composition with fewer parts renders fewer physical columns.
+- **Auto Width (fit to content)** — `<prefix>_auto` (**Type** `switch`, default `no`) + `<prefix>_justify` (**Type** `image-picker`, default `between`). When `<prefix>_auto = 'yes'` the Column Ratio above is **ignored**: columns become content-sized flex (`footer-col--auto`) and the row (`footer-row--auto`) distributes them by `<prefix>_justify`. Use this when the source columns **hug their content with `space-between`** (a brand block beside content-sized link lists) — the twelfths split-slider and fifths picker can only express *fixed fractions*, so they can't reproduce "one wider column beside content-hugging ones".
+  - `<prefix>_justify` choices: `between` (space-between — default) · `around` (space-around) · `center` · `start` (flex-start) · `end` (flex-end). Thumbnails diagram each.
+  - **Saved value** adds `<prefix>_auto` + `<prefix>_justify` under the count `N`, alongside `<prefix>_split`. Setting it: `main_footer_columns['4']['main_footer_auto']='yes'`, `['main_footer_justify']='between'`.
 - **Content columns**: `<prefix>_col_1` … `<prefix>_col_N` — each an `addable-popup` (footer column; element popup below). Column 1 may carry a default (Copyright uses it for the copyright line).
 
 *(Legacy helper `unysonplus_footer_ratio_picker` provides an alternate curated twelfths image-picker for 2–5 columns; the split-slider/fifths pickers above are what the sections actually use.)*
+
+---
+
+## Extra footer bars — the `unysonplus_footer_extra_bars` filter
+
+The four fixed bars (Pre / Main / Post / Copyright) cover almost every footer, and overflow **single-column** bands just stack as elements in one bar's column. But a design with **5+ structurally-distinct (multi-column) bands** above the copyright runs out of bars — do **not** cram one into the Copyright tab. Instead register **extra bars**: they appear as sub-tabs **between Post-Footer and Copyright** (Copyright stays pinned last) and render in that same order, each with the **full columns control** (count + ratio + Auto Width + elements — full parity with the built-ins).
+
+**Register via the filter** — return `id => { label, max }` (`max` 1–6, default 6; ids are `sanitize_key`'d and the reserved `pre/main/post/copyright/layout` are dropped):
+
+```php
+add_filter( 'unysonplus_footer_extra_bars', function ( $bars ) {
+    $bars['row4'] = array( 'label' => 'Footer Row 4', 'max' => 6 );
+    $bars['row5'] = array( 'label' => 'Footer Row 5', 'max' => 6 );
+    return $bars;
+} );
+```
+
+**WHERE to put that filter (REQUIRED — this is site config, not framework code):**
+- **Site has a child theme** → the **child theme's `functions.php`** (the canonical home). Check `get_option('stylesheet') !== get_option('template')` — if they differ, a child theme is active.
+- **No child theme** (`stylesheet === template`) → a small **mu-plugin** at `wp-content/mu-plugins/<name>.php` (`<?php` + the `add_filter`). It auto-loads and is theme-independent.
+- **Never** in the **parent theme** (`unysonplus-theme`) `functions.php` — that ships the bars to *every* site — and **never** in the shipped **`unysonplus-theme-child`** template child theme (same reason). Per-site bars belong to that site's child theme (or mu-plugin), not the products.
+
+**Storage & keys:** each bar stores under **`footer_x_<id>_columns`** in `fw_theme_settings_options:unysonplus`, the same shape as `main_footer_columns` (`{count,'N':{…}}`). Its prefix is `footer_x_<id>`, so `<prefix>_split` / `<prefix>_auto` / `<prefix>_justify` / `<prefix>_col_i` all apply exactly as documented above.
+
+**How it wires (parent theme — already built; you only register the filter):** `unysonplus_footer_extra_bars()` (`inc/includes/footer-builder.php`) normalizes the filter list → `id => {label,max,prefix}`; `footer-settings.php` splices one sub-tab per bar (built from `unysonplus_footer_columns_field(prefix,max,1)`) before Copyright; `template-parts/footer-builder.php` loops the **same** list, rendering each `unysonplus_render_footer_section()` between Post-Footer and Copyright. One list drives tabs + render (never desync), and Copyright is appended **after** the loop in both, so it's structurally always last.
 
 ---
 
@@ -165,6 +225,24 @@ When `yes`:
 
 Each footer column is an `addable-popup`. Per added item:
 
+### Picking the element type — do NOT default to Custom HTML (REQUIRED)
+
+The **Element** picker defaults to **`custom_html`**, so it's tempting to paste everything as raw HTML. **Don't.** Classify each piece of column content and pick the semantic element; **Custom HTML is the last resort**, only for bespoke markup no element covers.
+
+| Column content | Correct element |
+|---|---|
+| A list of links / a nav | **Menu** — create a WP menu (Appearance → Menus), pick it via `menu_id`. Never custom HTML for links. |
+| A logo image | **Footer Logo** (or Logo) |
+| A heading, paragraph, brand blurb, rich text, the © line | **Text** (`wp-editor`; `wpautop` preserves block tags like `<h5>`) |
+| A row of social icons | **Social Icons** |
+| Phone / email / address with an icon | **Icon Text** (or Phone) |
+| A search box | **Search** · a registered widget area → **Widget Area** · a whole builder section → **Builder Section** · a reusable snippet → **Snippet** |
+| Bespoke markup no element covers (e.g. an image/badge strip) | **Custom HTML** — only here |
+
+Rule of thumb: **links → Menu, words → Text, logo → Footer Logo; Custom HTML only when nothing else fits.** Tag any element needing CSS with its **CSS Class** field (`element_css_class`) — it lands on the `.footer-element` wrapper (`.footer-element.<class>`) — rather than wrapping the content in a classed `<div>`. Menu elements render `.builder-menu-list`; Text elements render `.builder-text-element`, so target those (scoped by your element class) in Custom CSS.
+
+*Worked example — a link column* = **Text** (`<h5>Bingo</h5>`, class `fcol-title`) **+ Menu** (the "Footer — Bingo" menu, class `fcol-links`). A compliance-badge strip stays **Custom HTML** (an image row has no element). The © bar = **Text** (© line) + **Menu** (a "Footer Legal" menu).
+
 ### Element — `element_type` (multi-picker, picker `element` = select)
 - **Default**: `custom_html`
 - **Choices**:
@@ -195,7 +273,7 @@ Each footer column is an `addable-popup`. Per added item:
   - `menu_area` → `menu_location` (select; default `primary`; `primary` Primary menu, `secondary` Secondary menu, `footer` Footer menu, + registered locations).
   - `text` → `text_content` (`wp-editor`; supports `{{current_year}}`).
   - `widget_area` → `sidebar_id` (select; default `sidebar-right`; registered sidebars incl. `footer-1..5`).
-  - `footer_logo` → `footer_logo_image` (upload), `footer_logo_width` (unit-input `rem`,`px`,`em`, default `{value:'12.5',unit:'rem'}`).
+  - `footer_logo` → `footer_logo_image` (upload), `footer_logo_width` (unit-input `rem`,`px`,`em`, default `{value:'12.5',unit:'rem'}`). Re-resolved from `attachment_id` on the current site at render (portable, no cross-site 404 — see the logo-portability note in `theme-settings/header.md`); falls back to the text logo when the attachment isn't present here. SVG supported.
   - `back_to_top` → `back_to_top_text` (text, default `Back to Top`; empty = arrow only).
   - `builder_section` → `builder_post_id` (select; saved layouts).
   - `snippet` → `snippet_id` (select; published Snippets).

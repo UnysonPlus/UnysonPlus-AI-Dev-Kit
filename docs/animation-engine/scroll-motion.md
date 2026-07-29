@@ -23,6 +23,54 @@ Shared 9-way `direction`: `up`/`down`/`left`/`right`/`up_left`/`up_right`/`down_
   "delay": 0, "start": "top 85%", "once": "yes", "run_on_mobile": "yes" } }
 ```
 
+## Advanced tier (power users)
+
+`reveal` · `stagger` · `parallax` · `pin` · `scrub` additionally expose an **inline multi-picker**
+`advanced` that collapses to a single "Default" row. Value shape:
+
+```json
+"advanced": { "mode": "custom", "custom": {
+  "ease": "expo.out",          // curated GSAP ease, or "custom" → use ease_custom
+  "ease_custom": "",           // free-text GSAP ease; regex-validated, invalid = ignored
+  "scrub_smooth": 0.4,         // scrub-family only. 0 = scrub:true; >0 = scrub:<seconds>
+  "markers": "no"              // ScrollTrigger markers; only stamped for edit_theme_options users
+} }
+```
+
+`{"mode":"default"}` (or omitting `advanced` entirely) stamps **nothing** — identical rendering to
+pre-1.2.38 saves. Curated eases: `none` `power1.out` `power2.out` `power3.out` `expo.out`
+`back.out(1.7)` `elastic.out(1,0.5)` `circ.out` `sine.inOut`.
+
+**In a Motion Sequence (v1.2.44).** `reveal` and `stagger` also carry a `seq_pos` select
+(`gsap_motion.<effect>.seq_pos`): `after` (default) or `with`. It only matters when the element's
+parent Section is a **Motion Sequence** (see `motion-sequence.md`) — `with` starts the step at the
+previous step's start (`"<"`) so a pair enters together; `after` plays in turn using the Section's
+Overlap. Ignored outside a sequence.
+
+Those same five effects also carry a **read-only "Show generated GSAP" panel** (v1.2.39) — a
+`gsap-code-preview` option type that prints the actual GSAP the current settings generate and updates
+live. Value-less (stores nothing); it's a learning/teaching aid, not part of the saved value shape.
+
+## Motion Snippet — the `custom` effect (v1.2.41)
+
+A **Custom Code** effect (`effect: "custom"`) turns the element into author-written GSAP. Value shape:
+
+```json
+"gsap_motion": { "effect": "custom", "custom": {
+  "code": "tl.from(el, { y: 60, opacity: 0 }).from(el.querySelectorAll('.card'), { scale: 0.8, stagger: 0.1 }, '<')"
+} }
+```
+
+The runtime runs the code as `new Function('el','tl','gsap', code)`, where **`el`** = this element,
+**`tl`** = a `gsap.timeline()` already tied to `scrollTrigger:{trigger:el, start:'top 80%'}`, and
+**`gsap`** is the library. Add tweens to `tl` (they choreograph) or use `gsap` for your own triggers.
+
+**Security (execution gate, not a UI gate):** the code is base64-stamped into post_content as
+`data-upw-snip` and only *executes* when the page author has `unfiltered_html` (a per-request footer
+flag `window.upwSnippetsOK`). The `custom` choice is always offered (gating the choice made the saved
+value fragile — it got reset by `json_to_shortcodes` re-validation); safety is entirely at execution.
+Honours reduce-motion (skipped). It's the lossless fallback: styling → Custom CSS, motion → Motion Snippet.
+
 ## Params (per effect; key = default)
 
 | Effect | Params |

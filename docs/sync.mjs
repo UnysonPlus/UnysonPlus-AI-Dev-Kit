@@ -54,6 +54,11 @@ const SC_OVERRIDE = {
   'contact-form': EXT && join(EXT, 'forms/extensions/contact-forms/shortcodes/contact-form'),
   portfolio: EXT && join(EXT, 'portfolio/shortcodes/portfolio'),
   'project-gallery': EXT && join(EXT, 'portfolio/shortcodes/project-gallery'),
+  'project-details': EXT && join(EXT, 'portfolio/shortcodes/project-details'),
+  'project-results': EXT && join(EXT, 'portfolio/shortcodes/project-results'),
+  'project-testimonial': EXT && join(EXT, 'portfolio/shortcodes/project-testimonial'),
+  'project-nav': EXT && join(EXT, 'portfolio/shortcodes/project-nav'),
+  'related-projects': EXT && join(EXT, 'portfolio/shortcodes/related-projects'),
 };
 
 function sourcesFor(docRel) {
@@ -106,6 +111,7 @@ function sourcesFor(docRel) {
       social:       [t('general-social.php'), t('social-settings.php')],
       misc:         [t('misc.php'), ...glob(COMP || '', /^miscellaneous-.*\.php$/)],
       woocommerce:  [t('woocommerce-settings.php')],
+      portfolio:    glob(THOPT || '', /^portfolio-.*\.php$/),
     };
     const src = (MAP[base] || []).filter(Boolean).filter(existsSync);
     return { kind: 'theme-settings', src };

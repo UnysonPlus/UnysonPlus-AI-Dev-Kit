@@ -18,9 +18,13 @@ Concrete (inner `option` is an `image` upload — each entry is that type's own 
 | key | type | notes |
 |---|---|---|
 | (array items) | mixed | A flat, ordered array. Each element is the full stored value of the configured inner `option` type (`option['option']['type']`), produced by that type's own `get_value_from_input`. |
+| `option` | array | The inner option type repeated per row, e.g. `[ 'type' => 'text' ]`. |
+| `sortable` | bool | Drag-to-reorder within the list. Default `true`. |
+| `connect_group` | string | **Opt-in cross-list drag-and-drop.** Two+ `addable-option`s that share the same non-empty id let rows be dragged between them. Default `''` (self-contained). |
 
 ## Notes / gotchas
 - **Default is an empty array `[]`.** Non-array input falls back to the option's `value` default.
 - The element shape is entirely determined by the **inner option type** — a `text` inner gives strings, an `image`/`multi-picker`/etc. inner gives that type's object shape.
 - `sortable` (default `true`) controls drag-reordering only; the array order is the saved order.
+- **`connect_group` — cross-list drag-and-drop.** Set the SAME non-empty `connect_group` on two or more `addable-option` fields and their rows can be dragged **between** them (jQuery-UI connectWith), not just reordered within one list. Scope the id per logical group so unrelated lists don't interlink. Empty connected lists stay a visible drop target. Rows persist automatically on drop (they're re-keyed to the receiving list, since the form saves by indexed input name). Same feature also on `addable-popup`; **not** on `addable-box`.
 - This is the SINGLE-option repeater. For a repeater of a whole option *group*, that's `addable-box`/`addable-popup`, not this type.

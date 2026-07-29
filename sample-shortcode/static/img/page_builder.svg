@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="#b3b3b3" shape-rendering="crispEdges" aria-hidden="true">
+	<!--
+		Builder icon. REQUIRED for every new element — the picker auto-detects
+		this exact path (static/img/page_builder.svg) and inlines it.
+
+		HOUSE STYLE for simple content elements (this file):
+		  · viewBox="0 0 16 16" with width/height 16 — icons render AT 16px, so
+		    a 16-grid is 1:1 crisp. A 20-grid scaled down renders 1px rows
+		    unevenly.
+		  · fill="#b3b3b3" — fixed, NOT currentColor (which resolves too dark
+		    in the editor).
+		  · shape-rendering="crispEdges" and integer coordinates only.
+		  · No PNGs. The whole set is SVG.
+		  · Match the density of the existing set — these were traced from the
+		    original 16x16 pixel art, so a new icon should sit at the same
+		    weight. Keep diagonals as paths (crispEdges stair-steps them, which
+		    reads as pixel art); use fill-rule="evenodd" for holes.
+
+		LAYOUT ELEMENTS (section / column / container and other section-like
+		types) use a DIFFERENT, larger thumbnail style — viewBox="0 0 60 40",
+		outlined #9b9b9b strokes on #f8fdff. Do not apply this 16x16 pixel
+		style to those.
+
+		This glyph: a framed card with content lines — a generic "template".
+		Replace it with something that says what YOUR element does.
+	-->
+	<rect x="1" y="2" width="14" height="2"/>
+	<rect x="1" y="4" width="1" height="10"/>
+	<rect x="14" y="4" width="1" height="10"/>
+	<rect x="1" y="13" width="14" height="1"/>
+	<rect x="3" y="6" width="10" height="1"/>
+	<rect x="3" y="8" width="10" height="1"/>
+	<rect x="3" y="10" width="6" height="1"/>
+</svg>

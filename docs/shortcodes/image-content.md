@@ -26,6 +26,7 @@ An image and a WYSIWYG content block side by side (or stacked) — the classic z
 | `content_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Body content color. |
 | `content_bg` | color-preset | `{predefined:'',custom:''}` | compact color object | Background behind the content (`kind: bg`). |
 | `content_padding` | spacing (padding) | see README | spacing object | Inner padding of the content panel. |
+| `image_style` | image-style-picker | `''` | `''` (none) · `imgs-rounded` · `imgs-circle` · `imgs-portrait-card` · `imgs-monochrome` · `imgs-duotone` · `imgs-diagonal` · `imgs-hexagon` · `imgs-cinematic` | Preset visual treatment (shape / filter) applied to the image half. |
 
 ## Ready-to-use example (the atts object)
 ```json

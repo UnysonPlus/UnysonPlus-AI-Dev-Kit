@@ -1,20 +1,28 @@
 # `tabs` — Tabs
 
-A horizontal or vertical tabbed-content widget; each tab has a title and a body panel. Leaf node: `{ type:'simple', shortcode:'tabs', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.
+A horizontal or vertical tabbed-content widget; each tab has a title and a body panel. A **Media panel** layout turns it into a list-of-tabs + switching-image showcase (each tab has its own image, the content becomes the caption), with **Click / Hover** activation and optional **Auto-rotate**. Leaf node: `{ type:'simple', shortcode:'tabs', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.
+
+> **Scroll-driven vs. this.** For the *scroll-pinned* cinematic version (image pins while steps scroll — the Apple/Stripe pattern) use the **Animation Engine → Scrollytelling** module (Media Panel + Steps) on a Section. This shortcode is the **click / hover / auto-rotate** version and needs no engine.
 
 ## atts
 | key | type | default | value shape / choices | what it does |
 |---|---|---|---|---|
-| `tabs` | addable-popup | `[]` | array of `{ tab_title, tab_content, badge, is_active }` | The tab entries, rendered in order. |
+| `tabs` | addable-popup | `[]` | array of `{ tab_title, tab_content, tab_image, badge, is_active }` | The tab entries, rendered in order. |
 | `tabs[].tab_title` | text | `''` | string | Label on the clickable tab button. |
-| `tabs[].tab_content` | wp-editor | `''` | HTML string | Panel body shown when the tab is selected. |
+| `tabs[].tab_content` | wp-editor | `''` | HTML string | Panel body shown when the tab is selected. In the Media layout it's the caption under the image. |
+| `tabs[].tab_image` | upload | `''` | image upload object | Per-tab image shown on the media side in the Media layout (srcset when it's a Media-Library attachment). Ignored in Content layout. |
 | `tabs[].badge` | text | `''` | string | Optional small pill beside the title (e.g. "Save 20%"). |
 | `tabs[].is_active` | switch | `'no'` | `yes` \| `no` | Marks the tab open on load. If several are `yes`, the first wins. |
 | `tab_style` | select | `'tabs'` | `tabs` `pills` `underline` `segmented` | Nav style. `segmented` is a compact toggle switcher. |
-| `justified` | switch | `'no'` | `yes` \| `no` | Stretch tab buttons to fill the container width. |
+| `justified` | switch | `'no'` | `yes` \| `no` | Stretch tab buttons to fill the container width (Content layout). |
 | `alignment` | select | `'start'` | `start` `center` `end` | Horizontal alignment of the tab nav (ignored when justified). |
-| `orientation` | select | `'horizontal'` | `horizontal` `vertical` | Tabs above content, or beside it in a side column. |
-| `fade` | switch | `'no'` | `yes` \| `no` | Soft cross-fade between panels instead of an instant swap. |
+| `orientation` | select | `'horizontal'` | `horizontal` `vertical` | Tabs above content, or beside it in a side column (Content layout; ignored in Media). |
+| `layout` | select | `'content'` | `content` `media` | `media` = list of tabs on one side, a switching image on the other. |
+| `media_side` | select | `'right'` | `right` `left` | Which side the image sits on in the Media layout. |
+| `activate_on` | select | `'click'` | `click` `hover` | Switch tabs on click or on pointer hover (any layout). |
+| `autoplay` | switch | `'no'` | `yes` \| `no` | Auto-rotate through the tabs; pauses on hover/focus, skipped under reduce-motion. |
+| `autoplay_interval` | slider | `5` | `2`–`12` (seconds) | Seconds each tab stays active when `autoplay` is on. |
+| `fade` | switch | `'no'` | `yes` \| `no` | Soft cross-fade between panels/images instead of an instant swap. |
 | `text_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Wrapper text color. |
 | `bg_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Wrapper background (`kind: bg`). |
 | `font_size_preset` | font-size preset | `''` | preset slug | Named body font-size preset. |
@@ -33,6 +41,11 @@ A horizontal or vertical tabbed-content widget; each tab has a title and a body 
   "justified": "no",
   "alignment": "start",
   "orientation": "horizontal",
+  "layout": "content",
+  "media_side": "right",
+  "activate_on": "click",
+  "autoplay": "no",
+  "autoplay_interval": 5,
   "fade": "no",
   "text_color": { "predefined": "", "custom": "" },
   "bg_color": { "predefined": "", "custom": "" },
@@ -47,4 +60,6 @@ A horizontal or vertical tabbed-content widget; each tab has a title and a body 
 - `is_active` is per-item, not a global setting. Set exactly one entry to `yes`; if none is set the first tab opens by default.
 - `orientation: vertical` uses horizontal space for the nav sidebar — place it in a wide enough column.
 - `segmented` and `underline` styles suit a Monthly / Yearly-style toggle and quiet editorial strips respectively.
+- **Media layout** (`layout:"media"`): give each tab a `tab_image`; `tab_content` becomes the caption. `orientation`/`justified` don't apply; `media_side` controls left/right and it stacks (list above image) on mobile.
+- `activate_on:"hover"` and `autoplay` work in **both** layouts. Auto-rotate pauses while the visitor hovers or focuses the element and is skipped entirely under `prefers-reduced-motion`.
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, not a raw hex string. See `README.md`.

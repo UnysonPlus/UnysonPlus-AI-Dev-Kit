@@ -20,6 +20,7 @@ Comparable pricing plans as cards in a responsive grid — each with an icon, na
 | `price_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Price color. |
 | `text_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Features / body text color. |
 | `font_size_preset` | font-size preset | `''` | preset slug | Named body font-size preset. |
+| `product_schema` | switch | `'no'` | `yes` \| `no` | Emit **Product** / **Offer** JSON-LD for each plan so search engines read the pricing as products. |
 
 Each **plan** object: `plan_title` (text), `icon` (icon-v2), `subtitle` (text), `currency` (text, `'$'`), `price` (text, e.g. `'29'`), `period` (text, e.g. `'/mo'`), `features` (textarea — one per line; a line starting `-` or `!` = unavailable/crossed out), `featured` (`'yes'`/`'no'`), `ribbon` (text), `button_label` (text — blank hides the button), `button_url` (text), `button_target` (`'_self'`/`'_blank'`).
 

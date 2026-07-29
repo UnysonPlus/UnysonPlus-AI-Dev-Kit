@@ -29,6 +29,7 @@ A **dynamic post-data element** (used in post / archive templates and any page) 
 | `title_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Title color. |
 | `text_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Body text color. |
 | `font_size_preset` | font-size preset | `''` | preset slug | Named font-size preset. |
+| `image_style` | image-style-picker | `''` | `''` (none) · `imgs-rounded` · `imgs-circle` · `imgs-portrait-card` · `imgs-monochrome` · `imgs-duotone` · `imgs-diagonal` · `imgs-hexagon` · `imgs-cinematic` | Preset visual treatment (shape / filter) applied to each card image. |
 
 ## Ready-to-use example (the atts object)
 ```json

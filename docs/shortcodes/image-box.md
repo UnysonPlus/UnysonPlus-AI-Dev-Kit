@@ -33,6 +33,7 @@ An image paired with an optional eyebrow, title, text, icon and button — a por
 | `content_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Body text color. |
 | `icon_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Icon color (font icons only). |
 | `accent_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Button / arrow / frame accent (`kind: bg`). |
+| `image_style` | image-style-picker | `''` | `''` (none) · `imgs-rounded` · `imgs-circle` · `imgs-portrait-card` · `imgs-monochrome` · `imgs-duotone` · `imgs-diagonal` · `imgs-hexagon` · `imgs-cinematic` | Preset visual treatment (shape / filter) applied to the box image. |
 
 ## Ready-to-use example (the atts object)
 ```json

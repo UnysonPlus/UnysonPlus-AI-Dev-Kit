@@ -1,0 +1,197 @@
+/**
+ * Sample Shortcode — front-end styles.
+ *
+ * ============================================================================
+ * THE THREE RULES FOR A SHORTCODE STYLESHEET
+ * ============================================================================
+ *
+ * 1. SCOPE EVERYTHING. A shortcode is a guest on someone else's page. Every
+ *    rule starts from the element's root class. No bare element selectors, no
+ *    `*`, and above all nothing targeting `html`, `body`, `:root` or `#page`.
+ *
+ *    This is the single most common failure when porting a CodePen or a
+ *    standalone demo: those files own the whole document and open with
+ *    `* { margin: 0 }` and `body { overflow: hidden }`. Ported verbatim, that
+ *    resets the theme's typography and disables scrolling site-wide.
+ *
+ * 2. NO ABSOLUTE POSITIONING OF THE ELEMENT ITSELF. Demos routinely centre
+ *    themselves with `position:absolute; top:50%; left:50%;
+ *    transform:translate(-50%,-50%)` because they assume they are the only
+ *    thing on the page. In a builder the element must be a normal in-flow
+ *    block, or it will sit on top of whatever the user placed around it.
+ *    Position things INSIDE your element freely — just not the root.
+ *
+ * 3. CONFIGURATION COMES IN AS CUSTOM PROPERTIES, set per instance on the
+ *    wrapper by view.php. Declare a fallback for each: if an att is empty the
+ *    view emits no variable, and the fallback keeps the element rendering
+ *    instead of collapsing to zero.
+ * ============================================================================
+ */
+
+.sample-shortcode {
+	/* Per-instance configuration, with fallbacks. */
+	--ss-max-w: 100%;
+	--ss-gap: 16px;
+
+	position: relative;   /* fine — this is `relative`, not `absolute` */
+	max-width: var(--ss-max-w);
+}
+
+.sample-shortcode__title {
+	margin: 0 0 0.5em;
+	color: inherit;   /* let the preset class / theme win unless overridden */
+}
+
+.sample-shortcode__text {
+	margin: 0;
+	color: inherit;
+}
+
+/* Alignment modifier — set from the `alignment` option in view.php. */
+.sample-shortcode.is-align-center { text-align: center; margin-left: auto; margin-right: auto; }
+.sample-shortcode.is-align-right  { text-align: right; margin-left: auto; }
+
+/* -------------------------------------------------------------------------
+ * Screen-reader-only text.
+ *
+ * Present in textContent — so crawlers and the accessibility tree read the
+ * full "Read more about <title>" — but clipped from view. Required by the
+ * descriptive-link-text rule; see sc_sample_link_html() in static.php.
+ * ---------------------------------------------------------------------- */
+.sample-shortcode__sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* -------------------------------------------------------------------------
+ * Focus visibility.
+ *
+ * Demos habitually write `border: none; outline: none` on buttons and give
+ * nothing back, leaving keyboard users unable to tell what is focused. If you
+ * remove a default focus ring, replace it.
+ * ---------------------------------------------------------------------- */
+.sample-shortcode a:focus-visible,
+.sample-shortcode button:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------------------
+ * Responsive.
+ *
+ * A source demo is usually a fixed-size box with no media queries. Add them:
+ * the element will be dropped into columns and narrow layouts you did not
+ * anticipate. Prefer intrinsic sizing (max-width, clamp, %) over breakpoints
+ * where it works.
+ * ---------------------------------------------------------------------- */
+@media (max-width: 767px) {
+	.sample-shortcode {
+		--ss-gap: 12px;
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Reduced motion.
+ *
+ * Not optional, and never present in a source demo. Anything that moves,
+ * blurs or scales must stop here. Content still appears — only the movement
+ * goes, so never hide anything in this block.
+ * ---------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+	.sample-shortcode *,
+	.sample-shortcode *::before,
+	.sample-shortcode *::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+
+/* ============================================================================
+ * REFERENCE BLOCK — commented out.
+ * ==========================================================================*/
+
+/*
+ * DERIVED VALUES. Compute in CSS from the variables the view supplies rather
+ * than doing the arithmetic in PHP — the relationship stays visible, and it
+ * re-resolves if a variable changes at runtime.
+ *
+ *   .sample-shortcode {
+ *       --ss-step: calc(var(--ss-card-w) + var(--ss-gap));
+ *   }
+ *   .sample-shortcode__item:nth-child(2) { left: calc(50% + (var(--ss-step) * 1)); }
+ *   .sample-shortcode__item:nth-child(3) { left: calc(50% + (var(--ss-step) * 2)); }
+ *
+ * A source demo will typically have those offsets hardcoded (`left: 220px`,
+ * `left: 440px`). Work out what the numbers are MADE of — here card width plus
+ * gap — and express that, or the element breaks the moment a user changes a
+ * size.
+ */
+
+/*
+ * COUNT-DRIVEN RULES. CSS cannot do `nth-child(n + var(--x))`, so when a
+ * numeric option controls a selector threshold, the view emits a class and
+ * the stylesheet carries one small rule per supported value.
+ *
+ *   .sample-shortcode.is-count-1 .sample-shortcode__item:nth-child(n + 2),
+ *   .sample-shortcode.is-count-2 .sample-shortcode__item:nth-child(n + 3),
+ *   .sample-shortcode.is-count-3 .sample-shortcode__item:nth-child(n + 4) {
+ *       opacity: 0;
+ *       pointer-events: none;
+ *   }
+ */
+
+/*
+ * IMAGE FILL. Replaceable media arrives as a real <img> (see view.php), so
+ * size it here rather than reaching for a CSS background.
+ *
+ *   .sample-shortcode__image {
+ *       display: block;
+ *       width: 100%;
+ *       height: 100%;
+ *       object-fit: cover;
+ *   }
+ */
+
+/*
+ * READABILITY SCRIM over an image. Drive the alpha from an option so it can
+ * be turned off without a second selector — at 0 the rule costs nothing.
+ *
+ *   .sample-shortcode__item::after {
+ *       content: "";
+ *       position: absolute;
+ *       inset: 0;
+ *       background: rgba(0, 0, 0, var(--ss-overlay, 0));
+ *       pointer-events: none;
+ *   }
+ *
+ * Text over a photo will not meet the 4.5:1 contrast minimum without one.
+ */
+
+/*
+ * WHAT NOT TO WRITE. Every line below is a real failure mode:
+ *
+ *   * { margin: 0; padding: 0; box-sizing: border-box; }   resets the theme
+ *   body { overflow: hidden; }                             kills page scroll
+ *   .container { … }                                       collides with the
+ *                                                          framework's own grid
+ *                                                          class
+ *   .item, .content, .name { … }                           unscoped generic
+ *                                                          names — WILL collide
+ *   #slider { … }                                          ids break with two
+ *                                                          instances on a page
+ *   h2 { font-size: 40px; }                                bare element
+ *                                                          selector escapes the
+ *                                                          element
+ *
+ * Prefix every class with the element's root name and the collisions
+ * disappear.
+ */

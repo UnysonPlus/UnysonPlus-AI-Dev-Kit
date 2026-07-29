@@ -17,6 +17,7 @@ A rating display with partial (half / decimal) fill — stars, hearts, circles o
 | `empty_color` | color-preset | `{predefined:'',custom:''}` | compact color object (`kind:bg`) | Empty-symbol color. |
 | `text_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Label / value text color. |
 | `font_size_preset` | font-size preset | `''` | preset slug | Named font-size preset. |
+| `rating_schema` | switch | `'no'` | `yes` \| `no` | Emit **AggregateRating** JSON-LD so search engines read the score. A number in the Count Text (e.g. "based on 220 reviews") becomes `ratingCount`. |
 
 ## Ready-to-use example (the atts object)
 ```json

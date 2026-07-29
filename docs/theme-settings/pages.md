@@ -144,6 +144,12 @@ Site-wide defaults for every "page". Per-content selections still override these
 | `yes` | Yes |
 | `no` | No |
 
+### Show Page Title on Builder Pages — `pages_show_title_on_builder`
+- **Type**: switch
+- **Default**: `yes`
+- **Choices**: `yes` (Yes) · `no` (No)
+- **Notes**: Renders the page title as the `<h1 class="entry-title">` (in a `.page-title-header`) at the top of **Page Builder** pages, so every page has exactly one H1 (classic/non-builder pages always show their title). Consumed in `template-parts/content-page.php`. The per-page **Hide Page Title** checkbox (`hide_page_title`, Page Settings) still wins — set it on landing pages (e.g. a home page) that supply their **own** H1 in the builder content, to avoid a duplicate H1. The H1 respects the per-page Title Icon and `page_header = transparent` (which suppresses it), same as classic pages.
+
 ## Per-Page overrides — `page_options` (multi, Page Settings meta box)
 
 **Per-page meta, NOT global.** Set on an individual page; overrides the globals above.

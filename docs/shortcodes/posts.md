@@ -58,6 +58,16 @@ A data-driven query grid: pulls content from the WordPress post DB (`WP_Query`) 
 | `live_filters` | switch | `'no'` | `'yes'` \| `'no'` | AJAX category filter bar. |
 | `cache_output` | switch | `'no'` | `'yes'` \| `'no'` | Cache rendered HTML in a transient. |
 | `no_results_text` | text | `'Sorry, no posts matched your criteria.'` | string | Empty-state message. |
+| `box_style` | border-style-picker | `''` | `''` `boxp-card` `boxp-outline` `boxp-soft-shadow` `boxp-hover-lift` | Reusable **box preset** on each card. |
+| `image_style` | image-style-picker | `''` | `''` · `imgs-rounded` · `imgs-circle` · `imgs-portrait-card` · `imgs-monochrome` · `imgs-duotone` · `imgs-diagonal` · `imgs-hexagon` · `imgs-cinematic` | Preset visual treatment applied to each card image. |
+| `mobile_layout_override` | select | `'inherit'` | `inherit` `standard` `side-left` `minimal` | Card layout override on phones (replaces `card_style_mobile`). |
+| `cat_taxonomy` | text | `'category'` | taxonomy slug | Which taxonomy feeds the category chips. |
+| `cat_max` | short-text | `'2'` | integer | Max category chips shown per card. |
+| `excerpt_source` | select | `'auto'` | `auto` `excerpt` `content` | Where the excerpt text is pulled from. |
+| `excerpt_suffix` | short-text | `'…'` | string | Trailing string appended after a trimmed excerpt. |
+| `title_color` / `excerpt_color` / `meta_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Per-part text colors. |
+| `chip_bg` / `chip_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Category-chip background / text color. |
+| `accent_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Accent (button / link / frame) color (`kind: bg`). |
 
 ## Ready-to-use example (the atts object)
 ```json
@@ -85,6 +95,7 @@ A data-driven query grid: pulls content from the WordPress post DB (`WP_Query`) 
 
 ## Notes
 - The largest option surface in the set; every att has a sensible default, so a minimal atts object (post_type + count + layout + card_style) renders fine — the rest fall back.
+- **Storage vs. flat keys.** The builder now stores several options as **multi-pickers** — `design` (`{mode:'grid'|'masonry'|'list'|'slider', <mode>:{columns,gaps,slider…}}`), `card` (`{style:'standard'|'side'|'side-left'|'side-right'|'hero-split'|'alternating'|'listicle'|'newslist'|'postcard'}`), `readmore` (`{style:'text-link'|'button'}`), and `pagination` (`{type:'none'|'numeric'|'prev_next'|'ajax_loadmore'}`). The view resolves the picker path FIRST and falls back to the legacy flat key — e.g. `design/mode` → `layout_mode`, `card/style` → `card_style`, `pagination/type` → `pagination_type`, `readmore/style` → `readmore_style`. **So a generator may keep emitting the flat keys above and they still work**; emit the picker shape only when you need the mode-specific sub-options (columns, slider settings).
 - `card_style` is one of the registry designs: `standard`, `side-left`, `side-right`, `overlay`, `minimal`, `hero-split`, `alternating`, plus `gradient`, `listicle`, `newslist`, `editorial`, `polaroid`, `timeline`, `tile`, `circular`, `accent`, `cover`, `quote`, `postcard`, `badge`, `filmstrip`, `diagonal`, `glass`.
 - Switch values are **strings** (`'yes'`/`'no'`), including the `enabled` flag inside each `element_order` entry.
 - `include_ids` overrides `taxonomy_filter` when both are set. `fallback_image_url` is a plain URL string, not a WP upload object.

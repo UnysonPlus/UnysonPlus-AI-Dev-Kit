@@ -1,6 +1,6 @@
 # asset-optimizer extension
 
-Combines enqueued frontend CSS and JavaScript into single minified, cached files to cut HTTP requests and payload. **Active by default:** yes. Version: 1.1.28.
+Combines enqueued frontend CSS and JavaScript into single minified, cached files to cut HTTP requests and payload. **Active by default:** yes.
 
 ## Provides
 
