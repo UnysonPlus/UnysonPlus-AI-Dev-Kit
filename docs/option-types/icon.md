@@ -1,6 +1,6 @@
 # icon
 
-**THE icon option type** — `icon-v2` and `icon-v3` are retired, so `'type' => 'icon'` is the only one to use. It runs the canonical modern picker (merged Icons/Custom tabs, Emoji, SVG upload, favorites, and — with the Animated Icons extension — Animated/Lottie/Rive). The engine class physically lives in the icon-v3 folder; `icon` subclasses it. The stored value is a typed object whose keys depend on `type`.
+**THE icon option type** — `icon-v2` and `icon-v3` are retired, so `'type' => 'icon'` is the only one to use. It runs the canonical modern picker (merged Icons/Custom tabs, Emoji, SVG upload, favorites, and — with the Animated Icons extension — Animated/Lottie/Rive). The engine class (`FW_Option_Type_Icon`) lives in the `icon` folder and extends `FW_Option_Type` directly — its internal asset handles / CSS classes / `wp.template` names still carry a legacy `-v3` prefix, but that's a naming leftover, not a separate type. The stored value is a typed object whose keys depend on `type`.
 
 ## Stored value shape
 ```json
@@ -24,5 +24,5 @@ Empty / unset:
 ## Notes / gotchas
 - **Default value is `{ "type": "none" }`** (the `_get_defaults` array also seeds empty `icon-class`/`pack-*` keys, but the effective empty state is `type:none`).
 - **Legacy scalar tolerated (this is the v1 vs v2 difference).** The original stock `icon` type stored a **bare class STRING** (e.g. `"fa fa-star"`). `normalize_value()` bridges any string on load/render to `{ type:'icon-font', 'icon-class': <string> }` (and `""` → `{ type:'none' }`), so old saved values and legacy string defaults keep working with no migration.
-- `icon`, `icon-v2`, and `icon-v3` all share ONE picker instance / engine — they differ only in `get_type()`. `icon-v2` is the same modern engine under a distinct id; only truly ancient data ever exists as the bare-string form.
+- **Only `icon` is registered now** (`FW_Option_Type::register( 'FW_Option_Type_Icon' )`); there is no separate `icon-v2`/`icon-v3` class or folder. The picker's internal handles / CSS classes / `wp.template` names still carry a `-v3` prefix, but that's an internal naming leftover, not a second option type. Only truly ancient data ever exists as the bare-string form.
 - When used as a multi-picker picker, the value may arrive as a decoded array rather than a JSON string — the engine handles both.

@@ -18,7 +18,7 @@ Concrete (a min-height picker whose `custom` choice reveals a unit-input):
 | key | type | notes |
 |---|---|---|
 | `<picker_id>` | string | the selection — the picker sub-option's id (e.g. `preset`, `mode`, `effect`, `enabled`). Value = one non-empty choice key. |
-| `<choice_key>` | object | the revealed sub-values for the currently-selected choice. Only choices that reveal something have a key. Values for OTHER choices persist too (switching never loses them). |
+| `<choice_key>` | object | the revealed sub-values. **Only the SELECTED choice's group is persisted** — on save the picker prunes every other choice's reveal values (they're dead weight for a single-select, and storing all of them bloats the value, e.g. an entrance-effect picker would keep a block for all ~56 effects). Falls back to collect-all only when the selection isn't a clear scalar. A choice that reveals nothing has no key at all. |
 
 ## Notes / gotchas
 - **Choice keys must be NON-EMPTY strings** — use `'auto'`/`'none'`, never `''`.

@@ -66,7 +66,7 @@ Directional styles prepend `"direction": "auto"`.
 | `exit` | select | `'hold'` | **Stage only** — `hold` (last frame stays until the pin releases) / `fade` (the pinned stage fades to 0 near the end, revealing the Section background — set that bg to the next section's colour for a seamless hand-off). |
 | `exit_at` | slider | `78` (50–95) | **Stage + `exit:fade` only** — % of the story where the fade begins. |
 | `backdrop` | multi-picker | `{source:'none'}` | **Stage only** — `source`: `none` / `frames` / `sequence` / `video` / `image`. `frames` → `{frames (multi-upload, in order), fit}` — the **Media-Library, user-replaceable default**; `sequence` → `{url_pattern (%d), count, start, pad, fit}` (advanced, best for 100+ frames); both scrub frame-by-frame with story progress. `video` → `{video_file (upload), video_url, fit}` (paused + scrubbed); `image` → `{image (upload), fit}` (fixed). |
-| `backdrop_motion` | select | `'none'` | **Stage + a set backdrop only** — the "camera glide" illusion (moving the backdrop, not a real camera): `none` / `pan` (backdrop slides sideways/up as the story scrubs) / `dolly` (backdrop scales in) / `pan_dolly` (both — the poly-style desk drift). Best on a fixed `image` (or `video`) backdrop; leave `none` for a `frames`/`sequence` backdrop that is already animating. |
+| `backdrop_motion` | select | `'none'` | **Stage + a set backdrop only** — the "camera glide" illusion (moving the backdrop, not a real camera): `none` / `pan` (backdrop slides sideways/up as the story scrubs) / `dolly` (backdrop scales in) / `pan_dolly` (both — a cinematic desk drift). Best on a fixed `image` (or `video`) backdrop; leave `none` for a `frames`/`sequence` backdrop that is already animating. |
 | `motion_direction` | select | `'left'` | **`backdrop_motion` pan only** — which way the backdrop travels: `left` / `right` / `up` / `down`. Ignored for a pure `dolly`. |
 | `motion_intensity` | slider | `50` (0–100) | **`backdrop_motion` only** — strength of the glide (pan travel + dolly zoom). ~40–50 reads as a gentle cinematic drift; 100 is a strong sweep. |
 | `pin_side` | select | `'left'` | **Panel only** — `left` / `right` / `top` (stacked). Which column is the pinned media. |
@@ -102,7 +102,7 @@ Directional styles prepend `"direction": "auto"`.
   a perspective** (a subtle `rotateY`/`rotateX` keystone so the near edge sweeps faster than the far
   edge — depth *within* the single image, which is what reads as a camera physically turning rather
   than a layer sliding), arcs gently on the cross axis, and **dollies in** (scale). So a *static* photo
-  backdrop reads as a slow cinematic camera move (how poly's rendered "camera" is faithfully faked with
+  backdrop reads as a slow cinematic camera move (how a reference site's rendered "camera" is faithfully faked with
   one still image). It transforms the backdrop **container**, so it composes with any per-image CSS
   (e.g. a blur) without fighting it — do **not** hand-write a `transform` on the backdrop `<img>` too,
   or the two stack. Use `motion_direction` for the pan axis and `motion_intensity` (~50–60 reads as a

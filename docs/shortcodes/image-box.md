@@ -19,7 +19,6 @@ An image paired with an optional eyebrow, title, text, icon and button — a por
 | `image_ratio` | select | `'ratio-4-3'` | `original` `ratio-1-1` `ratio-4-3` `ratio-3-2` `ratio-16-9` `ratio-3-4` `ratio-2-3` | Force the image to a fixed crop. |
 | `content_align` | alignment | `''` (inherit) | `''` `left` `center` `right` | Align eyebrow/title/text/button. |
 | `image_size` | short-select | `'full'` | `full` `large` `medium` `small` `xsmall` | Image size (image-top families). |
-| `image_mask` | multi-picker | `{mask:'none'}` | mask key + `custom` reveal | Clip the image to a shape (see Notes). |
 | `hover_effect` | select | `'zoom-in'` | `none` `zoom-in` `zoom-out` `grayscale` `blur` `shine` `lift` `tilt` | Hover motion / image effect. |
 | `transition_speed` | select | `'normal'` | `fast` `normal` `slow` | Hover transition speed. |
 | `link_behavior` | select | `'none'` | `none` `url` `lightbox` `video` | What a click does. |
@@ -52,7 +51,6 @@ An image paired with an optional eyebrow, title, text, icon and button — a por
   "image_ratio": "ratio-4-3",
   "content_align": "",
   "image_size": "full",
-  "image_mask": { "mask": "none" },
   "hover_effect": "zoom-in",
   "transition_speed": "normal",
   "link_behavior": "url",
@@ -70,6 +68,6 @@ An image paired with an optional eyebrow, title, text, icon and button — a por
 
 ## Notes
 - `design_settings` is a **popover multi-picker** keyed by family. Each family reveals its own sub-object: `stacked` → `{ stacking }` (`img-title-text` `title-img-text` `title-text-img` `text-img-title`); `side` → `{ image_side:'left'|'right', panel:'yes'|'no', media_width:'33'|'40'|'50'|'60' }`; `overlay` → `{ reveal, overlay_color, overlay_opacity }` (reveal: `scrim` `cover` `overlap` `bar` `fade` `slide` `center` `frame`); `card` → `{ style:'card'|'caption-below' }`; `frame` → `{ style:'polaroid'|'postcard'|'badge'|'photo-stack' }`.
-- `image_mask` is a multi-picker; masks include `rounded` `circle` `squircle` `arch` `hexagon` `star` `heart` … and `custom` (which reveals `custom_svg` / `custom_upload` / `custom_clip`). Shape masks force a square crop.
+- Image masking is now handled by the shared **Image Style** preset (`image_style` — Styling tab; Theme Settings → Components → Image Styles), which carries the shape library. (Boxes saved with a legacy `image_mask` value still render for back-compat, but it is no longer an editable option.)
 - `icon` uses the **icon-v2** shape (see `icon-box.md`). `text` is WYSIWYG — keep it clean semantic HTML with no classes on `<p>`/`<li>`.
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, NOT a raw hex string. See `README.md`.

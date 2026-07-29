@@ -57,13 +57,18 @@ A **Custom Code** effect (`effect: "custom"`) turns the element into author-writ
 
 ```json
 "gsap_motion": { "effect": "custom", "custom": {
-  "code": "tl.from(el, { y: 60, opacity: 0 }).from(el.querySelectorAll('.card'), { scale: 0.8, stagger: 0.1 }, '<')"
+  "code": "tl.from(el, { y: 60, opacity: 0 }).from(el.querySelectorAll('.card'), { scale: 0.8, stagger: 0.1 }, '<')",
+  "snip_start": "top 80%",   // trigger start [top 100%/top 80%/top 60%/top center/top 30%]
+  "snip_scrub": "no",        // no (play once) / yes (scrub) / smooth (eased scrub)
+  "run_on_mobile": "yes"
 } }
 ```
 
-The runtime runs the code as `new Function('el','tl','gsap', code)`, where **`el`** = this element,
-**`tl`** = a `gsap.timeline()` already tied to `scrollTrigger:{trigger:el, start:'top 80%'}`, and
-**`gsap`** is the library. Add tweens to `tl` (they choreograph) or use `gsap` for your own triggers.
+`code` is a `code-editor` (JS); `snip_start`/`snip_scrub`/`run_on_mobile` are selects/switch. The
+runtime runs the code as `new Function('el','tl','gsap', code)`, where **`el`** = this element,
+**`tl`** = a `gsap.timeline()` already tied to a `scrollTrigger` at the chosen `snip_start` (default
+`top 80%`; `snip_scrub` links it to the scrollbar), and **`gsap`** is the library. Add tweens to `tl`
+(they choreograph) or use `gsap` for your own triggers.
 
 **Security (execution gate, not a UI gate):** the code is base64-stamped into post_content as
 `data-upw-snip` and only *executes* when the page author has `unfiltered_html` (a per-request footer
