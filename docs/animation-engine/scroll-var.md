@@ -2,15 +2,19 @@
 
 Publishes an element's **in-view scroll progress (0→1) to a CSS custom property you name**, so you can
 drive ANY custom CSS with it — the general "attribute-driven progress" primitive. **Per-element**:
-attaches from every element's **Animations** tab via `sc_animation_fields` (key **`scroll_var`**).
-Emits data-attributes on the element wrapper; a tiny runtime writes the variable as the element crosses
-the viewport. Requires the `animation-engine` extension **ACTIVE**.
+attaches from every element's **Animations** tab through the **"Add Animation" inserter** (key
+**`scroll_var`**, category "Scroll"). Emits data-attributes on the element wrapper; a tiny runtime
+writes the variable as the element crosses the viewport. Requires the `animation-engine` extension
+**ACTIVE**.
 
-## Field (Animations tab → `scroll_var`, a `group`, category "Scroll")
+## Field (Animations → Add Animation → "Scroll → CSS Variable")
+
+A **popover multi-picker** (picker id `mode`, default `off`, one `on` tile) — so it sits inside the
+inserter collapsed until added, like every other per-element animation. Adding it sets `mode: on` and
+reveals these options:
 
 | Param | Default | Notes |
 |---|---|---|
-| `enable` | `no` | master on/off (switch) |
 | `var_name` | `--progress` | the CSS custom property to write; sanitized to an ident-safe name, a leading `--` is forced |
 | `axis` | `y` | `y` (vertical) or `x` (horizontal) travel |
 | `range` | `cover` | when 0 and 1 hit: `cover` (enters bottom → exits top), `enter` (until fully in view), `center` (element center crosses viewport center) |
@@ -18,8 +22,12 @@ the viewport. Requires the `animation-engine` extension **ACTIVE**.
 ## Value shape
 
 ```json
-"scroll_var": { "enable": "yes", "var_name": "--progress", "axis": "y", "range": "cover" }
+"scroll_var": { "mode": "on", "on": { "var_name": "--progress", "axis": "y", "range": "cover" } }
 ```
+
+`mode: "off"` (the default) = not added. (Earlier builds used a flat `group` shape
+`{enable, var_name, axis, range}`; that rendered always-open outside the inserter and was replaced —
+see the extension-points note on per-element fields being popover multi-pickers.)
 
 ## What it emits / how it runs
 

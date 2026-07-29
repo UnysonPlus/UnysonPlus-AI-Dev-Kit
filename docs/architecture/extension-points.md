@@ -57,6 +57,14 @@ add_filter( 'sc_animation_fields', function ( $fields ) {
 } );
 ```
 
+> **The field MUST be a popover `multi-picker` (picker id `mode`, default `off`, with `anim_meta`).**
+> The inserter only recognizes that shape — it renders it as an add-tile and keeps its options
+> collapsed until added. A plain `type => 'group'` (or a bare `switch` + fields) is **not** managed by
+> the inserter and renders **always-open** as a stray field below the "Add Animation" button (the exact
+> bug that hit the first `scroll_var` build). Even a single-behavior module uses a one-tile picker
+> (`choices => array( 'on' => $tile )`, reveal under `choices['on']`). Value shape is therefore always
+> `{ mode: '<tile>'|'off', '<tile>': { …revealed options } }` — not a flat option bag.
+
 ### `sc_build_wrapper_attr` — filter — Stable
 ```php
 apply_filters( 'sc_build_wrapper_attr', array $attr, array $atts )
