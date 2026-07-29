@@ -51,7 +51,7 @@ Each field maps to an Unyson option type; the value shape is that option type's 
 | Checkbox (on/off) | `checkbox` | `bool` |
 | Switch (on/off) | `switch` | `bool` (default choices are `false`/`true`) |
 | Color | `color-picker` | `string` (hex, e.g. `#3366ff`) |
-| Date | `date-picker` | `string` in the datepicker's display format (stored as-entered, **not** normalized to ISO — verify the exact format from a saved value) |
+| Date | `date-picker` | `string` in the picker's display format — **`DD-MM-YYYY`** (e.g. `29-07-2026`), stored as-entered (**not** ISO). This is the `date-picker` option type's air-datepicker default (`dateFormat: 'dd-MM-yyyy'`); parse accordingly (e.g. `DateTime::createFromFormat('d-m-Y', $v)`) |
 | Repeater (rows of sub-fields) | `addable-box` | `array` of **rows**; each row is `{ subfield_name => value }` using each sub-field's own shape |
 
 Notes on shapes:
