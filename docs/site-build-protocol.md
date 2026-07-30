@@ -60,6 +60,47 @@ This emits the **source of truth**: `design-config.json` (tokens → Theme Setti
 > built for exactly this. If `capture-out/<site>/` does not exist for the source, **STOP and run the
 > capture first.** The only exception is a genuinely *fresh* build with no source to reproduce.
 
+## Rule −1 — CONVERTER-FIRST region loop: fix the ALGORITHM, not the output (the token-saver + the product)
+
+**This governs every conversion and overrides any instinct to hand-build or hand-patch.** The Site Converter
+(capture service = URL/JS path **+** the **extension** = HTML/PHP path) is a *product* whose promise is: it
+converts a source into a UnysonPlus site — **child theme, header, footer, and every section — with NO AI at
+runtime.** So during a build the AI's job is NOT to produce a pretty page; it is to **make the deterministic
+converter smarter until it produces that page itself.** Priority order of *why*:
+1. **Save tokens** — the deterministic pass does the bulk once; the AI improves the algorithm once and every
+   future site reuses it. Hand-matching a site property-by-property (what NOT to do) burns tokens that buy
+   nothing for the next site.
+2. **Marketability** — a converter that needs an AI to finish each site is not the product; one that converts
+   perfectly on its own is. Every deterministic win is a selling point.
+
+**The loop (per conversion):**
+1. **Phase 1 — run the converter for EVERYTHING.** Capture service **and** the Site Converter extension on the
+   captured markup → it scaffolds the **child theme**, **header**, **footer**, and **all sections**. That is the
+   whole build; you do **not** hand-author the tree.
+2. **AI review, REGION BY REGION, in order** (header → footer → each section top-to-bottom). For the current region:
+   - **a. Measure** source vs the converter's output with the fidelity tools (computed-style + geometry + pixel).
+   - **b. Classify** each diff: **deterministic** (a rule derivable from the captured markup/styles) or **AI-only**
+     (needs judgment not present in the source).
+   - **c. If deterministic → fix the CONVERTER algorithm** (JS `capture-extract`/`to-pages` **and** PHP
+     `Mapper`/`Stitch`, kept in sync), then **re-run the converter for THAT region only** and re-measure.
+     **Did the converter itself emit your fix?** No → refine and re-run. **Loop until the region PASSES.**
+   - **d. If AI-only → report it to the user.** Look together for a deterministic rule; if one emerges, bake it in
+     (back to c). If none emerges, **mark it a WAIVED "AI-only residual"** in the converter's known-limitations
+     ledger and move on.
+   - **e.** Advance to the next region only when it PASSES or is waived.
+3. **NEVER hand-fix the converter's OUTPUT to pass a region** — no bespoke `misc_custom_css` patch, no manual
+   preset tweak *to make this one site look right*. The output is disposable; the algorithm is the product. The
+   test for an allowed fix: **does the NEXT site get it for free?** A framework/shortcode bug fix qualifies (e.g.
+   the `:where()` button-preset override); a site-specific DB patch does not.
+
+**Prerequisites & discipline:**
+- **Per-region re-run** must exist (run just the header / footer / section N) so the verify loop is cheap;
+  if it doesn't yet, adding it is the FIRST converter improvement.
+- **Track every waiver** in an "AI-only residuals" ledger — honest marketing + a backlog of future determinism wins.
+- **Verification stays deterministic** — the same measurement tools gate every region; "did the fix work" is objective.
+- **Bootstrapping an already-hand-built site:** start the loop from a FRESH capture + scratch page and treat the
+  hand-built version as the answer key (its DB patches do NOT count as converter progress).
+
 ## The ordered major steps (do in THIS order)
 
 | Phase | Do | Detail |
@@ -125,6 +166,39 @@ Before extracting tokens/sections, capture the source with the established machi
   - So: swap ⇒ font icons only. **Do not swap emoji→font-icon or SVG→emoji** — that mismatches the
     source (the recurring "Visiting Us used emoji, I used Font Awesome" miss). Carry animation classes
     too (a slow-spin sparkle → a CSS `@keyframes` spin, honoring `prefers-reduced-motion`).
+
+## Rule 0.6 — Tailwind sources: DETECT first, then TRANSLATE the class list (don't eyeball computed styles)
+
+Many modern sources (Wegic, Framer exports, most React/Next landing pages) are **Tailwind**. Reproducing
+them by *glancing* at a button/card — or even by reading `getComputedStyle` **partially** — silently drops
+styles: the `pinky-bites` primary button was `rounded-full font-bold text-lg shadow-lg` and the **`shadow-lg`
+was missed** because the computed `box-shadow` was read truncated and the `class` attribute was never read.
+The class names are the design-token source of truth; do not skip them.
+
+1. **Detect Tailwind before capturing styles.** Signals: high utility-class density with Tailwind patterns
+   (`flex items-center`, `px-8`, `py-4`, `gap-2`, `rounded-full`, `shadow-lg`, `text-lg`), **arbitrary values**
+   in brackets (`bg-[#ff6b8b]`, `w-[420px]`), scale colors (`pink-200`, `pink-700`), or a Tailwind
+   stylesheet/CDN/`tailwind.config`. If NOT Tailwind → capture full computed styles as normal.
+2. **When Tailwind: capture each element's FULL `class` attribute** (never truncate) and **translate the
+   utilities to CSS** — via a `tw-to-css` step (recommended lib: `tw-to-css`; alternatives `tailwindcss-to-css`,
+   `tailwind-converter`) — then **cross-check against the element's full computed styles** (the lib only knows
+   Tailwind's default config; arbitrary `[...]` values + the default scales are covered, a site's custom theme
+   is not).
+3. **Map Tailwind scale tokens → framework preset scales**, so intent survives (not just pixels):
+   - `rounded-full` → Size Preset `border-radius: 9999px`; `rounded-lg` → the radius token.
+   - `shadow-sm/md/lg/xl/2xl` → the Colour Preset **`box_shadow`** per state (Tailwind: `lg` = `0 10px 15px -3px
+     rgb(0 0 0/.1)`, `md` = `0 4px 6px -1px …`, `xl` = `0 20px 25px -5px …`; `hover:shadow-xl` → the hover state).
+   - `border-2` / `border` → `border_width` `2px` / `1px`; **no border class on a filled button → `border_style:
+     none`** (the primary button's 0-width border). `border-pink-200` → `#fbcfe8`.
+   - `px-8 py-4` → padding `32px 16px`; `text-lg` → font-size `18px` + line-height `28px`; `font-bold` → `700`;
+     `gap-2` → `8px`; `text-white`/`text-pink-700` → `#fff`/`#be185d`.
+   Set these through the **owning framework option** (Button Size/Colour Preset, typography token, column
+   option) — NOT a per-section CSS patch. The button Colour Preset already exposes `border_width`,
+   `border_style`, and `box_shadow` per state; there is nothing to add — just SET them.
+4. **This belongs in the converter too (Phase 5):** the capture service should run the tw-translate step when
+   Tailwind is detected and emit a per-element `{classes → resolved CSS + token intent}` map, so the build
+   maps tokens to presets deterministically instead of by eye. Keep the JS (`capture-extract`) and PHP
+   (`Mapper`) paths in sync.
 
 ## Rule 1 — Design system FIRST, in this order (never jump to sections)
 
@@ -278,12 +352,18 @@ text but not the hairline divider above it.
 - After writing settings outside the normal save flow: call **`unysonplus_hf_regenerate_css()`** and
   clear the optimizer/generated caches (`uploads/**/asset-optimizer/*`, `unysonplus-generated.css`,
   `presets-*.css`, `unysonplus/css/*.css`).
-- **Verify one region at a time, IN ORDER, and do not advance until the current region matches:**
+- **Verify one region at a time, IN ORDER, and do not advance until the current region PASSES:**
   **header → footer → then each section top-to-bottom.** For the region you're on, run a tight
-  **compare → fix → compare** loop against the source and repeat *until it matches* — then move to the
-  next region. Do NOT fix scattershot across regions; finish the header before touching the footer,
-  finish the footer before the first section, etc. (This ordering is deliberate: the header/footer are
-  the chrome the whole site is judged by, so they get locked first.)
+  **run `fidelity-check.mjs` → fix from the measured diff → re-run** loop and repeat *until it PASSES*
+  (see [fidelity-verification.md](fidelity-verification.md) Rule 2.5 for the PASS definition + waiver
+  rule) — then move to the next region. Do NOT fix scattershot across regions; finish the header before
+  touching the footer, finish the footer before the first section, etc. (This ordering is deliberate:
+  the header/footer are the chrome the whole site is judged by, so they get locked first.)
+- **THREE levels of gate** (Rule 2.6): **Phase 3** — header PASSES, then footer PASSES (each its own
+  gated region); **Phase 4** — every section PASSES before the next; **then an OVERALL FULL-PAGE PASS**
+  on the assembled page before the ship gate (source `full.png` vs a full-page build shot, via
+  `compare.mjs`) — it catches inter-section spacing/rhythm, cross-section drift, sticky-header overlap,
+  and proportion that per-region checks can't. A per-region PASS does not imply a whole-page PASS.
 - **Verification is visual and per-region — LOOK, don't grep.** Use a **region-cropped side-by-side**
   (source panel next to build panel) plus a pixel-mismatch score, not a full-page glance and not an
   element-presence grep. A grep that finds an element in the DOM is NOT verification — the recurring

@@ -14,6 +14,7 @@ Apply design-config → Theme Settings: colors palette, typography (per-heading 
 Phase 3 · CHROME — header + footer, match the source exactly
 
 Build header (logo lockup, nav, right element, topbar) + footer (widget columns + copyright) from Theme Settings + native elements. Lock these first — the whole site is judged by them.
+VERIFY EACH region separately and LOOP until PASS: the HEADER is its own gated region (run fidelity-check.mjs source-vs-build, fix, re-run until PASS), THEN the FOOTER is its own gated region. Never verify against memory (that is how a whole announcement topbar shipped missing). Also confirm webfonts actually LOADED (document.fonts.check), not just declared.
 Phase 4 · SECTIONS — grab→convert, region-by-region (top-to-bottom)
 For each section, in order, don't advance until it matches:
 
@@ -21,7 +22,8 @@ Start from the converter's section output as the scaffold.
 Decompose code_block fallbacks into real shortcodes + Theme Settings (the editable deliverable).
 Keep bespoke pieces hand-crafted (custom shortcodes, WooCommerce) — don't flatten to code_block.
 Un-expressible decor → code_block + scoped child CSS, and flag it.
-Verify vs the captured reference — substance, not pixel-perfect decoration.
+EACH section is its own gated region: RUN tools/measure/fidelity-check.mjs (source vs build, 3 lenses) and LOOP run→fix→re-run until PASS before building the next section.
+AFTER all sections: run an OVERALL FULL-PAGE PASS on the assembled page (source full.png vs a full-page shot of the build, via compare.mjs / pixel+perceptual). It catches what per-region checks can't: inter-section spacing/rhythm, cross-section consistency drift, sticky-header overlap, page height/proportion. A per-region PASS does NOT imply a whole-page PASS. Loop until PASS or written waiver.
 Phase 5 · ANALYZE REPORT + IMPROVE THE CONVERTER
 
 Review fallbacks/opportunities/styling-drops; improve the converter (JS to-pages/capture-extract and PHP Mapper/Stitch kept in sync) so next time has fewer fallbacks. Delete the analyzed capture from capture-out/.
@@ -30,6 +32,7 @@ Phase 6 · MOTION — add Animation Engine effects from the captured animations.
 Phase 7 · SHIP GATE — a11y/SEO/perf checklist, "opens+editable in the builder" check, verify by looking, version bump, localhost mirror, demos-home card, doc in the AI Dev Kit.
 
 Cross-cutting rules (apply throughout)
+Verify = a TEST, not a glance — run the comparison tools (tools/measure/fidelity-check.mjs, and compare.mjs for a second opinion) per region against the SOURCE, and LOOP: run → if not PASS, fix from the measured diff → re-run → repeat until PASS. Don't advance on red. PASS = Lens 1 zero unexplained missing/extra + no material property diff, Lens 2 no overlaps, Lens 3 pixel under the region target. Every residual is either fixed or a WRITTEN waiver (decorative flourish out of scope / known tool artifact). Silence is not a pass.
 Capture-first — grab/measure from the converter, never guess.
 Framework options > child CSS — child CSS only for genuine pixel tweaks/decor.
 Flag anything that can't translate cleanly — ask/note, don't silently approximate.

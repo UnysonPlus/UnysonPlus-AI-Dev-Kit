@@ -6,7 +6,7 @@ Bring an AI-generated / existing website into WordPress — imports media, styli
 
 - **Shortcodes:** none — it's an importer toolkit, not builder elements (it *emits* page-builder trees + presets that shortcodes consume).
 - **Admin page:** Unyson+ → **Convert**. Tools: Media scanner/importer, Styling Presets importer, Theme-settings importer, Pages importer, Menu importer, one-shot **Convert bundle** (`.zip`), and a **header/footer Theme Generator** (child or standalone). Two conversion methods (URL / file) with auto-detected source adapters + an optional **"Use AI"** fidelity pass and a human-in-the-loop "Review mapping first" editor.
-- **Reusable engines (`includes/`, all static):** `FW_Site_Converter_Media`, `_Presets`, `_Theme_Settings`, `_Pages`, `_Menus`, `_Bundle`, `_Theme_Generator`, `_Stitch` (Google Stitch ingest, deterministic no-AI), `_Sources` (source adapter registry).
+- **Reusable engines (`includes/`, all static):** `FW_Site_Converter_Media`, `_Presets`, `_Theme_Settings`, `_Pages`, `_Menus`, `_Bundle`, `_Theme_Generator`, `_Stitch` (deterministic no-AI section decompose + block recognizers), **`_Mapper`** (block → shortcode / Theme-Settings-preset mapping — the counterpart of the JS `to-pages`), **`_Tailwind`** (Tailwind class → CSS compiler **and** class → design-token translation: arbitrary `[…]` values, the full default colour palette, `shadow-*`), `_Sources` (source adapter registry).
 - **Public hooks/filters:** `fw_site_converter_sources` (register a builder adapter). The AI backend + capture service live **outside WordPress** (local `unysonplus-site-capture` service — `/capture`, `/ai-convert`).
 
 ## Notes / gotchas
@@ -36,11 +36,16 @@ so the converted DOM stays clean instead of carrying raw utilities.
   preflight doesn't reach it: when there's a `border-width`, also emit `border-style:solid` and
   `box-sizing:border-box` — otherwise the border renders as `0px none`.
 - **De-dup by declaration set** — identical cards share ONE `.box` class (`.box`, `.box-2`, …).
-- **Inline buttons (side-by-side).** A page-builder COLUMN is `display:flex;flex-direction:column`, so
-  two buttons in a column STACK. For a side-by-side button group, wrap them in a **flex-row Inner Wrapper
-  Class** (`display:flex;gap;justify-content:center;flex-wrap:wrap`) — NOT per-button `alignment` (that
-  wraps each button in its own block `.sc-btn-align` div and stacks them). The `button` shortcode's
-  `<a class="btn">` is already `inline-block`.
+- **Inline buttons / inline cells (side-by-side).** A page-builder COLUMN is
+  `display:flex;flex-direction:column`, so two buttons in a column STACK. Lay them side-by-side with the
+  column's **native `content_direction: 'row'` + `content_gap`** option — NOT a `.btn-row` CSS wrapper
+  (removed 2026-07-31), and NOT per-button `alignment` (that wraps each button in its own block
+  `.sc-btn-align` div and stacks them). This is the general rule for ANY inline cell: a source cell that is
+  a flex-**row** container is replayed via `content_direction:row` + `content_gap` (nearest Gap-Scale slug:
+  4px→1, 8px→2, 16px→3, 24px→4, 48px→5), with `content_order:reverse` for `row-reverse`. Both a CTA
+  button-group (JS `to-pages` cell loop / PHP `Mapper::group_buttons` + the cell-column case) and any
+  captured flex-row cell (JS `capture-extract` `cell.flex` / PHP `grid_cols` reading `data-sc-cs`) go
+  through this. `content_h`/`content_v` are left to the existing heuristics (direction-dependent semantics).
 - **Open question (don't action without asking):** whether to add a native *button* option to the
   `icon_box` shortcode (so a card+CTA stays one element) vs. the current icon_box + button + Inner-Wrapper
   approach. The wrapper approach needs no schema/doc/screenshot changes, so it's the default for now.
@@ -119,6 +124,18 @@ bounce is **flagged**, not silently skipped.
   pushes a `.scm-x:hover{…}` rule from the node's hover + the `@keyframes` for known Tailwind animations
   (bounce/pulse/spin/ping) once. Verbatim `code_block` sections already keep the source's `hover:`
   classes + CSS, so hover is preserved there too.
-- **Remaining follow-ons:** emit hover on the **to-pages decomposed** path (not just the mirror path);
-  the **PHP `Mapper`** mirror for the file-upload path; and mapping a captured design prop to a **builder
-  option** where one exists (else scoped CSS) rather than always scoped CSS.
+- **Shipped 2026-07-31 (both paths, JS + PHP, kept in sync — see the extension's `CONVERSION-ALGORITHM-SYNC.md`):**
+  the "map a captured design prop → a **builder option**" follow-on is now substantially real, not always scoped CSS:
+  - **Tailwind class → design-token translation.** JS `capture-extract` attaches `styles.tw` (shadow/radius/
+    border/spacing/font scale) + a site-level `tailwind` flag; the PHP `_Tailwind` compiler resolves arbitrary
+    `[#hex]` values, the full default colour palette (`pink-200`…), and `shadow-xl/2xl`.
+  - **Button Colour/Size Presets from the source skin** → `button_colors` + `button_sizes` Theme-Settings
+    presets (bg/text/border/`box_shadow` per state; padding/radius/font). `buildButtonPresets()` (JS) /
+    `FW_Site_Converter_Stitch::build_button_presets()` (PHP).
+  - **Structural testimonials detection** (a flex/grid of quote-cards → `testimonials`, no class name needed).
+  - **Fewer `code_block` fallbacks** — an unrecognised text cell → editable `text_block`; an empty/decorative
+    cell is dropped (13→4 on the pinky-bites reference).
+  - **Flex-row cell → native `content_direction` + `content_gap`** (replaces the old `.btn-row` CSS wrapper).
+- **Remaining follow-ons:** emit hover on the **to-pages decomposed** path (not just the mirror path); the
+  **hero / media-bearing** sections still fall to verbatim `code_block` (fidelity-preserving, but the biggest
+  remaining decomposition gap); broaden token→option mapping beyond buttons (typography, spacing, boxes).

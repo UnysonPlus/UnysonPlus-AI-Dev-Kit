@@ -23,8 +23,10 @@ const VW = 1440;
 
 async function capture(page, url, sel) {
   await page.setViewportSize({ width: VW, height: 1000 });
-  await page.goto(url, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(1200);
+  // 'load' + a fixed settle, NOT 'networkidle' — SPAs (Wegic, Next.js, analytics beacons)
+  // keep the network busy and never reach idle, which made this checker time out.
+  await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+  await page.waitForTimeout(2500);
   const region = await page.$(sel);
   if (!region) return { spec: [], shot: null, box: null };
   await region.scrollIntoViewIfNeeded().catch(() => {});

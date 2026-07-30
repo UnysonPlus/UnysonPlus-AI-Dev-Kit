@@ -42,6 +42,31 @@ $gl['layout_container_width'] = array('base'=>array('value'=>'100','unit'=>'%'),
 fw_set_db_settings_option('general_layout', $gl);
 ```
 
+## 3.5 Buttons — `button_colors` + `button_sizes` (Components design-system — do this in PHASE 2)
+Buttons are a **design-system** concern, not a per-section CSS patch: the Components → Buttons presets
+emit `.btn-{slug}` classes every button on the site inherits. **SEED the defaults first** (both options
+are empty until saved, like `theme_colors`), then override the presets you use. Each color preset has
+`states` (`default`/`hover`/`active`/`focus`/`disabled`), each a compact color value
+`{predefined:<preset-slug>, custom:'#hex'}`. Sizes carry `font_size`/`padding_*`/`border_radius`.
+```php
+$c  = fn($hex) => array('predefined'=>'','custom'=>$hex);
+$bc = (array) fw_get_db_settings_option('button_colors', array());
+if (empty($bc) && function_exists('unysonplus_default_button_color_presets')) $bc = unysonplus_default_button_color_presets();
+foreach ($bc as &$p) { $n = strtolower(trim($p['color_name'] ?? ''));
+  if ($n==='primary')   { $p['states']['default']=array('text_color'=>$c('#fff'),'bg_color'=>$c('#ff6b8b'),'border_color'=>$c('#ff6b8b')); $p['states']['hover']=array('text_color'=>$c('#fff'),'bg_color'=>$c('#ff85a1'),'border_color'=>$c('#ff85a1')); }
+  if ($n==='secondary') { $p['states']['default']=array('text_color'=>$c('#be185d'),'bg_color'=>$c('#fff'),'border_color'=>$c('#fbcfe8')); $p['states']['hover']=array('text_color'=>$c('#be185d'),'bg_color'=>$c('#fce7f3'),'border_color'=>$c('#fbcfe8')); }
+} unset($p); fw_set_db_settings_option('button_colors', $bc);
+$bs = (array) fw_get_db_settings_option('button_sizes', array());
+if (empty($bs) && function_exists('unysonplus_default_button_size_presets')) $bs = unysonplus_default_button_size_presets();
+foreach ($bs as &$s) if (strtolower(trim($s['slug'] ?? ''))==='lg') { $s['font_size']=array('value'=>'18','unit'=>'px'); $s['border_radius']=array('value'=>'999','unit'=>'px'); $s['padding_y']=array('value'=>'16','unit'=>'px'); $s['padding_x']=array('value'=>'32','unit'=>'px'); }
+unset($s); fw_set_db_settings_option('button_sizes', $bs);
+```
+> **Regen gotcha (bit me):** the button/preset CSS lives in a generated `uploads/**/unysonplus/css/presets-*.css`
+> file that a **programmatic** preset write does NOT rebuild (only the admin save flow does). After setting
+> `button_colors`/`button_sizes` (or any Components preset), **DELETE the generated CSS files and call
+> `unysonplus_hf_regenerate_css()`** — clearing only the asset-optimizer cache leaves buttons rendering the
+> Bootstrap defaults (blue/gray). Same failure mode as the font link needing `_action_theme_process_google_fonts()`.
+
 ## 4. Nav menu
 `wp_create_nav_menu('Primary')` (reuse by `wp_get_nav_menu_object`), `wp_update_nav_menu_item($id,0,['menu-item-title'=>…,'menu-item-url'=>'#anchor','menu-item-status'=>'publish','menu-item-type'=>'custom'])` per item, then `set_theme_mod('nav_menu_locations', ['primary'=>$id])`.
 
