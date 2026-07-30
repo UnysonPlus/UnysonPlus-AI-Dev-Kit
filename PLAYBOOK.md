@@ -5,8 +5,9 @@ let the deterministic Site Converter do the bulk mapping (token-free), then meas
 close it with native options. Build **outside-in**, **measure** at every step, **native options
 before CSS**.
 
-Prereq: `pwsh assemble.ps1` populates the two conversion repos + (with `-WithSource`) the
-plugin/theme. Shape references: `docs/` (shortcodes / option-types / theme-settings / animation-engine).
+Prereq: `pwsh assemble.ps1 -Source github` populates the two conversion repos + the plugin/theme (from the
+release zip); `-Source local` copies them from sibling working copies instead. Then `pwsh update.ps1`
+installs tool deps. Shape references: `docs/` (shortcodes / option-types / theme-settings / animation-engine).
 Metrics: `design-parity-checklist.md`.
 
 ---
@@ -18,7 +19,7 @@ capture service FIRST, automatically.** `capture.mjs` renders the page in a real
 URL gets you the **full rendered DOM** (JS-built content + inline SVGs — you never need to ask for
 them), the **downloaded media**, AND the **computed styles** (exact colors/spacing that no static HTML
 carries), then maps sections → shortcodes and tokens → presets. This is the default first move — do it
-before any hand-building. One-time setup: `cd tools/design-capture && npm install` (Playwright + deps).
+before any hand-building. One-time setup: `cd UnysonPlus-Capture-Service/tools/design-capture && npm install` (deps; needs system Google Chrome).
 Only fall back to a manual bundle (Phase 0b) when there's **no URL**, or Node/Playwright isn't available.
 
 > **Lesson baked in:** skipping this and hand-building from scratch is what forces you to ask the user

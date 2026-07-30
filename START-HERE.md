@@ -35,6 +35,8 @@ Already run WordPress locally? Just install + activate these two, then use your 
 - **Classic Editor** — install + activate it from *Plugins → Add New* (search "Classic Editor").
   UnysonPlus's page builder and meta boxes need the classic editor, not the Gutenberg block editor.
   (Option A's `wp-env` installs it automatically.)
+- **Site Converter extension (only if you're converting a source)** — activate it under *Unyson+ →
+  Extensions → Site Converter*; it's inactive by default, and the "Unyson+ → Convert" screen needs it.
 
 That is the entire setup. Everything after this, the agent does.
 

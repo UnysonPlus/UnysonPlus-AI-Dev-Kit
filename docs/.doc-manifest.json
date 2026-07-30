@@ -347,8 +347,8 @@
         "{plugin}/framework/extensions/woocommerce/manifest.php",
         "{plugin}/framework/extensions/woocommerce/settings-options.php"
       ],
-      "hash": "d2e9c897c30705573e7034417466c75a",
-      "synced": "2026-07-24"
+      "hash": "9b369aaaaff960d5747b6d9dd695667c",
+      "synced": "2026-07-30"
     },
     "option-types/addable-box.md": {
       "kind": "option-type",
@@ -1612,8 +1612,8 @@
         "{plugin}-theme/framework-customizations/theme/options/header-settings.php",
         "{plugin}-theme/framework-customizations/theme/options/header-topbar.php"
       ],
-      "hash": "337ea072fa33d6ee38e82b2097f4c6aa",
-      "synced": "2026-07-29"
+      "hash": "cb571a41fa888b9a01745cc4a2902ceb",
+      "synced": "2026-07-30"
     },
     "theme-settings/misc.md": {
       "kind": "theme-settings",

@@ -16,3 +16,109 @@ Bring an AI-generated / existing website into WordPress — imports media, styli
 - **Full detail lives in the extension's own `AGENTS.md`** + `docs/site-conversion-playbook.md` (Theme-Settings-first demo conversion) + `docs/stitch-to-unysonplus.md`. Read those before working on conversion logic.
 - Carried CSS must be scoped `body:not(.wp-admin)` (the asset optimizer absorbs `misc_custom_css` into a bundle that also loads in wp-admin); `misc_custom_css` is a `multi` option (`{ "custom_css": "…" }`, never a raw string).
 - Media import is content-hash de-duped; per-shortcode att keys in emitted `pages.json` are exact (`text_block` → `text`, column `width` is top-level) — clone shapes from a real export.
+
+## CSS Class Mapper & box columns (deterministic decompose — rules to keep)
+
+The deterministic decompose maps a source element's utility classes into ONE clean **semantic class**
+(`compile_class_set()` in `class-fw-site-converter-tailwind.php` → `FW_Site_Converter_Mapper::box_style_class()`),
+so the converted DOM stays clean instead of carrying raw utilities.
+
+- **Detect a box.** `FW_Site_Converter_Mapper::is_box_class()` flags a column/card as a *box* when it
+  has a border / shadow / background / rounded — anything that reads as a card container.
+- **Where the box class goes (the key rule):**
+  - Card content is **only icon + title + content** (fits the `icon_box` shortcode) → put the box class
+    on the **`icon_box`'s own `css_class`**.
+  - Card has **extra content the icon_box can't hold** (most commonly a button, e.g. "Explore →") →
+    render `icon_box + button` in the column and put the box class on the **column's Inner Wrapper Class**
+    (`column atts['inner_class']`) so it wraps BOTH. That option exists precisely for boxed columns whose
+    contents exceed the icon_box.
+- **Self-contained box CSS.** The compiled `.box` rule is GLOBAL (not under `.sc-tw`), so the Tailwind
+  preflight doesn't reach it: when there's a `border-width`, also emit `border-style:solid` and
+  `box-sizing:border-box` — otherwise the border renders as `0px none`.
+- **De-dup by declaration set** — identical cards share ONE `.box` class (`.box`, `.box-2`, …).
+- **Inline buttons (side-by-side).** A page-builder COLUMN is `display:flex;flex-direction:column`, so
+  two buttons in a column STACK. For a side-by-side button group, wrap them in a **flex-row Inner Wrapper
+  Class** (`display:flex;gap;justify-content:center;flex-wrap:wrap`) — NOT per-button `alignment` (that
+  wraps each button in its own block `.sc-btn-align` div and stacks them). The `button` shortcode's
+  `<a class="btn">` is already `inline-block`.
+- **Open question (don't action without asking):** whether to add a native *button* option to the
+  `icon_box` shortcode (so a card+CTA stays one element) vs. the current icon_box + button + Inner-Wrapper
+  approach. The wrapper approach needs no schema/doc/screenshot changes, so it's the default for now.
+
+**Keep this algorithm in sync across BOTH implementations** — the PHP `Mapper`/`Stitch`/`Tailwind`
+(file-upload path) and the JS `capture-extract`/`to-pages` (URL path) — so both produce consistent output.
+
+## Keep the no-AI conversion algorithm in sync (PHP ↔ JS)
+
+The deterministic ("no AI") converter exists in **two** implementations — the plugin for the
+**file-upload** path (`class-fw-site-converter-stitch.php` + `class-fw-site-converter-mapper.php`, PHP)
+and the capture service for the **URL** path (`capture-extract.mjs`, `to-pages.mjs`,
+`to-design-config.mjs`, JS). Whenever you change the conversion logic in one — what counts as a page
+section, how sections map to shortcodes, what's **chrome** (header/footer/nav) vs. content, token/design
+extraction — **apply the equivalent change to the other** so both paths produce consistent output.
+(E.g. header/footer/nav are CHROME handled by the generated theme, NOT page-builder content —
+`capture-extract.mjs` excludes them from body sections; the PHP `section_roots()` matches.) When in
+doubt, the capture service's extraction is usually the more-complete reference.
+
+## Conversion-report analysis → improve the converter
+
+Each `node capture.mjs <url> [outdir]` run emits a **conversion report**
+(`<outdir>/<site>/conversion-report.csv` + `.html`) tracing every source element → the shortcode it
+became, flagged `fallback` (code_block catch-all), `opportunity` (a richer role detected but not
+mapped), `styling drop`, and `over-large`/under-segmentation. To analyze a batch (captures accumulate
+under `capture-out/`): aggregate the CSVs, rank the **systematic** failures (most-common fallbacks,
+recurring styling drops, over-large sections), then **improve the converter** — mirroring any change to
+BOTH the JS (`to-pages`/`capture-extract`) and PHP (`Mapper`/`Stitch`) paths (a JS-path report is a
+great way to catch JS↔PHP drift; e.g. cards/counters mapped to `icon_box`/`counter` in PHP but
+code_blocked in JS). For new shortcode atoms, use the **live plugin defaults** (dump via a WP-loaded PHP
+script writing to a FILE — stdout gets eaten — then store the full default-att shape in
+`atom-templates.json` so generated nodes carry no missing nested atts). **Delete each analyzed site
+folder from `capture-out/` when done** (captures regenerate; deleting prevents re-analysis).
+
+## Contrast review — detect + ask, never auto-adjust the brand
+
+Every created OR converted site must pass the a11y/SEO/perf **score-keeping standards** (contrast
+≥ 4.5:1, links-not-color-only, heading order, `alt`, structured data) — see the plugin's
+`site-converter/docs/seo-performance-accessibility-standards.md` (run its **§0 ship gate** before
+calling a site done). The converter emits a **contrast review** that flags low-contrast brand pairs
+and suggests an AA-compliant shade — but it **never changes the user's colors**. A converted palette
+is the user's brand: **detect + surface it, ask; do not auto-adjust.**
+
+## Target architecture — capture EVERY element's full style + states, then map (don't curate)
+
+The converter today **curates** a few tokens (brand color, one button style, typography) + decomposes
+sections to shortcodes + **code_blocks the rest** — which silently DROPS per-element detail (`:hover`,
+`text-decoration` wavy underlines, `animation`, `box-shadow`, `transform`). The right model, and the
+standing target, is:
+
+1. **Capture — walk every container/element** and dump its **full computed style** PLUS its interaction
+   states (`:hover`, `:focus`, `:active`). Resting styles come from `getComputedStyle`; states come from
+   resolving the element's `hover:*`/`focus:*` utilities (arbitrary `[#hex]` parsed directly; named via a
+   probe of the page's compiled CSS — see `hoverStyle()` in `capture-extract.mjs`) or by scanning the
+   stylesheets for `:hover`/`:active` rules that match the element.
+2. **Map — translate, don't drop.** Known design properties → the matching **builder option / Theme
+   Settings preset / element `CSS Class`** (colors→palette, type→typography, buttons→Buttons builder incl.
+   its **Hover** state, spacing→spacing scale, boxes→box presets). Everything the builder can't express —
+   a wavy `text-decoration`, a keyframe `animation`, a one-off `transform` — becomes **scoped element
+   CSS** (Misc → Custom CSS / the child theme), keyed off the element's `css_class`. **Nothing captured
+   is dropped**: it's either a builder option or scoped CSS.
+
+This keeps the tension honest: full capture = fidelity; the map step keeps it editable/on-brand where it
+can, and only falls to scoped CSS for the genuinely un-expressible. **Verify with the comparison tool**
+(`tools/measure/fidelity-check.mjs`) which now diffs the *full* per-element computed style — text-decoration,
+animation, box-shadow, transform, letter-spacing — not a curated subset, so a missing wavy underline or
+bounce is **flagged**, not silently skipped.
+
+### Implementation status (per-element full-style + state capture)
+
+- **Capture — DONE.** `capture-extract.mjs`'s `styleOf()` now records the full per-element style incl.
+  `text-decoration`, `animation`, `transform`, `transition`, and the element's `:hover` (via
+  `hoverStyle()`), on every decomposed node (verified: nodes carry animation/hover/transform). Plus the
+  brand button's hover → `tokens.brandHover` → design-config `hover_bg/color/border`.
+- **Emit (mirror path) — DONE.** `to-mirror.mjs` `stylesToCss()` emits those props, and `klass()` also
+  pushes a `.scm-x:hover{…}` rule from the node's hover + the `@keyframes` for known Tailwind animations
+  (bounce/pulse/spin/ping) once. Verbatim `code_block` sections already keep the source's `hover:`
+  classes + CSS, so hover is preserved there too.
+- **Remaining follow-ons:** emit hover on the **to-pages decomposed** path (not just the mirror path);
+  the **PHP `Mapper`** mirror for the file-upload path; and mapping a captured design prop to a **builder
+  option** where one exists (else scoped CSS) rather than always scoped CSS.

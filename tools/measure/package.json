@@ -9,6 +9,7 @@
     "playwright": "^1.44.0",
     "pixelmatch": "^7.1.0",
     "pngjs": "^7.0.0",
-    "resemblejs": "^5.0.0"
+    "resemblejs": "^5.0.0",
+    "sharp": "^0.33.0"
   }
 }

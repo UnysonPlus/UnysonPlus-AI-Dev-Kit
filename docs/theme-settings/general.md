@@ -95,6 +95,7 @@ Stored under the `general_layout` multi key. Groups are editor-only wrappers; le
 - **Default**: `{ base:{value:'100',unit:'%'}, md:{value:'720',unit:'px'}, lg:{value:'1170',unit:'px'} }`
 - **Saved value shape**: `{ base:{value,unit}, md?:{value,unit}, lg?:{value,unit} }` (mobile-first; blank device inherits smaller). Device tabs: Phone(base)/Tablet(md)/Desktop(lg).
 - **Notes**: 100% = full width. Full-Width containers ignore it.
+- **When cloning a reference, set `lg` to the source's content-container max-width BEFORE building sections.** The default `lg` is 1170px; common Tailwind mockups use `max-w-7xl` = 1280px, `max-w-6xl` = 1152px, `max-w-5xl` = 1024px. If this is left at the default, every section is horizontally off by the difference and per-section CSS can't fix it — it's the most common "why doesn't the layout match" cause.
 
 ### Border Roundness — `layout_roundness`
 - **Type**: radio · **Default**: `subtle`

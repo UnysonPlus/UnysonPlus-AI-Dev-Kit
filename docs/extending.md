@@ -77,6 +77,53 @@ The folder name is the identity: `hero-banner` → the shortcode tag `hero_banne
   See [`option-types/declaring-options.md`](option-types/declaring-options.md) → *Changing an
   existing option is a migration*.
 
+### Shipping a shortcode inside a theme or child theme
+
+A shortcode does **not** have to live in the plugin. A **theme or child theme can carry its own
+shortcodes** — the right home for a bespoke element that only makes sense for one site/brand (a
+booking widget, a review card, an interactive configurator) and should travel with the theme, not
+be added to the framework for everyone.
+
+**Location — drop the same folder under the theme's `framework-customizations` tree:**
+
+```
+<theme>/framework-customizations/extensions/shortcodes/shortcodes/<folder>/
+    config.php · options.php · views/view.php · static/{css,js,img/page_builder.svg}
+```
+
+**No registration call is needed.** The shortcodes loader
+(`extensions/shortcodes/includes/class-fw-shortcodes-loader.php`) scans four locations, in order:
+
+1. **core** (bundled) `shortcodes/`
+2. **user-uploaded** (uploads dir)
+3. the **parent theme** — `fw_get_template_customizations_directory('/extensions/shortcodes/shortcodes')`
+4. the **child theme** — `fw_get_stylesheet_customizations_directory('/extensions/shortcodes/shortcodes')`
+
+So a folder at `<child-theme>/framework-customizations/extensions/shortcodes/shortcodes/cupcake-builder/`
+becomes the tag `cupcake_builder`, discovered automatically whenever that theme is active. Folder name
+is the identity (`-` → `_`); a same-named **core** tag wins, so don't shadow a bundled one.
+
+**Everything else is identical to a plugin shortcode** — same file contract, same
+`sc_build_wrapper_attr()`, same option types, same auto-detection of `static/img/page_builder.svg` for
+the picker tile, assets enqueued automatically from the theme URI. The three differences that bite:
+
+- **Plugin-only helpers must be `function_exists()`-guarded.** `sc_color_field_compact()`,
+  `sc_normalize_color_value()`, `sc_card_box_style_class()` etc. live in the shortcodes extension.
+  They're normally loaded before a theme shortcode, but guard each with a `color-picker` (or plain)
+  fallback so the element still works if the plugin is older/absent:
+  `function_exists('sc_color_field_compact') ? sc_color_field_compact([…]) : ['type'=>'color-picker', …]`.
+- **Swatch/decorative colours** that define a *specific* colour (a cake-frosting swatch) stay a raw
+  `color-picker` — the compact preset field is for colours that *consume the site palette*.
+- **Version/mirror**: a theme shortcode ships with the THEME (bump `style.css` `Version:`), not a
+  plugin manifest.
+
+**When to use which.** Reusable across every site → a **plugin** shortcode (the shortcodes extension,
+per the section above). One brand's bespoke element → a **theme/child-theme** shortcode. The porting
+procedure (`sample-shortcode/HOW-TO.md`) is the same either way — only the destination folder changes.
+
+**References:** the `newbingosite` child theme ships `mini-reviews` / `pros-cons` / `casino-matcher` /
+`toplist-offers` this way; the `pinky-bites` demo ships an interactive `cupcake-builder` configurator.
+
 ---
 
 ## Creating an extension

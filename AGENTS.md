@@ -16,6 +16,38 @@ This kit exists for one reason:
 > **Get the mockup's design right on the first pass — target 95–100% — by building
 > outside-in and measuring, not by eyeballing and patching.**
 
+> ## ⛔ CONVERSION? CAPTURE FIRST — hard gate, before anything else
+>
+> **Detect a conversion by the presence of a SOURCE, not by a keyword.** If the request references or
+> supplies **an existing design to reproduce** — a **URL**, a **screenshot/image**, a **PDF/Figma**, an
+> **HTML/CSS dump**, or a **named template/site** — it is a **conversion**, whatever verb is used
+> ("convert / clone / rebuild / **turn this into** / **make a WordPress version of** / like / based on",
+> or just "here's the site: …", "match this"). Only a brief with **nothing to reproduce** ("build me a
+> bakery site") is a fresh build. For a conversion, your FIRST action — before Theme Settings, before any
+> section, before ANY hand-measuring — is to run the capture/converter pipeline:
+>
+> ```
+> node capture.mjs <url> capture-out/     # capture service — UnysonPlus-Capture-Service/tools/design-capture
+> ```
+>
+> **Who runs what (audience split — see the 2026-07-19 decision):** building ONE site → run the **capture
+> service**, import its output, build Phases 2–7. If you are the **converter maintainer/contributor** (you
+> have the converter repos) → ALSO run the **Site Converter extension** (PHP path) and improve **both**
+> paths (JS + PHP) from the conversion report in Phase 5. A **fresh build** (no source) skips capture.
+>
+> It emits the **source of truth**: `design-config` (→ Theme Settings), `pages.json` (per-section
+> shortcodes), the **conversion-report** (fallbacks to fix), `animations.json`, a screenshot.
+> **Hand-measuring the source with Playwright/devtools and hand-building sections before a
+> `capture-out/<site>/` exists is a PROTOCOL VIOLATION** — it's slow, drifts, and skips the tool
+> built for exactly this. If no capture exists → **STOP and run it.** Then follow the ordered phases
+> in [`docs/site-build-protocol.md`](docs/site-build-protocol.md) (the capture-first gate + the major-steps table).
+>
+> **The protocol is ALWAYS ON — for every build, whether or not the user mentions a "protocol."** A
+> **conversion** runs Phase 1 (capture) first; a **fresh build** (from a prompt/brief, nothing to
+> reproduce) is the *only* case that skips capture — but it still follows every other phase (design
+> system → chrome → sections region-by-region → motion → ship gate). Following the protocol is the
+> default; not following it is the exception you must justify.
+
 Read this file, then `PLAYBOOK.md`, before touching a site.
 
 ## Four things this kit lets you do
@@ -32,6 +64,29 @@ An all-in-one toolkit for working with UnysonPlus — pick the surface that matc
 
 Matching a source **mockup** to 95–100% (below) is the most demanding form of #1 — its outside-in,
 measure-don't-eyeball discipline applies to every build.
+
+## Using these docs — consult FIRST, then backfill (the reflex)
+
+Before reading UnysonPlus plugin / `unysonplus-theme` **PHP** to answer *"does this shortcode / option /
+module exist?" · "what are its options / value shape?" · "how does X work?" · "how do I build X?"* —
+**FIRST consult these `docs/`.** They exist so an agent can answer WITHOUT paging through verbose source
+(~10–50× cheaper in tokens). Make it the default reflex, not a fallback.
+
+- **Where to look:** build/usage questions → `docs/shortcodes/`, `docs/option-types/`,
+  `docs/animation-engine/`, `docs/extensions/`, `docs/theme-settings/`. Architecture/internals (render
+  pipeline, option value-shape flows, hooks & extension points, the Animation-Engine module loader +
+  Lenis singleton, the theme's preset + CSS-generation systems) → `docs/architecture/`.
+- **If the doc answers it → use it and do NOT open the PHP.** That is the entire point of the kit.
+- **If the doc is MISSING or ambiguous,** treat it as a signal, not an answer — a missing doc can mean
+  "feature doesn't exist" OR "exists but undocumented." FIRST run `node docs/sync.mjs check` (it *hashes*
+  the source — a shell op, near-zero tokens) to tell which; only THEN read the **minimum** PHP needed.
+- **Any time you DO read plugin/theme source, backfill the kit in the SAME turn** — write/refresh the
+  matching doc in the correct category folder, **generalized** (no site/brand names), matching the
+  existing doc style, then `node docs/sync.mjs stamp <doc>` it. Every source read must pay for itself by
+  making the next lookup free.
+- **Don't document exhaustively.** Prefer stable, high-value surfaces (existing elements/options + the
+  durable extension points) over volatile internal wiring — every doc added is a doc to keep in sync.
+  Quality over volume.
 
 ### Human manual (live docs) — deep-links
 
@@ -78,7 +133,7 @@ guessing a per-page slug.)
 
 Assembled folders are empty until you run `pwsh assemble.ps1` (see that file).
 
-## Step 0 — make sure there's a WordPress to build into (check FIRST)
+## Phase 0 (Setup) — make sure there's a WordPress to build into (check FIRST)
 
 Before anything, confirm the target site (the "Create the dev site at" URL) is a **running
 WordPress with the UnysonPlus plugin AND the unysonplus-theme parent active** — the agent builds
@@ -95,6 +150,9 @@ WordPress with the UnysonPlus plugin AND the unysonplus-theme parent active** �
   Editor** plugin must be installed AND active (Unyson's page builder + meta boxes need the classic
   editor, not Gutenberg). `wp-env` installs it via `.wp-env.json`; on a BYO install, run
   `wp plugin install classic-editor --activate` (or Plugins → Add New).
+- **For a CONVERSION, also activate the Site Converter extension.** It ships **inactive by default**, so
+  enable it under **Unyson+ → Extensions → Site Converter** before you convert — otherwise the
+  "Unyson+ → Convert" screen (the PHP file-upload path) won't exist. A fresh build doesn't need it.
 - **Critical:** the plugin MUST be the **release bundle / assembled `./unysonplus`** (all 21 extensions).
   A `git clone` of the `UnysonPlus` repo is **core-only** (blog + update) — it activates cleanly but has
   **no page builder and no shortcodes**, so nothing can be built. Never install the site from a clone of
@@ -109,7 +167,7 @@ the hero, then a table, then back to the logo) and **guessing sizes** from
 screenshots. That never converges. Instead — **convert first, then refine:**
 
 0. **Convert first (automated, token-free) — for a URL, RUN THE CAPTURE SERVICE; don't ask for files.**
-   `cd tools/design-capture && npm install` (once), then `node capture.mjs "<url>" <out>`. It renders
+   `cd UnysonPlus-Capture-Service/tools/design-capture && npm install` (once), then `node capture.mjs "<url>" <out>`. It renders
    the page in a real browser, so ONE url gives you the full **rendered DOM** (JS-built content + inline
    SVGs — never ask the user for these), the **downloaded media**, AND **computed styles** — then maps
    structure → shortcodes and tokens → presets, so you refine a real page, not a blank one. Skipping
@@ -155,3 +213,20 @@ tolerance. **Measure — never eyeball.**
   site slug.
 - Keep this kit's docs and the two conversion repos **in sync** — a standard added
   here should be reflected there and vice-versa.
+
+## Keeping the docs (and the published manual) current when options change
+
+- **Kit docs (`docs/`).** These are the reference base — one markdown per shortcode / option type /
+  animation module / extension / Theme Settings tab. When you change a documented surface (a shortcode's
+  atts, an option type's value shape, an AE module's effect options, a Theme Settings option), **update
+  the matching doc in the SAME turn**, then re-record it: `node docs/sync.mjs check` (lists only docs
+  whose *source hash* changed — near-zero tokens), `node docs/sync.mjs stamp <doc.md> …` (re-record
+  hash+date after regenerating), `node docs/sync.mjs build` (rebuild the whole manifest baseline). Keep
+  docs **generic/public** (no site/brand names). A NEW shortcode/option-type/module/extension → write its
+  doc, then `build` (or `stamp`).
+- **Published-manual screenshots.** The human manual's shortcode/element pages carry screenshots of each
+  element's **options panel** (one per builder-modal tab, except Animations/Advanced) + its backend
+  builder canvas. When a shortcode's options change (add/remove/rename an option, change a type, change an
+  `image-picker`'s choices), **the affected screenshots must be regenerated** so the manual matches the
+  live UI, using the project's screenshot tooling against a running local WP with the plugin+theme active.
+  If that WP isn't reachable, say so and list which screenshots are now stale — don't silently skip.

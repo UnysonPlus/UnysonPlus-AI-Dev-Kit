@@ -1,0 +1,124 @@
+// 3-LENS fidelity check for a single region (capture-first). Verifies a build
+// region against its source with three independent lenses, because no one lens
+// catches everything:
+//   Lens 1  TYPOGRAPHY/CONTENT — per element (matched by text): fontSize, weight,
+//           color, family, textTransform, exact text/emoji, icon-kind + missing/extra.
+//   Lens 2  GEOMETRY — column x-positions, widths, and sibling OVERLAP.
+//   Lens 3  PIXEL — region side-by-side + pixelmatch %.
+// Build to the SOURCE spec, then run this per region before advancing.
+//
+// Usage: node fidelity-check.mjs <srcUrl> <srcSel> <buildUrl> <buildSel>
+//   e.g. node fidelity-check.mjs https://src/ footer http://localhost/demos/pinky-bites/ footer
+import { chromium } from 'playwright';
+import { PNG } from 'pngjs';
+import pixelmatch from 'pixelmatch';
+import sharp from 'sharp';
+
+const [srcUrl, srcSel, buildUrl, buildSel] = process.argv.slice(2);
+if (!srcUrl || !srcSel || !buildUrl || !buildSel) {
+  console.error('usage: node fidelity-check.mjs <srcUrl> <srcSel> <buildUrl> <buildSel>');
+  process.exit(1);
+}
+const VW = 1440;
+
+async function capture(page, url, sel) {
+  await page.setViewportSize({ width: VW, height: 1000 });
+  await page.goto(url, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1200);
+  const region = await page.$(sel);
+  if (!region) return { spec: [], shot: null, box: null };
+  await region.scrollIntoViewIfNeeded().catch(() => {});
+  const spec = await page.evaluate((sel) => {
+    const root = document.querySelector(sel);
+    const EMOJI = /\p{Extended_Pictographic}/u;
+    const out = [];
+    root.querySelectorAll('h1,h2,h3,h4,h5,h6,p,a,span,li,strong,button,div').forEach((el) => {
+      let t = ''; for (const n of el.childNodes) if (n.nodeType === 3) t += n.textContent;
+      t = t.replace(/\s+/g, ' ').trim(); if (t.length < 2) return;
+      const r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4) return;
+      const c = getComputedStyle(el);
+      const iconKind = el.querySelector('svg') ? 'svg'
+        : /\b(fa|fas|far|fab|icon-|glyphicon)\b/.test(el.className || '') ? 'font-icon'
+        : EMOJI.test(t) ? 'emoji' : 'none';
+      out.push({ text: t.slice(0, 44), tag: el.tagName.toLowerCase(),
+        fs: Math.round(parseFloat(c.fontSize)), fw: c.fontWeight, color: c.color,
+        family: (c.fontFamily.split(',')[0] || '').replace(/["']/g, ''), tt: c.textTransform,
+        // Comprehensive design properties the curated subset used to SKIP (why wavy
+        // underlines / bounce animations / shadows were silently missed):
+        deco: (c.textDecorationLine === 'none') ? '' : `${c.textDecorationLine} ${c.textDecorationStyle} ${c.textDecorationColor}`,
+        anim: (c.animationName === 'none') ? '' : `${c.animationName} ${c.animationDuration} ${c.animationIterationCount}`,
+        shadow: (c.boxShadow === 'none') ? '' : c.boxShadow.replace(/\s+/g, ' '),
+        transform: (c.transform === 'none') ? '' : c.transform,
+        ls: c.letterSpacing === 'normal' ? '' : c.letterSpacing, lh: c.lineHeight,
+        x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height), iconKind });
+    });
+    return out;
+  }, sel);
+  const shot = await region.screenshot();
+  return { spec, shot };
+}
+
+const key = (e) => e.text.toLowerCase().replace(/^[^a-z0-9$]+/i, '').slice(0, 40).trim();
+const b = await chromium.launch();
+const [ps, pm] = [await b.newPage(), await b.newPage()];
+const [S, M] = await Promise.all([capture(ps, srcUrl, srcSel), capture(pm, buildUrl, buildSel)]);
+await b.close();
+
+// ---- Lens 1: typography / content ----
+const si = new Map(); for (const e of S.spec) if (!si.has(key(e)) || e.fs > si.get(key(e)).fs) si.set(key(e), e);
+const mi = new Map(); for (const e of M.spec) if (!mi.has(key(e)) || e.fs > mi.get(key(e)).fs) mi.set(key(e), e);
+console.log('===== LENS 1 — typography / content (source → build) =====');
+let l1 = 0;
+for (const [k, s] of si) {
+  const m = mi.get(k);
+  if (!m) { console.log(`  − MISSING "${s.text}" [${s.tag} ${s.fs}px ${s.iconKind}]`); l1++; continue; }
+  const d = [];
+  if (Math.abs(s.fs - m.fs) > 1) d.push(`size ${s.fs}→${m.fs}`);
+  if (s.fw !== m.fw) d.push(`weight ${s.fw}→${m.fw}`);
+  if (s.color !== m.color) d.push(`color ${s.color}→${m.color}`);
+  if (s.family.toLowerCase() !== m.family.toLowerCase()) d.push(`font ${s.family}→${m.family}`);
+  if (s.tt !== m.tt) d.push(`text-transform ${s.tt}→${m.tt}`);
+  if (s.iconKind !== m.iconKind) d.push(`icon ${s.iconKind}→${m.iconKind}`);
+  // Comprehensive design-property diffs (previously never checked → silently missed):
+  if (s.deco !== m.deco) d.push(`text-decoration ${s.deco || '∅'}→${m.deco || '∅'}`);
+  if (!!s.anim !== !!m.anim) d.push(`animation ${s.anim || 'none'}→${m.anim || 'none'}`);
+  if (!!s.shadow !== !!m.shadow) d.push(`box-shadow ${s.shadow ? 'yes' : '∅'}→${m.shadow ? 'yes' : '∅'}`);
+  if (s.transform !== m.transform) d.push(`transform ${s.transform || '∅'}→${m.transform || '∅'}`);
+  if (s.ls !== m.ls) d.push(`letter-spacing ${s.ls || '∅'}→${m.ls || '∅'}`);
+  if (d.length) { console.log(`  ⚠ "${s.text}"  ${d.join(' | ')}`); l1++; }
+}
+for (const [k, m] of mi) if (!si.has(k)) console.log(`  + EXTRA "${m.text}"`);
+if (!l1) console.log('  ✓ typography/content match');
+
+// ---- Lens 2: geometry (overlap + columns) ----
+console.log('\n===== LENS 2 — geometry (overlap + columns) =====');
+const boxes = M.spec.filter((e) => e.tag !== 'span' && e.w > 30 && e.h > 8);
+let overlaps = 0;
+for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
+  const a = boxes[i], c = boxes[j];
+  const ox = Math.min(a.x + a.w, c.x + c.w) - Math.max(a.x, c.x);
+  const oy = Math.min(a.y + a.h, c.y + c.h) - Math.max(a.y, c.y);
+  if (ox > 12 && oy > 6 && !(a.x <= c.x && a.x + a.w >= c.x + c.w) && !(c.x <= a.x && c.x + c.w >= a.x + a.w)) {
+    if (overlaps < 6) console.log(`  ⚠ OVERLAP "${a.text.slice(0,22)}" ∩ "${c.text.slice(0,22)}" (${ox}px)`);
+    overlaps++;
+  }
+}
+const colXsS = [...new Set(S.spec.map((e) => e.x))].sort((x, y) => x - y).filter((x, i, a) => i === 0 || x - a[i-1] > 40);
+const colXsM = [...new Set(M.spec.map((e) => e.x))].sort((x, y) => x - y).filter((x, i, a) => i === 0 || x - a[i-1] > 40);
+console.log(`  column x-starts  SRC ${colXsS.join(',')}  |  BUILD ${colXsM.join(',')}`);
+if (!overlaps) console.log('  ✓ no overlaps');
+
+// ---- Lens 3: pixel ----
+console.log('\n===== LENS 3 — pixel mismatch =====');
+if (S.shot && M.shot) {
+  const W = 700;
+  const fit = async (buf) => sharp(buf).resize({ width: W }).png().toBuffer();
+  let [a, c] = [await fit(S.shot), await fit(M.shot)];
+  const ha = (await sharp(a).metadata()).height, hc = (await sharp(c).metadata()).height;
+  const H = Math.max(ha, hc);
+  const pad = async (buf) => sharp(buf).extend({ bottom: H - (await sharp(buf).metadata()).height, background: '#fff' }).png().toBuffer();
+  a = await pad(a); c = await pad(c);
+  const A = PNG.sync.read(a), C = PNG.sync.read(c), out = new PNG({ width: W, height: H });
+  const n = pixelmatch(A.data, C.data, out.data, W, H, { threshold: 0.12 });
+  console.log(`  ${(100 * n / (W * H)).toFixed(1)}% pixels differ`);
+} else console.log('  (region shot missing)');

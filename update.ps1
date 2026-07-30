@@ -8,7 +8,8 @@
       [1/3] git pull      — latest kit content (AGENTS.md, PLAYBOOK.md, docs, harness, starter)
       [2/3] assemble.ps1  — refresh the assembled plugin / theme / converter sources
                             (assemble is update-safe: robocopy /MIR + git pull-or-clone)
-      [3/3] npm install   — measure-harness deps (Playwright) + the chromium browser
+      [3/3] npm install   — measure-harness deps (Playwright) + the chromium browser,
+                            AND capture-service deps (needs system Google Chrome)
 
     Run this whenever you come back to the kit, so you build against the current
     plugin/theme and the latest playbook — not a stale snapshot.
@@ -91,6 +92,18 @@ if (-not $SkipDeps) {
         } finally { Pop-Location }
     } else {
         Write-Host '[3/3] no tools/measure/package.json — skipping deps.'
+    }
+
+    # Capture-service dependencies (the URL converter path — Phase 1 of a conversion).
+    # NOTE: playwright-core ships NO bundled browser — the capture service needs system
+    # Google Chrome installed. If capture.mjs errors with a missing-browser message, install Chrome.
+    $capture = Join-Path $Kit 'UnysonPlus-Capture-Service/tools/design-capture'
+    if (Test-Path (Join-Path $capture 'package.json')) {
+        Write-Host '[3/3] npm install (capture service)…  (requires system Google Chrome)'
+        Push-Location $capture
+        try { npm install } finally { Pop-Location }
+    } else {
+        Write-Host '[3/3] no capture-service package.json — run assemble.ps1 first.'
     }
 } else {
     Write-Host '[3/3] deps skipped (-SkipDeps).'

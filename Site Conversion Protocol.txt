@@ -1,0 +1,39 @@
+The protocol — major steps
+Phase 0 · Setup
+
+Confirm it's a conversion (source URL/files exist) vs. a fresh build.
+Capture service ready (node_modules installed); Classic Editor installed+activated before the UnysonPlus plugin.
+Phase 1 · CAPTURE/CONVERT — run the deterministic converter, don't hand-measure
+
+Detect a conversion by the presence of a SOURCE (URL / screenshot / HTML-CSS / named template), not by a keyword. Site-builder: run the capture service — node capture.mjs <url> capture-out/ (UnysonPlus-Capture-Service/tools/design-capture) — then import its output and build. Maintainer/contributor (has the repos): ALSO run the Site Converter EXTENSION (PHP Mapper/Stitch) on the captured markup and improve BOTH paths (JS + PHP) from the conversion report in Phase 5 — so each run makes the converter smarter and saves tokens. Emits the source of truth: design-config (tokens), pages.json (per-section shortcode JSON), conversion-report (fallbacks), style-coverage, animations, screenshot, theme bundle.
+No reverse-engineering by eye. The capture is the measurement.
+(A from-scratch / fresh build has nothing to convert — it skips Phase 1 and starts at Phase 2.)
+Phase 2 · DESIGN SYSTEM FIRST — from the captured tokens
+
+Apply design-config → Theme Settings: colors palette, typography (per-heading scale), container width, buttons, boxes, spacing. Verify tokens before any section.
+Phase 3 · CHROME — header + footer, match the source exactly
+
+Build header (logo lockup, nav, right element, topbar) + footer (widget columns + copyright) from Theme Settings + native elements. Lock these first — the whole site is judged by them.
+Phase 4 · SECTIONS — grab→convert, region-by-region (top-to-bottom)
+For each section, in order, don't advance until it matches:
+
+Start from the converter's section output as the scaffold.
+Decompose code_block fallbacks into real shortcodes + Theme Settings (the editable deliverable).
+Keep bespoke pieces hand-crafted (custom shortcodes, WooCommerce) — don't flatten to code_block.
+Un-expressible decor → code_block + scoped child CSS, and flag it.
+Verify vs the captured reference — substance, not pixel-perfect decoration.
+Phase 5 · ANALYZE REPORT + IMPROVE THE CONVERTER
+
+Review fallbacks/opportunities/styling-drops; improve the converter (JS to-pages/capture-extract and PHP Mapper/Stitch kept in sync) so next time has fewer fallbacks. Delete the analyzed capture from capture-out/.
+Phase 6 · MOTION — add Animation Engine effects from the captured animations.json.
+
+Phase 7 · SHIP GATE — a11y/SEO/perf checklist, "opens+editable in the builder" check, verify by looking, version bump, localhost mirror, demos-home card, doc in the AI Dev Kit.
+
+Cross-cutting rules (apply throughout)
+Capture-first — grab/measure from the converter, never guess.
+Framework options > child CSS — child CSS only for genuine pixel tweaks/decor.
+Flag anything that can't translate cleanly — ask/note, don't silently approximate.
+Fixing ≠ redesigning — ask before altering a design decision.
+Don't over-replicate decorative flourishes.
+Keep it editable/on-brand — convert to shortcodes, not raw HTML blobs.
+Doc everything in the AI Dev Kit; keep the converter's JS↔PHP paths in sync.

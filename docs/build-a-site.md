@@ -6,6 +6,14 @@ the build tooling ([building-pages.md](building-pages.md)), and the [conventions
 
 > Prerequisite: a WordPress with the UnysonPlus plugin + parent theme active, and Classic Editor
 > active (the builder assumes the classic editor). See [START-HERE.md](../START-HERE.md).
+>
+> **Install + activate the Classic Editor plugin FIRST — before installing/activating the UnysonPlus
+> plugin.** For any UnysonPlus site setup (a fresh install, a demo/test build, or automated
+> provisioning), the sequence is: install & activate **Classic Editor**, *then* install & activate the
+> **UnysonPlus** plugin, then the parent theme. The page builder assumes the classic editor; bringing
+> UnysonPlus up first against the block editor can leave the builder's editor UI in a bad state.
+> Automate it (`wp plugin install classic-editor --activate` before the UnysonPlus plugin, or bundle
+> it as a required plugin) — never rely on it being there.
 
 ## The order that works (tokens → chrome → pages → motion → verify)
 
@@ -25,6 +33,24 @@ Header, footer, and the container width are **theme chrome**, not page-builder c
 Theme Settings (and the header/footer builder) and get them ~right before building bodies — the child-
 theme starter ships polished chrome so this is mostly tuning. Measure, don't eyeball, if a mockup
 exists (`tools/measure/`).
+
+> **When reproducing a source, the header and footer must match it EXACTLY** (applies to any site —
+> demo, test, or live):
+> - **Footer = widget columns, not just the copyright line.** Setting only the copyright bar and
+>   calling the footer done is the single most common miss. If the source footer has N columns
+>   (brand+social / links / contact / newsletter…), build **N columns** (`main_footer_columns`), plus
+>   `footer_background` (light vs dark) to match. Footer column titles are `<h2>` styled small (never a
+>   deeper tag to look small).
+> - **Header = the whole lockup:** the logo (icon + title + tagline as the source has it, via
+>   `header_logo` `logo_type=custom` — not a bare text logo), the exact nav items, AND the right-side
+>   element (CTA / cart / search), plus an announcement topbar if the source has one.
+
+> **Match the container width to the source — it's a first-class token, not an afterthought.** If a
+> reference exists, read its content container's max-width and set **Theme Settings → General → Layout →
+> Container Width** (`general_layout.layout_container_width`, responsive `{base,md,lg}`) to it *before*
+> building sections. The theme default desktop width is **1170px**; a Tailwind mockup's `max-w-7xl` is
+> **1280px**, `max-w-6xl` is 1152px, etc. Skip this and *every* section is off by the difference and no
+> amount of per-section CSS lines it up. This is the single most common "why doesn't it match" cause.
 
 ### 3. Compose each page, section by section
 Use [building-pages.md](building-pages.md) — `upw_build_page()` with a sections/columns/elements tree.
@@ -60,7 +86,8 @@ Before calling it done ([conventions](conventions.md) §7):
 | The prompt says… | Do this |
 | --- | --- |
 | A brand/industry ("law firm", "SaaS", "cafe") | Pick palette + type that fit; set them as Theme Settings tokens first. |
-| "Like &lt;some site&gt;" / a screenshot | Extract tokens (colors, type, spacing) and reproduce them **as Theme Settings presets**; for a live URL, prefer the Site Converter pipeline (see the converter docs) over hand-building. |
+| "Like &lt;some site&gt;" / a screenshot | Extract tokens (colors, type, spacing, **container width**) and reproduce them **as Theme Settings presets**; for a live URL, prefer the Site Converter pipeline (see the converter docs) over hand-building. |
+| A **store** — "Add to Cart"/"Basket" buttons, per-item **prices**, a Shop/Menu nav, product cards | It's an e-commerce site: build it on **WooCommerce**, not static cards. Activate the `woocommerce` extension, create real products, and use the `wc_products` grid + `wc_mini_cart` / `wc_cart_link` chrome. Detecting these cues early avoids rebuilding a "brochure" into a store later. See [extensions/woocommerce.md](extensions/woocommerce.md). |
 | Specific pages ("home, about, pricing, contact") | One `upw_build_page()` per page; reuse section patterns across them. |
 | "Animated" / "modern motion" | Add engine effects in step 4 — start with entrance + a scroll-keyframed hero, add section-level motion where it earns its place. |
 

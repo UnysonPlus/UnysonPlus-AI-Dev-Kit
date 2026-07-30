@@ -76,8 +76,9 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
 
 - `color` — **Type** `predefined-colors-color-picker-compact`. **Default** `{predefined:'',custom:''}`. **Saved shape** `{predefined:'text-{slug}',custom:'#hex}`. Choices = palette presets (`text-{slug}` from `unysonplus_option_color_palette()`, live).
 - `tagline_color` — same as `color` (palette-preset compact). Header tagline color.
-- `logo_icon_color` — same as `color`. Empty = inherit Site Title Color.
-- `logo_icon_size` — **Type** `unit-input` (`px`,`rem`,`em`). **Default** `{value:'',unit:'em'}`. Empty ≈ 1.4em.
+- `logo_icon_color` — same as `color`. Empty = inherit Site Title Color. Also sets the frame's border color (`currentColor`).
+- `logo_icon_frame_bg` — **Type** `predefined-colors-color-picker-compact`. **Default** `{predefined:'',custom:''}`. Fill color of the **frame tile** (when `logo_icon_frame` ≠ `none`) — e.g. a **white "app-icon" tile** behind a colored mark. Emitted as `background-color` on `.site-logo__mark--framed`, so an image-based mark (set via `logo_custom_css` `background-image`) shows on top of the tile. Empty = the default subtle tint. (The frame itself uses `background-color` — not the `background` shorthand — so it never wipes a mark's `background-image`.)
+- `logo_icon_size` — **Type** `unit-input` (`px`,`rem`,`em`). **Default** `{value:'',unit:'em'}`. Empty ≈ 1.4em. Drives the frame tile size (`2.2em` of this).
 - `logo_custom_css` — **Type** `code-editor` (`mode:css`). **Default** `''`. Hooks: `.site-logo__mark`, `.site-logo__mark--framed`, `.site-logo__eyebrow`, `.site-logo__sub`, `.site-title-text`, `.site-title`.
 
 ### Favicon / Site Icon — `favicon`
@@ -195,6 +196,16 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
 ### Mobile
 - `mobile_drawer_side` — **Type** `select`. **Default** `right`. **Choices**: `right` Right, `left` Left.
 - `nav_scrollspy` — **Type** `switch`. **Default** `no`. right `yes`/On, left `no`/Off. One-page scroll spy + smooth-scroll.
+  - **Convention — anchor-only nav ⇒ turn Scroll Spy ON.** When the (source) nav items are all
+    same-page `#fragment` links pointing at on-page section IDs (a one-page site) rather than links to
+    other pages, it's a Scroll Spy site: set `header_layout['nav_scrollspy']='yes'`, give each builder
+    **Section a CSS ID** (Advanced tab) matching the anchor, and point the menu items (Custom Links) at
+    `#that-id`. `initScrollSpy()` (navigation.js, gated by `body.nav-scrollspy`) then adds
+    `.current-menu-item` to the in-view section's item and smooth-scrolls on click (deferring to Lenis).
+    The active item colors itself via `var(--menu-link-hover)` = **Menu Link Hover / Active Color**, so
+    set that (Header → Menu) to the source's active color. Detection rule for a build/convert: *every*
+    nav `href` starts with `#` and resolves to a section id ⇒ one-page ⇒ Scroll Spy on. Leave OFF for
+    normal multi-page sites.
 - `mobile_hide_topbar` — **Type** `switch`. **Default** `no` (On/Off). Hide Top Bar below 768px.
 - `mobile_hide_bottombar` — **Type** `switch`. **Default** `no` (On/Off). Hide Bottom Bar below 768px.
 
@@ -229,6 +240,7 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
 ### Typography & spacing
 - `menu_font` — **Type** `typography`. **Default** `{family:''}`. `components`: family only (size/line-height/letter-spacing/color off). Empty inherits Body Font.
 - `menu_link_font_size` — **Type** `unit-input` (`rem`,`px`,`em`). **Default** `{value:'',unit:'rem'}`.
+- `menu_link_font_weight` — **Type** `select`. **Default** `''` (Default = theme's 500). **Choices**: `''` Default, `300`,`400`,`500`,`600`,`700`,`800`. Emitted as `--menu-link-font-weight` (base rule falls back to 500).
 - `menu_link_color` — **Type** `predefined-colors-color-picker-compact` (kind `text`). Menu link color; empty = body text.
 - `menu_link_hover_color` — same compact (kind `text`). Hover/active color + Underline/Bar accent; empty = primary.
 - `menu_item_bg` — same compact (kind `bg`). Item background (normal state); empty = transparent.

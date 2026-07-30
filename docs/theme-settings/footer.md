@@ -264,6 +264,8 @@ Rule of thumb: **links → Menu, words → Text, logo → Footer Logo; Custom HT
 | `builder_section` | Builder Section |
 | `snippet` | Snippet |
 
+**Addon-registered elements** also appear here when their extension is active — e.g. the WooCommerce extension adds a **Mini Cart** (`mini_cart`, context `both`). Extensions register via the `unysonplus_hf_elements` filter (`{label, context:'header'|'footer'|'both', options}`) and render via `add_action('unysonplus_render_hf_element_<slug>', …)`. See [extensions/woocommerce.md](../extensions/woocommerce.md) for the reference implementation.
+
 - **Saved value shape**: `[ 'element' => 'text', '<element>' => {…sub-options…} ]`
 - **Per-element sub-options**:
   - `cta_button` → `cta_text` (text, default `Get Started`), `cta_link` (text, default `#`), `cta_style` (`button-style-picker` from Theme Settings → Buttons; fallback select `filled` Filled/`outline` Outline/`pill` Pill (Rounded)), `cta_size` (`button-style-picker` sizes).
@@ -273,17 +275,54 @@ Rule of thumb: **links → Menu, words → Text, logo → Footer Logo; Custom HT
   - `menu_area` → `menu_location` (select; default `primary`; `primary` Primary menu, `secondary` Secondary menu, `footer` Footer menu, + registered locations).
   - `text` → `text_content` (`wp-editor`; supports `{{current_year}}`).
   - `widget_area` → `sidebar_id` (select; default `sidebar-right`; registered sidebars incl. `footer-1..5`).
-  - `footer_logo` → `footer_logo_image` (upload), `footer_logo_width` (unit-input `rem`,`px`,`em`, default `{value:'12.5',unit:'rem'}`). Re-resolved from `attachment_id` on the current site at render (portable, no cross-site 404 — see the logo-portability note in `theme-settings/header.md`); falls back to the text logo when the attachment isn't present here. SVG supported.
+  - `footer_logo` → `footer_logo_image` (upload), `footer_logo_width` (unit-input `rem`,`px`,`em`, default `{value:'12.5',unit:'rem'}`), **`footer_logo_show_title`** (switch, default `no` — show the site title as a wordmark beside the image, an image+text **lockup** like the header logo), **`footer_logo_title`** (text, default `''` — optional wordmark text; empty = the Site Title). Re-resolved from `attachment_id` on the current site at render (portable, no cross-site 404 — see the logo-portability note in `theme-settings/header.md`); falls back to the text logo when the attachment isn't present here. SVG supported. **Renders**: `.footer-logo-link` (+ `.footer-logo-link--lockup` when the title is on) wrapping `img.footer-logo-img` + `span.footer-logo-title`. Use this for a brand mark **+ wordmark** footer column — do NOT hand-build it as a `text` element with an inline `<img>` (that's a hack; this is the editable native element).
   - `back_to_top` → `back_to_top_text` (text, default `Back to Top`; empty = arrow only).
   - `builder_section` → `builder_post_id` (select; saved layouts).
   - `snippet` → `snippet_id` (select; published Snippets).
   - `logo`, `search`, `social_icons` → no extra options.
 
+- **Saved value shapes for programmatic construction** (what a build script must write, not just the type name):
+  - `icon_text` → `icontext_icon` is an **icon-v2** whose stored value is `{ 'type' => 'icon-font', 'icon-class' => '<class>' }`; the renderer reads `icontext_icon['icon-class']`. The theme ships **Font Awesome**, so use FA classes: `fas fa-location-dot` (address), `fas fa-phone`, `fas fa-clock`, `fas fa-moon`, `fas fa-envelope`. `icontext_link_type`+`icontext_link` make it a real `mailto:`/`tel:`/URL link.
+    Example item: `['element_type' => ['element' => 'icon_text', 'icon_text' => ['icontext_icon' => ['type'=>'icon-font','icon-class'=>'fas fa-phone'], 'icontext_text' => '+1 (555) …', 'icontext_link_type' => 'phone', 'icontext_link' => '']]]`.
+  - `social_icons` → no per-element options; it renders the profiles from **Theme Settings → Social** (`general_social` — each item `{ 'icon' => ['type'=>'icon-font','icon-class'=>'fab fa-instagram'], 'url' => '…' }`). Set the profiles there first, or no icons render.
+  - `menu` → `menu_id` is the WP menu **term id** (or the menu **name/slug** `wp_get_nav_menu_object()` accepts). Create the menu with `wp_create_nav_menu()` + `wp_update_nav_menu_item()` first, then reference it.
+  - `cta_button` → `cta_style`/`cta_size` are a **button-style-picker** storing the chosen preset slug (e.g. `'filled'`/`'outline'`/`'pill'`); the picker's choices come from Theme Settings → Buttons.
+  - `text` → `text_content` is raw WYSIWYG HTML; runs through `wpautop`+`do_shortcode`. A footer column **title** is an `<h2>` here (styled small via CSS), and links belong in a **Menu** element, not typed as `<ul>` in Text.
+  - `custom_html` → `custom_html_content` runs `do_shortcode()` (so `[wc_mini_cart …]` etc. work). Reserve it for markup with no native element (e.g. a newsletter `<form>`).
+
+- **Rendered output / CSS hook per element** (every element is wrapped in `.footer-element.footer-element--<type>` + your `element_css_class`; target the inner node):
+  | element | renders | inner hook |
+  |---|---|---|
+  | `logo` / `footer_logo` | the site logo lockup / footer image | `.site-logo` / `.footer-logo img` |
+  | `menu` | the chosen WP menu as a `<ul>` | `.builder-menu-list` |
+  | `menu_area` | the theme menu at a location (primary → inline nav) | `.builder-menu-list` / theme nav |
+  | `text` | WYSIWYG HTML (`wpautop`+`do_shortcode`) | `.builder-text-element` |
+  | `icon_text` | `<i class="icon-class">` + text, optionally linked (`mailto:`/`tel:`/URL; external → new tab) | `.icon-text` (icon `<i>` + `<span>`) |
+  | `social_icons` | Theme Settings → Social profiles as icon links | `.social-icons a` |
+  | `cta_button` | a themed button | `.btn` (+ chosen style/size classes) |
+  | `search` | a WP search form | `.search-form` |
+  | `custom_html` | raw HTML, `do_shortcode`'d | `.footer-custom-html` |
+  | `widget_area` | a registered sidebar's widgets | `.widget` |
+  | `back_to_top` | a scroll-to-top link (arrow + optional text) | `.footer-back-to-top` |
+  | `builder_section` | a saved page-builder layout, `do_shortcode`'d | `.up-builder-section` |
+  | `snippet` | a published Snippet's output | (snippet markup) |
+  - **Shared per item:** `visibility` (device hide checkboxes) and `element_css_class` (lands on the `.footer-element` wrapper). The header uses the SAME element set + shapes (see [header.md](header.md)); differences are only the extra header-only types (`phone`, `spacer`, `divider`).
+
 ### visibility — `visibility`
 - **Type**: `checkboxes`. **Default** `[]`. **Choices**: `hide-xs` Mobile (< 768px), `hide-sm` Tablet (768–991px), `hide-md` Desktop (≥ 992px).
 
 ### CSS Class — `element_css_class`
-- **Type**: `text`. **Default** `''`.
+- **Type**: `text`. **Default** `''`. Lands on the element's `.footer-element` wrapper.
+- **Use it for per-element spacing AND alignment via utility classes** instead of child CSS:
+  - **Spacing** — spacing-scale classes (`mt-3`=1rem, `mt-4`=1.5rem, `mt-5`=3rem; `mt-`/`mb-`/`pt-`/`pb-`,
+    names `0`–`12`), e.g. `mt-4` on a `social_icons` element for a gap above it.
+  - **Alignment** — the **copyright bar auto-aligns by column count** (1 col = centered, 2 = left|right,
+    3+ = left|center|right) via `unysonplus_copyright_auto_align_class()`, so a `© …` line needs no
+    class. Override one column with a text-align utility on its `element_css_class` (`text-start` /
+    `text-center` / `text-end`, Bootstrap, theme-shipped) — deeper in the DOM, so it wins. Widget
+    columns keep their natural left alignment (no count-based auto-align).
+  - Every header/footer element has this field — reach for it + a utility to space/align/tweak an
+    element, rather than a `.footer .builder-… {…}` rule in the child theme.
 
 ---
 
@@ -306,9 +345,46 @@ When `yes`, reveals 4 container-only groups:
 - `{prefix}_grp_borders`:
   - `{prefix}_border` — `multi-inline` border row: `{ width:{value,unit}, style, color:{predefined,custom} }`; `style` select **Choices** `solid` Solid, `dashed` Dashed, `dotted` Dotted, `double` Double. Shows only when width+color set.
   - `{prefix}_border_sides` — `image-picker` multiple, default `['top']`. **Choices**: `top` Top, `right` Right, `bottom` Bottom, `left` Left.
-  - `{prefix}_border_extent` — `multi-picker` (inline), default `{mode:'full'}`. Picker `mode` **Choices**: `full` Full Width, `container` Container Width, `custom` Custom Width. `custom` reveals `{prefix}_border_extent_width` (unit-input `px`,`rem`,`em`,`%`).
+  - `{prefix}_border_extent` — `multi-picker` (inline), default `{mode:'full'}`. Picker `mode` **Choices**: `full` Full Width, `container` Container Width, `custom` Custom Width. `custom` reveals `{prefix}_border_extent_width` (unit-input `px`,`rem`,`em`,`%`). **Gotcha:** `container`/`custom` render the top/bottom line as a **centered `::before`/`::after` pseudo-element** capped at the max width (the section's own `border-top` stays `0` — verify the *pseudo*). Use this to reproduce a source's container-width `border-t` divider (e.g. a copyright hairline).
 - `{prefix}_grp_advanced`:
   - `{prefix}_css_class` — `text`, default `''`.
+
+### The 7 blocks — prefix → option key (header + footer share the same builder)
+
+| Section | `$prefix` | Option key | Builder |
+|---|---|---|---|
+| Header main bar | `main` | `main_custom_styling` (in `header_main`) | `unysonplus_hf_custom_styling('main')` |
+| Header topbar | `topbar` | `topbar_custom_styling` (in `header_topbar`) | `unysonplus_hf_custom_styling('topbar')` |
+| Header bottombar | `bottombar` | `bottombar_custom_styling` (in `header_bottombar`) | `unysonplus_hf_custom_styling('bottombar')` |
+| Footer — pre | `pre_footer` | `pre_footer_custom_styling` | `unysonplus_footer_custom_styling('pre_footer')` |
+| Footer — main | `main_footer` | `main_footer_custom_styling` | `unysonplus_footer_custom_styling('main_footer')` |
+| Footer — post | `post_footer` | `post_footer_custom_styling` | `unysonplus_footer_custom_styling('post_footer')` |
+| Footer — copyright | `copyright` | `copyright_custom_styling` | `unysonplus_footer_custom_styling('copyright')` |
+
+### Programmatic value shapes (build-script — the `yes` group leaves flatten, groups are NOT stored)
+
+`fw_set_db_settings_option('<option key>', [...])` with:
+```php
+[ 'enabled' => 'yes',
+  'yes' => [
+    '<prefix>_container'  => 'container',            // or 'container-fluid'
+    '<prefix>_padding'    => [ /* spacing: 'top'/'right'/'bottom'/'left' => e.g. 'pt-9' (scale slug) */ ],
+    '<prefix>_background'  => [ 'color' => [ 'value' => [ 'predefined' => '', 'custom' => '#fdf2f8' ] ],
+                               'gradient' => [ 'data' => [ 'type'=>'linear','angle'=>90,'stops'=>[] ] ],
+                               'image' => [ 'src'=>[], 'position'=>'center center', 'size'=>['selected'=>'cover','custom'=>''], 'repeat'=>'no-repeat', 'attachment'=>'scroll' ],
+                               'advanced' => [] ],
+    '<prefix>_typography'  => [ 'family'=>'Quicksand', 'variation'=>'regular', 'size'=>14,
+                               'line-height'=>1.6, 'letter-spacing'=>0, 'color'=>'rgba(157,23,77,.8)' ],
+    '<prefix>_link_color'  => [ 'predefined' => 'text-primary', 'custom' => '' ],   // compact color (or a hex in custom)
+    '<prefix>_border'      => [ 'width'=>['value'=>'','unit'=>'px'], 'style'=>'solid', 'color'=>['predefined'=>'','custom'=>''] ],
+    '<prefix>_border_sides'=> [ 'top' ],
+    '<prefix>_border_extent' => [ 'mode' => 'full' ],   // full | container | custom(+ _border_extent_width)
+    '<prefix>_css_class'   => '',
+  ],
+]
+```
+- **This is where a header/footer bar's TEXT size/color, LINK color, BACKGROUND, PADDING and BORDERS belong** — not a `.footer .builder-text-element{…}` child rule. Resolved to CSS by `inc/includes/hf-custom-css.php` (scoped to that section), so it's editable + rebrandable.
+- Set `<prefix>_typography` to the source's *measured* footer text spec (size/weight/color) — e.g. the source Pinky Bites footer is `14px / rgba(157,23,77,.8)` body, so that goes in `main_footer_custom_styling.yes.main_footer_typography`, not child CSS.
 
 ---
 

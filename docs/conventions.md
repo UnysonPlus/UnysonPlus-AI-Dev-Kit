@@ -4,6 +4,19 @@ The rules every UnysonPlus site/page/element should follow, whether you build by
 compose programmatically ([building-pages.md](building-pages.md)), or convert an existing site. They
 keep output clean, accessible, on-brand, and editable. Site-agnostic — no project specifics.
 
+## 0. Fixing ≠ redesigning — ask before altering the design or system
+
+A **fix** removes a defect while preserving the existing design and behavior. **Altering** the
+design, the interaction model, or the system architecture is a different act — and it is the user's
+call, not yours. When a bug's only obvious workaround would change how something looks or behaves
+(swapping a slide-out drawer for a dropdown, dropping an animation, changing a layout, removing an
+option), **stop and ask first** — present the fix options and let the user choose. Do not "fix" by
+quietly redesigning. Likewise, don't add a control, backdrop, or behavior the source/original didn't
+have without confirming. Scope discipline: solve the reported problem with the smallest change that
+keeps the intended design intact; surface anything bigger as a question. (This rule exists because a
+drawer-overflow *fix* was silently turned into a dropdown *redesign* — the overflow was the bug; the
+drawer was the design.)
+
 ## 1. Design tokens come from Theme Settings, elements *consume* them
 
 UnysonPlus is **Theme-Settings-first**: colors, typography, buttons, box/card presets, and spacing
@@ -17,6 +30,24 @@ child-theme CSS when a Theme Settings preset exists (or could).
   define a preset).
 - **Typography / buttons / boxes / spacing** — prefer the Theme Settings preset pickers; if a needed
   option doesn't exist, that's a signal to add it to the framework, not to bury CSS in the theme.
+- **The framework already provides a preset system for nearly everything — so child-theme CSS is a
+  LAST RESORT, not the default.** There are Theme Settings presets for **colors** (palette →
+  `--color-primary/secondary/accent/text/…` tokens), **boxes/cards** (`components-box` — bg / radius /
+  shadow / border, consumed by a column's `border_preset`), **buttons** (`components-buttons` — styles
+  like a secondary outline), **section styles** (`components-section-styles` — band tints/backgrounds),
+  **image styles** (`components-image-styles` — rounded/shadowed media), **spacing**
+  (`components-spacing`) and **typography**. **Header/footer bars additionally have a per-section
+  `Custom Styling` block** (`{prefix}_custom_styling` on main / topbar / bottombar / pre-main-post
+  footer): **Background, Typography** (family/size/weight/line-height/color), **Link Color**,
+  **Padding**, **Borders**. A footer's text size/color, link color, background and padding go **there**,
+  not in a `.footer .builder-text-element{font-size…}` child rule — reach for Custom Styling first when
+  styling any header/footer bar. Before writing a rule in a child stylesheet, ask *"is this
+  a color / card / button / section-band / image-style / spacing value?"* — if yes, it belongs in a
+  **Theme Settings preset that the element consumes**, and a child `:root` that re-hardcodes brand hex
+  (instead of aliasing `var(--color-*)`), a hand-rolled `.card{}`/`.btn{}`, or a hardcoded section tint
+  are all shortcuts to undo. Child CSS is only for truly bespoke pixel details no preset can express —
+  and even those, if recurring, are a prompt to extend the framework. **Nothing "hinders" using Theme
+  Settings for these; hardcoding them is a shortcut, and it breaks rebrand-ability.**
 
 ## 2. Clean DOM is the point — don't bloat markup
 
