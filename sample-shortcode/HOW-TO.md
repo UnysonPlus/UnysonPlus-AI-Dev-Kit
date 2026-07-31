@@ -47,6 +47,37 @@ over a rounded-bottom base, overlapping by 40px, with white text** — none of w
 had produced. Steps 1–5 below still apply (they are the *translation*); Step 0 is how you get a
 correct thing to translate.
 
+### Step 0.9 — CLOSE THE LOOP: teach the converter about your new shortcode (REUSABLE ones only)
+
+> **This is the step that makes "never hand-build again" actually true** (site-build-protocol.md Rule 0).
+> The converter emitted a **`code_block`** for this widget because it didn't recognise it. If you swap
+> the code_block for your shortcode and stop there, the **next** conversion of a similar block will fall
+> back to a `code_block` too — and you'll hand-swap it *forever*. Close the loop:
+
+- **Is the shortcode REUSABLE (generic — e.g. `product_configurator`, `badge`) or a genuine ONE-OFF
+  (`cupcake_builder`, built for one site's source)?**
+  - **Reusable → add a converter recognizer** so the source pattern auto-maps to your shortcode next
+    time (no more code_block, no more hand-swap). This is a **contributor task** (needs the converter
+    repos, must be upstreamed, and mirrored across **both** paths):
+    - **PHP** (`UnysonPlus-Site-Converter-Extension`): a `_Stitch` **recognizer** (a `match_*` at a
+      priority above the verbatim fallback) + a `register_builder` → **`n_<name>()`** mapper in `_Mapper`
+      that emits `{ shortcode:'<name>', atts:{…} }` with your options. **Copy the `badge` pair as the
+      template** — `announcement_pill` recognizer (priority 76) + `n_announcement_pill()`.
+    - **JS** (`UnysonPlus-Capture-Service` `capture-extract`/`to-pages`): the matching recognizer, kept
+      **in sync** with the PHP (the JS↔PHP parity check catches drift).
+    - Then re-run the conversion → the block now arrives as your shortcode, options pre-filled.
+  - **One-off → do NOT add a recognizer** (it would never recur; a recognizer for it is dead weight).
+    The `code_block` → hand-swap is correct *once*. But still **flag it** in the conversion report if the
+    *category* of widget ("interactive product builder") looks like it could recur — the maintainer
+    decides whether it graduates to a reusable shortcode + recognizer.
+- **Site-builder (no converter repos)?** You can't add the recognizer — so **flag the systematic miss**
+  (Rule −1: `--share` / the Gmail report form) with `element → got code_block / expected <name>`, and the
+  maintainer adds the recognizer. Your one site still gets the shortcode by hand-swapping this once.
+
+So the bespoke protocol is now complete: **capture → replica → port → (reusable?) teach the converter.**
+Without Step 0.9 the converter never gets smarter about bespoke widgets, which is the gap that keeps
+forcing hand-swaps.
+
 ---
 
 ## Step 1 — Audit the source before writing anything

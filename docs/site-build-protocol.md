@@ -7,6 +7,26 @@ header/footer** and **hand-building a conversion instead of running the converte
 order; do not skip steps. The narrative how-to is [build-a-site.md](build-a-site.md); this is the
 enforceable checklist + the exact value shapes.
 
+> ## ⛔ RULE 0 — NEVER hand-build or hand-translate a conversion. The converter is the source of truth.
+>
+> On a **conversion** (any source to reproduce — see the trigger below) you **must not**:
+> - **hand-measure** the source (Playwright/devtools) and type geometry into a tree, OR
+> - **hand-translate** Tailwind/CSS into option values or scoped CSS by eye, OR
+> - **hand-author** the section tree in a `build-<slug>.mjs` factory as if from scratch.
+>
+> The deterministic converter (capture service / Site Converter extension) already does all of that —
+> it maps each block to the right shortcode with **native options**, compiles Tailwind → tokens, and
+> falls back to `code_block` only for the genuinely bespoke. **Run it first; start from its output.**
+> Hand-work is allowed for **one thing only: the residual delta** the converter couldn't express — and
+> even then it is `native options → misc_custom_css`, never a from-scratch rebuild, and every
+> *systematic* miss is **flagged to make the converter smarter** (Rule −1), so next time there is even
+> less to touch. **The mission: every hand-fix you're tempted to make is a converter improvement you owe
+> upstream. If you find yourself measuring or eyeballing a class, STOP — you skipped Phase 1.**
+> (This is not new — it is the explicit, unmissable statement of the capture-first gate + Rule 4 below.
+> The pinky-bites builder heading is the cautionary tale: hand-built, it shipped an emoji for a captured
+> SVG and mis-measured gaps; the converter would have emitted the correct `special_heading` + native
+> options in one pass.)
+
 > **ALWAYS ON — this protocol governs EVERY build, whether or not the user mentions a "protocol."**
 > It applies to both a **conversion** (reproducing a source — URL, screenshot, template, HTML/CSS) and
 > a **fresh build** (from a prompt/brief, no source to reproduce). The only difference: a conversion
@@ -61,6 +81,35 @@ This emits the **source of truth**: `design-config.json` (tokens → Theme Setti
 > a capture exists is a **protocol violation** — it is slow, drifts from the source, and skips the tool
 > built for exactly this. If `capture-out/<site>/` does not exist for the source, **STOP and run the
 > capture first.** The only exception is a genuinely *fresh* build with no source to reproduce.
+>
+> **The `.mjs` demo-builder loophole (learned the hard way — pinky-bites, 2026-07-31).** Emitting the
+> tree by hand in a `build-<slug>.mjs` factory *feels* like authoring from scratch, so it's tempting to
+> skip Phase 1 — **don't.** If the demo **clones a source** (a named template, a URL), it is a
+> **conversion**, and the `.mjs` file is only the *import format*, not a licence to hand-measure. Run the
+> converter/capture first and let its per-section output (a `special_heading` with **native** options
+> below + a `code_block` for anything bespoke) seed the tree; then swap each bespoke `code_block` for the
+> real shortcode. Hand-translating Tailwind → guessed scoped CSS is how the pinky-bites builder heading
+> shipped with a `🎁` emoji instead of the source's lucide-gift SVG and mis-measured 40/0px gaps.
+>
+> **Tailwind → native `special_heading` option cheat sheet** (what the mapper already does — reach for
+> these BEFORE scoped CSS; a heading block `text-center space-y-4 max-w-3xl mx-auto mb-16` + pill + h2 + p
+> is ONE `special_heading`):
+>
+> | Source class | Native option | Value |
+> |---|---|---|
+> | `text-center` | `alignment` | `center` |
+> | `space-y-4` | `element_spacing` | `relaxed` (=16px) |
+> | `max-w-3xl` + `mx-auto` | `block_max_width` | `48rem` (centres itself w/ center align) |
+> | `mb-16` | `spacing.margin.bottom` | `4rem` |
+> | pill wrapper | `overline_container` | `pill` |
+> | `text-[#…]` overline/title/subtitle | `overline_color` / `title_color` / `subtitle_color` | the hex |
+> | `text-lg` subtitle | `subtitle_size` | preset |
+> | `uppercase` overline | `overline_uppercase` | `yes` |
+>
+> Only what has **no** native option falls back to scoped CSS: a **custom overline icon** (the marker
+> only does dot/line/bar — inline the captured SVG as a currentColor mask), a **non-default pill fill**
+> (the theme pill auto-tints; override bg/border for a white pill), and **font weights** (`font-black`
+> 900 / `font-medium` 500 have no option). Everything else = a native field.
 
 ## Rule −1 — CONVERTER-FIRST region loop: fix the ALGORITHM, not the output (the token-saver + the product)
 
