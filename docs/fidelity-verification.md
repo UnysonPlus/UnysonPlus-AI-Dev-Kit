@@ -117,6 +117,24 @@ chunky vs thin padding, dark vs white text) survived pass after pass. Two hard r
 *shape* (radius), *weight* (padding/height), or *ink* (a base `.btn{color:inherit}` overriding a preset on
 load order). If you can measure a property, you have no excuse to guess it.
 
+## Rule 2.8 — A FIX is not done until you re-measure it against the source (post-fix comparison pass)
+
+**Applying a change is not fixing it. Confirming it now matches the source is.** After every fix —
+especially a reactive one to a reported issue — **re-run the DOM computed-style + geometry diff against
+the source for the element(s) you touched, and only declare it done when the numbers match.** "I added
+the CSS / it looks better in a screenshot" is not evidence; a re-measured `demo == source` is.
+
+- Do the pass **before saying "fixed"**, every time — this is the step that keeps a user from having to
+  tell you the same design is still wrong. A fix that "looks close" routinely lands 40px off (title→sub
+  gap) or 0px where it needs 64 (block→card), and only a re-measure catches it.
+- Re-measure the **exact properties + gaps** that were wrong, not just "does it render". For a heading
+  block that means: overline→title gap, title→subtitle gap, block→next-element gap, and each element's
+  `fontSize`/`fontWeight`/`letterSpacing`/`color` — vs the source/replica.
+- If a margin/gap "didn't take", it's usually applied to the wrong node — the special-heading and the
+  next element are **separate wrapper siblings**, so the gap goes on the sibling (`.cupcake-builder`
+  `margin-top`), not inside `.heading`. Re-measuring is how you find that; eyeballing is how you miss it.
+- Batch fixes → **one comparison pass over all of them** at the end, then report only what the numbers confirm.
+
 ## Rule 3 — The order (ties into the region loop)
 
 Header → Footer → sections top-to-bottom (see the protocol's region-loop). For **each** region:
