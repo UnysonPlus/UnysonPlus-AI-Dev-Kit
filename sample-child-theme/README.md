@@ -45,18 +45,52 @@ not the active stylesheet. So switching a site from `unysonplus-theme` to a chil
 re-configure Theme Settings after activating a child theme. (This is why "prefer Theme Settings
 over CSS" still holds inside a child theme.)
 
-## Shipping bespoke elements with the theme
+## Where EXACTLY a shipped shortcode goes (agents: read this carefully)
 
-Drop the element folder under the child's `framework-customizations` tree — **no registration
-call**, the loaders scan it when the theme is active:
+**No registration call.** You drop the element folder at this EXACT path and the loader
+discovers it whenever the theme is active:
 
-- **Shortcode:** `<child>/framework-customizations/extensions/shortcodes/shortcodes/<name>/`
-  (folder name → tag, `-`→`_`). Build it from the kit's [`sample-shortcode/`](../sample-shortcode/).
-- **Option type:** `<child>/framework-customizations/includes/option-types/<name>/`.
+```
+<child-theme>/framework-customizations/extensions/shortcodes/shortcodes/<slug>/
+    config.php                     builder tile + canvas preview
+    options.php                    the atts contract
+    static.php                     enqueues + PHP render helpers
+    views/view.php                 the front-end markup
+    static/css/styles.css
+    static/js/scripts.js
+    static/img/page_builder.svg    the picker icon (auto-detected at this exact path)
+```
 
-Everything else is identical to a plugin element — same file contract, same
-`sc_build_wrapper_attr()`, same option types, assets auto-enqueued from the theme URI. Guard
-plugin-only helpers with `function_exists()`. Full detail: `docs/extending.md` →
+Get these three right or it silently won't load:
+
+1. **The path is `framework-customizations/extensions/shortcodes/shortcodes/` — `shortcodes`
+   appears TWICE** (the extension folder, then its elements folder). One level up, or a level
+   missing, is NOT scanned. This is the #1 mistake.
+2. **`<slug>` = the folder name = the shortcode tag, with `-` → `_`.** A folder
+   `product-configurator/` becomes the tag `[product_configurator]`. Match this slug in
+   `AGENTS.md` and any generated page-builder JSON.
+3. **A same-named CORE tag wins** — don't shadow a bundled element (don't name a folder
+   `button`, `badge`, etc.).
+
+**Concrete, working example** — the pinky-bites demo ships its configurator exactly here:
+
+```
+wp-content/themes/pinky-bites/framework-customizations/extensions/shortcodes/shortcodes/product-configurator/
+→ appears in the builder as "Product Configurator" whenever pinky-bites is active.
+```
+
+There is an empty copy of this directory tree in **this template** (see
+`framework-customizations/extensions/shortcodes/shortcodes/`) — drop your element folder straight
+into it.
+
+**An option type** goes at the sibling path
+`<child-theme>/framework-customizations/includes/option-types/<name>/`.
+
+Everything about the element itself is identical to a plugin element — same file contract, same
+`sc_build_wrapper_attr()`, same option types, assets auto-enqueued from the theme URI. Build it
+from [`sample-shortcode/`](../sample-shortcode/), and **guard plugin-only helpers**
+(`sc_color_field_compact`, `sc_normalize_color_value`, …) with `function_exists()` so it still
+works if the plugin is older/absent. Full detail: `docs/extending.md` →
 *Shipping a shortcode inside a theme or child theme*.
 
 ## Where the folder lives (staging)
