@@ -48,12 +48,20 @@ asset bug. **Measure it, and don't blame the image first.**
   collapses to 0. Fix = add `display:inline-flex`. This exact bug hit the pinky-bites footer — the
   lockup had `align-items:center; gap:.55rem` but no `display`, so the title sat **11px below** the
   mark centre with a **0px gap**; `inline-flex` restored centred alignment + the 12px gap.
-- **Verify with geometry, per element.** For a lockup: the mark's vertical centre **==** the
-  title's, and the gap matches the source. For an icon row: each glyph's offset within its circle
-  is **0,0** and the icons share a `top`. On pinky-bites the social icons measured a perfect 0,0
-  offset and matched the source — the block only *looked* off because the mis-aligned lockup above
-  dragged it. Swapping the logo image "to fix it" was the wrong move: it changed a mark that
-  already matched the source. **Diagnose the layout before touching the asset.**
+- **A font-icon glyph does NOT auto-centre in its badge — the icon element itself needs flex.** A
+  flex-centred *parent* circle is not enough: the glyph is baseline-positioned inside its line box,
+  so a solid letter-mark (Font Awesome `fa-facebook-f`) sits **high** while an outline glyph next
+  to it (`fa-instagram`) looks fine — which reads as "one icon is off". Fix = put
+  `display:flex; align-items:center; justify-content:center` on the `<i>` / `<svg>` glyph itself.
+  Do **not** swap the icon or the icon set to "fix" this; the glyph is fine, its centring isn't.
+- **A 0,0 bounding-box offset does NOT prove it LOOKS centred — LOOK at a crop.** The glyph's *box*
+  can be centred while the *visible* glyph inside it is not (font metrics, a letter-mark's weight).
+  On pinky-bites the social icons measured a perfect 0,0 offset, so I called them fine and chased
+  the wrong things (the logo, the icon set) — the real fix was one line of glyph-centring CSS.
+  When something looks off, **capture a high-DPI element crop and view it** before theorising:
+  geometry numbers are a starting point, not proof. And for a lockup, check the mark's vertical
+  centre **==** the title's and the gap matches the source — **diagnose the layout before touching
+  the asset.**
 
 ## Icons — match by kind (only font icons get swapped)
 - **Emoji** (🏠 📞 ⏰ 💤) → reproduce the character verbatim. **Inline SVG** → copy markup / map to
