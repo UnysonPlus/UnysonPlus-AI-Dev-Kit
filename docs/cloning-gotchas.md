@@ -36,27 +36,24 @@ real misses. Skim this before and during a clone; the detail lives in the linked
   The kit's `tools/measure/fidelity-check.mjs` (`getBoundingClientRect` + `getComputedStyle` on both
   source and yours) turns "the footer feels off" into "blurb→social is 24px, source is 16px → `mt-3`".
 
-## Logos & image assets — verify TRANSPARENCY before using one
+## Lockups & icon rows — `align-items` / `gap` do nothing unless `display` is flex
 
-A logo / mark image (especially an **AI-generated or CDN-sourced** one) frequently ships with a
-**baked-in background** — a dark or blurry rectangle instead of real transparency. Dropped in as a
-logo it either shows that background on any non-matching surface, or gets half-hidden by a white
-logo-chip while `object-fit:cover` crops the mark **smaller and inset** (the tell: the cupcake
-looks shrunken inside its chip). The source's `…_nobg` / `…greenscreen_nobg` filename is the hint
-that *their* asset was background-removed and yours must be too.
+A logo lockup (mark + site-title) or a social-icon row that looks *almost* right — the title a few
+px low, the mark and text touching, an icon nudged — is almost always a **layout** bug, not an
+asset bug. **Measure it, and don't blame the image first.**
 
-- **Verify the ASSET, not just the rendered chip.** A white chip masks a bad background — "it
-  looks fine in the footer" is not proof. Open the file, and preview it on **both a light and a
-  dark background** (a truly transparent PNG is clean on both; a baked-bg one shows its rectangle).
-- **Remove the background if it has one.** No ImageMagick in this environment, so use a headless
-  **Chromium canvas flood-fill from the four borders**: mark border-connected pixels below a
-  luminance threshold transparent (preserves interior darks — eyes, outline — because they aren't
-  border-connected). `tools/measure`-style Playwright script; ~30 lines. Replace the master **and
-  every WordPress size variant** (`-100x100`, `-150x150`, … — WP won't regenerate them on its own).
-- **At the source:** when an importer **sideloads** a logo from a URL you don't control, treat the
-  downloaded file as suspect — background-remove it in place after sideload, and note it in the
-  importer so a fresh re-import isn't a surprise. (A one-time sideload guarded by an option keeps a
-  hand-fixed file, but a clean re-download will bring the baked background back.)
+- **`align-items` and `gap` are silently IGNORED on `display:inline` (or `block`).** A rule like
+  `.footer-logo-link--lockup { align-items:center; gap:12px; }` no-ops entirely if the element
+  isn't `flex` / `inline-flex`: the title drops to the text baseline (a few px low) and the gap
+  collapses to 0. Fix = add `display:inline-flex`. This exact bug hit the pinky-bites footer — the
+  lockup had `align-items:center; gap:.55rem` but no `display`, so the title sat **11px below** the
+  mark centre with a **0px gap**; `inline-flex` restored centred alignment + the 12px gap.
+- **Verify with geometry, per element.** For a lockup: the mark's vertical centre **==** the
+  title's, and the gap matches the source. For an icon row: each glyph's offset within its circle
+  is **0,0** and the icons share a `top`. On pinky-bites the social icons measured a perfect 0,0
+  offset and matched the source — the block only *looked* off because the mis-aligned lockup above
+  dragged it. Swapping the logo image "to fix it" was the wrong move: it changed a mark that
+  already matched the source. **Diagnose the layout before touching the asset.**
 
 ## Icons — match by kind (only font icons get swapped)
 - **Emoji** (🏠 📞 ⏰ 💤) → reproduce the character verbatim. **Inline SVG** → copy markup / map to
