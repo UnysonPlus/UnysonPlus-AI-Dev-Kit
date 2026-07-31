@@ -42,7 +42,9 @@ node capture.mjs <url> capture-out/     # UnysonPlus-Capture-Service/tools/desig
 > deterministic converter (capture service = URL/JS path; extension = HTML-upload/PHP path).
 > - **Site-builder (building ONE site):** run the **capture service** → import its output → build Phases
 >   2–7. You do **not** separately run or fork the PHP extension; close this site's residual delta with
->   native options / `misc_custom_css`, and (opt-in) `--share` the anonymized report upstream.
+>   native options / `misc_custom_css`, and — for a *systematic* miss only — **FLAG it to the Gmail
+>   report-intake form** (opt-in, consent-gated, anonymized structural data only; = the `--share` upstream
+>   artifact). See "What a SITE-BUILDER flags" under Rule −1. **Do not edit the converter.**
 > - **Converter maintainer/contributor (has the repos):** ALSO run the **Site Converter extension** on the
 >   captured markup, and in **Phase 5** improve **both** paths (JS `to-pages`/`capture-extract` **and** PHP
 >   `Mapper`/`Stitch`, kept in sync) from the conversion report — so every conversion makes the tool
@@ -61,6 +63,18 @@ This emits the **source of truth**: `design-config.json` (tokens → Theme Setti
 > capture first.** The only exception is a genuinely *fresh* build with no source to reproduce.
 
 ## Rule −1 — CONVERTER-FIRST region loop: fix the ALGORITHM, not the output (the token-saver + the product)
+
+> **⚠️ WHO this rule is for — read FIRST (it decides whether you edit the converter at all).** "Fix the
+> algorithm" is the **MAINTAINER / contributor** path — an agent that **has the converter repos** (the
+> `UnysonPlus-Capture-Service` + `UnysonPlus-Site-Converter-Extension` clones) and is authorised to change +
+> upstream them. If you are that maintainer, follow this rule in full.
+>
+> **If you are a SITE-BUILDER agent** (building ONE site for a developer, *without* those repos): you do **NOT**
+> edit the converter. Instead — (a) close this one site's residual delta with **native options /
+> `misc_custom_css`**, and (b) **FLAG** any *systematic* converter miss and **submit it to the Gmail
+> report-intake form** (see "What a site-builder flags" below) so the maintainer can improve the algorithm for
+> everyone. The report/flag is the feedback artifact — **never a code fork**. Everything below (measure →
+> improve the algorithm → re-run → verify) is the maintainer's loop; a site-builder stops at flag + report.
 
 **This governs every conversion and overrides any instinct to hand-build or hand-patch.** The Site Converter
 (capture service = URL/JS path **+** the **extension** = HTML/PHP path) is a *product* whose promise is: it
@@ -100,6 +114,26 @@ converter smarter until it produces that page itself.** Priority order of *why*:
 - **Verification stays deterministic** — the same measurement tools gate every region; "did the fix work" is objective.
 - **Bootstrapping an already-hand-built site:** start the loop from a FRESH capture + scratch page and treat the
   hand-built version as the answer key (its DB patches do NOT count as converter progress).
+
+### What a SITE-BUILDER flags (and how) — the report is the feedback, not a code fork
+
+A site-builder agent does **not** edit the converter; it **flags systematic misses** so the maintainer can. The
+one test: **"would fixing this help the NEXT site too?"** Yes → it's *systematic* → flag it. Only-this-site → fix
+it locally (native options / `misc_custom_css`) and move on, don't flag.
+
+- **DO flag** (source them from the **conversion report** — it already tags these): a `code_block` **fallback**
+  where a real shortcode clearly fits (a pricing table → `pricing_table`, a steps list → `steps`, a testimonials
+  grid mapped to plain columns); an **`opportunity`** row (a richer role detected but not mapped); a **styling
+  drop** where a builder option/token exists to carry it; a **wrong mapping** (element → wrong shortcode); an
+  **over-large / under-segmented** section. Rank by how often the miss recurs.
+- **DON'T flag** (these are NOT converter bugs): a bespoke/interactive widget with no shortcode equivalent
+  (correctly kept **verbatim** — e.g. a custom cupcake-builder); a one-off, site-specific delta; a subjective
+  design-judgment call (an AI-only residual).
+- **How — submit to the Gmail report-intake form.** Send **anonymized, structural data ONLY** with the site
+  owner's consent: source *type* (not raw content), the miss as **`element → got vs. expected`**, the relevant
+  conversion-report row(s), and **`systematic? y/n`**. **No raw third-party content.** (This is the same
+  consent-gated feedback artifact as the opt-in `--share` upstream flow — the Gmail form is the intake the
+  maintainer monitors.)
 
 ## The ordered major steps (do in THIS order)
 
