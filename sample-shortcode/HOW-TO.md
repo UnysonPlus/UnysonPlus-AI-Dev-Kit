@@ -13,6 +13,42 @@ imagined.
 
 ---
 
+## Step 0 — When the source is a LIVE site: CAPTURE → REPLICA → PORT
+
+If you are reproducing a component from a live URL (cloning a site), **do not hand-build it from
+screenshots and measurements** — that produces an approximation, and it will be wrong in ways you
+won't see until someone else does. **Capture the real markup first; it IS the design.** This
+three-step flow gives a pixel-faithful result:
+
+1. **Capture** — render the source in headless Chromium and grab the component's `outerHTML` plus
+   the computed styles of any custom-shaped nodes. If the source is **Tailwind** (most modern sites
+   are), the class list *is* the design spec — arbitrary values (`bg-[#ff6b8b]`, `rounded-[40px]`,
+   `space-y-[-40px]`) and all. Note the **behaviour** too (what changes on select / hover).
+   - Text-match traps: labels are often mixed-case with a CSS `uppercase` transform, so search
+     **case-insensitively** (a node reads "Live Preview", not "LIVE PREVIEW").
+2. **Standalone replica** — drop the captured markup into a self-contained
+   `test-sites/<name>/index.html` with the **Tailwind Play CDN** (`https://cdn.tailwindcss.com`),
+   the source's webfonts, and any custom utilities it used (a `text-shadow` class, a keyframe).
+   **Screenshot it against the source and iterate until they match.** The design is now locked in a
+   file with no framework in the way. (CDN Tailwind is fine *here* — this is a design reference, not
+   the shipped element.)
+3. **Port** the verified replica into the element:
+   - **Tailwind → scoped CSS**: reproduce each class's value under the element's root class
+     (`rounded-[40px]` → `border-radius:40px`; `bg-pink-300` → `#f9a8d4`; `space-y-[-40px]` →
+     `margin-top:-40px` on the stacked children; `opacity-90` fill layer under a `z-10` text layer).
+     Keep the **exact markup structure**.
+   - **Hardcoded content → options** (repeaters for the repeated cards).
+   - **Behaviour → `data-*` + a small root-scoped JS** (no CDN, no inline script).
+   - **Screenshot the shipped element against the replica** — they must match.
+
+This is the difference between an "unsatisfactory" hand-built result and a faithful one: on the
+pinky-bites cupcake builder the captured markup revealed the frosting was a **white-bordered ellipse
+over a rounded-bottom base, overlapping by 40px, with white text** — none of which my measurements
+had produced. Steps 1–5 below still apply (they are the *translation*); Step 0 is how you get a
+correct thing to translate.
+
+---
+
 ## Step 1 — Audit the source before writing anything
 
 Read the source HTML, CSS and JS and write down every line that assumes it owns the page.
