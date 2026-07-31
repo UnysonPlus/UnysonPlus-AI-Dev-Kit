@@ -63,6 +63,24 @@ asset bug. **Measure it, and don't blame the image first.**
   centre **==** the title's and the gap matches the source — **diagnose the layout before touching
   the asset.**
 
+## Emojis look flat / wrong vs a non-WordPress source — disable wp-emoji
+
+WordPress rewrites every native emoji into a **Twemoji image** (`<img class="emoji"
+src="https://s.w.org/images/core/emoji/…svg">`, via the `wp-emoji` script). Twemoji's glyphs differ
+from the OS/native set — most visibly the **geometric** ones: `⚪` renders as a **shiny pale pearl**
+natively but a **flat grey circle** in Twemoji; `⚫`, `🔘`, `▪` similar. So an emoji that should match a
+**non-WordPress source** (Next.js / static / React — which render *native* emojis) looks wrong on the WP
+clone. "The emoji was captured wrong" is a red herring here: the character is correct (`⚪` = U+26AA),
+WordPress is swapping the **rendering**.
+
+- **Tell:** inspect the node — the emoji is an `<img class="emoji">`, not a text glyph.
+- **Fix:** disable wp-emoji so the browser renders native emojis (then they match the source). Scope it
+  to the one site via the **child theme's `functions.php`**:
+  `remove_action('wp_head','print_emoji_detection_script',7);`
+  `remove_action('wp_print_styles','print_emoji_styles');` (+ the feed / `wp_mail`
+  `wp_staticize_emoji*` filters and `add_filter('emoji_svg_url','__return_false')`).
+- It fixes **every** emoji on the page at once — the whole set reverts to native, matching the source.
+
 ## Icons — match by kind (only font icons get swapped)
 - **Emoji** (🏠 📞 ⏰ 💤) → reproduce the character verbatim. **Inline SVG** → copy markup / map to
   lucide. **Font icons** (`fas fa-…`) → the ONLY kind that needs translating to the target's icon set.
