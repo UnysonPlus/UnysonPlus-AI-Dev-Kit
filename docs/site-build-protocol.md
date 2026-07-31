@@ -129,11 +129,14 @@ it locally (native options / `misc_custom_css`) and move on, don't flag.
 - **DON'T flag** (these are NOT converter bugs): a bespoke/interactive widget with no shortcode equivalent
   (correctly kept **verbatim** — e.g. a custom cupcake-builder); a one-off, site-specific delta; a subjective
   design-judgment call (an AI-only residual).
-- **How — submit to the Gmail report-intake form.** Send **anonymized, structural data ONLY** with the site
-  owner's consent: source *type* (not raw content), the miss as **`element → got vs. expected`**, the relevant
-  conversion-report row(s), and **`systematic? y/n`**. **No raw third-party content.** (This is the same
-  consent-gated feedback artifact as the opt-in `--share` upstream flow — the Gmail form is the intake the
-  maintainer monitors.)
+- **How — run `--share`; it submits to the Google Form (already wired, no setup).** `node capture.mjs <url>
+  --share` sanitizes the conversion report to **structural-only** JSON (`to-share.mjs`) and POSTs it to the
+  maintainer's Google Form (`share-config.json` → `.../formResponse`; intake `unysonplus@gmail.com`). Inspect
+  first with `--share-preview` (writes `share-report.json`, sends nothing). **Always get the site owner's
+  consent** before sharing a client site's report. **Anonymized structural data ONLY** — source *type*, the
+  miss as `element → got vs. expected`, the report row, `systematic? y/n`; **no raw third-party content**.
+  Full setup + field ids: the capture service's `docs/report-sharing.md`; the maintainer ranks submissions via
+  `aggregate-reports.mjs`.
 
 ## The ordered major steps (do in THIS order)
 
