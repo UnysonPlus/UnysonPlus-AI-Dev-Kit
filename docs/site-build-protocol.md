@@ -125,6 +125,35 @@ This emits the **source of truth**: `design-config.json` (tokens → Theme Setti
 > everyone. The report/flag is the feedback artifact — **never a code fork**. Everything below (measure →
 > improve the algorithm → re-run → verify) is the maintainer's loop; a site-builder stops at flag + report.
 
+### The converter-improvement loop (the exact iteration — MAINTAINER)
+
+The concrete cycle for turning a hand-built section into a converter capability. Do this per bespoke
+region, in order:
+
+1. **Capture → run the converter FIRST**, and **pin the capture as a snapshot** (a saved DOM / HTML
+   fixture). Live sites change — a section can vanish between runs — so **every re-run tests against the
+   saved snapshot, offline and fast**, never re-hitting the network.
+2. **Inspect** the output + the **conversion report**. Chrome and headings should land right; genuinely
+   bespoke pieces fall to `code_block` (expected). The `fallback`/`opportunity` rows tell you *what* to
+   consider teaching — don't guess.
+3. **Hand-build the bespoke** section. This is not throwaway — it **defines the target node shape** the
+   mapper must emit (the known-good output you'll write the recognizer against).
+4. **Decide: recognizer or one-off?** Only write a recognizer for a **reusable** pattern (product grid,
+   pricing table, logo strip, stat row). A genuine **one-off** (a site-specific widget like a cupcake
+   builder) stays hand-built + `code_block`-swap — a recognizer for it is dead weight.
+5. **Teach the converter** — write the recognizer in **BOTH paths, kept in sync**: JS (`capture-extract`/
+   `to-pages`) **and** PHP (`Stitch`/`Mapper`). Emit the exact node shape from step 3.
+6. **Re-run against the snapshot** and **VERIFY WITH THE TOOL, not by eye** — `fidelity-check` (Lens 4 =
+   vertical spacing), ranked by delta. "Iterate until satisfied" = **iterate until the checker passes**.
+7. **Guard against regressions** — keep a tiny fixture set (a synthetic product-grid, a non-product card
+   grid, …) and re-run it so a new rule doesn't mis-fire (e.g. "card + price → wc_products" must NOT
+   catch a feature card that has no price).
+
+*Worked example (2026-07-31):* the pinky-bites "Daily Delicacy Lineup" — hand-built a WooCommerce
+`wc_products` section → wrote the "product-card grid (image + price) → wc_products" recognizer in JS +
+PHP → verified via a fixture that a product grid now emits `wc_products` (and a feature card does not).
+That's the loop end to end.
+
 **This governs every conversion and overrides any instinct to hand-build or hand-patch.** The Site Converter
 (capture service = URL/JS path **+** the **extension** = HTML/PHP path) is a *product* whose promise is: it
 converts a source into a UnysonPlus site — **child theme, header, footer, and every section — with NO AI at
