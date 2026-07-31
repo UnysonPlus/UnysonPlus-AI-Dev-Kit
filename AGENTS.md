@@ -130,8 +130,18 @@ guessing a per-page slug.)
 | `sample-shortcode/` | **The shortcode TEMPLATE** — a complete, installable skeleton of a page-builder element. Every file present and documented inline, with commented-out reference code for repeaters, uploads, dimensions, icons, conditional options and design variants. `HOW-TO.md` beside it is the procedure for porting a standalone component (a CodePen, a demo, a bought template) into an element. **Copy this folder to start a new element** — don't hand-assemble one. |
 | `unysonplus/` · `unysonplus-theme/` | The plugin + parent theme. **Assembled, gitignored** — see `assemble.ps1`. Read them for options/shortcode shapes; the working-copy source of truth is your local plugin/theme repos (siblings of this kit — see `assemble.ps1 -WorkDevRoot`). |
 | `UnysonPlus-Capture-Service/` · `UnysonPlus-Site-Converter-Extension/` | The **automated** conversion pipeline (capture service + converter). This manual kit shares their standards; keep them in sync. |
+| **`tools/README.md`** | **The TOOLS INVENTORY — organized by capability ("when you need to DO X, run Y").** Check it BEFORE concluding the kit lacks a tool or building your own. |
 
 Assembled folders are empty until you run `pwsh assemble.ps1` (see that file).
+
+> **REFLEX — need to DO something, not just read? Check [`tools/README.md`](tools/README.md) FIRST.**
+> Measuring geometry, running the comparison pass, screenshotting, capturing a source, composing a
+> page — the kit already has a self-contained tool for it (each with its **own** playwright/deps via a
+> local `npm install`). **NEVER conclude a capability is missing because one folder lacks it** — map the
+> *need* to the inventory. (This rule exists because `require('playwright')` failing in the
+> capture-service folder was wrongly read as "no playwright to verify with," while `tools/measure/` had
+> it installed and documented the whole time.) This is the tool-side twin of the "consult docs FIRST"
+> reflex above.
 
 ## Phase 0 (Setup) — make sure there's a WordPress to build into (check FIRST)
 
@@ -144,7 +154,7 @@ WordPress with the UnysonPlus plugin AND the unysonplus-theme parent active** �
 - **If nothing is set up:** run the kit's paved path — `pwsh assemble.ps1 -Source github` (fetches the
   **full plugin** from the latest release + the parent theme) then `npx @wordpress/env start` (boots
   WordPress at `http://localhost:8888` with both active). Then use `http://localhost:8888/` as the dev
-  URL. If the user already has their own WordPress, point them at **START-HERE.md → "First: a WordPress
+  URL. If the user already has their own WordPress, point them at **README.md → "First: a WordPress
   to build into" → Option B** to install the plugin + theme, and use their site URL instead.
 - **Classic Editor is required too.** Whenever the UnysonPlus plugin is installed, the **Classic
   Editor** plugin must be installed AND active (Unyson's page builder + meta boxes need the classic

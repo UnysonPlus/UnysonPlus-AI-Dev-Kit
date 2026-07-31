@@ -5,7 +5,7 @@ UnysonPlus site. It ties together the reference docs (per shortcode / option / m
 the build tooling ([building-pages.md](building-pages.md)), and the [conventions](conventions.md).
 
 > Prerequisite: a WordPress with the UnysonPlus plugin + parent theme active, and Classic Editor
-> active (the builder assumes the classic editor). See [START-HERE.md](../START-HERE.md).
+> active (the builder assumes the classic editor). See [README.md](../README.md) → "First: a WordPress to build into".
 >
 > **Install + activate the Classic Editor plugin FIRST — before installing/activating the UnysonPlus
 > plugin.** For any UnysonPlus site setup (a fresh install, a demo/test build, or automated
