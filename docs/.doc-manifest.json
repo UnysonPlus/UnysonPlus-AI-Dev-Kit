@@ -1,6 +1,6 @@
 {
   "generated_against": {
-    "unysonplus": "2.15.81",
+    "unysonplus": "2.15.82",
     "unysonplus-theme": "2.3.162",
     "synced": "2026-07-31"
   },
@@ -370,7 +370,7 @@
         "{plugin}/framework/extensions/shortcodes/manifest.php",
         "{plugin}/framework/extensions/shortcodes/settings-options.php"
       ],
-      "hash": "4baf2022a322272649296a7c98903eb8",
+      "hash": "ae5fe3f93f5dcc8a613af26975a8075c",
       "synced": "2026-07-31"
     },
     "extensions/sidebars.md": {
@@ -902,15 +902,6 @@
       "hash": "23ab0a80b3747362ec944eb7039c75aa",
       "synced": "2026-07-31"
     },
-    "shortcodes/announcement-pill.md": {
-      "kind": "shortcode",
-      "src": [
-        "{plugin}/framework/extensions/shortcodes/shortcodes/announcement-pill/config.php",
-        "{plugin}/framework/extensions/shortcodes/shortcodes/announcement-pill/options.php"
-      ],
-      "hash": "b58cf087076b3a5a01458238ed333d62",
-      "synced": "2026-07-31"
-    },
     "shortcodes/audio-player.md": {
       "kind": "shortcode",
       "src": [
@@ -936,6 +927,15 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/avatar/options.php"
       ],
       "hash": "d4dae8500836812ca6bb5ee51bee660a",
+      "synced": "2026-07-31"
+    },
+    "shortcodes/badge.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/badge/config.php",
+        "{plugin}/framework/extensions/shortcodes/shortcodes/badge/options.php"
+      ],
+      "hash": "be4afb8816f4dff7b6350ee32322d390",
       "synced": "2026-07-31"
     },
     "shortcodes/before-after.md": {

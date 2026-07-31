@@ -95,6 +95,52 @@ real misses. Skim this before and during a clone; the detail lives in the linked
   culprit: scan for elements whose `getBoundingClientRect().right > clientWidth`; toggling the suspect to
   `display:none` and seeing `scrollWidth` drop confirms it. Also offset fixed overlays below the WP
   **admin bar** (`body.admin-bar`) when logged in.
+- **The spacing + gap scales skip 2rem (32px) and 2.5rem (40px).** Both scales jump `1.5rem → 3rem`
+  (`framework/includes/presets/spacing-presets.php`), so the two most common modern/Tailwind steps —
+  `mt-8`/`gap-8` = **32px** and `pt-10` = **40px** — are **not expressible** by a native slug (section
+  padding, column `content_gap`, and `special_heading` `element_spacing` are all coarse: tight 4px /
+  relaxed 16px / normal ~48px). A faithful conversion of a Tailwind source therefore needs scoped CSS
+  for its dominant vertical rhythm. Measure the source's resolved spacing (`getComputedStyle` = the
+  Tailwind value) and set the exact px; **flag the scale gap** to the maintainer rather than rounding to
+  24/48. (Adding 32/40 natively means appended slugs — you can't renumber 0–12 without breaking saved pages.)
+- **Section "Gap" sets `--bs-gutter-y`, which cascades and double-stacks.** The Section Gap option emits
+  `.section--gap-{slug} .row` (a **descendant** combinator) setting BOTH `--bs-gutter-x` and
+  `--bs-gutter-y`; the gutter-y (a) cascades into a column's **nested** sub-column rows and (b) **adds** to
+  any explicit `margin-top` on those children — so a 48px column gap silently injects 48px between stacked
+  buttons/stats too. `gap_y:'0'` does **not** fix it (same specificity 0,2,0 as `gap`, and the `gap` rule
+  is emitted later → wins the tie). For a column gap with no vertical side-effects: **skip the section-gap
+  mechanism** — set `--bs-gutter-x` on the **top row only** via a child combinator
+  (`.hero > .fw-container > .fw-row { --bs-gutter-x: 3rem; }`), zero `--bs-gutter-y` on the hero's rows,
+  and control vertical rhythm with explicit margins.
+- **Overriding the section's default padding needs 0,2,0.** `.fw-page-builder-content > section` (0,1,1)
+  sets `padding: calc(4rem * var(--section-spacing-scale,1))`. A scoped `.my-section { padding-top:… }`
+  (0,1,0) **loses** — double the class (`.my-section.my-section { … }`) to win order-independently.
+
+## Badges / pills / chips (the `badge` shortcode — renamed from `announcement_pill`)
+- **The shortcode is `badge`** (folder `badge`, tag `[badge]`, title "Badge"). It was `announcement_pill`
+  until 2026-07-31 (direct rename, no migration — it had no saved usage). Its internal CSS classes stay
+  `.fw-announce` / `.ap-pill` and the Site Converter's internal recognizer/role token stays
+  `announcement_pill`; only the emitted shortcode is `badge`. Use it for status badges, "what's new" chips,
+  eyebrow labels and announcement bars.
+- **Match the pill spec in px, not the size preset.** A source pill/badge is typically `14px / 700 /
+  padding 8px 16px / gap 8px / radius 9999px`. The `badge` size presets resolve in `rem` and land smaller
+  (`sm` ≈ 12.48px·4px·9.9px, `md` ≈ 14px·6.4px·13.6px), and `special_heading`'s **pill overline**
+  hard-derives its own tint (`background: hsl(from currentColor h s 94.4%)`) + `.35em .75em` padding. So
+  pick the nearest size (`md` = 14px + 8px gap) for what it gets right, then set exact padding /
+  letter-spacing / bg in scoped CSS — raising specificity to beat the preset:
+  `.hero .heading-overline--pill .heading-overline__label` (0,3,0) beats the pill default (0,2,0).
+- **Never emit a bare `.badge` class** — Bootstrap ships `.badge`; keep the namespaced `.fw-announce` /
+  `.ap-pill`.
+- **Floating badges over an image → position by CENTRE, via `calc()` from the centred image.** A rotated
+  badge pinned by a corner drifts under rotation, and its offsets depend on the media box (bigger than the
+  image). Since the image is centred in its column, its edges are always at `50% ± halfWidth`. Measure the
+  source badge's centre as a % of the image, then:
+  `.badge-top { left: calc(50% - Xpx); top: calc(50% - Ypx); transform: translate(-50%,-50%) rotate(-12deg); }`
+  — `translate(-50%,-50%)` pins the centre, rotate about it. Rotation-invariant and media-box-independent.
+- **`width: max-content` on the absolute badge.** An absolutely-positioned badge whose `left` sits near the
+  container's right edge shrinks-to-fit the remaining space, and the pill's `text-overflow:ellipsis` then
+  clips the label ("Sweet Valley Favo…"). `width:max-content` (+ `.ap-pill__msg { overflow:visible }`) keeps
+  it full.
 
 ## Process
 - **Regenerate**: after settings written outside the save flow, call `unysonplus_hf_regenerate_css()` +

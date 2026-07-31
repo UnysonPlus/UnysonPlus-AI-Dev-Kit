@@ -87,7 +87,7 @@ atts. Filenames are the shortcode folder name (kebab); the tag is dashes→under
 
 **Structure / layout:** `section` · `column` · `container` · `flexbox` · `bleed-section` · `masonry-section` · `divider` · `steps` · `timeline`
 **Headings / text:** `special-heading` · `text-block` · `blockquote` · `highlight-text` · `animated-heading` · `text-expander` · `toc`
-**CTA / actions:** `button` · `call-to-action` · `announcement-pill` · `newsletter`
+**CTA / actions:** `button` · `call-to-action` · `badge` · `newsletter`
 **Cards / features:** `icon-box` · `feature-list` · `image-box` · `image-content` · `flip-box` · `pricing-table` · `team-member` · `testimonials` · `comparison-table` · `table`
 **Media:** `image` · `media-video` · `gallery` · `carousel` · `before-after` · `image-hotspots` · `lottie` · `video-popup` · `audio-player` · `logo-grid` · `avatar` · `featured-image`
 **Data / display:** `counter` · `countdown` · `progress` · `star-rating` · `calendar` · `map` · `business-info` · `tag-list`
