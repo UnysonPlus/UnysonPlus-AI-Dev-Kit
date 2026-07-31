@@ -164,11 +164,16 @@ because the source was never captured for a side-by-side.)
 
 ## Tooling (in the kit — `tools/measure/`)
 
-- **`tools/measure/fidelity-check.mjs`** — the per-element **3-lens** runner: **Lens 1** diffs the
+- **`tools/measure/fidelity-check.mjs`** — the per-element **4-lens** runner: **Lens 1** diffs the
   **full computed style** per element matched by text — font size/weight/color/family/text-transform
   **plus text-decoration, animation, box-shadow, transform, letter-spacing** (a comprehensive diff, NOT
   a curated subset, so a wavy underline or a bounce animation is *flagged*, not silently missed) + icon
-  kind + missing/extra; **Lens 2** geometry (column x, overlap); **Lens 3** pixel (pixelmatch %).
+  kind + missing/extra; **Lens 2** geometry (column x, overlap); **Lens 3** pixel (pixelmatch %);
+  **Lens 4 VERTICAL SPACING** — anchors on the region's heading, uses its parent block, and diffs the
+  **gaps between the block's children (overline/title/subtitle rhythm) + the gap BELOW the block**
+  (the `mb-16`-style container spacing), **ranked biggest-delta-first** so a VERY-obvious 44px miss
+  is reported above a subtle 2px one. This lens exists because x-positions + typography are blind to
+  vertical rhythm — the single most-visible dimension and the one that kept slipping through by eye.
   `node tools/measure/fidelity-check.mjs <srcUrl> <srcSel> <buildUrl> <buildSel>` — run it **per region**.
   Deps (`npm i` in `tools/measure`): playwright, pngjs, pixelmatch, sharp.
 - **`tools/measure/compare.mjs`** — the region-level **ensemble** (geometry + pixel + perceptual +

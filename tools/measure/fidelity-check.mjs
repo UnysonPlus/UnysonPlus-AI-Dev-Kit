@@ -56,8 +56,28 @@ async function capture(page, url, sel) {
     });
     return out;
   }, sel);
+  // Vertical rhythm, measured RELIABLY by anchoring on the region's heading and using its PARENT
+  // block: the gaps between that block's own children (overline/title/subtitle) + the block's gap to
+  // its next sibling (the "gap below the heading block" — the mb-16 the whole-region scan can't see).
+  const headingSpacing = await page.evaluate((sel) => {
+    const root = document.querySelector(sel); if (!root) return null;
+    const h = root.querySelector('h1,h2,h3,h4,h5,h6'); if (!h) return null;
+    const block = h.parentElement;
+    const lab = (e) => (e.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 14) || e.tagName.toLowerCase();
+    const kids = [...block.children].filter((e) => e.getBoundingClientRect().height > 2);
+    const gaps = [];
+    for (let i = 1; i < kids.length; i++) {
+      gaps.push({ px: Math.round(kids[i].getBoundingClientRect().top - kids[i - 1].getBoundingClientRect().bottom), a: lab(kids[i - 1]), b: lab(kids[i]) });
+    }
+    const nx = block.nextElementSibling;
+    return {
+      gaps,
+      belowGap: nx ? Math.round(nx.getBoundingClientRect().top - block.getBoundingClientRect().bottom) : null,
+      belowLabel: nx ? lab(nx) : '', mb: getComputedStyle(block).marginBottom,
+    };
+  }, sel);
   const shot = await region.screenshot();
-  return { spec, shot };
+  return { spec, shot, headingSpacing };
 }
 
 const key = (e) => e.text.toLowerCase().replace(/^[^a-z0-9$]+/i, '').slice(0, 40).trim();
@@ -124,3 +144,31 @@ if (S.shot && M.shot) {
   const n = pixelmatch(A.data, C.data, out.data, W, H, { threshold: 0.12 });
   console.log(`  ${(100 * n / (W * H)).toFixed(1)}% pixels differ`);
 } else console.log('  (region shot missing)');
+
+// ---- Lens 4: vertical spacing (stacked row gaps + region bottom margin), RANKED by delta ----
+// The most-visible dimension and the one x-positions/typography can't see. Ranked biggest-first,
+// so a VERY obvious 44px miss is reported above a subtle 2px one.
+console.log('\n===== LENS 4 — vertical spacing (heading block, ranked: most obvious first) =====');
+const HS = S.headingSpacing, HM = M.headingSpacing;
+let l4 = 0;
+if (!HS || !HM) { console.log('  (no heading block found in one side — skipped)'); }
+else {
+  const fmt = (h) => h.gaps.map((g) => `${g.px}[${g.a}→${g.b}]`).join(' ') + `  | below→"${h.belowLabel}": ${h.belowGap}px`;
+  console.log('  SRC:', fmt(HS));
+  console.log('  BLD:', fmt(HM));
+  const flags = [];
+  for (let i = 0; i < Math.min(HS.gaps.length, HM.gaps.length); i++) {
+    const d = Math.abs(HS.gaps[i].px - HM.gaps[i].px);
+    if (d > 4) flags.push({ d, msg: `gap "${HS.gaps[i].a}"↕"${HS.gaps[i].b}": ${HS.gaps[i].px}px → ${HM.gaps[i].px}px  (Δ${d})` });
+  }
+  if (HS.belowGap != null && HM.belowGap != null) {
+    const d = Math.abs(HS.belowGap - HM.belowGap);
+    if (d > 6) flags.push({ d, msg: `GAP BELOW heading block: ${HS.belowGap}px → ${HM.belowGap}px  (Δ${d})` });
+  }
+  if (HS.gaps.length !== HM.gaps.length) console.log(`  ⚠ child count differs: SRC ${HS.gaps.length + 1} vs BUILD ${HM.gaps.length + 1}`);
+  flags.sort((a, c) => c.d - a.d);
+  for (const f of flags) console.log(`  ⚠ ${f.msg}`);
+  l4 = flags.length;
+  if (!l4) console.log('  ✓ vertical spacing matches');
+}
+process.exit(l4 ? 1 : 0);
