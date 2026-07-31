@@ -36,6 +36,28 @@ real misses. Skim this before and during a clone; the detail lives in the linked
   The kit's `tools/measure/fidelity-check.mjs` (`getBoundingClientRect` + `getComputedStyle` on both
   source and yours) turns "the footer feels off" into "blurb→social is 24px, source is 16px → `mt-3`".
 
+## Logos & image assets — verify TRANSPARENCY before using one
+
+A logo / mark image (especially an **AI-generated or CDN-sourced** one) frequently ships with a
+**baked-in background** — a dark or blurry rectangle instead of real transparency. Dropped in as a
+logo it either shows that background on any non-matching surface, or gets half-hidden by a white
+logo-chip while `object-fit:cover` crops the mark **smaller and inset** (the tell: the cupcake
+looks shrunken inside its chip). The source's `…_nobg` / `…greenscreen_nobg` filename is the hint
+that *their* asset was background-removed and yours must be too.
+
+- **Verify the ASSET, not just the rendered chip.** A white chip masks a bad background — "it
+  looks fine in the footer" is not proof. Open the file, and preview it on **both a light and a
+  dark background** (a truly transparent PNG is clean on both; a baked-bg one shows its rectangle).
+- **Remove the background if it has one.** No ImageMagick in this environment, so use a headless
+  **Chromium canvas flood-fill from the four borders**: mark border-connected pixels below a
+  luminance threshold transparent (preserves interior darks — eyes, outline — because they aren't
+  border-connected). `tools/measure`-style Playwright script; ~30 lines. Replace the master **and
+  every WordPress size variant** (`-100x100`, `-150x150`, … — WP won't regenerate them on its own).
+- **At the source:** when an importer **sideloads** a logo from a URL you don't control, treat the
+  downloaded file as suspect — background-remove it in place after sideload, and note it in the
+  importer so a fresh re-import isn't a surprise. (A one-time sideload guarded by an option keeps a
+  hand-fixed file, but a clean re-download will bring the baked background back.)
+
 ## Icons — match by kind (only font icons get swapped)
 - **Emoji** (🏠 📞 ⏰ 💤) → reproduce the character verbatim. **Inline SVG** → copy markup / map to
   lucide. **Font icons** (`fas fa-…`) → the ONLY kind that needs translating to the target's icon set.
