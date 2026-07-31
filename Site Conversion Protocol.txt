@@ -1,42 +1,12 @@
-The protocol — major steps
-Phase 0 · Setup
+MOVED — this file is retired.
 
-Confirm it's a conversion (source URL/files exist) vs. a fresh build.
-Capture service ready (node_modules installed); Classic Editor installed+activated before the UnysonPlus plugin.
-Phase 1 · CAPTURE/CONVERT — run the deterministic converter, don't hand-measure
+The canonical, complete, always-current site-conversion / site-build protocol is:
 
-Detect a conversion by the presence of a SOURCE (URL / screenshot / HTML-CSS / named template), not by a keyword. Site-builder: run the capture service — node capture.mjs <url> capture-out/ (UnysonPlus-Capture-Service/tools/design-capture) — then import its output and build. Maintainer/contributor (has the repos): ALSO run the Site Converter EXTENSION (PHP Mapper/Stitch) on the captured markup and improve BOTH paths (JS + PHP) from the conversion report in Phase 5 — so each run makes the converter smarter and saves tokens. Emits the source of truth: design-config (tokens), pages.json (per-section shortcode JSON), conversion-report (fallbacks), style-coverage, animations, screenshot, theme bundle.
-No reverse-engineering by eye. The capture is the measurement.
-(A from-scratch / fresh build has nothing to convert — it skips Phase 1 and starts at Phase 2.)
-Phase 2 · DESIGN SYSTEM FIRST — from the captured tokens
+    docs/site-build-protocol.md
 
-Apply design-config → Theme Settings: colors palette, typography (per-heading scale), container width, buttons, boxes, spacing. Verify tokens before any section.
-Phase 3 · CHROME — header + footer, match the source exactly
+That is the AUTHORITATIVE checklist. This .txt used to hold a partial copy of the "major steps"
+and silently omitted several required steps (the Tailwind detect-then-translate rule, the header/
+footer value shapes, the icon-by-kind rule, the per-section checklist, and the recurring-miss
+checklist). To avoid two copies drifting apart, the content now lives only in the markdown file.
 
-Build header (logo lockup, nav, right element, topbar) + footer (widget columns + copyright) from Theme Settings + native elements. Lock these first — the whole site is judged by them.
-VERIFY EACH region separately and LOOP until PASS: the HEADER is its own gated region (run fidelity-check.mjs source-vs-build, fix, re-run until PASS), THEN the FOOTER is its own gated region. Never verify against memory (that is how a whole announcement topbar shipped missing). Also confirm webfonts actually LOADED (document.fonts.check), not just declared.
-Phase 4 · SECTIONS — grab→convert, region-by-region (top-to-bottom)
-For each section, in order, don't advance until it matches:
-
-Start from the converter's section output as the scaffold.
-Decompose code_block fallbacks into real shortcodes + Theme Settings (the editable deliverable).
-Keep bespoke pieces hand-crafted (custom shortcodes, WooCommerce) — don't flatten to code_block.
-Un-expressible decor → code_block + scoped child CSS, and flag it.
-EACH section is its own gated region: RUN tools/measure/fidelity-check.mjs (source vs build, 3 lenses) and LOOP run→fix→re-run until PASS before building the next section.
-AFTER all sections: run an OVERALL FULL-PAGE PASS on the assembled page (source full.png vs a full-page shot of the build, via compare.mjs / pixel+perceptual). It catches what per-region checks can't: inter-section spacing/rhythm, cross-section consistency drift, sticky-header overlap, page height/proportion. A per-region PASS does NOT imply a whole-page PASS. Loop until PASS or written waiver.
-Phase 5 · ANALYZE REPORT + IMPROVE THE CONVERTER
-
-Review fallbacks/opportunities/styling-drops; improve the converter (JS to-pages/capture-extract and PHP Mapper/Stitch kept in sync) so next time has fewer fallbacks. Delete the analyzed capture from capture-out/.
-Phase 6 · MOTION — add Animation Engine effects from the captured animations.json.
-
-Phase 7 · SHIP GATE — a11y/SEO/perf checklist, "opens+editable in the builder" check, verify by looking, version bump, localhost mirror, demos-home card, doc in the AI Dev Kit.
-
-Cross-cutting rules (apply throughout)
-Verify = a TEST, not a glance — run the comparison tools (tools/measure/fidelity-check.mjs, and compare.mjs for a second opinion) per region against the SOURCE, and LOOP: run → if not PASS, fix from the measured diff → re-run → repeat until PASS. Don't advance on red. PASS = Lens 1 zero unexplained missing/extra + no material property diff, Lens 2 no overlaps, Lens 3 pixel under the region target. Every residual is either fixed or a WRITTEN waiver (decorative flourish out of scope / known tool artifact). Silence is not a pass.
-Capture-first — grab/measure from the converter, never guess.
-Framework options > child CSS — child CSS only for genuine pixel tweaks/decor.
-Flag anything that can't translate cleanly — ask/note, don't silently approximate.
-Fixing ≠ redesigning — ask before altering a design decision.
-Don't over-replicate decorative flourishes.
-Keep it editable/on-brand — convert to shortcodes, not raw HTML blobs.
-Doc everything in the AI Dev Kit; keep the converter's JS↔PHP paths in sync.
+Agents: read docs/site-build-protocol.md — start with "THE PER-SECTION CHECKLIST".

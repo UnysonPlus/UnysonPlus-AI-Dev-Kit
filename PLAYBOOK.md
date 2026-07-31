@@ -10,9 +10,16 @@ release zip); `-Source local` copies them from sibling working copies instead. T
 installs tool deps. Shape references: `docs/` (shortcodes / option-types / theme-settings / animation-engine).
 Metrics: `design-parity-checklist.md`.
 
+> **This is the condensed practical view. The AUTHORITATIVE, complete checklist is
+> [`docs/site-build-protocol.md`](docs/site-build-protocol.md)** — where the two differ, the protocol wins,
+> and the **canonical Phase numbers are the protocol's** (0 Setup · 1 Capture · 2 Design system · 3 Chrome
+> · 4 Sections · 5 Report · 6 Motion · 7 Ship). The headings below use those same numbers so a Phase number
+> means the same thing in both docs. **Before each section, run the protocol's PER-SECTION CHECKLIST in full
+> — Phase 4 here is only a summary of it.**
+
 ---
 
-## Phase 0 — Convert (automated first pass)
+## Phase 1 — Capture / Convert (automated first pass)
 
 **Don't hand-build from a blank page, and don't ask the user for source files — for a URL, run the
 capture service FIRST, automatically.** `capture.mjs` renders the page in a real browser, so a single
@@ -20,7 +27,7 @@ URL gets you the **full rendered DOM** (JS-built content + inline SVGs — you n
 them), the **downloaded media**, AND the **computed styles** (exact colors/spacing that no static HTML
 carries), then maps sections → shortcodes and tokens → presets. This is the default first move — do it
 before any hand-building. One-time setup: `cd UnysonPlus-Capture-Service/tools/design-capture && npm install` (deps; needs system Google Chrome).
-Only fall back to a manual bundle (Phase 0b) when there's **no URL**, or Node/Playwright isn't available.
+Only fall back to a manual bundle (Phase 2a) when there's **no URL**, or Node/Playwright isn't available.
 
 > **Lesson baked in:** skipping this and hand-building from scratch is what forces you to ask the user
 > for assets (SVGs, the hero video) that the capture already had. Capture first, *then* refine.
@@ -60,7 +67,7 @@ Import the bundle into the dev site (the `site-converter` extension's import), t
 The converter reliably gets **typography, colors, and chrome structure**; it still misses **bespoke**
 design — that's the delta Phases 1–3 (below) close, applied to its output instead of a blank page.
 
-## Phase 0b — Read the mockup's OUTER layers first (when NOT converting)
+## Phase 2a — Read the mockup's OUTER layers first (fresh build — when NOT converting)
 
 **Source artifacts — capture the RENDERED DOM, and get BOTH files.** For a JS-rendered / SPA source
 (React, Next, Vue…), `view-source` is only the hydration shell — the real content and inline SVGs
@@ -84,7 +91,7 @@ them down — they are the spec you build to):
 
 Do **not** start with the logo or a hero graphic. Start with the frame.
 
-## Phase 1 — Lock the CHROME + CONTAINER to parity (native options only)
+## Phases 2–3 — Design system + lock the CHROME + CONTAINER to parity (native options only)
 
 This is the phase that makes "header and footer already perfect" true. Nothing else
 happens until this passes the parity check.
@@ -106,7 +113,7 @@ happens until this passes the parity check.
    you move on. CSS in the child `assets/chrome.css` is a **last resort** for things no
    option covers — log each as an enhancement candidate.
 
-## Phase 2 — Section / row skeleton
+## Phase 4 — Sections: section / row skeleton
 
 Build the page structure before content, in the page builder (or via the builder JSON):
 
@@ -118,7 +125,7 @@ Build the page structure before content, in the page builder (or via the builder
 3. **Measure** section paddings + column widths against the mockup. Get the skeleton
    right with empty/placeholder columns before filling them.
 
-## Phase 3 — Fill elements (hard ones as placeholders first)
+## Phase 4 (cont.) — Fill elements (hard ones as placeholders first)
 
 1. Drop in the simple elements (special_heading, text_block, image, button, accordion).
 2. **A hard element** (e.g. a reviews-table, a bespoke comparison grid) goes in as a

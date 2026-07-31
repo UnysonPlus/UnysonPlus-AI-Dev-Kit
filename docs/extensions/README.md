@@ -12,6 +12,7 @@ shapes live in `../shortcodes/`, `../option-types/`, `../theme-settings/README.m
 | **shortcodes** | **yes** (core) | The page-builder + all core shortcodes → `../shortcodes/` |
 | **snippets** | **yes** | Reusable code/HTML snippets |
 | `animation-engine` | **no** (activate in Extensions) | 21 effect modules → `../animation-engine/`; 6 shortcodes (gallery-3d, image-sequence, model-viewer, svg-draw, svg-morph, webgl-object) |
+| `animated-icons` | no | Adds an **"Animated"** tab to the icon picker so any icon option (`icon`/`icon-v2`/`icon-v3`) can use an animated icon → `animated-icons.md` |
 | `megamenu` | no | Mega-menu builder for header nav (see `../theme-settings/README.md` Header → Menu) |
 | `forms` | no | `[contact-form]` + a form-builder option type (needs `builder` + `mailer`) |
 | `portfolio` | no | `portfolio` CPT + `portfolio` / `project-gallery` shortcodes |

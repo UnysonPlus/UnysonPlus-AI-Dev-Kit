@@ -81,11 +81,11 @@ every sub-shape must be present (that's why the wrapper blocks above are always 
 
 ## Index (this folder)
 
-**Every shortcode has its own file here** (~76 total) — open `docs/shortcodes/<name>.md` for its
+**Every shortcode has its own file here** (~90 total) — open `docs/shortcodes/<name>.md` for its
 atts. Filenames are the shortcode folder name (kebab); the tag is dashes→underscores
 (`call-to-action.md` → `call_to_action`). `image.md` = the `media_image` shortcode.
 
-**Structure / layout:** `section` · `column` · `container` · `flexbox` · `bleed-section` · `masonry-section` · `divider` · `steps` · `timeline`
+**Structure / layout:** `section` · `row` · `column` · `container` · `flexbox` · `bleed-section` · `masonry-section` · `divider` · `steps` · `timeline`
 **Headings / text:** `special-heading` · `text-block` · `blockquote` · `highlight-text` · `animated-heading` · `text-expander` · `toc`
 **CTA / actions:** `button` · `call-to-action` · `badge` · `newsletter`
 **Cards / features:** `icon-box` · `feature-list` · `image-box` · `image-content` · `flip-box` · `pricing-table` · `team-member` · `testimonials` · `comparison-table` · `table`
@@ -94,6 +94,7 @@ atts. Filenames are the shortcode folder name (kebab); the tag is dashes→under
 **Interactive:** `accordion` · `tabs` · `tooltip` · `modal-popup` · `scroll-indicator` · `scroll-to-top` · `menu-toggle`
 **Icons / social:** `icon` · `social-icons` · `social-share` · `notification`
 **Site / dynamic:** `site-logo` · `nav-menu` · `site-search` · `widget-area` · `code-block` · `posts` · `post-carousel` · `post-title` · `post-content` · `post-excerpt` · `post-meta` · `post-author` · `post-date` · `post-terms` · `author-box`
+**Extension-sourced (portfolio / forms / animation-engine):** `contact-form` · `portfolio` · `project-details` · `project-gallery` · `project-nav` · `project-results` · `project-testimonial` · `related-projects` · `gallery-3d` · `model-viewer` · `webgl-object` · `image-sequence` · `svg-draw` · `svg-morph`  *(WooCommerce elements — `wc_products`, `wc_mini_cart`, `wc_cart_link`, … — are in [`../extensions/woocommerce.md`](../extensions/woocommerce.md).)*
 
 **Colors on elements:** use the compact color-preset field (`{predefined:'text-<slug>'|'bg-<slug>',custom}`),
 not raw hex — see `../option-types/compact-color.md`. **Value shapes** for option types live in

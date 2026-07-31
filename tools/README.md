@@ -15,10 +15,11 @@ from a global install or a personal copy.
 | When you need to… | Tool | Setup |
 |---|---|---|
 | **Read an element's real geometry / type / colour** (stop eyeballing — a 0,0 bbox is not proof) | `tools/measure/measure.mjs <mockupUrl> <devUrl>` | `npm i` in `tools/measure` |
-| **Run the fidelity comparison pass** on a region (source ↔ build): typography + geometry + pixel | `tools/measure/fidelity-check.mjs <srcUrl> <srcSel> <buildUrl> <buildSel>` | ″ |
+| **Run the fidelity comparison pass** on a region (source ↔ build): typography + geometry + pixel + **vertical spacing (Lens 4)** | `tools/measure/fidelity-check.mjs <srcUrl> <srcSel> <buildUrl> <buildSel>` | ″ |
 | **Region ensemble** — geometry + pixelmatch + Resemble.js + DOM-structure, fail-loud | `tools/measure/compare.mjs` | ″ |
 | **Full-body property diff** — named computed-style deltas across the whole page | `tools/measure/props.mjs` | ″ |
 | **Capture / convert a source site** (Phase 1 — the deterministic converter) | `UnysonPlus-Capture-Service/tools/design-capture/capture.mjs <url> capture-out/` | `npm i` in that folder (its **own** playwright) |
+| **Colour-contrast / a11y check** (ship gate) | `UnysonPlus-Capture-Service/tools/design-capture/contrast.mjs` — or read the capture's `contrast-review.csv` | `npm i` in the design-capture folder |
 | **Compose UnysonPlus builder pages programmatically** (sections/columns/elements + effects, still editable) | `tools/upw-build-pages.php` (via `wp eval-file`) + `docs/building-pages.md` | WP-CLI on a live install |
 | **Record / verify the docs manifest** after editing a doc | `docs/sync.mjs check | stamp <doc> | build` | node (no deps) |
 

@@ -61,16 +61,33 @@ const SC_OVERRIDE = {
   'related-projects': EXT && join(EXT, 'portfolio/shortcodes/related-projects'),
 };
 
+// Docs that are INTENTIONALLY source-less — prose/workflow guides and AGGREGATE reference docs whose
+// subject is spread across many classes with no single 1:1 source dir. Listed explicitly so `check`
+// reports them as 'narrative (by design)' instead of 'UNRESOLVED — check the resolver' (which hid their
+// drift risk among genuine resolver failures). Review these by hand when the underlying surface changes.
+const NARRATIVE = new Set([
+  // top-level guides
+  'build-a-site.md', 'building-pages.md', 'cloning-gotchas.md', 'conventions.md',
+  'extending.md', 'fidelity-verification.md', 'site-build-protocol.md',
+  // aggregate reference docs (no single source dir)
+  'option-types/containers.md', 'option-types/declaring-options.md', 'option-types/icon-v2.md',
+  'option-types/icon-v3.md', 'option-types/primitives.md', 'theme-settings/programmatic-setup.md',
+]);
+
 function sourcesFor(docRel) {
   const slash = docRel.indexOf('/');
   const folder = slash < 0 ? '' : docRel.slice(0, slash);
   const base = docRel.slice(slash + 1).replace(/\.md$/, '');
   if (docRel.endsWith('README.md')) return { kind: 'index', src: [] };
+  if (NARRATIVE.has(docRel)) return { kind: 'narrative', src: [] };
 
   if (folder === 'shortcodes') {
     const dir = SC_OVERRIDE[base] || (SC && join(SC, base));
     if (!dir || !existsSync(dir)) return { kind: 'shortcode', src: [] };
-    return { kind: 'shortcode', src: glob(dir, /^(options|config)\.php$/) };
+    let src = glob(dir, /^(options|config)\.php$/);
+    // Structural shortcodes (e.g. `row`) have no options/config — hash-track the shortcode class instead.
+    if (!src.length) src = glob(dir, /^class-fw-shortcode-.*\.php$/);
+    return { kind: 'shortcode', src };
   }
   if (folder === 'option-types') {
     const name = base === 'compact-color' ? 'predefined-colors-color-picker-compact' : base;
@@ -139,6 +156,7 @@ function build() {
   for (const d of allDocs()) {
     const { kind, src } = sourcesFor(d);
     if (kind === 'index') continue;
+    if (kind === 'narrative') { docs[d] = { kind, src: [], hash: null, synced: today, note: 'narrative — intentionally source-less (aggregate/how-to); review by hand' }; continue; }
     if (!src.length) { unresolved++; docs[d] = { kind, src: [], hash: null, synced: today, note: 'UNRESOLVED — no source found' }; continue; }
     docs[d] = { kind, src: src.map(rel), hash: hashOf(src), synced: today };
   }
@@ -151,11 +169,12 @@ function loadManifest() { if (!existsSync(MANIFEST)) { console.error('No .doc-ma
 function check() {
   if (!PLUGIN || !THEME) { console.error('Source not found (need the plugin/theme to hash). Set KIT_SRC_* or assemble -WithSource.'); process.exit(1); }
   const man = loadManifest();
-  const stale = [], missingSrc = [], newDocs = [], unresolved = [];
+  const stale = [], missingSrc = [], newDocs = [], unresolved = [], narrative = [];
   const known = new Set(Object.keys(man.docs));
   for (const d of allDocs()) {
     if (d.endsWith('README.md')) continue;
-    const { src } = sourcesFor(d);
+    const { kind, src } = sourcesFor(d);
+    if (kind === 'narrative') { narrative.push(d); continue; }
     if (!src.length) { unresolved.push(d); continue; }
     if (!known.has(d)) { newDocs.push(d); continue; }
     const cur = hashOf(src);
@@ -168,6 +187,7 @@ function check() {
   p('STALE — source changed, regenerate these docs', stale);
   p('NEW — doc has no manifest entry, run stamp', newDocs);
   p('UNRESOLVED — no source file matched (check the resolver)', unresolved);
+  p('NARRATIVE — intentionally source-less (aggregate/how-to; review by hand)', narrative);
   if (!stale.length && !newDocs.length) console.log('\n✓ all docs in sync with source.');
   else console.log(`\n→ regenerate the STALE/NEW docs, then: node docs/sync.mjs stamp ${[...stale, ...newDocs].join(' ')}`);
 }

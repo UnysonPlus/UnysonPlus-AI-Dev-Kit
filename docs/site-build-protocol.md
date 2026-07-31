@@ -35,7 +35,7 @@ enforceable checklist + the exact value shapes.
 > wait to be told to follow it — following it is the default; *not* following it is the exception you
 > must justify.
 
-> **Phase numbering (matches `Site Conversion Protocol.txt`):** **Phase 0 = Setup** (fresh WordPress,
+> **Phase numbering (canonical — used across this protocol + PLAYBOOK.md):** **Phase 0 = Setup** (fresh WordPress,
 > Classic Editor before UnysonPlus, capture service ready) · **Phase 1 = Capture** · then Design system
 > → Chrome → Sections → Report → Motion → Ship gate. "Capture-first" below is the **gate/principle**, not
 > a phase number — it lives *inside* Phase 0 and forces Phase 1 before any building.
@@ -142,7 +142,9 @@ region, in order:
    pricing table, logo strip, stat row). A genuine **one-off** (a site-specific widget like a cupcake
    builder) stays hand-built + `code_block`-swap — a recognizer for it is dead weight.
 5. **Teach the converter** — write the recognizer in **BOTH paths, kept in sync**: JS (`capture-extract`/
-   `to-pages`) **and** PHP (`Stitch`/`Mapper`). Emit the exact node shape from step 3.
+   `to-pages`) **and** PHP (`Stitch`/`Mapper`). Emit the exact node shape from step 3. For a Tailwind
+   source, the recognizer must also **carry the Tailwind→token translation** (Rule 0.6 step 4) — emit
+   native options, not raw utility classes that die in the builder.
 6. **Re-run against the snapshot** and **VERIFY WITH THE TOOL, not by eye** — `fidelity-check` (Lens 4 =
    vertical spacing), ranked by delta. "Iterate until satisfied" = **iterate until the checker passes**.
 7. **Guard against regressions** — keep a tiny fixture set (a synthetic product-grid, a non-product card
@@ -224,7 +226,7 @@ it locally (native options / `misc_custom_css`) and move on, don't flag.
 | **1 · Capture/Convert** | **Conversion only** (fresh builds skip — nothing to convert). Run the **capture service** (`capture.mjs`, URL path) → design-config, pages.json, conversion-report — **the source of truth, never hand-measure**. *Maintainers* also run the Site Converter **extension** (PHP) + improve both paths in Phase 5 (site-builders just import). | Rule 0.5 |
 | **2 · Design system** | *(Fresh builds start here.)* Apply the design tokens (captured for a conversion; chosen for the brief on a fresh build) → **Theme Settings** (colors, typography scale, container width, buttons, boxes, spacing). Verify *before* sections. | Rule 1 |
 | **3 · Chrome** | Header + footer to **match the source exactly**, from Theme Settings + native elements. Lock first. | Rules 0, 2, 3 |
-| **4 · Sections** | Region-by-region top-to-bottom from the **converter's section output**: decompose `code_block` fallbacks into shortcodes + Theme Settings (editable); keep bespoke pieces (custom shortcodes, Woo) hand-crafted; un-expressible decor → `code_block` + scoped child CSS (flag it). Don't advance until each matches. | Rule 4 |
+| **4 · Sections** | For EACH section, run **[THE PER-SECTION CHECKLIST](#-the-per-section-checklist--run-all-of-these-for-every-section-the-authoritative-gate)** in full (converter output → **Tailwind translate (0.6)** → native options → swap bespoke `code_block`s for real shortcodes → **4-lens fidelity verify** → flag residuals → teach the converter). Don't advance until each PASSES. | The per-section checklist + Rules 0.6, 4, −1 |
 | **5 · Report → improve** | Analyze the conversion-report; improve the converter (JS `to-pages`/`capture-extract` **and** PHP `Mapper`/`Stitch`, kept in sync) so next time has fewer fallbacks. Delete the analyzed capture. | — |
 | **6 · Motion** | Add Animation Engine effects from `animations.json`. | build-a-site.md §4 |
 | **7 · Ship gate** | a11y/SEO/perf; opens+editable in the builder; verify by looking; version bump; localhost mirror; demos-home card; **doc in the Dev Kit**. | Rule 4 + conventions |
@@ -234,6 +236,47 @@ it locally (native options / `misc_custom_css`) and move on, don't flag.
 **fixing ≠ redesigning** ([conventions §0](conventions.md)) · don't over-replicate decorative
 flourishes · keep it **editable/on-brand** (shortcodes, not raw HTML blobs) · doc everything + keep the
 converter's JS↔PHP paths in sync.
+
+## ✅ THE PER-SECTION CHECKLIST — run ALL of these for EVERY section (the authoritative gate)
+
+> **READ THIS BEFORE BUILDING EACH SECTION — every time, from the top. Do NOT work from memory.**
+> These steps are **cumulative, not a menu**: adding a new procedure (a converter recognizer, a Woo
+> flow, anything) **NEVER replaces** the steps below — they ALL still apply to every section. The #1
+> recurring failure is following the newest procedure and silently dropping an earlier one (e.g. doing
+> the WooCommerce/converter work and skipping the **Tailwind→CSS translation**). This list exists so
+> that can't happen: open it fresh for each section and tick every box.
+
+For the section you're on, in order:
+
+1. **[ ] Start from the converter's section output — never hand-build from scratch.** Import the
+   `pages.json` node for this section (capture-first gate + Rule 0.5). A bespoke piece the converter
+   couldn't map arrives as a `code_block` — that's expected; you'll swap it (step 4).
+2. **[ ] DETECT + TRANSLATE Tailwind (Rule 0.6) — do NOT skip this and do NOT eyeball.** If the source
+   is Tailwind (it usually is), read each element's **full `class` attribute** and translate the whole
+   list → framework **native options / preset scales** (radius, shadow, border, padding, type, gap,
+   colors), cross-checked against computed styles. This is the step most often dropped. See
+   [Rule 0.6](#rule-06--tailwind-sources-detect-first-then-translate-the-class-list-dont-eyeball-computed-styles).
+3. **[ ] Native framework options BEFORE any child CSS.** Set the translated tokens through the owning
+   option (Theme Settings / the element's options), not a CSS patch. `misc_custom_css` / scoped child
+   CSS is ONLY for a genuine pixel tweak or decor the options can't express — and every such use is
+   **flagged**.
+4. **[ ] Bespoke pieces → the real shortcode, not a raw HTML blob.** Swap each `code_block` placeholder
+   for a proper element; to build a new one use [`sample-shortcode/HOW-TO.md`](../sample-shortcode/HOW-TO.md)
+   (capture → replica → port → teach-the-converter). A store section → real WooCommerce (Rule 5).
+5. **[ ] VERIFY with `fidelity-check.mjs` — ALL FOUR lenses, including vertical spacing — LOOK, don't
+   grep.** Run → fix from the measured diff → re-run until the region **PASSES** (typography, geometry,
+   **vertical spacing / gaps**, pixel; [fidelity-verification.md](fidelity-verification.md)). List every
+   **missing** element the build dropped (badge, description, rating). Don't advance until it PASSES.
+6. **[ ] Flag residuals.** Anything that couldn't translate cleanly = a native-option fallback or a
+   flagged scoped-CSS delta — recorded, not hidden.
+7. **[ ] Reusable fallback? Teach the converter (maintainer).** If the `code_block` fallback is a
+   *reusable* pattern (product grid, pricing table, logo strip), run the **converter-improvement loop**
+   ([Rule −1](#rule--1--converter-first-region-loop-fix-the-algorithm-not-the-output-the-token-saver--the-product))
+   — write the recognizer in JS + PHP, re-run against the pinned snapshot, verify. A genuine one-off
+   stays a hand-built swap.
+
+**None of these is optional, and none is replaced by a later/newer instruction.** If you catch yourself
+about to hand-measure, hand-style, or skip the Tailwind translation, STOP — you dropped a step above.
 
 ## Rule 0 — The header and footer MUST look EXACTLY like the source
 
@@ -360,15 +403,6 @@ header/footer), the way the reference demos do (`<slug>-colors.php` / `-typograp
     (match the source's frame — often none). It stays user-replaceable for the later rebrand. Only fall
     back to a generic lucide icon if the source has no logo image.
 
-## Rule 1.6 — Media: sideload the source's REAL assets so the output matches
-
-The converter exists to make the output the **same as the source** — so its media handling **sideloads
-the source's actual assets** (logo, hero/section images, product photos, video, avatars) into the WP
-**Media Library**, and references them as real, **user-replaceable** elements/options (never hot-linked,
-never baked into CSS/markup as the only path). Pixel-parity now; the user swaps in their own brand media
-later through the builder (that's the converter's promise — see [conventions.md](conventions.md) §4).
-Do this for **every** image the source uses, the **logo included** — treating the logo differently from
-the other media breaks "output = source".
 - **`header_main`** — `main_left` / `main_center` / `main_right`, each an **addable-popup element
   list**: `array( array('element_type'=>array('element'=>'<type>', '<type>'=>array(...))) )`. Element
   types: `logo`, `menu_area` (`menu_location`=>'primary'), `cta_button`
@@ -379,6 +413,16 @@ the other media breaks "output = source".
   anchors), then `set_theme_mod('nav_menu_locations', ['primary'=>$menu_id])`.
 - **`header_menu`** — link color / hover / font-size. **`header_topbar`** — announcement strip (a
   `custom_html` element in `topbar_center`) when the source has one.
+
+## Rule 2.5 — Media: sideload the source's REAL assets so the output matches
+
+The converter exists to make the output the **same as the source** — so its media handling **sideloads
+the source's actual assets** (logo, hero/section images, product photos, video, avatars) into the WP
+**Media Library**, and references them as real, **user-replaceable** elements/options (never hot-linked,
+never baked into CSS/markup as the only path). Pixel-parity now; the user swaps in their own brand media
+later through the builder (that's the converter's promise — see [conventions.md](conventions.md) §4).
+Do this for **every** image the source uses, the **logo included** — treating the logo differently from
+the other media breaks "output = source".
 
 ## Rule 3 — Footer value shapes
 
@@ -491,6 +535,10 @@ text but not the hairline divider above it.
   Approximating (an emoji for an icon, a guessed padding) is the root cause of recurring misses.
   Tooling: a semantic-region visual differ (side-by-side + pixelmatch %) and a text-keyed DOM diff that
   reports font + box-model + icon + missing/extra.
+- **Verification only confirms what step 2 of the per-section checklist should already have produced:**
+  the values come from **translating the source's Tailwind class list (Rule 0.6)** into native options —
+  not from eyeballing the render. If fidelity-check flags a box-model/spacing miss, the usual cause is a
+  **skipped or partial Tailwind translation**; go back and translate the class list, don't patch by eye.
 
 ## Rule 5 — Store detection
 
@@ -499,6 +547,13 @@ Cart/basket buttons + per-item prices + a Shop/Menu nav ⇒ it's a **WooCommerce
 chrome. Don't build a store as static cards. See [extensions/woocommerce.md](extensions/woocommerce.md).
 
 ## The recurring-miss checklist (tick before declaring a site done)
+
+> **Scope: this is the CHROME + whole-site SHIP checklist.** It is **not** the section-build list — for
+> each section you run **[THE PER-SECTION CHECKLIST](#-the-per-section-checklist--run-all-of-these-for-every-section-the-authoritative-gate)**
+> (the authoritative per-section gate). The two are complementary, not competing: the per-section checklist
+> gates each section as you build; this one is the final header/footer/whole-site pass. (The other lists in
+> the kit — the "ordered major steps" phase table above, and `design-parity-checklist.md` — are the same
+> discipline at a coarser grain; where any differ, the per-section checklist + this ship checklist win.)
 
 - [ ] Header logo matches source (icon + title + tagline lockup, not bare text)
 - [ ] Header nav items + right-side element (CTA/cart/search) match source

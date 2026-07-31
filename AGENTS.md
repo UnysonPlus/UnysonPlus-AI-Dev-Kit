@@ -48,7 +48,19 @@ This kit exists for one reason:
 > system → chrome → sections region-by-region → motion → ship gate). Following the protocol is the
 > default; not following it is the exception you must justify.
 
-Read this file, then `PLAYBOOK.md`, before touching a site.
+Read this file, then `PLAYBOOK.md`, then the **authoritative build checklist**
+[`docs/site-build-protocol.md`](docs/site-build-protocol.md), before touching a site. When building or
+converting, **`site-build-protocol.md` is CANONICAL** — where any looser summary (PLAYBOOK, build-a-site,
+the root `Site Conversion Protocol.txt`) differs, the protocol wins.
+
+> **⛔ REFLEX — RELOAD THE PER-SECTION CHECKLIST BEFORE EACH SECTION. Do not work from memory.**
+> Before building *any* section, re-open `site-build-protocol.md` → **"THE PER-SECTION CHECKLIST — run ALL
+> of these for EVERY section"** and run every step. The steps are **cumulative, not a menu**: a newer
+> procedure (a converter recognizer, a WooCommerce flow, anything) **never replaces** the earlier ones —
+> capture-first, **Tailwind detect+translate**, native-options-before-CSS, and the 4-lens fidelity verify
+> ALL still apply. The recurring failure is applying the last procedure you touched and silently dropping
+> an established step (the Tailwind→CSS translation is the usual casualty). "The protocol is ALWAYS ON" is
+> only real if you re-open the checklist each section — so do that, every section.
 
 ## Four things this kit lets you do
 

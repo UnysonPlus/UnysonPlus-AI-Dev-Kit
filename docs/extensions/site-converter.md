@@ -50,6 +50,16 @@ so the converted DOM stays clean instead of carrying raw utilities.
   `icon_box` shortcode (so a card+CTA stays one element) vs. the current icon_box + button + Inner-Wrapper
   approach. The wrapper approach needs no schema/doc/screenshot changes, so it's the default for now.
 
+- **Heading-group → ONE `special_heading` with NATIVE options (2026-07-31).** A wrapper `[pill?, h, p]`
+  collapses to a single `special_heading`, and its Tailwind layout/spacing classes are **translated to
+  native options, not left as dead classes**: `text-center`→`alignment`, `space-y-N`→`element_spacing`,
+  `max-w-{scale}`→`block_max_width`, `mb-N`→`spacing.margin.bottom` as a **scale-slug utility class**
+  (`mb-16`→`mb-7`=4rem — a raw `4rem` would land as a dead class), and an arbitrary accent
+  `text-[#hex]`→inline color. JS `to-pages` `headingNode` + PHP `Mapper::heading_layout`/`n_heading`.
+- **Product-card grid → `wc_products` (2026-07-31).** A grid whose cells are product cards (an `<img>` +
+  a price token, ≥60% of cells) maps to ONE `wc_products` placeholder grid — not N static `icon_box`es.
+  JS `to-pages` (`cellIsProduct`/`wcProductsNode`) + PHP `Mapper::cell_is_product`/`n_wc_products`.
+
 **Keep this algorithm in sync across BOTH implementations** — the PHP `Mapper`/`Stitch`/`Tailwind`
 (file-upload path) and the JS `capture-extract`/`to-pages` (URL path) — so both produce consistent output.
 

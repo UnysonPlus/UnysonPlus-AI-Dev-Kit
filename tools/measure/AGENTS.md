@@ -3,6 +3,11 @@
 Run after EVERY change. It loads the mockup + dev at the same width, extracts a fixed
 metric set from each DOM, and prints a pass/fail diff table.
 
+**One-time setup:** `npm install` in this folder (`tools/measure/`) — installs its own
+playwright + pixelmatch / resemblejs / sharp. `node_modules` is gitignored, so a fresh
+clone must run this before the tools work. (`fidelity-check.mjs` here is the 4-lens region
+runner — typography, geometry, pixel, **and vertical spacing**.)
+
 ```
 node measure.mjs "file:///<abs-path-to>/mockup/index.html" "http://localhost/<site>/" --width 1440
 ```

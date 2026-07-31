@@ -21,7 +21,7 @@ font sizes, weights, colors, or the exact text/emoji — so building from one is
   reproduce the character verbatim; inline SVG → copy the markup / map to lucide; font-icon → the ONLY
   kind that needs swapping** to the target's icon system. Don't swap emoji↔font-icon.
 
-## Rule 2 — Verify with THREE independent lenses (per region, before advancing)
+## Rule 2 — Verify with FOUR independent lenses (per region, before advancing)
 
 No single lens is sufficient — each catches a different class of miss:
 
@@ -36,8 +36,13 @@ No single lens is sufficient — each catches a different class of miss:
 3. **Pixel diff** — region-anchored `pixelmatch`/`resemble` side-by-side + mismatch %, cropping each
    logical region by its own bounds (robust to different page heights). Catches "does it *look* the
    same" — decorative details the DOM diff can't express.
+4. **Vertical-spacing diff (Lens 4)** — the gaps between stacked rows and a block's bottom margin
+   (overline→title→subtitle rhythm; heading-block→next-element gap), ranked biggest-delta-first.
+   Vertical rhythm is the **most-visible dimension and the one x-position/typography checks are blind
+   to** — the recurring "spacing is off / the gap below the heading collapsed" miss. **`fidelity-check.mjs`'s
+   exit code is driven by this lens**, so it is not optional.
 
-**Gate:** advance to the next region only when all three pass for the current one. Grep/element-presence
+**Gate:** advance to the next region only when all FOUR pass for the current one. Grep/element-presence
 is NOT a lens — every recurring failure passed a presence check and still looked wrong.
 
 ## Rule 2.5 — RUN the tools and LOOP until PASS (hard gate — this is a test, not a glance)
@@ -61,6 +66,9 @@ run fidelity-check.mjs (source vs build)  →  PASS?  ── yes ──▶ advan
 - **Lens 3 (pixel):** mismatch under the region's target (**≈ ≤8%** for normal content regions; a
   photo-heavy or full-bleed section runs higher because the box framing inflates it — judge the *content*,
   not the frame).
+- **Lens 4 (vertical spacing):** the per-row gaps (overline→title→subtitle) **and the block's gap-to-next**
+  match the source within **~4px** — no oversized or collapsed gap. This is the tool's exit driver; an
+  un-waived spacing delta is a FAIL (it's the miss that keeps slipping through the other lenses).
 
 **Every residual diff must be one of two things — fixed, or a JUSTIFIED WAIVER you write down:**
 a decorative flourish you deliberately skipped ("dashed halo — out of scope"), or a known tool artifact

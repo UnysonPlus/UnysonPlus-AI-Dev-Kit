@@ -206,39 +206,39 @@
       "synced": "2026-07-31"
     },
     "build-a-site.md": {
-      "kind": "unknown",
+      "kind": "narrative",
       "src": [],
       "hash": null,
       "synced": "2026-07-31",
-      "note": "UNRESOLVED — no source found"
+      "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "building-pages.md": {
-      "kind": "unknown",
+      "kind": "narrative",
       "src": [],
       "hash": null,
       "synced": "2026-07-31",
-      "note": "UNRESOLVED — no source found"
+      "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "cloning-gotchas.md": {
-      "kind": "unknown",
+      "kind": "narrative",
       "src": [],
       "hash": null,
       "synced": "2026-07-31",
-      "note": "UNRESOLVED — no source found"
+      "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "conventions.md": {
-      "kind": "unknown",
+      "kind": "narrative",
       "src": [],
       "hash": null,
       "synced": "2026-07-31",
-      "note": "UNRESOLVED — no source found"
+      "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "extending.md": {
-      "kind": "unknown",
+      "kind": "narrative",
       "src": [],
       "hash": null,
       "synced": "2026-07-31",
-      "note": "UNRESOLVED — no source found"
+      "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "extensions/animated-icons.md": {
       "kind": "extension",
@@ -370,7 +370,7 @@
         "{plugin}/framework/extensions/shortcodes/manifest.php",
         "{plugin}/framework/extensions/shortcodes/settings-options.php"
       ],
-      "hash": "ae5fe3f93f5dcc8a613af26975a8075c",
+      "hash": "cd74140367e13ddab3ecef12ab033bca",
       "synced": "2026-07-31"
     },
     "extensions/sidebars.md": {
@@ -388,7 +388,7 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "c6e411ec74557b4a5d24e6ef8f9ee898",
+      "hash": "f9f9041fccc01d3a2947624acce37805",
       "synced": "2026-07-31"
     },
     "extensions/snippets.md": {
@@ -422,15 +422,15 @@
         "{plugin}/framework/extensions/woocommerce/manifest.php",
         "{plugin}/framework/extensions/woocommerce/settings-options.php"
       ],
-      "hash": "9b369aaaaff960d5747b6d9dd695667c",
+      "hash": "32b899af80236e363b7d5c81220a94c2",
       "synced": "2026-07-31"
     },
     "fidelity-verification.md": {
-      "kind": "unknown",
+      "kind": "narrative",
       "src": [],
       "hash": null,
       "synced": "2026-07-31",
-      "note": "UNRESOLVED — no source found"
+      "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "option-types/addable-box.md": {
       "kind": "option-type",
@@ -553,11 +553,11 @@
       "synced": "2026-07-31"
     },
     "option-types/containers.md": {
-      "kind": "option-type",
+      "kind": "narrative",
       "src": [],
       "hash": null,
       "synced": "2026-07-31",
-      "note": "UNRESOLVED — no source found"
+      "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "option-types/date-picker.md": {
       "kind": "option-type",
@@ -584,11 +584,11 @@
       "synced": "2026-07-31"
     },
     "option-types/declaring-options.md": {
-      "kind": "option-type",
+      "kind": "narrative",
       "src": [],
       "hash": null,
       "synced": "2026-07-31",
-      "note": "UNRESOLVED — no source found"
+      "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "option-types/fw-multi-inline.md": {
       "kind": "option-type",
@@ -615,18 +615,18 @@
       "synced": "2026-07-31"
     },
     "option-types/icon-v2.md": {
-      "kind": "option-type",
+      "kind": "narrative",
       "src": [],
       "hash": null,
       "synced": "2026-07-31",
-      "note": "UNRESOLVED — no source found"
+      "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "option-types/icon-v3.md": {
-      "kind": "option-type",
+      "kind": "narrative",
       "src": [],
       "hash": null,
       "synced": "2026-07-31",
-      "note": "UNRESOLVED — no source found"
+      "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "option-types/icon.md": {
       "kind": "option-type",
@@ -749,11 +749,11 @@
       "synced": "2026-07-31"
     },
     "option-types/primitives.md": {
-      "kind": "option-type",
+      "kind": "narrative",
       "src": [],
       "hash": null,
       "synced": "2026-07-31",
-      "note": "UNRESOLVED — no source found"
+      "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "option-types/radio-text.md": {
       "kind": "option-type",
@@ -1469,6 +1469,14 @@
       "hash": "2c7a5f216230c56ef0285ae46c27e9e9",
       "synced": "2026-07-31"
     },
+    "shortcodes/row.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/shortcodes/shortcodes/row/class-fw-shortcode-row.php"
+      ],
+      "hash": "93a6c151bc25bdccb43cdf928f0bd172",
+      "synced": "2026-07-31"
+    },
     "shortcodes/scroll-indicator.md": {
       "kind": "shortcode",
       "src": [
@@ -1695,11 +1703,11 @@
       "synced": "2026-07-31"
     },
     "site-build-protocol.md": {
-      "kind": "unknown",
+      "kind": "narrative",
       "src": [],
       "hash": null,
       "synced": "2026-07-31",
-      "note": "UNRESOLVED — no source found"
+      "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "theme-settings/blog.md": {
       "kind": "theme-settings",
@@ -1826,11 +1834,11 @@
       "synced": "2026-07-31"
     },
     "theme-settings/programmatic-setup.md": {
-      "kind": "theme-settings",
+      "kind": "narrative",
       "src": [],
       "hash": null,
       "synced": "2026-07-31",
-      "note": "UNRESOLVED — no source found"
+      "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "theme-settings/site-ux.md": {
       "kind": "theme-settings",
