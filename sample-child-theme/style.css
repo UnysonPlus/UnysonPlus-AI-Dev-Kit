@@ -1,0 +1,41 @@
+/*
+Theme Name:   Sample Child Theme (UnysonPlus)
+Theme URI:    https://unysonplus.com/
+Description:  The child-theme TEMPLATE. Copy this folder, rename it, and fill in the
+              header + your CSS. A child theme is the right home for one site's / one
+              brand's bespoke look and bespoke elements (a booking widget, a review
+              card, an interactive configurator) — it travels with the site and
+              survives parent-theme updates. Reusable-everywhere code belongs in the
+              plugin instead; see the kit's extending.md.
+Template:     unysonplus-theme
+Version:      0.0.1
+Author:       your-name
+License:      GNU General Public License v2 or later
+Text Domain:  sample-child-theme
+Tags:         bootstrap, unyson
+*/
+
+/* ============================================================================
+   THIS STYLESHEET LOADS LAST.
+   ----------------------------------------------------------------------------
+   The parent theme (unysonplus-theme) enqueues this file as the `child-style`
+   handle, ordered dead last — AFTER the framework / shortcode CSS, the parent
+   style.css, and the plugin's generated presets + per-page dynamic CSS. So a
+   plain selector here beats the same selector anywhere else. You only need
+   !important to beat the plugin's per-section UTILITY classes (.pt-*, .pb-*,
+   .g-*), which ship as !important themselves.
+
+   PREFER Theme Settings over CSS. Colours, fonts, buttons, spacing, header and
+   footer are all configured in Theme Settings (which a child theme SHARES with
+   its parent — settings are keyed by the parent template, `:unysonplus`, so
+   switching a site to a child theme of unysonplus-theme keeps them). Reach for
+   this file only for what Theme Settings cannot express.
+
+   Scope bespoke rules under a root class you also put on the element / section
+   (Advanced → CSS Class), e.g. `.mybrand-hero`, so they can't leak.
+
+   Example:
+     .site-header { background: #0d1b2a; }
+   ============================================================================ */
+
+/* Your custom styles go below. */

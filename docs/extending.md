@@ -12,12 +12,41 @@ For *using* what already exists, see `docs/shortcodes/`, `docs/option-types/`,
 | To add / modify… | Lives under… | Start from |
 |---|---|---|
 | A **shortcode** (page-builder element) | the shortcodes extension → `shortcodes/<name>/` | **[`../sample-shortcode/`](../sample-shortcode/)** |
+| A **child theme** (one site's / brand's bespoke look + elements) | `wp-content/themes/<slug>/` | **[`../sample-child-theme/`](../sample-child-theme/)** |
 | An **option type** (a new field UI + value shape) | the framework's `includes/option-types/<name>/` | an existing type's folder |
 | An **extension** (a feature module: options, admin page, assets) | `framework/extensions/<name>/` | the reference extensions below |
 | An **Animation Engine module** | the animation-engine extension → `modules/<name>/` | an existing module |
 
 Each area has an `AGENTS.md` beside the code in the plugin source — read the nearest one before
 editing. See *[Reading the real source](#reading-the-real-source)* for how to get it.
+
+---
+
+## Creating a child theme
+
+**Use the template: [`sample-child-theme/`](../sample-child-theme/).** Two files — `style.css`
+(the header + your CSS, which loads LAST in the cascade so plain selectors win) and
+`functions.php` (a guarded `child-style` enqueue fallback + reference blocks for fonts, shipped
+elements and template overrides). It installs and runs as-is. Its `README.md` has the full
+procedure, the child-vs-plugin decision, and the verify checklist.
+
+A child theme is the home for **one site's / one brand's** bespoke look and bespoke elements —
+things that must survive parent-theme updates and only make sense for that site. Reusable code
+goes in the plugin instead.
+
+- **`Template: unysonplus-theme`** in the header is the identity (it names the parent folder).
+- **Theme Settings are SHARED with the parent** — Unyson keys them by the parent template
+  (`fw_theme_settings_options:unysonplus`), not the active stylesheet, so switching a site to a
+  child theme of `unysonplus-theme` **keeps every setting** (colours, typography, buttons,
+  header/footer, Custom CSS). Do not re-configure them; prefer Theme Settings over CSS even here.
+- **Ship bespoke elements** under `framework-customizations/extensions/shortcodes/shortcodes/<name>/`
+  (or `.../includes/option-types/<name>/`) — no registration call; the loaders scan the child theme
+  when active. Build the element from [`sample-shortcode/`](../sample-shortcode/).
+- **Staging:** a demos-network child theme lives in the demos install
+  (`htdocs/demos/wp-content/themes/<slug>/`, network-enabled + activated on its subsite) with a
+  tracked source under `unysonplus-website/wordpress/demos/demo-themes/<slug>/`; a standalone child
+  theme stages in `test-sites/<slug>/` and runs in `testsite`.
+- **Version marker** = the `style.css` `Version:` line — bump it on any change.
 
 ---
 
