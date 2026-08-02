@@ -1,11 +1,16 @@
-// 3-LENS fidelity check for a single region (capture-first). Verifies a build
-// region against its source with three independent lenses, because no one lens
+// 4-LENS fidelity check for a single region (capture-first). Verifies a build
+// region against its source with four independent lenses, because no one lens
 // catches everything:
 //   Lens 1  TYPOGRAPHY/CONTENT — per element (matched by text): fontSize, weight,
-//           color, family, textTransform, exact text/emoji, icon-kind + missing/extra.
+//           color, family, textTransform, exact text/emoji, icon-kind, box SHAPE
+//           (square/rounded/pill/circle from border-radius) + missing/extra.
 //   Lens 2  GEOMETRY — column x-positions, widths, and sibling OVERLAP.
 //   Lens 3  PIXEL — region side-by-side + pixelmatch %.
+//   Lens 4  VERTICAL SPACING — stacked-row gaps + region bottom margin (drives exit code).
 // Build to the SOURCE spec, then run this per region before advancing.
+// NOTE: this rendered check is the FROM-SCRATCH verification path, and the SECONDARY
+// (assembly) confirmation for a conversion. For a CONVERSION the PRIMARY proof is the
+// browser-free class-string fixture (tailwind-matrix.test.mjs) — see tools/README.md.
 //
 // Usage: node fidelity-check.mjs <srcUrl> <srcSel> <buildUrl> <buildSel>
 //   e.g. node fidelity-check.mjs https://src/ footer http://localhost/demos/pinky-bites/ footer
@@ -42,7 +47,17 @@ async function capture(page, url, sel) {
       const iconKind = el.querySelector('svg') ? 'svg'
         : /\b(fa|fas|far|fab|icon-|glyphicon)\b/.test(el.className || '') ? 'font-icon'
         : EMOJI.test(t) ? 'emoji' : 'none';
-      out.push({ text: t.slice(0, 44), tag: el.tagName.toLowerCase(),
+      // Box SHAPE from border-radius — the dimension the tool was blind to (a source PILL rendered as
+      // a rounded-rect slipped straight through). Classify vs the box's short side so it's size-agnostic:
+      //   square (~0 radius) · rounded (a corner radius) · pill (radius ≥ half the short side, oblong)
+      //   · circle (pill + roughly square box). border-radius in % is resolved to px against the box.
+      const brRaw = c.borderTopLeftRadius || '0px';
+      let brPx = parseFloat(brRaw) || 0;
+      if (/%\s*$/.test(brRaw)) brPx = (parseFloat(brRaw) / 100) * Math.min(r.width, r.height);
+      const shortSide = Math.min(r.width, r.height);
+      const shape = brPx < 2 ? 'square'
+        : (brPx >= shortSide / 2 - 1 ? (Math.abs(r.width - r.height) <= 4 ? 'circle' : 'pill') : 'rounded');
+      out.push({ text: t.slice(0, 44), tag: el.tagName.toLowerCase(), br: Math.round(brPx), shape,
         fs: Math.round(parseFloat(c.fontSize)), fw: c.fontWeight, color: c.color,
         family: (c.fontFamily.split(',')[0] || '').replace(/["']/g, ''), tt: c.textTransform,
         // Comprehensive design properties the curated subset used to SKIP (why wavy
@@ -105,6 +120,7 @@ for (const [k, s] of si) {
   if (s.deco !== m.deco) d.push(`text-decoration ${s.deco || '∅'}→${m.deco || '∅'}`);
   if (!!s.anim !== !!m.anim) d.push(`animation ${s.anim || 'none'}→${m.anim || 'none'}`);
   if (!!s.shadow !== !!m.shadow) d.push(`box-shadow ${s.shadow ? 'yes' : '∅'}→${m.shadow ? 'yes' : '∅'}`);
+  if (s.shape !== m.shape) d.push(`shape ${s.shape}(${s.br}px)→${m.shape}(${m.br}px)`);
   if (s.transform !== m.transform) d.push(`transform ${s.transform || '∅'}→${m.transform || '∅'}`);
   if (s.ls !== m.ls) d.push(`letter-spacing ${s.ls || '∅'}→${m.ls || '∅'}`);
   if (d.length) { console.log(`  ⚠ "${s.text}"  ${d.join(' | ')}`); l1++; }

@@ -8,6 +8,16 @@ the way the builder itself does.
 Helpers live in **`tools/upw-build-pages.php`**. This is the *mechanical* how-to. For the end-to-end
 "turn a prompt into a site" workflow, see **[build-a-site.md](build-a-site.md)**.
 
+> **⛔ Hand-authoring a tree to reproduce a SOURCE is a Rule-0 violation.** This file's PHP-array
+> authoring is legitimate for a **fresh build, a demo, or a test** — where you're *creating* a page. It is
+> **forbidden for a conversion** (a URL / screenshot / template / HTML dump to reproduce): there the
+> deterministic converter **emits the tree**, and hand-writing one — even inside a `build-<slug>.mjs`
+> factory — re-derives values the captured classes already encode and drifts from the source. If a source
+> exists, run the converter and follow [`site-build-protocol.md`](site-build-protocol.md) Rule 0; the
+> `.mjs` factory is only an *import format* seeded from the converter's output, never a licence to
+> hand-measure. (This is the exact loophole that shipped the pinky-bites heading with a wrong emoji + mis-
+> measured gaps.)
+
 ## Quick start
 
 A page spec is ~15 lines:
@@ -103,6 +113,7 @@ The JSON shape matches a real builder-saved page exactly:
 
 ## When to reach for something else
 
-- **Converting an existing site** → use the Site Converter / capture pipeline, not hand-built trees.
+- **Converting an existing site** → use the Site Converter / capture pipeline, **not** hand-built trees
+  (Rule-0 violation — see the gate at the top of this file).
 - **A production / heavily hand-tuned page** → prefer a source-JSON → importer flow with a manual-edit
   guard, so later hand edits aren't clobbered.

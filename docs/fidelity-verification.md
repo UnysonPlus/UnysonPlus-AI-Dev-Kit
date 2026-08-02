@@ -1,10 +1,29 @@
 # Fidelity verification — capture-first + multi-lens comparison
 
-How to verify a cloned/converted site actually matches its source. The recurring failures (13px
-uppercase footer titles that should be 18px title-case; Font Awesome icons where the source used
-emoji; overlapping columns) all came from **building from a screenshot glance and eyeballing**, then
-declaring done. The fix is a discipline, not a tool: **measure the source first, build to the measured
-spec, and verify every region with multiple independent lenses before advancing.**
+How to verify a build actually matches its source. The recurring failures (13px uppercase footer titles
+that should be 18px title-case; Font Awesome icons where the source used emoji; overlapping columns) all
+came from **eyeballing and declaring done**. The fix is a discipline — but the *right proof depends on the
+build type*, and conflating the two is itself a bug.
+
+> **⛔ TWO MODES — pick the proof by whether a SOURCE exists (see [site-build-protocol.md](site-build-protocol.md) Rule 0).**
+>
+> - **CONVERSION (a source exists) — the PRIMARY proof is the browser-free class-string fixture, NOT the
+>   rendered lenses.** The source is a finished design: every value already exists as a captured Tailwind
+>   class / computed style. You do not measure the render to derive or hand-tune a value — you **translate**
+>   the captured class into a native option, and a wrong value is a **converter translation bug**. Prove the
+>   fix with **`tailwind-matrix.test.mjs`** (in the capture service): a class in (`py-10`), the expected
+>   native option out (`40px`/`pt-9`), **no browser**. The rendered 4-lens check below is then the
+>   **secondary** confirmation that the translated options *assembled* correctly — never the place a value
+>   comes from. **Measuring a computed style off the source to type into an option is the forbidden
+>   re-derivation (Rule 0).**
+> - **FROM-SCRATCH (nothing to reproduce) — the rendered lenses ARE the mechanism.** There is no captured
+>   class to translate, so you *create* values from your mockup/brief and verify them by measuring the
+>   render. Everything below (capture the spec, build to it, run the four lenses per region) is this path.
+>
+> The single-sentence test: **source exists → translate + fixture; no source → measure + lenses.** The rest
+> of this doc is written for the from-scratch path; on a conversion, treat every "measure the source / build
+> to the measured spec" instruction as *the converter's* job (translate the class), with these tools as the
+> assembly check only.
 
 ## Rule 1 — Capture-first: build to a measured SPEC, never a screenshot
 
@@ -26,10 +45,11 @@ font sizes, weights, colors, or the exact text/emoji — so building from one is
 No single lens is sufficient — each catches a different class of miss:
 
 1. **DOM computed-style diff** — match elements by **text** (not index) and compare `fontSize`,
-   `fontWeight`, `color`, `fontFamily`, **`textTransform`**, and the **exact text/emoji**. Catches
-   "18px vs 13px", "title-case vs uppercase", "emoji vs FA icon", wrong color/font, and **missing**
-   elements (a badge/description/rating the build dropped). *This is the lens that would have caught the
-   footer titles + emoji.*
+   `fontWeight`, `color`, `fontFamily`, **`textTransform`**, box **SHAPE** (square / rounded / pill /
+   circle, classified from `border-radius` vs the box's short side), and the **exact text/emoji**. Catches
+   "18px vs 13px", "title-case vs uppercase", **"pill vs rounded-rect"** (a badge/button whose corners are
+   too square), "emoji vs FA icon", wrong color/font, and **missing** elements (a badge/description/rating
+   the build dropped). *This is the lens that would have caught the footer titles + emoji + the pill badge.*
 2. **Geometry / layout diff** — compare **bounding boxes**: element x-positions, **column widths**,
    spacing/padding, and **overlap** (siblings whose boxes intersect). Catches the column-overlap and
    spacing/padding misses that typography checks miss.
@@ -146,7 +166,9 @@ the CSS / it looks better in a screenshot" is not evidence; a re-measured `demo 
 ## Rule 3 — The order (ties into the region loop)
 
 Header → Footer → sections top-to-bottom (see the protocol's region-loop). For **each** region:
-`capture source spec → build to spec → run the 3 lenses → fix from measured values → re-run → advance`.
+`capture source spec → build to spec → run the 4 lenses → fix from measured values → re-run → advance`
+(from-scratch path; on a conversion the primary loop is `translate captured class → run the class-string
+fixture → fix the converter → re-run`, with the lenses as the assembly check).
 
 ## Rule 3.5 — You MUST diff against the SOURCE, per region — NEVER "verify" against memory
 

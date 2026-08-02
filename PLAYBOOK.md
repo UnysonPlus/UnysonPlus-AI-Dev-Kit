@@ -1,9 +1,16 @@
 # PLAYBOOK — building a UnysonPlus site/demo from a mockup
 
 The process gets a mockup **right on the first pass** by **converting first, then refining** —
-let the deterministic Site Converter do the bulk mapping (token-free), then measure the gap and
-close it with native options. Build **outside-in**, **measure** at every step, **native options
-before CSS**.
+let the deterministic Site Converter do the bulk mapping (token-free), then close each gap by
+**translating the source's captured Tailwind classes** into native options (Rule 0.6). Build
+**outside-in**, **native options before CSS**.
+
+> **Two modes — don't conflate them (this whole playbook assumes a CONVERSION unless noted).** On a
+> **conversion** every value already exists as a captured class; you **translate** it, and a wrong value
+> is a **converter bug you fix + prove with a browser-free class-string fixture** (`tailwind-matrix.test.mjs`)
+> — you do **not** measure the render to hand-tune it. "Measure the gap / measure at every step" below is
+> the **FROM-SCRATCH** technique (Phase 2a — no source to translate), where you create values. See
+> [`docs/site-build-protocol.md`](docs/site-build-protocol.md) Rule 0.
 
 Prereq: `pwsh assemble.ps1 -Source github` populates the two conversion repos + the plugin/theme (from the
 release zip); `-Source local` copies them from sibling working copies instead. Then `pwsh update.ps1`
@@ -64,8 +71,12 @@ Import the bundle into the dev site (the `site-converter` extension's import), t
    touches the bands you're still iterating on. Each pass makes it smarter, so the next site needs less
    manual fixing.
 
-The converter reliably gets **typography, colors, and chrome structure**; it still misses **bespoke**
-design — that's the delta Phases 1–3 (below) close, applied to its output instead of a blank page.
+The converter reliably gets **typography, colors, and chrome structure**; where it still misses, the
+delta is closed by **translating the captured classes it didn't yet handle** — and a *systematic* miss is
+a **converter fix** (teach the class→value rule, prove it with the class-string fixture), not a hand-tune
+of the output. The measure-driven Phases 2a/2–4 below are the **fresh-build** path; on a conversion they
+apply only as the secondary "did the translated options assemble correctly" check, never as the way you
+derive a value.
 
 ## Phase 2a — Read the mockup's OUTER layers first (fresh build — when NOT converting)
 
@@ -115,6 +126,11 @@ happens until this passes the parity check.
 
 ## Phase 4 — Sections: section / row skeleton
 
+> **Conversion vs fresh build.** On a **conversion** the converter emits each section; you **translate**
+> its remaining captured classes (Rule 0.6) and, for a systematic miss, **fix the converter + re-run the
+> class-string fixture** — the "measure section paddings/column widths against the mockup" steps below are
+> then only the secondary assembly check. The measure-driven build here is the **fresh-build** path.
+
 Build the page structure before content, in the page builder (or via the builder JSON):
 
 1. One **section per band** of the mockup, in order. Set section `is_fullwidth`,
@@ -142,7 +158,10 @@ Build the page structure before content, in the page builder (or via the builder
 ## Rules
 
 - **Native options before CSS.** If it's in `docs/theme-settings/README.md`, use it.
-- **Measure, don't eyeball.** Run the harness after each phase; never "looks right".
+- **Translate (conversion) or measure (fresh) — never eyeball.** On a **conversion**, values come from
+  translating the captured class list; a wrong one is a converter fix proven by the class-string fixture
+  (`tailwind-matrix.test.mjs`), not a number read off the render. On a **fresh build**, run the measure
+  harness after each phase. Either way, never "looks right".
 - **Outside-in.** Frame → sections → elements. Never patch an inner element before the
   frame passes parity.
 - **Placeholders unblock.** A `code_block` of the mockup's HTML is a legitimate interim

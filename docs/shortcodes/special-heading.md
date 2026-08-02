@@ -7,7 +7,10 @@ An overline + title + subtitle heading block with per-element alignment, color a
 |---|---|---|---|---|
 | `overline` | text | `''` | plain string | Small eyebrow label above the title. Empty = hidden. |
 | `title` | text | `''` | string (inline HTML allowed) | The heading text. |
-| `icon` | icon-v2 | none | icon-v2 object (see Notes) | Optional icon before the title. |
+| `icon` | icon-v2 | none | icon-v2 object (see Notes) | **Title Icon** (Icons tab). Optional icon shown with the title. |
+| `overline_icon` | icon-v2 | none | icon-v2 object (see Notes) | **Overline Icon** (Icons tab). Optional icon shown inside the overline label; recolours via `overline_color` when it uses `currentColor`. |
+| `overline_icon_position` | select | `'before'` | `before` \| `after` | Overline icon before or after the overline text. |
+| `title_icon_position` | select | `'before'` | `before` \| `after` | Title icon before or after the title text. |
 | `subtitle` | text | `''` | string (inline HTML allowed) | Supporting line under the title. |
 | `heading` | select | `'h2'` | `h1` `h2` `h3` `h4` `h5` `h6` | Semantic/SEO tag for the title (not visual size). |
 | `alignment` | alignment | `''` (inherit) | `''` `left` `center` `right` | Master alignment for all three lines. |
@@ -42,6 +45,8 @@ An overline + title + subtitle heading block with per-element alignment, color a
   "alignment": "center",
   "overline_align": "", "title_align": "", "subtitle_align": "",
   "overline_uppercase": "yes",
+  "overline_icon": { "type": "none" }, "overline_icon_position": "before",
+  "icon": { "type": "none" }, "title_icon_position": "before",
   "overline_marker": "", "overline_marker_position": "before", "overline_container": "",
   "element_spacing": "",
   "block_max_width": { "value": "", "unit": "px" },
@@ -58,8 +63,10 @@ An overline + title + subtitle heading block with per-element alignment, color a
 ```
 
 ## Notes
+- **Modal tabs:** *Content* = Overline / Title / Subtitle / Title Tag (`heading`); *Icons* = **Overline Icon** (`overline_icon` + `overline_icon_position`) and **Title Icon** (`icon` + `title_icon_position`); *Layout* = alignment, overline case / marker / container, spacing, max-width; *Styling* = colors, display size, typography. (Tabs are UI grouping only — the atts are flat.)
 - `title` and `subtitle` accept **inline HTML** — use `<br>` for a controlled line break and `<span class="…"><em>…</em></span>` to emphasize / color a word. Keep it inline only; don't nest block elements.
-- `icon` is a full **icon-v2** object. For "no icon" use `{ "type":"none", "icon-class":"", "icon-class-without-root":false, "pack-name":false, "pack-css-uri":false }`; for a library SVG use `{ "type":"svg", "svg-source":"library", "svg-id":"lucide/<name>" }`.
+- The **overline icon** renders inside the `.heading-overline__label` (which flexes it beside the text); the **title icon** renders inside the heading tag. Each has its own Placement (`before`/`after`). An overline SVG icon is what the Site Converter maps a source overline `<svg>` into.
+- `icon` / `overline_icon` are full **icon-v2** object(s). For "no icon" use `{ "type":"none", "icon-class":"", "icon-class-without-root":false, "pack-name":false, "pack-css-uri":false }`; for a library SVG use `{ "type":"svg", "svg-source":"library", "svg-id":"lucide/<name>" }`.
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, NOT a raw hex string (`predefined` wins when both set). See `README.md`.
 - `heading` sets the SEO tag only; use `display_size` to change visual size while keeping the tag. Use one `h1` per page.
 - Alignment fields default to `''` = **inherit** the parent/theme; the per-element `*_align` fields override the master `alignment`.

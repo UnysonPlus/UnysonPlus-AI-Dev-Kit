@@ -8,7 +8,7 @@ Site-wide developer/utility settings: Custom CSS, custom scripts, analytics, 404
 - **Type**: `multi` container wrapping one `code-editor` leaf `custom_css` (`mode: css`, height 400).
 - **Default**: `''` (empty).
 - **Saved value shape**: `{ "custom_css": "…css text…" }`. The `multi` parent key `misc_custom_css` holds an object with the single `custom_css` string.
-- **Notes**: THE canonical custom-CSS field. Emitted into the plugin's combined presets stylesheet, which loads after all theme + plugin styles so it wins the cascade. Rules are scoped under `body:not(.wp-admin)` (front-end only). Same key the theme historically used — values carry over, no migration.
+- **Notes**: THE canonical custom-CSS field. Emitted into the plugin's combined presets stylesheet, which loads after all theme + plugin styles so it wins the cascade. Because that stylesheet also loads in the **page-builder canvas (wp-admin)**, top-level **`body`/`html`** rules are **auto-scoped to the front end** (`body:not(.wp-admin)`, `html:not(:has(.wp-admin))`) by `fw_admin_safe_custom_css()` so a global background/overflow rule can't repaint the editor chrome; class/id rules are left as-is so they still skin the canvas. Same key the theme historically used — values carry over, no migration.
 
 ## 404 Page — `misc_404`
 
@@ -102,7 +102,8 @@ Every switch below shares the same choices:
 | `no` | Off |
 
 ### Disable WordPress emojis — `perf_disable_emojis`
-- **Type**: switch — **Default**: `no` — Removes emoji detection script + styles from every page.
+- **Type**: switch — **Default**: `no` — Removes emoji detection script + styles from every **front-end** page.
+- **In wp-admin the emoji detection script is dropped unconditionally** (independent of this toggle), because WordPress's Twemoji rewrote emoji in the page-builder canvas previews (badge / eyebrow text, emoji icon picks) into `<img>` tags from s.w.org that render as broken images inside the builder. Native emoji render fine in the admin. Hooked on `admin_init` (see `miscellaneous-handlers.php`).
 
 ### Disable oEmbed discovery — `perf_disable_embeds`
 - **Type**: switch — **Default**: `no` — Removes WP oEmbed JSON/XML discovery links and the legacy wp-embed.js loader.

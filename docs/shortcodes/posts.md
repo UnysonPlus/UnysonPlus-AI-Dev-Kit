@@ -40,7 +40,8 @@ A data-driven query grid: pulls content from the WordPress post DB (`WP_Query`) 
 | `slider_autoplay` | switch | `'no'` | `'yes'` \| `'no'` | Slider autoplay (slider layout). |
 | `slider_interval` | short-text | `'5000'` | integer (ms) | Slider autoplay interval (slider layout). |
 | `slider_loop` | switch | `'yes'` | `'yes'` \| `'no'` | Slider loop (slider layout). |
-| `element_order` | addable-box | image, cats, title, meta, excerpt, readmore | array of `{slug,enabled}` | Reorder/toggle card blocks. |
+| `card_rows` | addable-popup (Card Rows) | seeded (image / cats / title / meta / excerpt / readmore rows) | array of `{ slots:[…], direction, justify, align }` | **Card Rows** block designer (Elements tab) — arrange each card's blocks into rows and set inline / stacked + alignment; a block shows only when it's in a row. Slots: `image, cats, title, meta, excerpt, readmore`. Shared `sc_card_rows_field()` helper (with `testimonials` / `team-member` / `wc_products`). Replaces the flat `element_order` list (still read as a legacy fallback). Image POSITION inside side / overlay card styles stays governed by `card_style`, not the rows. |
+| `element_order` | addable-box | image, cats, title, meta, excerpt, readmore | array of `{slug,enabled}` | **Legacy** block reorder/toggle — still honored as a fallback when `card_rows` is empty; new content uses `card_rows`. |
 | `title_tag` | select | `'h3'` | `h2` `h3` `h4` `h5` `div` | Title HTML tag. |
 | `meta_items` | checkboxes | `{date:true,author:true}` | map of `date` `author` `comments` `reading_time` | Meta bar contents. |
 | `meta_layout` | select | `'inline-dot'` | `inline-dot` (Inline · dot) `inline-pipe` (Inline \| pipe) `inline-icons` (Inline with icons) `stacked` (one per line) | Meta bar layout. |
@@ -58,7 +59,7 @@ A data-driven query grid: pulls content from the WordPress post DB (`WP_Query`) 
 | `live_filters` | switch | `'no'` | `'yes'` \| `'no'` | AJAX category filter bar. |
 | `cache_output` | switch | `'no'` | `'yes'` \| `'no'` | Cache rendered HTML in a transient. |
 | `no_results_text` | text | `'Sorry, no posts matched your criteria.'` | string | Empty-state message. |
-| `box_style` | border-style-picker | `''` | `''` `boxp-card` `boxp-outline` `boxp-soft-shadow` `boxp-hover-lift` | Reusable **box preset** on each card. |
+| `box_style` | box-style picker | `''` | box-preset picker object | Reusable **Box Preset** (border / corners / shadow / fill + hover) applied to each card, on the **Design tab** (`sc_card_box_style_field()`, shared with the other card-family shortcodes). Manage presets in Theme Settings → Components → Box Presets. |
 | `image_style` | image-style-picker | `''` | `''` · `imgs-rounded` · `imgs-circle` · `imgs-portrait-card` · `imgs-monochrome` · `imgs-duotone` · `imgs-diagonal` · `imgs-hexagon` · `imgs-cinematic` | Preset visual treatment applied to each card image. |
 | `mobile_layout_override` | select | `'inherit'` | `inherit` `standard` `side-left` `minimal` | Card layout override on phones (replaces `card_style_mobile`). |
 | `cat_taxonomy` | text | `'category'` | taxonomy slug | Which taxonomy feeds the category chips. |
@@ -100,4 +101,5 @@ A data-driven query grid: pulls content from the WordPress post DB (`WP_Query`) 
 - Switch values are **strings** (`'yes'`/`'no'`), including the `enabled` flag inside each `element_order` entry.
 - `include_ids` overrides `taxonomy_filter` when both are set. `fallback_image_url` is a plain URL string, not a WP upload object.
 - Don't combine `cache_output` with `ajax_loadmore` / `live_filters` — the transient key doesn't vary on AJAX params and can serve stale HTML.
+- **Card Rows (Elements tab).** The card's inner blocks are now arranged with the shared **Card Rows** designer (`card_rows`, `sc_card_rows_field()`) — a drag-sortable list of rows, each picking & ordering blocks with Direction (inline / stacked) + Distribute (justify) + Align, above a **live wireframe card preview**. It replaces the old flat `element_order` list; `element_order` is still read as a fallback when `card_rows` is empty, so legacy content keeps working. Image position inside side / overlay card styles remains a `card_style` concern, not a rows concern.
 - Colors + spacing live on the shared Styling block (`text_color`, `bg_color`, `font_size_preset`) — see `README.md`.

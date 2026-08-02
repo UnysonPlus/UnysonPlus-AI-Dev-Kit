@@ -22,6 +22,15 @@ enforceable checklist + the exact value shapes.
 > *systematic* miss is **flagged to make the converter smarter** (Rule −1), so next time there is even
 > less to touch. **The mission: every hand-fix you're tempted to make is a converter improvement you owe
 > upstream. If you find yourself measuring or eyeballing a class, STOP — you skipped Phase 1.**
+>
+> **WHY (say it plainly): a conversion is a TRANSLATION job, not a design job.** The source is a finished
+> design — every value already exists as a captured Tailwind class / computed style. You do not choose,
+> measure, or eyeball any value; you **translate** the captured class into a native option / scoped CSS,
+> and when a translation is wrong you **fix the converter's class→value rule** and **prove it with a
+> browser-free class-string fixture** (`tailwind-matrix.test.mjs` — `py-10` → `40px`), not by measuring
+> the rendered page. **Measuring / eyeballing to *create* a value is legitimate ONLY for a from-scratch
+> build** (a brief with nothing to reproduce) — there, and only there, you invent values and verify them
+> by measuring the render. The instant a source exists, you are translating, not designing.
 > (This is not new — it is the explicit, unmissable statement of the capture-first gate + Rule 4 below.
 > The pinky-bites builder heading is the cautionary tale: hand-built, it shipped an emoji for a captured
 > SVG and mis-measured gaps; the converter would have emitted the correct `special_heading` + native
@@ -225,7 +234,7 @@ it locally (native options / `misc_custom_css`) and move on, don't flag.
 | **0 · Setup** | Fresh WordPress ready; confirm conversion vs. fresh build (capture-first gate above); capture service ready; **Classic Editor installed+active *before* the UnysonPlus plugin**. | build-a-site.md |
 | **1 · Capture/Convert** | **Conversion only** (fresh builds skip — nothing to convert). Run the **capture service** (`capture.mjs`, URL path) → design-config, pages.json, conversion-report — **the source of truth, never hand-measure**. *Maintainers* also run the Site Converter **extension** (PHP) + improve both paths in Phase 5 (site-builders just import). | Rule 0.5 |
 | **2 · Design system** | *(Fresh builds start here.)* Apply the design tokens (captured for a conversion; chosen for the brief on a fresh build) → **Theme Settings** (colors, typography scale, container width, buttons, boxes, spacing). Verify *before* sections. | Rule 1 |
-| **3 · Chrome** | Header + footer to **match the source exactly**, from Theme Settings + native elements. Lock first. | Rules 0, 2, 3 |
+| **3 · Chrome** | Header + footer to **match the source exactly**, from Theme Settings + native elements. Lock first. | Rules 0.1, 2, 3 |
 | **4 · Sections** | For EACH section, run **[THE PER-SECTION CHECKLIST](#-the-per-section-checklist--run-all-of-these-for-every-section-the-authoritative-gate)** in full (converter output → **Tailwind translate (0.6)** → native options → swap bespoke `code_block`s for real shortcodes → **4-lens fidelity verify** → flag residuals → teach the converter). Don't advance until each PASSES. | The per-section checklist + Rules 0.6, 4, −1 |
 | **5 · Report → improve** | Analyze the conversion-report; improve the converter (JS `to-pages`/`capture-extract` **and** PHP `Mapper`/`Stitch`, kept in sync) so next time has fewer fallbacks. Delete the analyzed capture. | — |
 | **6 · Motion** | Add Animation Engine effects from `animations.json`. | build-a-site.md §4 |
@@ -263,10 +272,33 @@ For the section you're on, in order:
 4. **[ ] Bespoke pieces → the real shortcode, not a raw HTML blob.** Swap each `code_block` placeholder
    for a proper element; to build a new one use [`sample-shortcode/HOW-TO.md`](../sample-shortcode/HOW-TO.md)
    (capture → replica → port → teach-the-converter). A store section → real WooCommerce (Rule 5).
-5. **[ ] VERIFY with `fidelity-check.mjs` — ALL FOUR lenses, including vertical spacing — LOOK, don't
-   grep.** Run → fix from the measured diff → re-run until the region **PASSES** (typography, geometry,
-   **vertical spacing / gaps**, pixel; [fidelity-verification.md](fidelity-verification.md)). List every
-   **missing** element the build dropped (badge, description, rating). Don't advance until it PASSES.
+5. **[ ] VERIFY — by the right proof for the build type (do not conflate the two).**
+   - **CONVERSION: the PRIMARY proof is the browser-free class-string fixture** (`tailwind-matrix.test.mjs`)
+     — a captured class in, the expected native option out, no browser. A wrong value = a converter
+     translation bug (step 2 / Rule 0.6); fix the converter and re-run the fixture. Then run
+     `fidelity-check.mjs` (all four lenses) as the **secondary, assembly** check that the translated
+     options rendered together correctly. Do **not** read a number off the source render to type into an
+     option — that is the forbidden re-derivation (Rule 0).
+   - **FROM-SCRATCH: RUN `fidelity-check.mjs`, ALL FOUR lenses** incl. vertical spacing, as the primary
+     proof: run → fix from the **measured** diff → re-run until the region **PASSES** (typography,
+     geometry, vertical spacing / gaps, pixel; [fidelity-verification.md](fidelity-verification.md)).
+   List every **missing** element the build dropped (badge, description, rating). Don't advance until the
+   proof PASSES.
+   > **⛔ NEVER EYEBALL WITHOUT PERMISSION. Viewing a screenshot and judging "it looks good/faithful" is
+   > NOT verification — it is the exact failure this protocol exists to stop.** Verification = running the
+   > comparison + spacing tools and reading the measured numbers. If the source is no longer live, run the
+   > tools against the **pinned capture snapshot** (Rule 0.5). If you genuinely believe a human visual
+   > eyeball is needed (e.g. the tool can't express something), **STOP and ASK THE USER'S PERMISSION FIRST
+   > before eyeballing** — do not eyeball on your own initiative. Taking a screenshot to *feed the tool* is
+   > fine; taking one to *judge it yourself* is the forbidden eyeball.
+   > **⛔ VERIFY EVERYTHING — a section is NOT "done" on a SUBSET of dimensions.** Matching typography +
+   > colors while never measuring the vertical spacing is a FALSE pass — the exact miss that shipped a
+   > squashed section. "Done" requires ALL FOUR lenses green for the region: **(1) typography/content**
+   > (font-size, weight, color, family, transform, exact text, missing/extra elements), **(2) geometry**
+   > (column x-positions, widths, overlap), **(3) vertical spacing / rhythm** (the gap after every block —
+   > overline→title→subtitle, paragraph→paragraph, block→next-block, section padding; measure EACH gap,
+   > not just the heading), and **(4) pixel**. Never report a section verified until you have measured
+   > numbers for every one of these and each matches the source — partial verification is not verification.
 6. **[ ] Flag residuals.** Anything that couldn't translate cleanly = a native-option fallback or a
    flagged scoped-CSS delta — recorded, not hidden.
 7. **[ ] Reusable fallback? Teach the converter (maintainer).** If the `code_block` fallback is a
@@ -278,11 +310,14 @@ For the section you're on, in order:
 **None of these is optional, and none is replaced by a later/newer instruction.** If you catch yourself
 about to hand-measure, hand-style, or skip the Tailwind translation, STOP — you dropped a step above.
 
-## Rule 0 — The header and footer MUST look EXACTLY like the source
+## Rule 0.1 — The header and footer MUST look EXACTLY like the source
 
-Non-negotiable, and first because it is the rule most often broken. A build is **not done** until its
-**header and footer faithfully match the source**, verified by **looking at each region** (a
-screenshot compared to the source), NOT by grepping the DOM for an element.
+Non-negotiable, and near-first because it is the rule most often broken (numbered 0.1 to sit alongside
+Rule 0 / 0.5 / 0.6 — it is not a second "Rule 0"). A build is **not done** until its **header and footer
+faithfully match the source**. For a **conversion** the chrome is emitted by the converter's theme
+generator and its class→option translation, and the residual check is the class-string fixture; for a
+**fresh build** verify each region by comparison against the mockup. Either way, confirm at the region
+level (a side-by-side, not a DOM grep for an element).
 
 - **"Footer set" ≠ setting the copyright line.** The copyright bar is ONE small part. The footer is
   **not done** until the **widget columns** (`main_footer_columns`) are built to match the source —
@@ -523,22 +558,24 @@ text but not the hairline divider above it.
   on the assembled page before the ship gate (source `full.png` vs a full-page build shot, via
   `compare.mjs`) — it catches inter-section spacing/rhythm, cross-section drift, sticky-header overlap,
   and proportion that per-region checks can't. A per-region PASS does not imply a whole-page PASS.
-- **Verification is visual and per-region — LOOK, don't grep.** Use a **region-cropped side-by-side**
-  (source panel next to build panel) plus a pixel-mismatch score, not a full-page glance and not an
-  element-presence grep. A grep that finds an element in the DOM is NOT verification — the recurring
-  failures (empty footer, bare logo, mis-wrapped grid) all passed element-presence checks and still
-  looked wrong. For each element (matched by text, not index) compare **font** (size/weight/color/
-  family/position), the **box model** (padding, height, gap/spacing — the topbar-padding class of
-  miss, and check vertical centering), and **icon fidelity** (a source inline `<svg>` vs an emoji/none
-  stand-in), and list **missing** elements (badges, descriptions, ratings) the build dropped. **Drive
-  every value from the source's computed styles / DOM — never eyeball or guess a number.**
-  Approximating (an emoji for an icon, a guessed padding) is the root cause of recurring misses.
-  Tooling: a semantic-region visual differ (side-by-side + pixelmatch %) and a text-keyed DOM diff that
-  reports font + box-model + icon + missing/extra.
-- **Verification only confirms what step 2 of the per-section checklist should already have produced:**
-  the values come from **translating the source's Tailwind class list (Rule 0.6)** into native options —
-  not from eyeballing the render. If fidelity-check flags a box-model/spacing miss, the usual cause is a
-  **skipped or partial Tailwind translation**; go back and translate the class list, don't patch by eye.
+- **Where a wrong value comes from — the two modes (this is the crux; do NOT conflate them):**
+  - **CONVERSION (a source exists): the value already exists as a captured Tailwind class / computed
+    style. NEVER measure the render to hand-tune it.** Every value is produced by **translating the
+    source's class list (Rule 0.6)** into native options. If fidelity-check flags a box-model/spacing/type
+    miss, the cause is a **skipped or partial Tailwind translation** — so **FIX THE CONVERTER'S
+    class→value translation** and **prove the fix with the browser-free class-string fixture**
+    (`tailwind-matrix.test.mjs`: `py-10` → `40px`, `max-w-3xl` → `48rem`), no browser. The rendered lenses
+    only *confirm* that the translated options assembled correctly; they are not where a value is derived.
+    If you find yourself reading a computed number off the source to type into an option, STOP — you
+    skipped the translation (Rule 0) and are re-deriving a value the class already encodes.
+  - **FROM-SCRATCH (no source): drive every value from your measured mockup / chosen spec — measuring is
+    legitimate here** (there is no class to translate). Never eyeball or guess a number; measure it.
+- **Either mode — LOOK per region, don't grep.** A grep that finds an element in the DOM is NOT
+  verification — the recurring failures (empty footer, bare logo, mis-wrapped grid) all passed
+  element-presence checks and still looked wrong. Use a **region-cropped side-by-side** + pixel-mismatch
+  score; for each element (matched by text) compare font, box model, icon fidelity, and list **missing**
+  elements the build dropped. (For a conversion, a flagged miss routes back to the converter per the
+  first bullet; it is never a licence to hand-measure-and-patch.)
 
 ## Rule 5 — Store detection
 

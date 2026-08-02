@@ -4,7 +4,7 @@ Integrates WooCommerce with UnysonPlus — makes any active theme WooCommerce-aw
 
 ## Provides
 
-- **Shortcodes (WooCommerce Elements tab):** `wc_products`, `wc_product`, `wc_product_page`, `wc_product_categories`, `wc_add_to_cart`, `wc_cart`, `wc_cart_link`, `wc_mini_cart`, `wc_free_shipping`, `wc_checkout`, `wc_account`, `wc_my_account`, `wc_order_tracking`, `wc_product_search`, `wc_product_filters` → `../shortcodes/` for atts. Each is a friendly wrapper around the matching classic WooCommerce shortcode (except the custom grid/carousel/mini-cart markup).
+- **Shortcodes (WooCommerce Elements tab):** `wc_products`, `wc_product`, `wc_product_page`, `wc_product_categories`, `wc_add_to_cart`, `wc_cart`, `wc_cart_link`, `wc_mini_cart`, `wc_free_shipping`, `wc_checkout`, `wc_account`, `wc_my_account`, `wc_order_tracking`, `wc_product_search`, `wc_product_filters` → `../shortcodes/` for atts. The commerce-page elements (`wc_cart`/`wc_checkout`/`wc_my_account`/`wc_order_tracking`/`wc_product_page`) are friendly wrappers around the matching classic WooCommerce shortcode. The **catalog / storefront** elements are **custom UnysonPlus markup with their own option UIs** — `wc_products` + `wc_product` on the shared **Card Rows** engine, `wc_product_categories` on the same card model, `wc_add_to_cart` + `wc_product_search` on the shared **Button Style** system, and `wc_product_filters` as a drag-sortable filter **panel** — see the per-element sections below.
 - **Settings/options:** a **Shop** settings page. Key ids include `shop_columns`, `products_per_page`, `shop_sidebar`, gallery thumbnail columns, related-products count (`catalog_box` / `single_box`), plus **Shop Behavior** toggles (Catalog Mode, sale-badge style, AJAX add-to-cart, breadcrumb, product-gallery zoom/lightbox/slider).
 - **Theme support:** if the current theme hasn't declared WooCommerce support, the extension declares it (+ gallery zoom/lightbox/slider) and enqueues a small generic stylesheet — so any theme renders a reasonable shop.
 - **Public hooks/filters:** bridges its settings to the active integration via the theme's `unysonplus_woocommerce_*` filters when present, else WooCommerce's own (`loop_shop_columns`, `loop_shop_per_page`, `woocommerce_product_thumbnails_columns`, `woocommerce_output_related_products_args`).
@@ -37,6 +37,14 @@ WooCommerce's mini-cart template has **no hook for its empty branch** — it har
 
 **Survives AJAX:** because the empty branch is normally re-rendered from WC's template on add/remove-to-cart, the block is **re-applied to the `div.widget_shopping_cart_content` fragment** (`woocommerce_add_to_cart_fragments`) whenever the cart is empty — the pieces are persisted to the `upwc_minicart_empty` option on render (last-rendered-wins, same pattern as the branding labels). Markup: `.upwc-minicart__empty` › `__empty-icon` / `__empty-heading` / `__empty-text` / `__empty-btn` (a `.button`; style the CTA from the child theme).
 
+### Empty-cart count badge — hidden when count is 0
+
+The item-count badge on both the **cart link** (`wc_cart_link`) and the **mini-cart** trigger (`wc_mini_cart` / the header element) is **suppressed while the cart is empty** — no stray "0" sitting on the icon. Implemented in **three coordinated places** so it holds through a live AJAX update, not just the first server render:
+
+- **Server render** — `view.php` (cart link) and `includes/mini-cart-render.php` (mini-cart) add a `--empty` modifier to the count span when `count < 1` (`.upwc-cart__count--empty` / `.upwc-minicart__count--empty`).
+- **WC fragment refresh** — `class-fw-extension-woocommerce.php::_filter_cart_fragments` re-emits both count spans **with the same `--empty` modifier** when the AJAX count drops to 0 (the fragment selectors are `.upwc-cart .upwc-cart__count` and `.upwc-minicart .upwc-minicart__count`), so removing the last item re-hides the badge without a reload.
+- **CSS** — the `--empty` classes (in each element's `styles.css`) hide the badge. (`wc_cart_link` still also has the separate `hide_when_empty` option that removes the *whole element*; the `--empty` badge behavior is independent and always on.)
+
 > **Extension point — add your own header/footer element.** The `unysonplus_hf_elements` filter (theme) lets any extension register a draggable element: return `$els['<slug>'] = ['label'=>…, 'context'=>'header'|'footer'|'both', 'options'=>[<option schema>]]`, then render it by hooking `add_action('unysonplus_render_hf_element_<slug>', fn($settings,$element,$where) => …)`. `$settings` is the element's saved option values. The Mini Cart is the reference implementation.
 
 ## Building a store demo (products → grid → chrome)
@@ -48,6 +56,45 @@ The e-commerce equivalent of the [build-a-site](../build-a-site.md) flow:
 3. **Create real products** (`WC_Product_Simple`: name, slug, price, description, `set_category_ids`, `set_image_id` from a sideloaded attachment). Idempotent upsert by slug.
 4. **Grid, not cards.** Replace the static product columns with one `wc_products` element (`source: 'category'`, `category: '<slug>'`, `columns`, `image_ratio`, `show_price`/`show_add_to_cart`). Style the emitted `.products li.product` markup from the child theme (cap the product `img` height — square-ratio images render large in a wide container).
 5. **Chrome.** Put the **native `mini_cart` header element** (branded, icon-picker) in the header's right slot + the nav in the center — element shape `['element_type'=>['element'=>'mini_cart','mini_cart'=>['mc_icon'=>…,'mc_panel_title'=>…, …]]]`. (The old `custom_html` + `[wc_mini_cart]` wrapper still works but the native element is preferred — see above.)
+
+## `wc_products` — the Products element options
+
+Modal tabs (UI grouping only; atts are flat):
+
+- **Content** — *which* products: `source` (recent/featured/sale/best_selling/top_rated/category/tag/attribute/ids/recently_viewed/cross_sells), `category`, `tags`, `attribute`, `attribute_terms`, `product_ids`, `posts_per_page`, plus `orderby`/`order`.
+- **Grid** — *how the grid arranges*: `layout` (grid/carousel), `columns` (2–6), `gap` (sm/md/lg), `alignment` (text alignment), `pagination` (none/load_more), `carousel_arrows`.
+- **Card** — *what each card shows*, in three groups (**rows-only since 2026-08-01** — see below):
+  - **Card Layout:** `card_rows` (the single card model), `box_style` (Box Preset skin), `image_ratio`, `image_size`.
+  - **Badges:** `show_ribbon` (from `_upwc_ribbon` product meta), `show_sale_badge` (+ `badge_style` text/percent), `show_featured_badge`, `show_new_badge` (+ `new_days`). These pick **which** badges appear in the `badges` slot.
+  - **Add to Cart:** `add_to_cart_text` (the `cart` slot's button label).
+
+**Card Layout = the row designer (the ONE card model).** The old `card_layout` Classic/Slot toggle and the per-element **presence switches** (`show_price`/`show_rating`/`show_excerpt`/`show_wishlist`/`show_quick_view`/`show_add_to_cart`/`show_rating_count`/`show_stock`) were **removed 2026-08-01** — they were never used and double-controlled what the rows already own. **Presence is now "is the slot in a row"** (a slot renders when it's in a row AND the product has that data; remove the slot to hide it).
+
+- `card_rows` = an addable, drag-sortable list of ROWS. Each row = `{ slots:[…], direction:'inline'|'stack', justify:'start'|'center'|'between'|'end', align:'start'|'center'|'end'|'stretch' }`. Known slots: `badges, wishlist, media, title, excerpt, rating, rating_count, price, cart, quickview`. Empty slots (and empty rows) collapse, so a card with no rating/ribbon degrades cleanly. Seeded default (mirrors the Site Converter's emission): `[badges,wishlist] between` · `[media,title,excerpt] stack/center` · `[rating,rating_count] center` · `[price,cart] between`.
+- Cards render `.upwc-product--slotted` with `.upwc-product__row` (flex, `.upwc-row--{inline|stack}` + `.upwc-j-*` + `.upwc-a-*`). `rating` renders our own star markup (no WooCommerce "Rated X out of 5" screen-reader leak); `rating_count` shows the **average score** (e.g. 4.9), not the review count. The `badges` slot is a static row element (badge types chosen by the toggles above).
+- **Structure vs skin.** The rows set STRUCTURE. The card **skin** (border / corners / shadow / fill + hover) comes from **`box_style`** — a **Box Preset** picker (`sc_card_box_style_field()`; saved as a `boxp-{slug}` class applied to each `.upwc-product`, managed in Theme Settings → Components → Box Presets) — the native, on-brand way to skin the card. Scoped Custom CSS (`.upwc-products .upwc-product{…}`) is the fallback when a build needs a one-off skin (what the Site Converter emits from a captured card).
+
+**Image Ratio + Image Size.** `image_ratio` (auto/square/portrait/landscape) owns the image **shape**; `image_size` (unit-input width, empty = auto/fill) owns the **scale**, emitted as the `--upwc-img-size` custom property on the grid wrapper. Together they replace the old "cap the product `img` height from the child theme" workaround.
+
+## `wc_product` — Single Product (same card engine)
+
+Rebuilt to render **ONE product through the SAME engine as `wc_products`** (`upwc_wc_products_card`) instead of Woo's raw `[product id]` loop tile. It shares the whole Card tab with the grid via one helper — **`upwc_wc_card_option_groups()` in `helpers.php`** (the single source of truth for the card model, so the two can never drift): the **Card Rows** designer + live wireframe preview, the **Card Box Style** preset, **Image Ratio/Size**, the shared **Rating** style (`sc_rating_style_field()` — symbol / colors / size), the **Badges** group, Quick View and AJAX add-to-cart. The grid-only concerns (source query, columns, pagination, carousel) are omitted since they don't apply to one product, so its tabs are **Content** (a product picker) + **Card** + Animations + Advanced. Same slots/rows semantics as `wc_products` above.
+
+## `wc_product_categories` — Category grid on the card model
+
+Rebuilt off Woo's fixed `[product_categories]` loop onto the **flexible card model**. Each category card is composed from the shared **Card Rows** designer (`sc_card_rows_field()`) with **category slots** — `image` (Image), `title` (Name), `count` (Product Count), `button` (View link) — plus a live wireframe preview (`sc_card_preview_mount_html()`), a **Card Box Style** preset, and **Image Ratio/Size**. Seeded default = image · name · count (stacked, centered). Tabs: **Content** (query — `number`, `orderby`/`order`, `parent`, specific `ids`, `hide_empty`), **Grid** (`columns` 1–6, `gap` sm/md/lg, `alignment`), **Card** (rows + box style + image), plus `button_text` for the Button slot (default "View"), and Advanced. Emits its own lightweight grid stylesheet.
+
+## `wc_add_to_cart` — Add to Cart button (Button Style system)
+
+Rebuilt off Woo's raw `[add_to_cart]` onto **our own themed `<a>`** that keeps the WooCommerce AJAX add-to-cart behavior (the `add_to_cart_button`/`ajax_add_to_cart` classes + data attributes; variable / grouped / external products link to the product page instead). It wears the **same Button Style system as the `[button]` shortcode** — Theme Settings → Buttons presets, Size, Shape, Width, Alignment — via the shared `sc_button_style_field()` / `sc_button_style_atts()` helpers (a **Style** tab). **Content** tab: `product` (picker), `quantity`, a custom `label`, `show_price` + `price_position` (before/after the button).
+
+## `wc_product_search` — Product search (layout + Button Style)
+
+Was a bare placeholder-only form; now a product-scoped (`post_type=product`) search form with real layout/style controls. **Content:** `placeholder`, `button_text` (empty = icon-only), `button_icon` (icon-picker, default magnifier). **Style:** `layout` (`attached` button beside / `below` full-width button under / `compact` icon inside the field edge), `field_shape` (default / pill / rounded / square), `size` (sm/md/lg), a themed `button_style` (Button Style preset, for the Attached/Below layouts), `width` (auto max-22rem / full), and `alignment`.
+
+## `wc_product_filters` — Filter PANEL (drag-sortable stack)
+
+Was one Woo filter widget per element (price OR rating OR a single attribute); now a whole **filter PANEL** — an ordered, drag-sortable **stack of filter blocks** (`filters` addable-popup). Each block has a `type` (Price / Attribute / Rating / Active Filters), an optional block `title`, and — for the Attribute type — an `attribute` (picked from a select of the store's product attribute taxonomies), `display_type` (list / dropdown) and `query_type` (AND / OR). So one sidebar element can stack e.g. Price + Color + Size + Active Filters. **Style** tab wraps the stack in a styled panel: `panel_title`, `collapsible` (each block title toggles its block via a tiny event-delegated script), a **Card Box Style** preset skin, and `divider` (thin line between blocks). **Legacy single-filter instances still render** via a back-compat fallback when no blocks are configured. Filter widgets still only function on **shop / product-category pages**, where they filter the listing.
 
 ## Custom configurator → cart (bespoke element pattern)
 

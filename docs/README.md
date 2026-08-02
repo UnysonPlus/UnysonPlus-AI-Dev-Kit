@@ -9,11 +9,12 @@ already know a filename.
 
 | I need to… | Read |
 |---|---|
+| **The core rule — CONVERSION = translation, not design** (a source exists → translate its captured classes via the converter, fix the converter for a wrong value, prove with a class-string fixture; NEVER measure/eyeball/hand-author) | [`site-build-protocol.md`](site-build-protocol.md) → Rule 0 / Rule −1 |
 | **Follow the strict, authoritative build checklist** (canonical — start each section here) | [`site-build-protocol.md`](site-build-protocol.md) → "THE PER-SECTION CHECKLIST" |
-| Prompt → finished site (narrative workflow) | [`build-a-site.md`](build-a-site.md) |
-| Compose builder pages programmatically | [`building-pages.md`](building-pages.md) + [`../tools/upw-build-pages.php`](../tools/upw-build-pages.php) |
+| Prompt → finished site (narrative workflow — **fresh builds only**) | [`build-a-site.md`](build-a-site.md) |
+| Compose builder pages programmatically (fresh/demo/test — **not** conversions) | [`building-pages.md`](building-pages.md) + [`../tools/upw-build-pages.php`](../tools/upw-build-pages.php) |
 | The generalized conventions every build follows | [`conventions.md`](conventions.md) |
-| Verify a region against the source (the 4-lens PASS gate) | [`fidelity-verification.md`](fidelity-verification.md) + [`../tools/README.md`](../tools/README.md) |
+| Verify a region — **conversion:** the browser-free class-string fixture is the proof; **fresh build:** the 4-lens rendered PASS gate | [`fidelity-verification.md`](fidelity-verification.md) + [`../tools/README.md`](../tools/README.md) |
 | Cloning gotchas (Tailwind, spacing, emoji vs SVG, wp-emoji…) | [`cloning-gotchas.md`](cloning-gotchas.md) |
 | The deterministic converter (capture service + Site Converter) | [`extensions/site-converter.md`](extensions/site-converter.md) |
 

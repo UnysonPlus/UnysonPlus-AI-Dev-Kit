@@ -4,6 +4,15 @@ The orchestration layer: how to go from *"build me a &lt;kind&gt; site"* to a fi
 UnysonPlus site. It ties together the reference docs (per shortcode / option / module / extension),
 the build tooling ([building-pages.md](building-pages.md)), and the [conventions](conventions.md).
 
+> **⛔ THIS FILE IS THE FRESH-BUILD PATH ONLY. A source exists? It's a CONVERSION — stop and use the
+> converter.** If the request references or supplies **anything to reproduce** — a URL, a screenshot, a
+> PDF/Figma, an HTML/CSS dump, a named template — it is a **conversion**, and a conversion is a
+> **translation** job: run the capture/converter pipeline and follow
+> [`site-build-protocol.md`](site-build-protocol.md) (Rule 0). Do **NOT** use the measure-and-extract
+> steps below to hand-reproduce a source — every value already exists as a captured class; you translate
+> it, you don't measure it. The measuring/eyeballing this file describes is legitimate **only** when there
+> is nothing to reproduce.
+
 > Prerequisite: a WordPress with the UnysonPlus plugin + parent theme active, and Classic Editor
 > active (the builder assumes the classic editor). See [README.md](../README.md) → "First: a WordPress to build into".
 >
@@ -31,8 +40,9 @@ See `docs/theme-settings/` for every tab's options and choices.
 ### 2. Lock the chrome (header / footer / container)
 Header, footer, and the container width are **theme chrome**, not page-builder content. Set them from
 Theme Settings (and the header/footer builder) and get them ~right before building bodies — the child-
-theme starter ships polished chrome so this is mostly tuning. Measure, don't eyeball, if a mockup
-exists (`tools/measure/`).
+theme starter ships polished chrome so this is mostly tuning. **On a fresh build, measure your mockup
+rather than eyeballing** (`tools/measure/`). *(If a source **exists**, you're converting — don't measure
+it; translate its captured classes via the converter. See the gate at the top of this file.)*
 
 > **When reproducing a source, the header and footer must match it EXACTLY** (applies to any site —
 > demo, test, or live):
@@ -86,7 +96,7 @@ Before calling it done ([conventions](conventions.md) §7):
 | The prompt says… | Do this |
 | --- | --- |
 | A brand/industry ("law firm", "SaaS", "cafe") | Pick palette + type that fit; set them as Theme Settings tokens first. |
-| "Like &lt;some site&gt;" / a screenshot | Extract tokens (colors, type, spacing, **container width**) and reproduce them **as Theme Settings presets**; for a live URL, prefer the Site Converter pipeline (see the converter docs) over hand-building. |
+| "Like &lt;some site&gt;" / a screenshot / a template / an HTML dump | **This is a CONVERSION, not a fresh build — a source exists.** Run the capture/Site Converter pipeline and follow [`site-build-protocol.md`](site-build-protocol.md); the converter **translates** the source's captured classes → Theme Settings presets + native options deterministically. Don't hand-extract/measure tokens — that re-derives values the classes already encode (Rule 0). |
 | A **store** — "Add to Cart"/"Basket" buttons, per-item **prices**, a Shop/Menu nav, product cards | It's an e-commerce site: build it on **WooCommerce**, not static cards. Activate the `woocommerce` extension, create real products, and use the `wc_products` grid + `wc_mini_cart` / `wc_cart_link` chrome. Detecting these cues early avoids rebuilding a "brochure" into a store later. See [extensions/woocommerce.md](extensions/woocommerce.md). |
 | Specific pages ("home, about, pricing, contact") | One `upw_build_page()` per page; reuse section patterns across them. |
 | "Animated" / "modern motion" | Add engine effects in step 4 — start with entrance + a scroll-keyframed hero, add section-level motion where it earns its place. |

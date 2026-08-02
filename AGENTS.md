@@ -11,10 +11,17 @@
 
 You are building (or polishing) a **WordPress site or demo** on the **UnysonPlus**
 plugin + **unysonplus-theme** parent theme, usually to match a **source mockup**.
-This kit exists for one reason:
+This kit exists for one reason — but it splits cleanly by build type:
 
-> **Get the mockup's design right on the first pass — target 95–100% — by building
-> outside-in and measuring, not by eyeballing and patching.**
+> **CONVERSION (a source exists) — get the design right by TRANSLATING, not measuring.** The source is a
+> finished design; every value already exists as a captured Tailwind class / computed style. Run the
+> converter and **translate** each captured class → native option / scoped CSS; when a value is wrong,
+> **fix the converter's class→value rule and prove it with a browser-free class-string fixture** — never
+> measure the render to hand-tune, never eyeball, never hand-author the tree (Rule 0).
+>
+> **FROM-SCRATCH (nothing to reproduce) — get it right on the first pass by building outside-in and
+> measuring, not by eyeballing and patching.** Here you *create* values, so measuring the mockup is the
+> legitimate proof.
 
 > ## ⛔ CONVERSION? CAPTURE FIRST — hard gate, before anything else
 >
@@ -74,8 +81,10 @@ An all-in-one toolkit for working with UnysonPlus — pick the surface that matc
 4. **Know** the rules — [`docs/conventions.md`](docs/conventions.md) + the reference docs under `docs/`
    (one per shortcode / option type / animation module / extension / Theme Settings tab).
 
-Matching a source **mockup** to 95–100% (below) is the most demanding form of #1 — its outside-in,
-measure-don't-eyeball discipline applies to every build.
+Matching a source **mockup** to 95–100% (below) is a **conversion** — a translation job (run the
+converter, fix its class→value rules, prove with a class-string fixture), **not** the measure-and-eyeball
+discipline. That outside-in, measure-don't-eyeball discipline is for the **from-scratch** builds under #1
+where you create values; a conversion never hand-measures a source (Rule 0).
 
 ## Using these docs — consult FIRST, then backfill (the reflex)
 
@@ -203,6 +212,14 @@ screenshots. That never converges. Instead — **convert first, then refine:**
    conversion report** and, with the site owner's consent, **share that report upstream** rather than
    forking your local copy. The steps below then apply to its output (or to a blank page if you skip
    conversion):
+> **Steps 1–4 below (read the mockup's outer layers, lock chrome to *measured* parity, "measure — never
+> eyeball") are the FROM-SCRATCH path — they *create* values from a mockup you were given with nothing to
+> reproduce.** On a **CONVERSION** (a real source), you do NOT hand-read/measure the source: the converter
+> emits the chrome + every section, and each value comes from **translating the captured class list**
+> (Rule 0.6). A wrong value → **fix the converter and prove it with the class-string fixture**
+> (`tailwind-matrix.test.mjs`), never by measuring the render. The rendered lenses are only the secondary
+> "did the translated options assemble right" check.
+
 1. **Read the mockup's OUTER layers first.** Open the mockup HTML/CSS and extract
    the frame tokens: container `max-width`, header height + logo box, footer
    structure, spacing scale, color tokens, type scale. The mockup is the spec.
@@ -216,8 +233,9 @@ screenshots. That never converges. Instead — **convert first, then refine:**
    **`code_block` placeholder** first so the layout keeps moving; swap it for the
    real shortcode later.
 
-After every change: run `tools/measure/measure.mjs` and fix anything outside
-tolerance. **Measure — never eyeball.**
+After every change **on a fresh build**: run `tools/measure/measure.mjs` and fix anything outside
+tolerance. **Measure — never eyeball.** *(On a conversion the equivalent is: re-run the class-string
+fixture after each converter fix — the render check is only the secondary confirmation.)*
 
 ## Hard rules
 

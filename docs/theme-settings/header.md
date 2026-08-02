@@ -163,6 +163,7 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
 
 ### Structure & dimensions
 - `container` — **Type** `select`. **Default** `container`. **Choices**: `container` Fixed Width, `container-fluid` Full Width.
+- `container_width` — **Type** `unit-input` (`px`,`rem`,`em`). **Default** `{value:'',unit:'px'}`. (2026-08-02) The header bar's **CONTENT** width in Fixed-Width mode, independent of the site-wide Container Width — so the masthead can be narrower than the body (a common source pattern) without touching the global. Like the global setting it's the content width (gutter outside); empty = align with the global. Emitted as a header-scoped `--header-container-max` consumed by the `.site-header .fw-container` rule in `style.css` (falls back to `--container-max-desktop` when empty).
 - `min_height` — **Type** `unit-input` (`rem`,`px`,`em`). **Default** `{value:'5',unit:'rem'}`. Main header row min height.
 - `mobile_min_height` — **Type** `unit-input` (`rem`,`px`,`em`). **Default** `{value:'',unit:'rem'}`. Below 768px; empty reuses desktop.
 - `mobile_breakpoint` — **Type** `select`. **Default** `lg`. **Choices**: `lg` Below 992px (tablet & phone), `md` Below 768px (phone only).

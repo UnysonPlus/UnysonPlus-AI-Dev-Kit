@@ -17,6 +17,7 @@ Defines the spacing scale, gap scale, and site-wide default gaps that back Unyso
 
 - **Saved value shape:** array of `{ name, size }` entries, e.g. `[ { "name": "3", "size": "1rem" }, … ]`.
 - **Notes:** Each entry produces a complete set of utilities (`.m-NAME`, `.p-NAME`, `.mt-NAME`, `.mx-NAME`, etc.) plus a `--spacer-NAME` CSS var. Theme Settings override takes precedence over plugin defaults.
+- **Arbitrary-value spacer names (2026-08-02):** a spacer can be NAMED as a Tailwind-style arbitrary value — e.g. name `[40px]`, or `[3.5rem]`. It then produces the `pt-[40px]` class (NOT `pt-40px`) — the SAME class the Site Converter emits and the per-page dynamic CSS renders — so it shows in every spacing dropdown and a converter-set value is durable on a builder re-save. css-tokens **skips** bracket-named entries (a `--spacer-[40px]` var name is invalid); the arbitrary rule is emitted per-page instead. See "Arbitrary spacing values" below. This is why the scale stays **Bootstrap-aligned** (`0–5` match Bootstrap on purpose) — we did NOT renumber it; arbitrary values cover every off-scale size.
 
 ### Gap Scale — `gap_scale`
 
@@ -70,6 +71,25 @@ Defines the spacing scale, gap scale, and site-wide default gaps that back Unyso
   | *(one entry per gap-scale slug)* | the gap-scale names (`0`, `1`, `2`, `3`, `4`, `5`, plus any added) |
 
 - **Notes:** Overrides Default Gap on the vertical axis only.
+
+## Arbitrary spacing values (`pt-[40px]`) — exact, non-breaking
+
+The scale is coarse by design (Bootstrap-aligned; e.g. no 32/40px step). Rather than renumber it, any
+spacing option may hold a **Tailwind-style arbitrary token** — `pt-[40px]`, `mb-md-[3.5rem]`, `g-[24px]` —
+for an exact off-scale value. How it works:
+
+- **Rendering:** `sc_sanitize_class()` preserves the strict arbitrary pattern (everything else keeps the
+  `[a-z0-9_-]` filter, so no XSS surface), the responsive-infix builder turns `pt-[40px]` → `pt-md-[40px]`,
+  and the **per-page dynamic CSS** (`framework/includes/dynamic-css.php`) emits a matching escaped rule
+  `.pt-\[40px\]{padding-top:40px !important}` (breakpoint-aware for `md`/`lg`). The fixed scale, containers
+  and gutters are untouched.
+- **Where it comes from:** the section Top/Bottom Spacing option (and any `p-`/`m-`), and the **Site
+  Converter** — which emits a scale slug when the captured px is on-scale, else an exact `pt-[Npx]`
+  (lossless), and registers each arbitrary value as a `[40px]`-named Spacing-Scale preset on import via
+  `unysonplus_register_arbitrary_spacing_scale()`.
+- **Editing:** because a `[40px]`-named scale entry and the converter both produce the *same* `pt-[40px]`
+  class, a converter-set value shows as the selected option in the dropdown and survives a re-save — the
+  editable Spacing Scale doubles as the "custom value" UI (no per-field multi-picker needed).
 
 ## Reference — Default Spacing Scale
 

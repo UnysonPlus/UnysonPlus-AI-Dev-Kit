@@ -1,9 +1,17 @@
 # Cloning gotchas — the recurring fixes (quick reference)
 
 The concrete fixes that keep coming up when cloning a source into UnysonPlus, each generalized from
-real misses. Skim this before and during a clone; the detail lives in the linked docs. Governing rule:
-**measure the source, build to the measured value, verify per region** (see
-[fidelity-verification.md](fidelity-verification.md)).
+real misses. Skim this before and during a clone; the detail lives in the linked docs.
+
+> **Governing rule — a clone is a TRANSLATION, not a measure-and-hand-tune.** A clone/convert IS a
+> conversion: every value already exists as a captured Tailwind class / computed style, so you **translate
+> the captured class** into a native option (Rule 0.6), and when a value is wrong you **fix the converter's
+> class→value rule and prove it with the browser-free class-string fixture** (`tailwind-matrix.test.mjs`) —
+> you do **not** read a number off the source render to type in by hand. The fixes below are phrased as
+> "measure X" because that's how the miss was *diagnosed*; the **durable fix is a converter rule**, and any
+> hand value is only the residual delta the converter can't yet express. Measuring-to-create is legitimate
+> only on a **from-scratch** build. See [site-build-protocol.md](site-build-protocol.md) Rule 0 +
+> [fidelity-verification.md](fidelity-verification.md).
 
 ## Design system
 - **Container width** — the theme default desktop container is **1170px**; match the source's content
@@ -26,15 +34,18 @@ real misses. Skim this before and during a clone; the detail lives in the linked
     → `logo_icon_frame:circle`, `logo_icon_frame_bg:#fce7f3`, `logo_icon_color:#fbcfe8`.
 - **Cards / buttons / band tints / rounded media** — belong in **Box / Button / Section-style / Image-
   style presets** (`components-*`), consumed by elements — not hand-rolled `.card{}`/`.btn{}` child CSS.
-- **Spacing — MEASURE it from the capture, don't eyeball.** Load the live source (computed styles) and
-  read the actual box model — section padding, column gaps, element margins (e.g. blurb→social,
-  title→list, footer top/bottom) — then map each px to the nearest **spacing-scale** step and set it via
-  the element's CSS Class (`mt-3`) or the section's Custom Styling **Padding** (spacing value
-  `{ padding: ['pt-4'] }`). The scale (px): `1`=4 · `2`=8 · `3`=16 · `4`=24 · `5`=48 · `6`=56 · `7`=64 ·
-  `8`=72 · `9`=80 · `10`=96 · `11`=112 · `12`=128. It jumps 24→48 (no 32); when a measured value lands
-  between steps, prefer the **tighter** one (users dislike over-spacing) and note the small delta.
-  The kit's `tools/measure/fidelity-check.mjs` (`getBoundingClientRect` + `getComputedStyle` on both
-  source and yours) turns "the footer feels off" into "blurb→social is 24px, source is 16px → `mt-3`".
+- **Spacing — the converter TRANSLATES the source's spacing class; it's not yours to eyeball.** The
+  source's spacing is a captured class (`py-10`, `gap-8`, `mt-24`) or its resolved computed value; the
+  converter snaps it to the nearest **spacing-scale** slug and sets it via the element's CSS Class (`mt-3`)
+  or the section's Custom Styling **Padding** (`{ padding: ['pt-4'] }`). The scale (px): `1`=4 · `2`=8 ·
+  `3`=16 · `4`=24 · `5`=48 · `6`=56 · `7`=64 · `8`=72 · `9`=80 · `10`=96 · `11`=112 · `12`=128. It jumps
+  24→48 (no 32); when a value lands between steps, the converter prefers the **tighter** one (users dislike
+  over-spacing). **If a section's spacing is wrong, it's a converter translation miss — fix the class→slug
+  rule and prove it with `tailwind-matrix.test.mjs`** (which sweeps every official Tailwind step through
+  the real pipeline and fails on a CLAMP/COLLIDE), not a hand-typed px read off `getComputedStyle`.
+  `tools/measure/fidelity-check.mjs` still *diagnoses* the miss ("blurb→social is 24px, source is 16px"),
+  but the durable fix lives in the converter, not the page. *(On a **from-scratch** build there's no class
+  to translate — measure your mockup and set the slug directly.)*
 
 ## Lockups & icon rows — `align-items` / `gap` do nothing unless `display` is flex
 
@@ -62,6 +73,26 @@ asset bug. **Measure it, and don't blame the image first.**
   geometry numbers are a starting point, not proof. And for a lockup, check the mark's vertical
   centre **==** the title's and the gap matches the source — **diagnose the layout before touching
   the asset.**
+
+## Box-shadow / glow looks hard-cut = an ancestor with `overflow:hidden` (check this FIRST)
+- **Tell:** an image (or card) box-shadow — or a decorative backdrop glow — has a **straight, hard cut-off
+  edge** instead of a smooth falloff. No `box-shadow` value change fixes it; you'll burn rounds tweaking
+  blur / opacity / spread while the value was never wrong.
+- **Cause:** an ancestor **clips** it. **`.imgs-wrap` no longer does** — its overflow is
+  `var(--imgs-overflow, visible)`, so image shadows/glows render out of the box (the `<img>` keeps its own
+  `border-radius`, so it stays rounded without the clip). But **any other container** with `overflow:hidden`
+  (a column, a card, a section wrapper) still clips.
+- **`.imgs-wrap` hover-zoom note:** it only clips when you set `--imgs-overflow:hidden` — needed for a
+  hover-**zoom** crop (`:hover img{transform:scale(...)}`) so the zoom stays inside the frame. A hover-zoom
+  image and a shadowed image therefore conflict (zoom wants the clip, shadow wants it off).
+- **Fix (other wrappers):** `overflow: visible` on the clipping ancestor (scoped), NOT a shadow tweak. Safe
+  when the element keeps its own `border-radius`. (A box-shadow on a wrapper *element itself* renders fine
+  under `overflow:hidden` — only a shadow on a **child** is clipped — so moving the shadow to the wrapper
+  is the other fix.)
+- **Diagnose before theorising:** when a shadow looks cut, inspect the shadowed element's ancestors for
+  `overflow:hidden` FIRST. And use a **side-by-side element crop** — a clipped shadow is instantly obvious
+  visually but invisible in a `box-shadow` computed-value read (the value is correct; it's the rendering
+  that's clipped).
 
 ## Emojis look flat / wrong vs a non-WordPress source — disable wp-emoji
 
@@ -192,9 +223,10 @@ WordPress is swapping the **rendering**.
   clear the optimizer/generated caches.
 - **Extend, don't hack**: if an element can't do what the source needs (e.g. `footer_logo` had no title),
   add the option to the framework so it stays user-editable — don't bury it in child markup.
-- **Verify per region with the 3-lens tool** (`tools/measure/fidelity-check.mjs`) before advancing: it
-  catches font/size/color/**textTransform**/emoji, **overlap/geometry**, and pixel diffs — the classes of
-  miss an eyeball skips.
+- **Verify per region with the 4-lens tool** (`tools/measure/fidelity-check.mjs`) before advancing: it
+  catches font/size/color/**textTransform**/emoji, **overlap/geometry**, pixel, and **vertical-spacing**
+  diffs — the classes of miss an eyeball skips. On a conversion this is the *assembly* check; the primary
+  proof of a value is the class-string fixture (`tailwind-matrix.test.mjs`) — see the governing rule up top.
 
 ## :hover / :focus states — the converter drops them (capture-side gap)
 
