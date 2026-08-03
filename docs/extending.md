@@ -146,9 +146,31 @@ the picker tile, assets enqueued automatically from the theme URI. The three dif
 - **Version/mirror**: a theme shortcode ships with the THEME (bump `style.css` `Version:`), not a
   plugin manifest.
 
-**When to use which.** Reusable across every site → a **plugin** shortcode (the shortcodes extension,
-per the section above). One brand's bespoke element → a **theme/child-theme** shortcode. The porting
-procedure (`sample-shortcode/HOW-TO.md`) is the same either way — only the destination folder changes.
+### Deciding the home — reuse scope × distribution intent (ASK when unclear)
+
+Two independent axes decide where a new shortcode lives — and they are **not** the same question, so
+resolve both. **When the intent isn't obvious from the task, ASK the user** (a one-time decision per
+shortcode, not a per-build nag):
+
+> *"How should this shortcode ship — (a) bundled in the **core plugin** (auto-updates for every site, but
+> it becomes part of the framework release), (b) inside **this site's child theme** (travels with the
+> theme, which is itself an uploadable `.zip`), or (c) as a **standalone extension** — its own
+> distributable module a user activates under Unyson+ → Extensions and can hand out independently?"*
+
+| Home | Ships as / distributed by | Right when… | Notes |
+|---|---|---|---|
+| **Core plugin** `framework/extensions/shortcodes/shortcodes/<name>/` | the full-plugin release ZIP (auto-updater) | it's **generic + reusable** AND belongs in the framework for everyone | contributor task (needs the plugin repo + a version bump); a core tag wins over same-named theme/upload tags |
+| **Child theme** `<theme>/framework-customizations/extensions/shortcodes/shortcodes/<name>/` | inside the child-theme ZIP (Appearance → Add New → Upload) | it's **one site's / one brand's bespoke** element that should travel with the theme | no registration call — the loader scans the active theme; version = the theme's `style.css` |
+| **Standalone extension** `framework/extensions/<name>/` (manifest `standalone`/`author`/`license`) | its **own** distributable module, activatable in Extensions | the user wants to **ship / sell / hand it out independently** of any one plugin or theme | see *Creating an extension* below; the closest thing to a self-contained, distributable package |
+| **User-uploaded** (uploads dir) | dropped into the uploads dir | a quick per-site drop-in with no packaging | lightest path; no packaging UI/zip format today |
+
+**Reuse scope picks the DEFAULT; distribution intent can override it.** "Reusable → plugin, bespoke →
+child theme" is the *default*, but they're different axes: a **reusable** shortcode the user wants to
+**distribute as their own add-on** goes in a **standalone extension**, not the core plugin — so don't
+silently fold a would-be product into the framework. If the task doesn't make the intent clear, ask.
+
+The porting procedure (`sample-shortcode/HOW-TO.md`) is **identical for all homes** — only the destination
+folder (and the version marker) changes.
 
 **References:** the `newbingosite` child theme ships `mini-reviews` / `pros-cons` / `casino-matcher` /
 `toplist-offers` this way; the `pinky-bites` demo ships an interactive `cupcake-builder` configurator.

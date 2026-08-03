@@ -13,6 +13,19 @@ imagined.
 
 ---
 
+## Before you start — decide the HOME + how it ships (ask if unclear)
+
+The porting steps below are the same wherever the shortcode ends up — but decide the destination **first**,
+because reuse-scope and *distribution intent* are separate questions. When the task doesn't make it obvious,
+**ASK the user once:** ship it in the **core plugin** (auto-updates for every site), inside **this site's
+child theme** (an uploadable theme `.zip`), or as a **standalone extension** (its own distributable module,
+activatable in Extensions, that they can hand out independently)? A *reusable* shortcode the user wants to
+**distribute as their own add-on** goes in a standalone extension, not the framework. Full decision table
+(all four loader homes + version markers): **`docs/extending.md` → "Deciding the home"**. Only the
+destination folder + version marker change; everything below is identical.
+
+---
+
 ## Step 0 — When the source is a LIVE site: CAPTURE → REPLICA → PORT
 
 If you are reproducing a component from a live URL (cloning a site), **do not hand-build it from
