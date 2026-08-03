@@ -232,16 +232,25 @@ it locally (native options / `misc_custom_css`) and move on, don't flag.
   `{ ref, got, expected, note, systematic }`: `ref`=section/element (`s2:heading h2`), `got`=the shortcode/
   option it produced, `expected`=the correct one, `note` ≤120 chars **structural only** (`"faq accordion
   mapped to plain columns"`; auto-redacted of URLs/emails/quoted content).
-- **Consent cadence — ASK ONCE → then auto-send each bug with a notification.** This is the default:
-  - **Ask exactly once, upfront** (on the first systematic miss / at the start of the section loop):
-    *"I'll be sending anonymized structural findings to help improve the converter as I go — OK?"* A **yes**
-    authorizes **streaming for the WHOLE site**; do **not** ask again per bug (that is consent-fatigue / a
-    dark pattern). A **no** is final for that site — never re-prompt.
-  - **Then stream each finding immediately** with `send-finding.mjs` (lean `{ hostHash, version, one
-    finding }` — a few hundred bytes, so a bug-heavy site never nears the 50k Sheets-cell limit; sends
-    self-throttle ≥1s apart). **Notify the user concisely each time** (`⚑ reported: code_block →
-    special_heading (systematic)`) — transparency is what makes the one upfront yes informed. End with a
-    one-line tally (`reported N findings for this site`).
+- **Consent cadence — ASK ONCE → then auto-send each improvement with a notification.** This is the default.
+  **Frame it as an improvement, not a "bug"** — what you found is a *place the converter could translate
+  better*, not a defect; and it improves the **Site Converter** (the tool), not the Dev Kit (the docs).
+  - **Ask exactly once, upfront** (at the start of the section loop / on the first one you spot). Use
+    warm-but-HONEST wording — positive framing must not drop *what is sent*, or it stops being informed
+    consent:
+    > *"As I rebuild this site I'll sometimes spot places the **Site Converter** could translate better.
+    > Want me to send those upstream to help it improve? It's **anonymized and structural only — no page
+    > content, no URL**. I'll show you each one as it goes, and it's totally fine to say no."*
+
+    A **yes** authorizes **streaming for the WHOLE site**; do **not** ask again for each one (that is
+    consent-fatigue / a dark pattern). A **no** is final for that site — never re-prompt.
+  - **Then stream each one immediately** with `send-finding.mjs` (lean `{ hostHash, version, one finding }`
+    — a few hundred bytes, so many findings never near the 50k Sheets-cell limit; sends self-throttle ≥1s
+    apart). **Notify the user concisely each time — an improvement, not a bug:**
+    > `⚑ Converter improvement reported: heading → special_heading (it had fallen back to a code block)`
+
+    Transparency is what makes the one upfront yes informed. End with a one-line tally
+    (`reported N converter improvements for this site`).
 
     ```
     node send-finding.mjs --url=<src> --finding='{"ref":"s2:heading h2","got":"code_block",
