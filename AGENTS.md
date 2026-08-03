@@ -177,10 +177,18 @@ WordPress with the UnysonPlus plugin AND the unysonplus-theme parent active** �
   WordPress at `http://localhost:8888` with both active). Then use `http://localhost:8888/` as the dev
   URL. If the user already has their own WordPress, point them at **README.md → "First: a WordPress
   to build into" → Option B** to install the plugin + theme, and use their site URL instead.
-- **Classic Editor is required too.** Whenever the UnysonPlus plugin is installed, the **Classic
-  Editor** plugin must be installed AND active (Unyson's page builder + meta boxes need the classic
-  editor, not Gutenberg). `wp-env` installs it via `.wp-env.json`; on a BYO install, run
-  `wp plugin install classic-editor --activate` (or Plugins → Add New).
+- **Classic Editor is required too — ACTIVATE it as a setup step (the plugin only NOTIFIES).** Unyson's
+  page builder + meta boxes need the classic editor, not Gutenberg. The UnysonPlus plugin deliberately
+  does **not** force-disable the block editor (a user may want to run UnysonPlus without Classic Editor) —
+  it just shows an admin *notice* recommending it. So **it is the SETUP's job (yours) to activate it** on
+  every site/demo you provision, up front, before building:
+  - **Single site (BYO / wp-env):** `wp plugin install classic-editor --activate` (or Plugins → Add New).
+    `wp-env` installs it via `.wp-env.json`.
+  - **Multisite / a demo subsite (the demos network):** network-install once, then activate for the
+    subsite — `wp plugin install classic-editor && wp plugin activate classic-editor --url=<subsite-url>`
+    (or `--network`). Do this when you create the subsite, alongside activating the extensions + theme.
+  Skipping it lands the page on Gutenberg and the builder won't work — this is the "classic editor wasn't
+  active" symptom. Never assume a fresh WordPress / new subsite already has it; activate it explicitly.
 - **For a CONVERSION, also activate the Site Converter extension.** It ships **inactive by default**, so
   enable it under **Unyson+ → Extensions → Site Converter** before you convert — otherwise the
   "Unyson+ → Convert" screen (the PHP file-upload path) won't exist. A fresh build doesn't need it.

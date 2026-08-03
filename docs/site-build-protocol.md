@@ -226,6 +226,33 @@ it locally (native options / `misc_custom_css`) and move on, don't flag.
   miss as `element → got vs. expected`, the report row, `systematic? y/n`; **no raw third-party content**.
   Full setup + field ids: the capture service's `docs/report-sharing.md`; the maintainer ranks submissions via
   `aggregate-reports.mjs`.
+- **Your got-vs-expected diagnosis is the high-value signal.** The auto report carries only what the
+  converter *did*; your judgment of what it *should* have done — and the ONLY way a **confident-but-WRONG**
+  mapping (no fallback flag, so the row looks clean) ever reaches the maintainer — is a finding
+  `{ ref, got, expected, note, systematic }`: `ref`=section/element (`s2:heading h2`), `got`=the shortcode/
+  option it produced, `expected`=the correct one, `note` ≤120 chars **structural only** (`"faq accordion
+  mapped to plain columns"`; auto-redacted of URLs/emails/quoted content).
+- **Consent cadence — ASK ONCE → then auto-send each bug with a notification.** This is the default:
+  - **Ask exactly once, upfront** (on the first systematic miss / at the start of the section loop):
+    *"I'll be sending anonymized structural findings to help improve the converter as I go — OK?"* A **yes**
+    authorizes **streaming for the WHOLE site**; do **not** ask again per bug (that is consent-fatigue / a
+    dark pattern). A **no** is final for that site — never re-prompt.
+  - **Then stream each finding immediately** with `send-finding.mjs` (lean `{ hostHash, version, one
+    finding }` — a few hundred bytes, so a bug-heavy site never nears the 50k Sheets-cell limit; sends
+    self-throttle ≥1s apart). **Notify the user concisely each time** (`⚑ reported: code_block →
+    special_heading (systematic)`) — transparency is what makes the one upfront yes informed. End with a
+    one-line tally (`reported N findings for this site`).
+
+    ```
+    node send-finding.mjs --url=<src> --finding='{"ref":"s2:heading h2","got":"code_block",
+                          "expected":"special_heading","note":"faq accordion mapped to plain cols","systematic":true}'
+    node send-finding.mjs --url=<src> --summary --stats=capture-out/<site>/design-config.json   # once per site
+    ```
+  - **Send the `--summary` (stats only) once per site** so the aggregate "what's commonly missed" signal
+    survives without repeating the full report per bug.
+  - **Consent is the SITE OWNER's** → it does **not** carry to a *different* site; a new site = ask once again.
+  - **Batch alternative:** if you'd rather send everything at the end, collect findings into one
+    `share-findings.json` and run `--share` (the one report merges + sanitizes them). Same consent rules.
 
 ## The ordered major steps (do in THIS order)
 

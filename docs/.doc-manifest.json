@@ -1,7 +1,7 @@
 {
   "generated_against": {
     "unysonplus": "2.15.84",
-    "unysonplus-theme": "2.3.164",
+    "unysonplus-theme": "2.3.165",
     "synced": "2026-08-02"
   },
   "docs": {
@@ -370,7 +370,7 @@
         "{plugin}/framework/extensions/shortcodes/manifest.php",
         "{plugin}/framework/extensions/shortcodes/settings-options.php"
       ],
-      "hash": "2706bab7f0052b655dbf9afad539f6d6",
+      "hash": "c32a272a75b2595f53cf8bb133ad50f7",
       "synced": "2026-08-02"
     },
     "extensions/sidebars.md": {
@@ -388,7 +388,7 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "29e618cd4e8656c4f36920ca0fff874a",
+      "hash": "af7cabef3c6d31ea70c7e6cbd7872b0d",
       "synced": "2026-08-02"
     },
     "extensions/snippets.md": {
