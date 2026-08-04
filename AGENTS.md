@@ -170,6 +170,12 @@ Before anything, confirm the target site (the "Create the dev site at" URL) is a
 WordPress with the UnysonPlus plugin AND the unysonplus-theme parent active** — the agent builds
 *into* an existing install, it does not hand-roll a LAMP stack.
 
+- **① UPDATE THE KIT FIRST — do this before any build, every time.** Run `pwsh update.ps1 -Check`; if it
+  reports commits behind `origin`, run `pwsh update.ps1` (git-pull the kit + re-`assemble` the **latest**
+  plugin/theme release + refresh harness/capture deps). This is a **hard gate**: a stale clone means you'd
+  follow an outdated playbook and build against an old plugin/converter — silently wrong. (A **zip download**
+  isn't a git checkout so it can't self-check — `git clone` the kit, or re-grab the
+  [latest release](https://github.com/UnysonPlus/UnysonPlus-AI-Dev-Kit/releases/latest), so `-Check` works.)
 - **Verify:** the URL loads; the plugin + parent theme are active (`wp plugin list` / `wp theme list`
   via wp-cli, or the admin). With `wp-env`, use `npx @wordpress/env run cli wp …`.
 - **If nothing is set up:** run the kit's paved path — `pwsh assemble.ps1 -Source github` (fetches the

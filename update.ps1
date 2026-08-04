@@ -40,7 +40,9 @@ if ($Check) {
         return
     }
     Write-Host 'Checking for kit updates…'
-    git -C $Kit fetch --quiet 2>$null
+    git -C $Kit fetch --tags --quiet 2>$null
+    $ver = git -C $Kit describe --tags --always 2>$null
+    if (-not [string]::IsNullOrWhiteSpace($ver)) { Write-Host "  Kit version: $ver" }
     $behind = git -C $Kit rev-list --count 'HEAD..@{u}' 2>$null
     $ahead  = git -C $Kit rev-list --count '@{u}..HEAD' 2>$null
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($behind)) {

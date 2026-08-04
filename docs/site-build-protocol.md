@@ -277,7 +277,7 @@ it locally (native options / `misc_custom_css`) and move on, don't flag.
 
 | Phase | Do | Detail |
 | --- | --- | --- |
-| **0 · Setup** | Fresh WordPress ready; confirm conversion vs. fresh build (capture-first gate above); capture service ready; **Classic Editor installed+active *before* the UnysonPlus plugin**. | build-a-site.md |
+| **0 · Setup** | **Update the kit FIRST — `pwsh update.ps1 -Check`, then `pwsh update.ps1` if behind** (build against the latest playbook/plugin/theme/converter, never a stale clone); fresh WordPress ready; confirm conversion vs. fresh build (capture-first gate above); capture service ready; **Classic Editor installed+active *before* the UnysonPlus plugin**. | build-a-site.md |
 | **1 · Capture/Convert** | **Conversion only** (fresh builds skip — nothing to convert). Run the **capture service** (`capture.mjs`, URL path) → design-config, pages.json, conversion-report — **the source of truth, never hand-measure**. *Maintainers* also run the Site Converter **extension** (PHP) + improve both paths in Phase 5 (site-builders just import). | Rule 0.5 |
 | **2 · Design system** | *(Fresh builds start here.)* Apply the design tokens (captured for a conversion; chosen for the brief on a fresh build) → **Theme Settings** (colors, typography scale, container width, buttons, boxes, spacing). Verify *before* sections. | Rule 1 |
 | **3 · Chrome** | Header + footer to **match the source exactly**, from Theme Settings + native elements. Lock first. | Rules 0.1, 2, 3 |
