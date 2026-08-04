@@ -229,9 +229,19 @@ it locally (native options / `misc_custom_css`) and move on, don't flag.
 - **Your got-vs-expected diagnosis is the high-value signal.** The auto report carries only what the
   converter *did*; your judgment of what it *should* have done — and the ONLY way a **confident-but-WRONG**
   mapping (no fallback flag, so the row looks clean) ever reaches the maintainer — is a finding
-  `{ ref, got, expected, note, systematic }`: `ref`=section/element (`s2:heading h2`), `got`=the shortcode/
-  option it produced, `expected`=the correct one, `note` ≤120 chars **structural only** (`"faq accordion
-  mapped to plain columns"`; auto-redacted of URLs/emails/quoted content).
+  `{ ref, got, expected, note, systematic, solution? }`: `ref`=section/element (`s2:heading h2`), `got`=the
+  shortcode/option it produced, `expected`=the correct one, `note` ≤120 chars **structural only** (`"faq
+  accordion mapped to plain columns"`; auto-redacted of URLs/emails/quoted content).
+- **You BUILD the full site regardless — the converter is a head-start, not a ceiling.** Finish every
+  section to full fidelity with native options + real/child-theme shortcodes + `misc_custom_css` (the
+  per-section gate is the guarantee); a converter gap = verbatim-preserved, then *you* upgrade it. **Never
+  fork or edit the converter** (it lives twice, JS+PHP, and must stay in sync — outside edits break that and
+  land untrusted code). Improving the converter is the *maintainer's* job, fed by your report.
+- **`solution` (optional) — for a REUSABLE pattern, attach your fix SKETCH for the maintainer to promote.**
+  The recognizer approach you'd take, or the child-theme shortcode you actually wrote — capped ~2000 chars,
+  URL/email-redacted, your own code (not source content). It's a **suggestion the maintainer reviews, never
+  an auto-applied patch.** Omit it for one-offs. This captures the value of "here's how I solved it" without
+  any outside code landing in the converter.
 - **Consent cadence — ASK ONCE → then auto-send each improvement with a notification.** This is the default.
   **Frame it as an improvement, not a "bug"** — what you found is a *place the converter could translate
   better*, not a defect; and it improves the **Site Converter** (the tool), not the Dev Kit (the docs).
