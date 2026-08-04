@@ -48,7 +48,9 @@ if ($Check) {
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($behind)) {
         Write-Warning 'No upstream tracking branch — cannot compare. Set one: git branch --set-upstream-to=origin/main'
     } elseif ([int]$behind -gt 0) {
-        Write-Host "  $behind update(s) available on origin — run: pwsh ./update.ps1" -ForegroundColor Yellow
+        $target = git -C $Kit describe --tags '@{u}' 2>$null
+        $avail = if (-not [string]::IsNullOrWhiteSpace($target)) { " → $target available" } else { '' }
+        Write-Host "  $behind update(s) available on origin$avail — run: pwsh ./update.ps1" -ForegroundColor Yellow
     } else {
         Write-Host '  Kit content is up to date.' -ForegroundColor Green
         if ([int]$ahead -gt 0) { Write-Host "  (you have $ahead local commit(s) not yet pushed)" }
