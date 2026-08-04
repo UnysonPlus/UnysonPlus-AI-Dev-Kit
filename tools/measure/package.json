@@ -1,6 +1,6 @@
 {
   "name": "unysonplus-parity-harness",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "type": "module",
   "description": "Design-parity harness — frame metrics (measure.mjs), region-by-region ensemble (compare.mjs: geometry + pixelmatch + Resemble.js + DOM-structure), and full-body property diff (props.mjs).",

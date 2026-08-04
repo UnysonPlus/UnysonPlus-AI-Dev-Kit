@@ -14,3 +14,4 @@ node_modules/
 Thumbs.db
 /tools/measure/out/
 *.tmp
+/tools/measure/parity/

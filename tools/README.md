@@ -14,6 +14,8 @@ from a global install or a personal copy.
 
 | When you need to… | Tool | Setup |
 |---|---|---|
+| **Measure ONE element's computed props** (by visible text or CSS selector), or **diff the same element source-vs-build** — the ad-hoc "what's the fontSize/margin/width of X?" case. **Run this instead of hand-writing a Playwright probe.** | `tools/measure/probe.mjs <url> (--text "…"\|--sel "css") [--props "a,b,c"] [--vs <srcUrl>]` | `npm i` in `tools/measure` (uses `playwright-core` + system Chrome) |
+| **Screenshot** a viewport / full page / a single region (auto-scrolls off-screen regions into view) | `tools/measure/shot.mjs <url> [--full\|--sel "css"\|--text "…"] [--out f.png]` | ″ |
 | **Read an element's real geometry / type / colour** (stop eyeballing — a 0,0 bbox is not proof) | `tools/measure/measure.mjs <mockupUrl> <devUrl>` | `npm i` in `tools/measure` |
 | **Run the fidelity comparison pass** on a region (source ↔ build): typography + box **shape** (square/rounded/pill/circle) + geometry + pixel + **vertical spacing (Lens 4)** | `tools/measure/fidelity-check.mjs <srcUrl> <srcSel> <buildUrl> <buildSel>` | ″ |
 | **Verify the container CONTENT width** matches the source (max-width MINUS the gutter — the width that actually holds the design; catches "1280 setting → 1216 content") | `tools/measure/container-check.mjs <buildUrl> <expectedPx\|sourceUrl>` | ″ |
@@ -24,6 +26,14 @@ from a global install or a personal copy.
 | **Colour-contrast / a11y check** (ship gate) | `UnysonPlus-Capture-Service/tools/design-capture/contrast.mjs` — or read the capture's `contrast-review.csv` | `npm i` in the design-capture folder |
 | **Compose UnysonPlus builder pages programmatically** (sections/columns/elements + effects, still editable) | `tools/upw-build-pages.php` (via `wp eval-file`) + `docs/building-pages.md` | WP-CLI on a live install |
 | **Record / verify the docs manifest** after editing a doc | `docs/sync.mjs check | stamp <doc> | build` | node (no deps) |
+
+## Work from the REPORT, not the raw trees (token discipline)
+
+A capture's `design-capture.json` / `pages.json` are large (100–300 KB) — loading one into context costs
+tens of thousands of tokens for a few facts you could measure. **Default to the small artefacts:** the
+conversion report / `contrast-review.csv`, and `probe.mjs` for a specific value. Read a raw tree only
+when you genuinely need its structure, and then `Grep`/`Read` a slice — never dump the whole file. The
+same goes for verifying fidelity: `probe.mjs --vs` gives you the one differing number, not a page dump.
 
 ## Two verification modes — pick by whether a SOURCE exists
 
