@@ -35,6 +35,10 @@ if not exist "%~dp0assembled\ollama\ollama.exe" (
   call :ollama
 )
 
+REM Keep EVERYTHING in the kit: store pulled models under the kit too, not the default
+REM C:\Users\<you>\.ollama. So both the runtime AND the models live under assembled\ollama\.
+set "OLLAMA_MODELS=%~dp0assembled\ollama\models"
+
 REM Portable Ollama bundled into the kit by assemble.ps1 -> add to PATH so the service
 REM finds + starts it for the Experimental local-AI tier (no system install needed).
 if exist "%~dp0assembled\ollama\ollama.exe" set "PATH=%~dp0assembled\ollama;%PATH%"
