@@ -29,7 +29,11 @@ param(
     # -Source local expects the plugin + parent theme working copies to be SIBLINGS
     # of this kit folder (i.e. in the kit's parent dir). Override with -WorkDevRoot.
     [string]$WorkDevRoot = '',
-    [string]$GithubOrg   = 'https://github.com/UnysonPlus'
+    [string]$GithubOrg   = 'https://github.com/UnysonPlus',
+    # -WithOllama bundles the PORTABLE (no-install) Ollama Windows build into <kit>\ollama so the
+    # Experimental local-AI tier runs straight from the kit (the launcher adds it to PATH + starts it).
+    # Large download (~hundreds of MB), so it's opt-in. Idempotent — skipped if already present.
+    [switch]$WithOllama
 )
 
 $ErrorActionPreference = 'Stop'
@@ -128,6 +132,31 @@ if (Test-Path $mfPath) {
         Write-Host ("kit-manifest: bump_triggers in sync (capture {0}, ext {1})" -f $curCap, $curExt)
     }
     Set-Content -Path $mfPath -Value $mf -NoNewline
+}
+
+# 7. Portable Ollama (Experimental local AI) — opt-in with -WithOllama. The no-install Windows zip, so
+#    `ollama.exe serve` runs from the kit; the launcher adds <kit>\ollama to PATH and starts it. Idempotent.
+$ollamaDir = Join-Path $Kit 'ollama'
+if ($WithOllama) {
+    if (Test-Path (Join-Path $ollamaDir 'ollama.exe')) {
+        Write-Host "[6/6] Ollama  <- already present ($ollamaDir)"
+    } elseif ($env:OS -eq 'Windows_NT') {
+        Write-Host "[6/6] Ollama  <- downloading portable Windows build (no install; this is large)…"
+        $ozip = Join-Path $env:TEMP 'ollama-windows-amd64.zip'
+        try {
+            Invoke-WebRequest -Uri 'https://github.com/ollama/ollama/releases/latest/download/ollama-windows-amd64.zip' -OutFile $ozip
+            New-Item -ItemType Directory -Force -Path $ollamaDir | Out-Null
+            Expand-Archive -Path $ozip -DestinationPath $ollamaDir -Force
+            Remove-Item $ozip -Force -ErrorAction SilentlyContinue
+            Write-Host "  Ollama ready at $ollamaDir — the launcher starts it; pick a model in the dashboard (Local AI)."
+        } catch {
+            Write-Host "  Ollama download failed ($($_.Exception.Message)). Install it from https://ollama.com instead." -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "[6/6] Ollama  <- the portable zip is Windows-only; on macOS/Linux install Ollama or use a llamafile."
+    }
+} else {
+    Write-Host "[6/6] Ollama  <- skipped (pass -WithOllama to bundle the portable local-AI runtime, no install)"
 }
 
 Write-Host "`nDone. The kit is assembled. See PLAYBOOK.md to build a site."

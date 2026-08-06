@@ -19,5 +19,9 @@ if not exist "%SVC%\serve.mjs" (
   exit /b 1
 )
 
+REM Portable Ollama bundled into the kit (assemble.ps1 -WithOllama) → add to PATH so the service
+REM finds + starts it for the Experimental local-AI tier (no system install needed).
+if exist "%~dp0ollama\ollama.exe" set "PATH=%~dp0ollama;%PATH%"
+
 cd /d "%SVC%"
 call start-converter.bat

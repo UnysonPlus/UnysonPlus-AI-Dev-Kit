@@ -15,3 +15,4 @@ Thumbs.db
 /tools/measure/out/
 *.tmp
 /tools/measure/parity/
+/ollama/
