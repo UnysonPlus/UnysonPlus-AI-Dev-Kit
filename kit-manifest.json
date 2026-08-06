@@ -1,10 +1,10 @@
 {
   "name": "UnysonPlus-AI-Dev-Kit",
-  "kit_version": "1.3.10",
+  "kit_version": "1.3.11",
   "updated": "2026-08-06",
   "description": "Version marker for the AI Dev Kit. Bump kit_version (+0.0.1, cap/cascade at 99) whenever one of the tracked components below is updated, and set its recorded version, so the kit recognizes it carries an update. Only the conversion tooling triggers a kit bump.",
   "bump_triggers": {
-    "capture_service": "1.8.23",
+    "capture_service": "1.8.24",
     "site_converter_extension": "1.3.45"
   },
   "bump_rule": "When UnysonPlus-Capture-Service OR the UnysonPlus Site Converter extension is updated, bump kit_version and set the matching entry under \"bump_triggers\" to the new version. Plugin core and parent theme are also bundled by assemble.ps1 but do NOT trigger a kit bump (they have their own updaters).",
