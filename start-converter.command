@@ -7,7 +7,8 @@
 # ============================================================================
 cd "$(dirname "$0")" || exit 1
 SVC="assembled/UnysonPlus-Capture-Service/tools/design-capture"
-# Keep everything in the kit: store pulled models here too (not the default ~/.ollama).
+# Keep everything in the kit so deleting the kit leaves nothing behind.
+export CAPTURE_OUT="$(pwd)/capture-out"
 export OLLAMA_MODELS="$(pwd)/assembled/ollama/models"
 
 # First-time setup: assemble the kit if it isn't populated yet (needs PowerShell 7 + git).

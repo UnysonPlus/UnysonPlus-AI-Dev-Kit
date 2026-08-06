@@ -11,3 +11,6 @@ Thumbs.db
 /tools/measure/out/
 *.tmp
 /tools/measure/parity/
+
+# Conversion outputs (screenshots/bundles/state) — kit-local, regenerable
+/capture-out/

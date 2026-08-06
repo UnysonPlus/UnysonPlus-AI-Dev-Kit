@@ -35,8 +35,9 @@ if not exist "%~dp0assembled\ollama\ollama.exe" (
   call :ollama
 )
 
-REM Keep EVERYTHING in the kit: store pulled models under the kit too, not the default
-REM C:\Users\<you>\.ollama. So both the runtime AND the models live under assembled\ollama\.
+REM Keep EVERYTHING in the kit so deleting the kit leaves nothing behind: conversion outputs
+REM (screenshots/bundles/state) AND the Ollama runtime + models all live under the kit folder.
+set "CAPTURE_OUT=%~dp0capture-out"
 set "OLLAMA_MODELS=%~dp0assembled\ollama\models"
 
 REM Portable Ollama bundled into the kit by assemble.ps1 -> add to PATH so the service
