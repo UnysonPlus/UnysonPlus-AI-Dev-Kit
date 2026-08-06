@@ -34,7 +34,10 @@ param(
     # <kit>\assembled\ollama so the Experimental local-AI tier works out of the box (the launcher adds it to
     # PATH + starts it). It's a large one-time download; idempotent (skipped if already present). Pass
     # -NoOllama to skip it (e.g. on a metered connection or if you'll never use local AI).
-    [switch]$NoOllama
+    [switch]$NoOllama,
+    # -OllamaOnly SKIPS the plugin/theme/service assembly and only fetches the portable Ollama runtime.
+    # The launcher uses this to add local AI to an already-assembled kit without a full re-assemble.
+    [switch]$OllamaOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -60,6 +63,7 @@ function Clone-Or-Pull($repo, $to) {
     }
 }
 
+if (-not $OllamaOnly) {
 Write-Host "Assembling UnysonPlus-AI-Dev-Kit (source: $Source)"
 
 # 1. Plugin (full) + parent theme + child-theme starter
@@ -134,6 +138,7 @@ if (Test-Path $mfPath) {
     }
     Set-Content -Path $mfPath -Value $mf -NoNewline
 }
+} # end: if (-not $OllamaOnly) — steps 1-6 are skipped when only fetching the Ollama runtime
 
 # 7. Portable Ollama RUNTIME (Experimental local AI) — fetched BY DEFAULT so local AI works out of the box;
 #    skip with -NoOllama. The no-install Windows zip, so `ollama.exe serve` runs from the kit; the launcher

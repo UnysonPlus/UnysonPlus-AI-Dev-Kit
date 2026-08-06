@@ -26,6 +26,15 @@ if not exist "%SVC%\serve.mjs" (
   exit /b 1
 )
 
+REM Ensure the Ollama runtime is present — fetch JUST it if missing (no full re-assemble), so an
+REM already-assembled kit still gains local AI on the next launch. Everything's ready after one click.
+if not exist "%~dp0assembled\ollama\ollama.exe" (
+  echo.
+  echo   Setting up local AI: fetching the Ollama runtime ^(one-time download; press Ctrl+C to skip^)...
+  echo.
+  call :ollama
+)
+
 REM Portable Ollama bundled into the kit by assemble.ps1 -> add to PATH so the service
 REM finds + starts it for the Experimental local-AI tier (no system install needed).
 if exist "%~dp0assembled\ollama\ollama.exe" set "PATH=%~dp0assembled\ollama;%PATH%"
@@ -41,5 +50,15 @@ if %errorlevel%==0 (
   pwsh -ExecutionPolicy Bypass -File "%~dp0assemble.ps1" -Source github
 ) else (
   powershell -ExecutionPolicy Bypass -File "%~dp0assemble.ps1" -Source github
+)
+exit /b
+
+REM --- fetch ONLY the portable Ollama runtime (already-assembled kit) ----------
+:ollama
+where pwsh >nul 2>nul
+if %errorlevel%==0 (
+  pwsh -ExecutionPolicy Bypass -File "%~dp0assemble.ps1" -OllamaOnly
+) else (
+  powershell -ExecutionPolicy Bypass -File "%~dp0assemble.ps1" -OllamaOnly
 )
 exit /b
