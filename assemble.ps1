@@ -1,8 +1,8 @@
 <#
     assemble.ps1 — populate the heavy, gitignored folders of the AI Dev Kit.
 
-    These folders are NEVER committed (see .gitignore); they come from their own
-    sources so the kit never drifts from the real plugin/theme/repos:
+    These folders live under assembled/ and are NEVER committed (see .gitignore); they come
+    from their own sources so the kit never drifts from the real plugin/theme/repos:
 
         unysonplus/                              full plugin (all extensions)
         unysonplus-theme/                        parent theme
@@ -64,11 +64,11 @@ Write-Host "Assembling UnysonPlus-AI-Dev-Kit (source: $Source)"
 # 1. Plugin (full) + parent theme + child-theme starter
 if ($Source -eq 'local') {
     Write-Host "[1/5] plugin  <- $WorkDevRoot\unysonplus"
-    Sync-Dir "$WorkDevRoot\unysonplus"             "$Kit\unysonplus"
+    Sync-Dir "$WorkDevRoot\unysonplus"             "$Kit\assembled\unysonplus"
     Write-Host "[2/5] theme   <- $WorkDevRoot\unysonplus-theme"
-    Sync-Dir "$WorkDevRoot\unysonplus-theme"       "$Kit\unysonplus-theme"
+    Sync-Dir "$WorkDevRoot\unysonplus-theme"       "$Kit\assembled\unysonplus-theme"
     Write-Host "[3/5] child   <- $WorkDevRoot\unysonplus-theme-child"
-    Sync-Dir "$WorkDevRoot\unysonplus-theme-child" "$Kit\unysonplus-theme-child"
+    Sync-Dir "$WorkDevRoot\unysonplus-theme-child" "$Kit\assembled\unysonplus-theme-child"
 } else {
     Write-Host "[1/5] plugin  <- latest UnysonPlus release zip"
     $api = 'https://api.github.com/repos/UnysonPlus/UnysonPlus/releases/latest'
@@ -76,23 +76,23 @@ if ($Source -eq 'local') {
     $asset = $rel.assets | Where-Object { $_.name -like '*.zip' } | Select-Object -First 1
     $zip = Join-Path $env:TEMP 'unysonplus-plugin.zip'
     Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zip
-    if (Test-Path "$Kit\unysonplus") { Remove-Item -Recurse -Force "$Kit\unysonplus" }
+    if (Test-Path "$Kit\assembled\unysonplus") { Remove-Item -Recurse -Force "$Kit\assembled\unysonplus" }
     Expand-Archive -Path $zip -DestinationPath "$Kit\_pluginzip" -Force
     # release zip extracts to a single top folder → move its contents into unysonplus/
     $inner = Get-ChildItem "$Kit\_pluginzip" -Directory | Select-Object -First 1
-    Move-Item $inner.FullName "$Kit\unysonplus"
+    Move-Item $inner.FullName "$Kit\assembled\unysonplus"
     Remove-Item -Recurse -Force "$Kit\_pluginzip"
     Write-Host "[2/5] theme   <- clone UnysonPlus-Theme"
-    Clone-Or-Pull 'UnysonPlus-Theme'       "$Kit\unysonplus-theme"
+    Clone-Or-Pull 'UnysonPlus-Theme'       "$Kit\assembled\unysonplus-theme"
     Write-Host "[3/5] child   <- clone UnysonPlus-Theme-Child"
-    Clone-Or-Pull 'UnysonPlus-Theme-Child' "$Kit\unysonplus-theme-child"
+    Clone-Or-Pull 'UnysonPlus-Theme-Child' "$Kit\assembled\unysonplus-theme-child"
 }
 
 # 4. + 5. Service repos (always cloned)
 Write-Host "[4/5] capture service"
-Clone-Or-Pull 'UnysonPlus-Capture-Service' "$Kit\UnysonPlus-Capture-Service"
+Clone-Or-Pull 'UnysonPlus-Capture-Service' "$Kit\assembled\UnysonPlus-Capture-Service"
 Write-Host "[5/5] site-converter extension"
-Clone-Or-Pull 'UnysonPlus-Site-Converter-Extension' "$Kit\UnysonPlus-Site-Converter-Extension"
+Clone-Or-Pull 'UnysonPlus-Site-Converter-Extension' "$Kit\assembled\UnysonPlus-Site-Converter-Extension"
 
 # 6. Refresh kit-manifest.json so the kit "recognizes an update". Records the just-assembled versions of
 #    the two bump-trigger components (capture service + site-converter extension) and bumps kit_version
@@ -111,10 +111,10 @@ function Read-Ver($file, $pattern) {
 }
 $mfPath = Join-Path $Kit 'kit-manifest.json'
 if (Test-Path $mfPath) {
-    $curCap   = Read-Ver "$Kit\UnysonPlus-Capture-Service\tools\design-capture\package.json" '"version"\s*:\s*"([0-9.]+)"'
-    $curExt   = Read-Ver "$Kit\UnysonPlus-Site-Converter-Extension\manifest.php" "version'\s*\]\s*=\s*'([0-9.]+)'"
-    $curCore  = Read-Ver "$Kit\unysonplus\unysonplus.php" 'Version:\s*([0-9.]+)'
-    $curTheme = Read-Ver "$Kit\unysonplus-theme\style.css" 'Version:\s*([0-9.]+)'
+    $curCap   = Read-Ver "$Kit\assembled\UnysonPlus-Capture-Service\tools\design-capture\package.json" '"version"\s*:\s*"([0-9.]+)"'
+    $curExt   = Read-Ver "$Kit\assembled\UnysonPlus-Site-Converter-Extension\manifest.php" "version'\s*\]\s*=\s*'([0-9.]+)'"
+    $curCore  = Read-Ver "$Kit\assembled\unysonplus\unysonplus.php" 'Version:\s*([0-9.]+)'
+    $curTheme = Read-Ver "$Kit\assembled\unysonplus-theme\style.css" 'Version:\s*([0-9.]+)'
     $mf = Get-Content $mfPath -Raw
     $recCap = if ($mf -match '"capture_service"\s*:\s*"([0-9.]+)"') { $Matches[1] } else { '' }
     $recExt = if ($mf -match '"site_converter_extension"\s*:\s*"([0-9.]+)"') { $Matches[1] } else { '' }
@@ -136,7 +136,7 @@ if (Test-Path $mfPath) {
 
 # 7. Portable Ollama (Experimental local AI) — opt-in with -WithOllama. The no-install Windows zip, so
 #    `ollama.exe serve` runs from the kit; the launcher adds <kit>\ollama to PATH and starts it. Idempotent.
-$ollamaDir = Join-Path $Kit 'ollama'
+$ollamaDir = Join-Path $Kit 'assembled\ollama'
 if ($WithOllama) {
     if (Test-Path (Join-Path $ollamaDir 'ollama.exe')) {
         Write-Host "[6/6] Ollama  <- already present ($ollamaDir)"

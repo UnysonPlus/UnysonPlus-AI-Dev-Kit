@@ -63,7 +63,7 @@ building any section, before ANY hand-measuring — is **Phase 1: run the determ
 
 ```
 # Capture service — the URL path (JS: capture-extract / to-pages / to-design-config)
-node capture.mjs <url> capture-out/     # UnysonPlus-Capture-Service/tools/design-capture
+node capture.mjs <url> capture-out/     # assembled/UnysonPlus-Capture-Service/tools/design-capture
 ```
 
 > **Who runs what (audience split — see the 2026-07-19 "converter-improvements-via-shared-reports"
@@ -381,7 +381,7 @@ level (a side-by-side, not a DOM grep for an element).
 Before extracting tokens/sections, capture the source with the established machinery, not an ad-hoc
 `devtools.html` dump:
 
-- **Capture service** (`UnysonPlus-Capture-Service/tools/design-capture`): `capture.mjs
+- **Capture service** (`assembled/UnysonPlus-Capture-Service/tools/design-capture`): `capture.mjs
   <url> [outdir]` renders the page and emits the **rendered DOM + computed styles**, screenshots, and
   a deterministic **conversion report** (`conversion-report.csv`/`.html`) tracing each source element →
   the shortcode it maps to (with `fallback` / `opportunity` / `styling drop` flags). Computed styles

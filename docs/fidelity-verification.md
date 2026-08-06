@@ -30,7 +30,7 @@ build type*, and conflating the two is itself a bug.
 Before building a region, **capture the source's real values** and build to them. A screenshot has no
 font sizes, weights, colors, or the exact text/emoji — so building from one is guessing.
 
-- Run the **capture service** (`capture.mjs <url>` in `UnysonPlus-Capture-Service/tools/design-capture`) — it extracts per-region
+- Run the **capture service** (`capture.mjs <url>` in `assembled/UnysonPlus-Capture-Service/tools/design-capture`) — it extracts per-region
   **computed styles** (`fontFamily`/`fontSize`/`fontWeight`/`color`/`textTransform`), bounding boxes,
   and the rendered text (emoji included), plus a design config and conversion report. Or capture
   ad-hoc with Playwright `getComputedStyle`.
@@ -208,7 +208,7 @@ because the source was never captured for a side-by-side.)
   Deps (`npm i` in `tools/measure`): playwright, pngjs, pixelmatch, sharp.
 - **`tools/measure/compare.mjs`** — the region-level **ensemble** (geometry + pixel + perceptual +
   DOM-structure counts), aggregated fail-loud. Complements the per-element tool above.
-- **Capture service** (`UnysonPlus-Capture-Service/tools/design-capture`) — the source of truth for the design spec (per-element
+- **Capture service** (`assembled/UnysonPlus-Capture-Service/tools/design-capture`) — the source of truth for the design spec (per-element
   styles + button `:hover` via `hoverStyle()`); prefer it over hand-measuring.
 
 ## Why this exists (the failures it prevents)

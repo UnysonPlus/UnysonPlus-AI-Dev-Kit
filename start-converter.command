@@ -6,7 +6,7 @@
 #  macOS: double-click this .command file (chmod +x once if needed).
 # ============================================================================
 cd "$(dirname "$0")" || exit 1
-SVC="UnysonPlus-Capture-Service/tools/design-capture"
+SVC="assembled/UnysonPlus-Capture-Service/tools/design-capture"
 
 if [ ! -f "$SVC/serve.mjs" ]; then
   echo

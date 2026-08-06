@@ -6,7 +6,7 @@ REM  (http://localhost:4600 opens automatically) and Ollama if installed
 REM  (Experimental local AI). Keep the window open while you convert.
 REM ============================================================================
 setlocal
-set "SVC=%~dp0UnysonPlus-Capture-Service\tools\design-capture"
+set "SVC=%~dp0assembled\UnysonPlus-Capture-Service\tools\design-capture"
 
 if not exist "%SVC%\serve.mjs" (
   echo.
@@ -21,7 +21,7 @@ if not exist "%SVC%\serve.mjs" (
 
 REM Portable Ollama bundled into the kit (assemble.ps1 -WithOllama) → add to PATH so the service
 REM finds + starts it for the Experimental local-AI tier (no system install needed).
-if exist "%~dp0ollama\ollama.exe" set "PATH=%~dp0ollama;%PATH%"
+if exist "%~dp0assembled\ollama\ollama.exe" set "PATH=%~dp0assembled\ollama;%PATH%"
 
 cd /d "%SVC%"
 call start-converter.bat

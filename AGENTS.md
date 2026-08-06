@@ -34,7 +34,7 @@ This kit exists for one reason — but it splits cleanly by build type:
 > section, before ANY hand-measuring — is to run the capture/converter pipeline:
 >
 > ```
-> node capture.mjs <url> capture-out/     # capture service — UnysonPlus-Capture-Service/tools/design-capture
+> node capture.mjs <url> capture-out/     # capture service — assembled/UnysonPlus-Capture-Service/tools/design-capture
 > ```
 >
 > **Who runs what (audience split — see the 2026-07-19 decision):** building ONE site → run the **capture
@@ -140,7 +140,7 @@ guessing a per-page slug.)
 | `docs/animation-engine/` | Per-**module** effect shapes (hover, text-effects, scroll-motion, parallax, …) — the `fx`-block JSON to animate a node. Extension ships inactive. |
 | `docs/extensions/` | One **overview** per plugin extension (what it is, active-by-default, what it provides) — cross-links to the granular refs. |
 | `design-parity-checklist.md` | The metric set + the measurement algorithm (mockup ⟷ dev, ±2px tolerance). |
-| `unysonplus-theme-child/` | The **child-theme starter** you copy + rename per site. Ships a polished-chrome `design/design.json` so header/footer/container are ~90% right on activation. |
+| `assembled/unysonplus-theme-child/` | The **child-theme starter** you copy + rename per site. Ships a polished-chrome `design/design.json` so header/footer/container are ~90% right on activation. |
 | `tools/measure/measure.mjs` | The frame-metric harness (container/header/logo/footer/type). Run after every change. |
 | `tools/measure/compare.mjs` | Region-by-region **ensemble** — header↔header, each section↔section, footer↔footer, scored by geometry + pixelmatch + Resemble.js + a DOM-structure diff (fail-loud). |
 | `tools/measure/props.mjs` | Full-body **property diff** — walks both bodies, matches elements by text/region, reports NAMED computed-style deltas (caught the site-wide Inter→Open Sans miss). |
@@ -149,8 +149,8 @@ guessing a per-page slug.)
 | `docs/conventions.md` | The **generalized UnysonPlus conventions** every build must follow (color presets, clean DOM, heading order, links, replaceable media, option-value shapes). Public, site-agnostic. |
 | `docs/extending.md` | **Create / convert shortcodes, option types, and extensions** — where things live, the anatomy of each, the best reference extension per case, the conventions (thumbnail icon spec, settings-page layout, migrations, keep-docs-in-sync). |
 | `sample-shortcode/` | **The shortcode TEMPLATE** — a complete, installable skeleton of a page-builder element. Every file present and documented inline, with commented-out reference code for repeaters, uploads, dimensions, icons, conditional options and design variants. `HOW-TO.md` beside it is the procedure for porting a standalone component (a CodePen, a demo, a bought template) into an element. **Copy this folder to start a new element** — don't hand-assemble one. |
-| `unysonplus/` · `unysonplus-theme/` | The plugin + parent theme. **Assembled, gitignored** — see `assemble.ps1`. Read them for options/shortcode shapes; the working-copy source of truth is your local plugin/theme repos (siblings of this kit — see `assemble.ps1 -WorkDevRoot`). |
-| `UnysonPlus-Capture-Service/` · `UnysonPlus-Site-Converter-Extension/` | The **automated** conversion pipeline (capture service + converter). This manual kit shares their standards; keep them in sync. |
+| `assembled/unysonplus/` · `assembled/unysonplus-theme/` | The plugin + parent theme. **Assembled, gitignored** — see `assemble.ps1`. Read them for options/shortcode shapes; the working-copy source of truth is your local plugin/theme repos (siblings of this kit — see `assemble.ps1 -WorkDevRoot`). |
+| `assembled/UnysonPlus-Capture-Service/` · `assembled/UnysonPlus-Site-Converter-Extension/` | The **automated** conversion pipeline (capture service + converter). This manual kit shares their standards; keep them in sync. |
 | **`tools/README.md`** | **The TOOLS INVENTORY — organized by capability ("when you need to DO X, run Y").** Check it BEFORE concluding the kit lacks a tool or building your own. |
 
 Assembled folders are empty until you run `pwsh assemble.ps1` (see that file).
@@ -212,7 +212,7 @@ the hero, then a table, then back to the logo) and **guessing sizes** from
 screenshots. That never converges. Instead — **convert first, then refine:**
 
 0. **Convert first (automated, token-free) — for a URL, RUN THE CAPTURE SERVICE; don't ask for files.**
-   `cd UnysonPlus-Capture-Service/tools/design-capture && npm install` (once), then `node capture.mjs "<url>" <out>`. It renders
+   `cd assembled/UnysonPlus-Capture-Service/tools/design-capture && npm install` (once), then `node capture.mjs "<url>" <out>`. It renders
    the page in a real browser, so ONE url gives you the full **rendered DOM** (JS-built content + inline
    SVGs — never ask the user for these), the **downloaded media**, AND **computed styles** — then maps
    structure → shortcodes and tokens → presets, so you refine a real page, not a blank one. Skipping
@@ -256,14 +256,14 @@ fixture after each converter fix — the render check is only the secondary conf
 - **Native options before CSS.** If a look is achievable via a Theme Settings
   option, use it. Only fall back to the child theme's `assets/chrome.css` for
   things no option covers, and record those as enhancement candidates.
-- **Don't hand-edit the assembled folders** (`unysonplus/`, `unysonplus-theme/`).
+- **Don't hand-edit the assembled folders** (`assembled/unysonplus/`, `assembled/unysonplus-theme/`).
   Edit the working-copy sources (the plugin/theme repos, siblings of this kit — see
   `assemble.ps1 -WorkDevRoot`) and re-`assemble`.
 - **Keep the kit current.** Run `pwsh update.ps1` (pull kit + re-assemble sources +
   refresh harness deps) so you build against the latest plugin/theme/playbook, not a
   stale snapshot; `pwsh update.ps1 -Check` reports whether updates exist without changing
   anything.
-- **Per-site work happens in a copy of `unysonplus-theme-child/`**, renamed to the
+- **Per-site work happens in a copy of `assembled/unysonplus-theme-child/`**, renamed to the
   site slug.
 - Keep this kit's docs and the two conversion repos **in sync** — a standard added
   here should be reflected there and vice-versa.
