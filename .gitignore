@@ -1,12 +1,7 @@
 # ── Assembled at runtime by assemble.ps1 — never committed ─────────────
 # These come from their own repos / release zips; keeping them out of this
 # repo avoids drift and keeps the kit small. Run `pwsh assemble.ps1` to fill.
-/unysonplus/
-/unysonplus-theme/
-/unysonplus-theme-child/
-/UnysonPlus-Capture-Service/
 /assembled/
-/UnysonPlus-Site-Converter-Extension/
 
 # ── Tooling junk ───────────────────────────────────────────────────────
 node_modules/
@@ -16,4 +11,3 @@ Thumbs.db
 /tools/measure/out/
 *.tmp
 /tools/measure/parity/
-/ollama/
