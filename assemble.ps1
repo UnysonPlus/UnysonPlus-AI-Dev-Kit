@@ -90,4 +90,44 @@ Clone-Or-Pull 'UnysonPlus-Capture-Service' "$Kit\UnysonPlus-Capture-Service"
 Write-Host "[5/5] site-converter extension"
 Clone-Or-Pull 'UnysonPlus-Site-Converter-Extension' "$Kit\UnysonPlus-Site-Converter-Extension"
 
+# 6. Refresh kit-manifest.json so the kit "recognizes an update". Records the just-assembled versions of
+#    the two bump-trigger components (capture service + site-converter extension) and bumps kit_version
+#    when either moved. Plugin core + parent theme are refreshed under reference_only (they NEVER bump the
+#    kit — they have their own updaters). Runs AFTER the pulls above, so it reads current versions.
+function Bump-KitPatch($v) {
+    $p = @($v -split '\.'); while ($p.Count -lt 3) { $p += '0' }
+    $maj = [int]$p[0]; $min = [int]$p[1]; $pat = [int]$p[2]
+    $pat++
+    if ($pat -eq 100) { $pat = 0; $min++; if ($min -eq 100) { $min = 0; $maj++ } }  # cap/cascade at 99
+    "$maj.$min.$pat"
+}
+function Read-Ver($file, $pattern) {
+    if (Test-Path $file) { $t = Get-Content $file -Raw; if ($t -match $pattern) { return $Matches[1] } }
+    return ''
+}
+$mfPath = Join-Path $Kit 'kit-manifest.json'
+if (Test-Path $mfPath) {
+    $curCap   = Read-Ver "$Kit\UnysonPlus-Capture-Service\tools\design-capture\package.json" '"version"\s*:\s*"([0-9.]+)"'
+    $curExt   = Read-Ver "$Kit\UnysonPlus-Site-Converter-Extension\manifest.php" "version'\s*\]\s*=\s*'([0-9.]+)'"
+    $curCore  = Read-Ver "$Kit\unysonplus\unysonplus.php" 'Version:\s*([0-9.]+)'
+    $curTheme = Read-Ver "$Kit\unysonplus-theme\style.css" 'Version:\s*([0-9.]+)'
+    $mf = Get-Content $mfPath -Raw
+    $recCap = if ($mf -match '"capture_service"\s*:\s*"([0-9.]+)"') { $Matches[1] } else { '' }
+    $recExt = if ($mf -match '"site_converter_extension"\s*:\s*"([0-9.]+)"') { $Matches[1] } else { '' }
+    $triggerMoved = ($curCap -and $curCap -ne $recCap) -or ($curExt -and $curExt -ne $recExt)
+    if ($curCap)   { $mf = $mf -replace '("capture_service"\s*:\s*")[0-9.]+(")', ('${1}' + $curCap + '${2}') }
+    if ($curExt)   { $mf = $mf -replace '("site_converter_extension"\s*:\s*")[0-9.]+(")', ('${1}' + $curExt + '${2}') }
+    if ($curCore)  { $mf = $mf -replace '("plugin_core"\s*:\s*")[0-9.]+(")', ('${1}' + $curCore + '${2}') }
+    if ($curTheme) { $mf = $mf -replace '("parent_theme"\s*:\s*")[0-9.]+(")', ('${1}' + $curTheme + '${2}') }
+    if ($triggerMoved) {
+        $kv = if ($mf -match '"kit_version"\s*:\s*"([0-9.]+)"') { $Matches[1] } else { '0.0.0' }
+        $newKv = Bump-KitPatch $kv
+        $mf = $mf -replace '("kit_version"\s*:\s*")[0-9.]+(")', ('${1}' + $newKv + '${2}')
+        Write-Host ("kit-manifest: bump_triggers moved -> kit_version {0} -> {1} (capture {2}, ext {3})" -f $kv, $newKv, $curCap, $curExt) -ForegroundColor Yellow
+    } else {
+        Write-Host ("kit-manifest: bump_triggers in sync (capture {0}, ext {1})" -f $curCap, $curExt)
+    }
+    Set-Content -Path $mfPath -Value $mf -NoNewline
+}
+
 Write-Host "`nDone. The kit is assembled. See PLAYBOOK.md to build a site."
