@@ -8,12 +8,21 @@
 cd "$(dirname "$0")" || exit 1
 SVC="assembled/UnysonPlus-Capture-Service/tools/design-capture"
 
+# First-time setup: assemble the kit if it isn't populated yet (needs PowerShell 7 + git).
 if [ ! -f "$SVC/serve.mjs" ]; then
   echo
-  echo "  The capture service isn't assembled into the kit yet."
-  echo "  Run once:   pwsh ./assemble.ps1   (pulls the capture service + extension),"
-  echo "  then run this again."
+  echo "  First-time setup: assembling the kit (plugin/theme/services). This happens once."
   echo
+  if command -v pwsh >/dev/null 2>&1; then
+    pwsh -File ./assemble.ps1 -Source github
+  else
+    echo "  PowerShell 7 (pwsh) is required to assemble. Install it from https://aka.ms/powershell,"
+    echo "  then run this again — or run  pwsh ./assemble.ps1  manually."
+  fi
+fi
+if [ ! -f "$SVC/serve.mjs" ]; then
+  echo
+  echo "  Setup did not complete. Ensure pwsh + git + Node 20+ are installed, then run this again."
   read -r -p "Press Enter to close..." _
   exit 1
 fi
