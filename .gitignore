@@ -14,3 +14,4 @@ Thumbs.db
 
 # Conversion outputs (screenshots/bundles/state) — kit-local, regenerable
 /capture-out/
+/logs/

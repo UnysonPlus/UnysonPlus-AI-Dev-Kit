@@ -44,6 +44,21 @@ REM Portable Ollama bundled into the kit by assemble.ps1 -> add to PATH so the s
 REM finds + starts it for the Experimental local-AI tier (no system install needed).
 if exist "%~dp0assembled\ollama\ollama.exe" set "PATH=%~dp0assembled\ollama;%PATH%"
 
+REM --- Run log: ONE file per launch, everything the service + dashboard print lands in it. --------
+REM   Kept in the kit (deleting the kit removes them). We keep only the 5 newest and delete the rest.
+set "LOGDIR=%~dp0logs"
+if not exist "%LOGDIR%" mkdir "%LOGDIR%"
+for /f "skip=5 delims=" %%F in ('dir /b /o-d "%LOGDIR%\run-*.log" 2^>nul') do del "%LOGDIR%\%%F" >nul 2>nul
+for /f %%T in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd-HHmmss"') do set "STAMP=%%T"
+set "UPWK_LOG=%LOGDIR%\run-%STAMP%.log"
+>  "%UPWK_LOG%" echo UnysonPlus AI Dev Kit - run log
+>> "%UPWK_LOG%" echo started: %date% %time%
+>> "%UPWK_LOG%" echo capture-out: %CAPTURE_OUT%
+>> "%UPWK_LOG%" echo ollama-models: %OLLAMA_MODELS%
+>> "%UPWK_LOG%" echo ============================================================
+echo   Logging this run to: %UPWK_LOG%
+echo   ^(the 5 newest run logs are kept in %LOGDIR%^)
+
 cd /d "%SVC%"
 call start-converter.bat
 exit /b 0

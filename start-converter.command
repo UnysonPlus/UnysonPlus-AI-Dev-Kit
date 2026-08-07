@@ -30,5 +30,22 @@ if [ ! -f "$SVC/serve.mjs" ]; then
   exit 1
 fi
 
+# --- Run log: ONE file per launch (kept: 5 newest), everything the service + dashboard print. ------
+#     Lives in the kit so deleting the kit removes them too.
+LOGDIR="$(pwd)/logs"
+mkdir -p "$LOGDIR"
+# keep only the 5 newest run-*.log
+ls -1t "$LOGDIR"/run-*.log 2>/dev/null | tail -n +6 | while IFS= read -r f; do rm -f "$f"; done
+export UPWK_LOG="$LOGDIR/run-$(date +%Y%m%d-%H%M%S).log"
+{
+  echo "UnysonPlus AI Dev Kit - run log"
+  echo "started: $(date)"
+  echo "capture-out: $CAPTURE_OUT"
+  echo "ollama-models: $OLLAMA_MODELS"
+  echo "============================================================"
+} > "$UPWK_LOG"
+echo "  Logging this run to: $UPWK_LOG"
+echo "  (the 5 newest run logs are kept in $LOGDIR)"
+
 cd "$SVC" || exit 1
 exec bash ./start-converter.sh

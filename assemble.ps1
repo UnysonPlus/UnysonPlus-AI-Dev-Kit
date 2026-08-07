@@ -48,7 +48,7 @@ function Sync-Dir($from, $to) {
     if (-not (Test-Path $from)) { throw "source not found: $from" }
     New-Item -ItemType Directory -Force -Path $to | Out-Null
     # mirror, excluding VCS + build junk
-    robocopy $from $to /MIR /XD .git node_modules /XF *.log /NFL /NDL /NJH /NJS /NP | Out-Null
+    robocopy $from $to /MIR /XD .git node_modules /XF *.log /R:2 /W:2 /NFL /NDL /NJH /NJS /NP | Out-Null
     ".gitkeep" | ForEach-Object { $p = Join-Path $to $_; if (-not (Test-Path $p)) { New-Item -ItemType File -Force -Path $p | Out-Null } }
 }
 
@@ -95,7 +95,15 @@ if ($Source -eq 'local') {
 
 # 4. + 5. Service repos (always cloned)
 Write-Host "[4/5] capture service"
-Clone-Or-Pull 'UnysonPlus-Capture-Service' "$Kit\assembled\UnysonPlus-Capture-Service"
+# -Source local mirrors the LOCAL capture-service repo (so uncommitted local changes ship) via the
+# resilient robocopy mirror — no fragile delete-then-clone that a running/locked assembled folder can
+# half-delete. Falls back to a GitHub clone when the local repo isn't present or -Source github.
+$CapLocal = Join-Path $WorkDevRoot 'Github Repository\UnysonPlus-Capture-Service'
+if ($Source -eq 'local' -and (Test-Path $CapLocal)) {
+    Sync-Dir $CapLocal "$Kit\assembled\UnysonPlus-Capture-Service"
+} else {
+    Clone-Or-Pull 'UnysonPlus-Capture-Service' "$Kit\assembled\UnysonPlus-Capture-Service"
+}
 Write-Host "[5/5] site-converter extension"
 Clone-Or-Pull 'UnysonPlus-Site-Converter-Extension' "$Kit\assembled\UnysonPlus-Site-Converter-Extension"
 
@@ -117,7 +125,10 @@ function Read-Ver($file, $pattern) {
 $mfPath = Join-Path $Kit 'kit-manifest.json'
 if (Test-Path $mfPath) {
     $curCap   = Read-Ver "$Kit\assembled\UnysonPlus-Capture-Service\tools\design-capture\package.json" '"version"\s*:\s*"([0-9.]+)"'
-    $curExt   = Read-Ver "$Kit\assembled\UnysonPlus-Site-Converter-Extension\manifest.php" "version'\s*\]\s*=\s*'([0-9.]+)'"
+    # Read the ext version from the BUNDLED plugin (the working-copy that actually SHIPS in the kit),
+    # NOT the standalone repo clone — the clone lags the working copy by design (it's core-only + pushed
+    # only at release), so reading it left bump_triggers permanently behind (audit finding).
+    $curExt   = Read-Ver "$Kit\assembled\unysonplus\framework\extensions\site-converter\manifest.php" "version'\s*\]\s*=\s*'([0-9.]+)'"
     $curCore  = Read-Ver "$Kit\assembled\unysonplus\unysonplus.php" 'Version:\s*([0-9.]+)'
     $curTheme = Read-Ver "$Kit\assembled\unysonplus-theme\style.css" 'Version:\s*([0-9.]+)'
     $mf = Get-Content $mfPath -Raw
