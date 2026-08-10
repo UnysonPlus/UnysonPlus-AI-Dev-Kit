@@ -33,14 +33,14 @@ capture service FIRST, automatically.** `capture.mjs` renders the page in a real
 URL gets you the **full rendered DOM** (JS-built content + inline SVGs — you never need to ask for
 them), the **downloaded media**, AND the **computed styles** (exact colors/spacing that no static HTML
 carries), then maps sections → shortcodes and tokens → presets. This is the default first move — do it
-before any hand-building. One-time setup: `cd assembled/UnysonPlus-Capture-Service/tools/design-capture && npm install` (deps; needs system Google Chrome).
+before any hand-building. One-time setup: `cd UnysonPlus-Capture-Service/tools/design-capture && npm install` (deps; needs system Google Chrome).
 Only fall back to a manual bundle (Phase 2a) when there's **no URL**, or Node/Playwright isn't available.
 
 > **Lesson baked in:** skipping this and hand-building from scratch is what forces you to ask the user
 > for assets (SVGs, the hero video) that the capture already had. Capture first, *then* refine.
 
 ```
-# URL path — the capture service (assembled/UnysonPlus-Capture-Service/tools/design-capture):
+# URL path — the capture service (UnysonPlus-Capture-Service/tools/design-capture):
 node capture.mjs "<source-url>" <outdir>        # → pages.json, presets.json, theme-settings.json,
                                                 #    design-config.json, media.json, convert-bundle.zip,
                                                 #    + conversion-report.csv/html, style-coverage.csv
@@ -107,7 +107,7 @@ Do **not** start with the logo or a hero graphic. Start with the frame.
 This is the phase that makes "header and footer already perfect" true. Nothing else
 happens until this passes the parity check.
 
-1. **Child theme**: copy `assembled/unysonplus-theme-child/` → rename to the site slug; activate
+1. **Child theme**: copy `unysonplus-theme-child/` → rename to the site slug; activate
    it. Its `design/design.json` auto-imports a polished-chrome baseline, so you start
    ~90% there — you're re-skinning, not building from zero.
 2. **Container width** (General → Layout) to match the mockup's `max-width`.

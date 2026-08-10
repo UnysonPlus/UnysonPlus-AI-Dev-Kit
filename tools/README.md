@@ -21,9 +21,9 @@ from a global install or a personal copy.
 | **Verify the container CONTENT width** matches the source (max-width MINUS the gutter — the width that actually holds the design; catches "1280 setting → 1216 content") | `tools/measure/container-check.mjs <buildUrl> <expectedPx\|sourceUrl>` | ″ |
 | **Region ensemble** — geometry + pixelmatch + Resemble.js + DOM-structure, fail-loud | `tools/measure/compare.mjs` | ″ |
 | **Full-body property diff** — named computed-style deltas across the whole page | `tools/measure/props.mjs` | ″ |
-| **Capture / convert a source site** (Phase 1 — the deterministic converter) | `assembled/UnysonPlus-Capture-Service/tools/design-capture/capture.mjs <url> capture-out/` | `npm i` in that folder (its **own** playwright) |
-| **Prove a Tailwind class → native-option translation** (the CONVERSION proof — **no browser**) | `assembled/UnysonPlus-Capture-Service/tools/design-capture/tailwind-matrix.test.mjs` | node only (runs `toPages()` in-process) |
-| **Colour-contrast / a11y check** (ship gate) | `assembled/UnysonPlus-Capture-Service/tools/design-capture/contrast.mjs` — or read the capture's `contrast-review.csv` | `npm i` in the design-capture folder |
+| **Capture / convert a source site** (Phase 1 — the deterministic converter) | `UnysonPlus-Capture-Service/tools/design-capture/capture.mjs <url> capture-out/` | `npm i` in that folder (its **own** playwright) |
+| **Prove a Tailwind class → native-option translation** (the CONVERSION proof — **no browser**) | `UnysonPlus-Capture-Service/tools/design-capture/tailwind-matrix.test.mjs` | node only (runs `toPages()` in-process) |
+| **Colour-contrast / a11y check** (ship gate) | `UnysonPlus-Capture-Service/tools/design-capture/contrast.mjs` — or read the capture's `contrast-review.csv` | `npm i` in the design-capture folder |
 | **Compose UnysonPlus builder pages programmatically** (sections/columns/elements + effects, still editable) | `tools/upw-build-pages.php` (via `wp eval-file`) + `docs/building-pages.md` | WP-CLI on a live install |
 | **Record / verify the docs manifest** after editing a doc | `docs/sync.mjs check | stamp <doc> | build` | node (no deps) |
 
@@ -56,7 +56,7 @@ The right proof depends on the build type (see [`docs/site-build-protocol.md`](.
 - **`tools/measure/`** — the kit's verification playwright. `npm install` there → its own Chromium.
   `node_modules` is gitignored (root `.gitignore`), so a fresh clone installs cleanly. **This is the
   playwright to reach for when you need to measure/screenshot/verify.**
-- **`assembled/UnysonPlus-Capture-Service/tools/design-capture/`** — the capture pipeline's own playwright
+- **`UnysonPlus-Capture-Service/tools/design-capture/`** — the capture pipeline's own playwright
   (separate `npm install`, needs network to the source site). Use it for Phase 1 capture, not for
   fidelity checks.
 - **NOT in the kit:** a maintainer's personal `pw-screens` / `pw-verify` folders (option-panel doc

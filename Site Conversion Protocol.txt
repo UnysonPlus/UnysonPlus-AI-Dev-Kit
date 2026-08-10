@@ -1,0 +1,12 @@
+MOVED — this file is retired.
+
+The canonical, complete, always-current site-conversion / site-build protocol is:
+
+    docs/site-build-protocol.md
+
+That is the AUTHORITATIVE checklist. This .txt used to hold a partial copy of the "major steps"
+and silently omitted several required steps (the Tailwind detect-then-translate rule, the header/
+footer value shapes, the icon-by-kind rule, the per-section checklist, and the recurring-miss
+checklist). To avoid two copies drifting apart, the content now lives only in the markdown file.
+
+Agents: read docs/site-build-protocol.md — start with "THE PER-SECTION CHECKLIST".

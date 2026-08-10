@@ -60,7 +60,7 @@ into a fully functional WordPress site using the UnysonPlus framework.
 
 Read the kit's AGENTS.md and PLAYBOOK.md and follow them. Do Phase 0 FIRST when I gave a URL:
 run the capture service — `node capture.mjs "<url>" <out>` in the assembled
-assembled/UnysonPlus-Capture-Service/tools/design-capture (one-time `npm install` there) — to grab
+UnysonPlus-Capture-Service/tools/design-capture (one-time `npm install` there) — to grab
 the rendered DOM + media + computed styles, then import that bundle with the site-converter extension
 and refine. Don't hand-build from scratch, and don't ask me for assets (SVGs, video…) the capture
 already has.
@@ -86,7 +86,7 @@ also reads computed styles.
 The agent will, on its own:
 
 1. Run `pwsh assemble.ps1` if the plugin/theme folders are empty.
-2. Copy the `assembled/unysonplus-theme-child/` starter into your WordPress, rename + activate it.
+2. Copy the `unysonplus-theme-child/` starter into your WordPress, rename + activate it.
 3. **Lock the header, footer, and container to your mockup first** — native theme options — and
    **measure** with `tools/measure/measure.mjs` instead of eyeballing.
 4. Build the page section by section, then fill in the details. (Hard elements can start as a
@@ -116,9 +116,9 @@ Run `update.ps1` whenever you come back, so you build against the current plugin
 | `tools/measure/*.mjs` | The parity harness — frame metrics, region ensemble (pixelmatch + Resemble.js + DOM), full-body property diff. |
 | `assemble.ps1` · `.wp-env.json` | Populate the assembled folders; one-command WordPress. |
 
-**Assembled (gitignored — never committed, filled by `assemble.ps1`):** `assembled/unysonplus/` (full plugin),
-`assembled/unysonplus-theme/` (parent theme), `assembled/unysonplus-theme-child/` (child-theme **starter** — copy per site;
-ships polished-chrome `design.json`), `assembled/UnysonPlus-Capture-Service/` + `assembled/UnysonPlus-Site-Converter-Extension/`
+**Assembled (gitignored — never committed, filled by `assemble.ps1`):** `unysonplus/` (full plugin),
+`unysonplus-theme/` (parent theme), `unysonplus-theme-child/` (child-theme **starter** — copy per site;
+ships polished-chrome `design.json`), `UnysonPlus-Capture-Service/` + `UnysonPlus-Site-Converter-Extension/`
 (the automated conversion pipeline this kit shares standards with).
 
 ## Why assemble instead of submodules

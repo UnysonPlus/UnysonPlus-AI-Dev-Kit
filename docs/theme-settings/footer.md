@@ -231,11 +231,10 @@ The **Element** picker defaults to **`custom_html`**, so it's tempting to paste 
 
 | Column content | Correct element |
 |---|---|
-| A list of links / a nav | **Menu** — a registered WP menu (Appearance → Menus), picked via `menu_id` — best when the same menu is reused/managed centrally. Or **Links** — an *inline* `{label,url}` list (heading + rows) stored on the element itself, so the links can never vanish from a missing menu object. The Site Converter maps footer link columns to **Links** for exactly that reason. Never custom HTML for links. |
+| A list of links / a nav | **Menu** — create a WP menu (Appearance → Menus), pick it via `menu_id`. Never custom HTML for links. |
 | A logo image | **Footer Logo** (or Logo) |
 | A heading, paragraph, brand blurb, rich text, the © line | **Text** (`wp-editor`; `wpautop` preserves block tags like `<h5>`) |
 | A row of social icons | **Social Icons** |
-| An email signup form ("Stay Connected" + email field + button) | **Newsletter** — the working AJAX signup (`newsletter` shortcode); set Heading / Email Placeholder / Button Label. Never Custom HTML for a signup. |
 | Phone / email / address with an icon | **Icon Text** (or Phone) |
 | A search box | **Search** · a registered widget area → **Widget Area** · a whole builder section → **Builder Section** · a reusable snippet → **Snippet** |
 | Bespoke markup no element covers (e.g. an image/badge strip) | **Custom HTML** — only here |
@@ -254,12 +253,10 @@ Rule of thumb: **links → Menu, words → Text, logo → Footer Logo; Custom HT
 | `footer_logo` | Footer Logo |
 | `menu` | Menu |
 | `menu_area` | Menu Area |
-| `links` | Links (inline `{label,url}` rows; heading via `links_title`, rows via `links_items`) |
 | `cta_button` | CTA Button |
 | `icon_text` | Icon Text |
 | `search` | Search |
 | `social_icons` | Social Icons |
-| `newsletter` | Newsletter |
 | `custom_html` | Custom HTML |
 | `text` | Text |
 | `widget_area` | Widget Area |

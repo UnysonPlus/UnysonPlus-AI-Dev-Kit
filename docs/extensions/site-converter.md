@@ -157,34 +157,6 @@ so the converted DOM stays clean instead of carrying raw utilities.
   durable in the section dropdown. **We keep the Bootstrap-aligned scale — no renumber** (it stayed
   compatible so pasted Bootstrap markup still works); arbitrary values cover everything off-scale.
 
-### Deterministic global-token + chrome detection rules (2026-08-09)
-
-The converter now derives these GLOBAL design-system tokens + header/footer chrome details straight from the
-source's stamped computed styles (`data-sc-cs`) and emits them as native Theme-Settings values — no AI, no
-hand-tuning. Each reads the source, decides only on a real signal (else leaves the theme default), and is
-graded by the parity report (below). Implemented in `class-fw-site-converter-stitch.php`:
-
-| ID | Detection → emitted setting |
-|----|------------------------------|
-| **D1** | modal control/card corner radius → `general_layout.layout_roundness` (sharp/subtle/rounded/soft) |
-| **D2** | modal border/divider colour → `general_layout.layout_border_color` (`--color-border`, ~21 consumers) |
-| **D3** | median `<section>` vertical padding → `general_layout.layout_section_spacing` (compact/cozy/spacious) |
-| **D4** | in-text link `text-decoration` → `general_typography.body_link_underline` (always/never) |
-| **H3** | nav-item fill/border/underline + padding → `header_menu.menu_item_style` / `menu_item_bg` / `menu_link_padding_x/y` |
-| **H4** | dropdown panel bg/link/radius/width/border → `header_menu.menu_dropdown_*` (only when a real submenu exists) |
-| **H5** | all-anchor (`#id`) nav → `header_layout.nav_scrollspy:yes` (one-page Scroll Spy) |
-| **H6** | mark-only brand (no wordmark/image) → `header_logo` `logo_layout:icon-only` |
-| **H11** | header flex row `align-items`/`gap` → `header_layout.header_valign` / `header_element_gap` |
-| **G1** | `cs_decls()` synthesises `display:flex` whenever it emits `align-items`/`justify-content`/`gap` (lockup flex bug-guard) |
-| **F1** | footer link columns → the native **`links`** footer element (inline `{label,url}` rows — no `menu_id`, links can't vanish), not an HTML `<ul>` blob |
-| **P1** | `conversion-parity.json` — a pass/fail scorecard grading every emitted global token / chrome vs the re-measured source (`{score, passed, total, checks[]}`) |
-
-**Parity gate (P1).** Every conversion now writes `conversion-parity.json` alongside `theme-settings.json`.
-It re-derives each source signal and compares it to what was emitted, so any new detection rule is
-automatically graded. Use it as the objective "is the base faithful?" check — a scandi-haven-shop convert
-scores 100 (7/7). A check is only counted when the SOURCE carries that signal (a borderless source doesn't
-fail the border check).
-
 ### Translation rules still to add (known gaps — a conversion needs these; teach them + a fixture case)
 
 These are captured-class effects the "rules to keep" list above does **not** yet translate. Each is a
