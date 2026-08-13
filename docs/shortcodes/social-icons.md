@@ -8,6 +8,7 @@ A row of social **profile** links. `theme_settings` delegates to the theme's own
 | `source` | select | `'theme_settings'` | `theme_settings` (delegate to theme) `manual` (list below) | Where the profiles come from. |
 | `profiles` | addable-box | `[]` | array of profile objects (see below) | Used only when `source=manual`. |
 | `size` | select | `'md'` | `sm` `md` `lg` | Icon size. |
+| `icon_badge_preset` | border-style picker | `''` | `''` \| `iconb-<slug>` | A reusable Icon Badge preset (Theme Settings → Components → Icon Badges) — a shaped tile with its own icon colour/size + hover fx. Stamps `.iconb-<slug>` on the icon wrapper. Applies to every profile's icon. See [../option-types/icon-badge-presets.md](../option-types/icon-badge-presets.md). |
 
 Each **profile** object: `icon` (icon-v2), `link` (text — URL), `label` (text — accessible/screen-reader text, e.g. "Facebook").
 
@@ -20,7 +21,8 @@ Each **profile** object: `icon` (icon-v2), `link` (text — URL), `label` (text 
     { "icon": { "type": "svg", "svg-source": "library", "svg-id": "lucide/instagram" }, "link": "https://example.com/",  "label": "Instagram" },
     { "icon": { "type": "svg", "svg-source": "library", "svg-id": "lucide/linkedin" },  "link": "https://example.com/",  "label": "LinkedIn" }
   ],
-  "size": "md"
+  "size": "md",
+  "icon_badge_preset": ""
 }
 ```
 

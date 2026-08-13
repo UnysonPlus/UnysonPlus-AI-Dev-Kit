@@ -112,7 +112,7 @@ Run `update.ps1` whenever you come back, so you build against the current plugin
 | `PLAYBOOK.md` | The outside-in build process (frame → sections → elements). |
 | `tools/README.md` | **Tools inventory** — every runnable tool by capability (measure, compare, capture, build). |
 | `docs/theme-settings/README.md` | **Every** Theme Settings option — configure the design from these, not CSS. |
-| `design-parity-checklist.md` | Metric set + the measurement algorithm. |
+| `docs/design-parity-checklist.md` | Metric set + the measurement algorithm. |
 | `tools/measure/*.mjs` | The parity harness — frame metrics, region ensemble (pixelmatch + Resemble.js + DOM), full-body property diff. |
 | `assemble.ps1` · `.wp-env.json` | Populate the assembled folders; one-command WordPress. |
 

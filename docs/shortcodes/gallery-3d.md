@@ -5,23 +5,29 @@ An animated 3D image showcase — a set of images arranged into a rotating/scrol
 ## atts
 | key | type | default | value shape / choices | what it does |
 |---|---|---|---|---|
-| `images` | multi-upload | `[]` | array of `{ attachment_id, url }` | The cards of the 3D scene (order = display order). |
+| `source` | multi-picker | `{kind:'media'}` | `{ kind:'media'\|'posts', media:{images:[…]}, posts:{post_type,count,orderby} }` | Where the cards come from. **Media Library** → `media.images` (multi-upload of `{attachment_id,url}`, order = display order); **Post Type** → builds cards from a post type's featured images (`posts.post_type`, `posts.count` 1–200, `posts.orderby` `date_desc`/`date_asc`/`title`/`menu_order`/`rand`). *(Legacy flat `images` key is still read as a view fallback.)* |
 | `design_settings` | multi-picker | `{design:'carousel_ring'}` | see Notes | Chosen 3D design + that design's controls. |
 | `as_background` | section-background switch | `'no'` | `'yes'` \| `'no'` | Fill the parent Section and sit behind its content (Stage Height ignored; always auto-animates). |
 | `box_style` | box-style picker | box-preset object | box-preset picker object | Reusable Box Preset (border/fill/hover) on each card. |
 | `shadow` | box-shadow | `{x:0,y:6,blur:16,spread:-4,color:'rgba(0,0,0,0.35)',inset:false}` | box-shadow object | Card drop shadow. |
 | `captions` | select | `'none'` | `none` `hover` `below` | Show a caption per card. |
 | `caption_source` | select | `'caption'` | `caption` `title` `alt` `description` | Which Media field feeds the caption. |
-| `click_action` | select | `'none'` | `lightbox` `none` | Open the full image in the lightbox on card click. |
+| `click` | multi-picker | `{action:'none'}` | `action`: `lightbox` `link` `none` | On card click: **Open Lightbox** (full image in the shared gallery lightbox), **Open Link** (follows each card's link — its post's page for the Post Type source, or the image's "Link URL" for Media Library), or **Do Nothing**. *(Legacy flat `click_action` scalar is still read as a view fallback.)* |
 
 ## Ready-to-use example (the atts object)
 ```json
 {
-  "images": [
-    { "attachment_id": "", "url": "https://example.com/1.jpg" },
-    { "attachment_id": "", "url": "https://example.com/2.jpg" },
-    { "attachment_id": "", "url": "https://example.com/3.jpg" }
-  ],
+  "source": {
+    "kind": "media",
+    "media": {
+      "images": [
+        { "attachment_id": "", "url": "https://example.com/1.jpg" },
+        { "attachment_id": "", "url": "https://example.com/2.jpg" },
+        { "attachment_id": "", "url": "https://example.com/3.jpg" }
+      ]
+    },
+    "posts": { "post_type": "post", "count": "12", "orderby": "date_desc" }
+  },
   "design_settings": {
     "design": "carousel_ring",
     "carousel_ring": {
@@ -38,7 +44,7 @@ An animated 3D image showcase — a set of images arranged into a rotating/scrol
   "shadow": { "x": 0, "y": 6, "blur": 16, "spread": -4, "color": "rgba(0,0,0,0.35)", "inset": false },
   "captions": "none",
   "caption_source": "caption",
-  "click_action": "none"
+  "click": { "action": "none" }
 }
 ```
 

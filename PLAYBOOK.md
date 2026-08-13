@@ -15,7 +15,7 @@ let the deterministic Site Converter do the bulk mapping (token-free), then clos
 Prereq: `pwsh assemble.ps1 -Source github` populates the two conversion repos + the plugin/theme (from the
 release zip); `-Source local` copies them from sibling working copies instead. Then `pwsh update.ps1`
 installs tool deps. Shape references: `docs/` (shortcodes / option-types / theme-settings / animation-engine).
-Metrics: `design-parity-checklist.md`.
+Metrics: `docs/design-parity-checklist.md`.
 
 > **This is the condensed practical view. The AUTHORITATIVE, complete checklist is
 > [`docs/site-build-protocol.md`](docs/site-build-protocol.md)** — where the two differ, the protocol wins,
@@ -153,7 +153,7 @@ Build the page structure before content, in the page builder (or via the builder
    run `tools/measure/compare.mjs "<mockup>" "<dev>" --out ./parity` — the region-by-region
    **ensemble** (geometry + pixelmatch + Resemble.js + DOM-structure) flags missing/extra/short
    bands *and* missing content (links/icons/CTAs). Use the **live source URL** as the mockup.
-   See `design-parity-checklist.md`.
+   See `docs/design-parity-checklist.md`.
 
 ## Rules
 

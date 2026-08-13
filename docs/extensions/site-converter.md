@@ -176,7 +176,7 @@ graded by the parity report (below). Implemented in `class-fw-site-converter-sti
 | **H6** | mark-only brand (no wordmark/image) → `header_logo` `logo_layout:icon-only` |
 | **H11** | header flex row `align-items`/`gap` → `header_layout.header_valign` / `header_element_gap` |
 | **G1** | `cs_decls()` synthesises `display:flex` whenever it emits `align-items`/`justify-content`/`gap` (lockup flex bug-guard) |
-| **F1** | footer link columns → the native **`links`** footer element (inline `{label,url}` rows — no `menu_id`, links can't vanish), not an HTML `<ul>` blob |
+| **F1** | footer link columns → atomic native footer elements: a **`heading`** element (the column title) + one **`link`** element per row (inline `{label,url}` — no `menu_id`, links can't vanish), not an HTML `<ul>` blob. (Replaced the old compound `links` element, removed 2026-08.) |
 | **P1** | `conversion-parity.json` — a pass/fail scorecard grading every emitted global token / chrome vs the re-measured source (`{score, passed, total, checks[]}`) |
 
 **Parity gate (P1).** Every conversion now writes `conversion-parity.json` alongside `theme-settings.json`.

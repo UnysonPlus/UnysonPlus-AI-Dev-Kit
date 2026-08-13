@@ -49,6 +49,10 @@ function Sync-Dir($from, $to) {
     New-Item -ItemType Directory -Force -Path $to | Out-Null
     # mirror, excluding VCS + build junk
     robocopy $from $to /MIR /XD .git node_modules /XF *.log /R:2 /W:2 /NFL /NDL /NJH /NJS /NP | Out-Null
+    # robocopy exit codes 0-7 = success (bit flags: copied/extra/mismatch); >=8 = a real failure
+    # (locked files, path too long, access denied). $ErrorActionPreference='Stop' does NOT trap native
+    # non-zero exits, so check explicitly or a half-mirrored, broken bundle passes silently.
+    if ($LASTEXITCODE -ge 8) { throw "robocopy failed (exit $LASTEXITCODE): $from -> $to" }
     ".gitkeep" | ForEach-Object { $p = Join-Path $to $_; if (-not (Test-Path $p)) { New-Item -ItemType File -Force -Path $p | Out-Null } }
 }
 
@@ -79,6 +83,7 @@ if ($Source -eq 'local') {
     $api = 'https://api.github.com/repos/UnysonPlus/UnysonPlus/releases/latest'
     $rel = Invoke-RestMethod -Uri $api -Headers @{ 'User-Agent' = 'unysonplus-ai-dev-kit' }
     $asset = $rel.assets | Where-Object { $_.name -like '*.zip' } | Select-Object -First 1
+    if (-not $asset) { throw "latest UnysonPlus release has no .zip asset to download (assets: $(($rel.assets | ForEach-Object { $_.name }) -join ', '))" }
     $zip = Join-Path $env:TEMP 'unysonplus-plugin.zip'
     Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zip
     if (Test-Path "$Kit\assembled\unysonplus") { Remove-Item -Recurse -Force "$Kit\assembled\unysonplus" }

@@ -1,4 +1,4 @@
-# Theme Settings — Components (Boxes, Section Styles, Patterns, Tables)
+# Theme Settings — Components (Boxes, Icon Badges, Section Styles, Patterns, Tables)
 
 Reusable, palette-linked presets defined in Theme Settings → Components; each emits a CSS class that page-builder elements consume by slug.
 
@@ -60,6 +60,47 @@ Reusable, palette-linked presets defined in Theme Settings → Components; each 
 Seeded presets → slugs: `Card` → `.boxp-card`, `Outline` → `.boxp-outline`, `Soft Shadow` → `.boxp-soft-shadow`, `Hover Lift` → `.boxp-hover-lift`.
 
 - **Notes**: each preset emits a `.boxp-{slug}` class (slug from `preset_name`; collisions get `-2`/`-3`; empty name falls back to the id). Consumed on a **Column** (Styling → Box Preset / `border_preset`), a **Table** (Table Options → Frame), or a **Countdown**. Set per Default / Hover state.
+
+## Icon Badges
+
+### Icon Badges — `icon_badge_presets`
+
+Theme Settings → Components → **Icon Badges** (the tab sits between Buttons and Box Presets). A reusable icon *badge*: a fixed-size shaped tile (circle / rounded / square / hexagon) with a tile fill, a centered glyph (its own colour + size), border and box-shadow — each emitting a `.iconb-{slug}` class. Full value shape: [`option-types/icon-badge-presets.md`](../option-types/icon-badge-presets.md).
+
+- **Type**: `icon-badge-presets` (custom option type; addable list with Default/Hover state tabs + a live badge preview).
+- **Default**: the four seeded presets from `unysonplus_default_icon_badge_presets()` (below).
+- **Choices**: repeatable list of badge rows. Key sub-fields (see the option-type doc for the full table): `id`, `preset_name`, `badge_shape` (`circle`/`rounded`/`square`/`hexagon`), `badge_size` (unit), `icon_size` (unit), `border_radius` (unit; rounded/square only), `transition` (ms), `hover_fx` (`lift`/`pop`/`glow`/`shine`), `custom_css`, and `states.default` / `states.hover` each holding `background` (background-pro tile fill), `icon_color` (compact `{predefined,custom}`), `border_style`/`border_width`/`border_color`, `box_shadow`.
+
+- **Saved value shape** (seeded rows — key values; colours in `background` are literal hex in `custom`, `icon_color`/`border_color` are compact `{predefined,custom}`):
+
+```json
+[
+  {"id":"i000000001","preset_name":"Circle","badge_shape":"circle",
+   "badge_size":{"value":"48","unit":"px"},"icon_size":{"value":"24","unit":"px"},"border_radius":{"value":"","unit":"px"},
+   "transition":"200","hover_fx":["lift","glow"],"custom_css":"",
+   "states":{"default":{"background":{"color":{"value":{"predefined":"","custom":"#0d6efd"}}},"icon_color":{"predefined":"white","custom":""},"border_style":"","border_color":{"predefined":"","custom":""},"box_shadow":{"x":0,"y":4,"blur":12,"spread":0,"color":"rgba(0,0,0,0.15)","inset":false}},
+             "hover":{"box_shadow":{"x":0,"y":8,"blur":20,"spread":0,"color":"rgba(0,0,0,0.22)","inset":false}}}},
+  {"id":"i000000002","preset_name":"Soft Tile","badge_shape":"rounded",
+   "badge_size":{"value":"52","unit":"px"},"icon_size":{"value":"26","unit":"px"},"border_radius":{"value":"14","unit":"px"},
+   "transition":"200","hover_fx":["pop"],"custom_css":"",
+   "states":{"default":{"background":{"color":{"value":{"predefined":"","custom":"#eef2ff"}}},"icon_color":{"predefined":"primary","custom":""},"border_style":"","border_color":{"predefined":"","custom":""}},
+             "hover":{"background":{"color":{"value":{"predefined":"","custom":"#e0e7ff"}}}}}},
+  {"id":"i000000003","preset_name":"Outline Ring","badge_shape":"circle",
+   "badge_size":{"value":"48","unit":"px"},"icon_size":{"value":"22","unit":"px"},"border_radius":{"value":"","unit":"px"},
+   "transition":"200","hover_fx":[],"custom_css":"",
+   "states":{"default":{"background":{"color":{"value":{"predefined":"","custom":""}}},"icon_color":{"predefined":"primary","custom":""},"border_style":"solid","border_width":{"value":"2","unit":"px"},"border_color":{"predefined":"primary","custom":""}},
+             "hover":{"background":{"color":{"value":{"predefined":"","custom":"#0d6efd"}}},"icon_color":{"predefined":"white","custom":""}}}},
+  {"id":"i000000004","preset_name":"Hexagon","badge_shape":"hexagon",
+   "badge_size":{"value":"54","unit":"px"},"icon_size":{"value":"26","unit":"px"},"border_radius":{"value":"","unit":"px"},
+   "transition":"200","hover_fx":["glow"],"custom_css":"",
+   "states":{"default":{"background":{"color":{"value":{"predefined":"","custom":"#6610f2"}}},"icon_color":{"predefined":"white","custom":""},"border_style":"","border_color":{"predefined":"","custom":""}},
+             "hover":{}}}
+]
+```
+
+Seeded presets → slugs: `Circle` → `.iconb-circle`, `Soft Tile` → `.iconb-soft-tile`, `Outline Ring` → `.iconb-outline-ring`, `Hexagon` → `.iconb-hexagon`.
+
+- **Notes**: each preset emits a `.iconb-{slug}` class (slug from `preset_name`; collisions get `-2`/`-3`; empty name → the id). Consumed via an **`icon_badge_preset`** picker (Styling tab) on 9 icon-bearing shortcodes — `icon_box`, `feature_list`, `steps`, `timeline`, `flip_box`, `image_box`, `special_heading`, `pricing_table`, `social_icons` — where the class stamps the icon wrapper and its `!important` CSS fully drives shape/fill/border/shadow + the glyph's colour and size (overriding the element's own Icon Color / Icon Size). On `icon_box` this supersedes the retired simple "Icon Badge" shape + "Icon Badge Color" (kept render-only for legacy pages).
 
 ## Section Styles
 

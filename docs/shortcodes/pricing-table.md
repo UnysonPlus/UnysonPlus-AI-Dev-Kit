@@ -19,6 +19,7 @@ Comparable pricing plans as cards in a responsive grid — each with an icon, na
 | `title_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Plan name color. |
 | `price_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Price color. |
 | `text_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Features / body text color. |
+| `icon_badge_preset` | border-style picker | `''` | `''` \| `iconb-<slug>` | A reusable Icon Badge preset (Theme Settings → Components → Icon Badges) — a shaped tile with its own icon colour/size + hover fx. Stamps `.iconb-<slug>` on the icon wrapper. Applies to every plan's icon. See [../option-types/icon-badge-presets.md](../option-types/icon-badge-presets.md). |
 | `font_size_preset` | font-size preset | `''` | preset slug | Named body font-size preset. |
 | `product_schema` | switch | `'no'` | `yes` \| `no` | Emit **Product** / **Offer** JSON-LD for each plan so search engines read the pricing as products. |
 | `billing_toggle` | switch | `'no'` | `yes` \| `no` | Show a Monthly / Yearly switch above the plans that swaps each plan's monthly figures for its `price`/`period`/`original_price` **yearly** values. |
@@ -56,7 +57,8 @@ Each **plan** object: `plan_title` (text), `icon` (icon-v2), `subtitle` (text), 
   "button_preset": "",
   "align": "center",
   "accent_color": { "predefined": "", "custom": "" },
-  "font_size_preset": ""
+  "font_size_preset": "",
+  "icon_badge_preset": ""
 }
 ```
 

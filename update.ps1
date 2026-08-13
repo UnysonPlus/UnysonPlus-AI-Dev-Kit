@@ -56,8 +56,8 @@ if ($Check) {
         if ([int]$ahead -gt 0) { Write-Host "  (you have $ahead local commit(s) not yet pushed)" }
     }
     foreach ($d in 'unysonplus', 'unysonplus-theme') {
-        if (-not (Test-Path (Join-Path $Kit $d))) {
-            Write-Host "  '$d/' not assembled yet — run: pwsh ./assemble.ps1" -ForegroundColor Yellow
+        if (-not (Test-Path (Join-Path $Kit "assembled\$d"))) {
+            Write-Host "  'assembled/$d/' not assembled yet — run: pwsh ./assemble.ps1" -ForegroundColor Yellow
         }
     }
     return
@@ -101,7 +101,7 @@ if (-not $SkipDeps) {
     # Capture-service dependencies (the URL converter path — Phase 1 of a conversion).
     # NOTE: playwright-core ships NO bundled browser — the capture service needs system
     # Google Chrome installed. If capture.mjs errors with a missing-browser message, install Chrome.
-    $capture = Join-Path $Kit 'UnysonPlus-Capture-Service/tools/design-capture'
+    $capture = Join-Path $Kit 'assembled/UnysonPlus-Capture-Service/tools/design-capture'
     if (Test-Path (Join-Path $capture 'package.json')) {
         Write-Host '[3/3] npm install (capture service)…  (requires system Google Chrome)'
         Push-Location $capture

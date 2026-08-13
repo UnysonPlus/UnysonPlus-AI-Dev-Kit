@@ -57,8 +57,8 @@ This kit exists for one reason — but it splits cleanly by build type:
 
 Read this file, then `PLAYBOOK.md`, then the **authoritative build checklist**
 [`docs/site-build-protocol.md`](docs/site-build-protocol.md), before touching a site. When building or
-converting, **`site-build-protocol.md` is CANONICAL** — where any looser summary (PLAYBOOK, build-a-site,
-the root `Site Conversion Protocol.txt`) differs, the protocol wins.
+converting, **`site-build-protocol.md` is CANONICAL** — where any looser summary (PLAYBOOK,
+build-a-site) differs, the protocol wins.
 
 > **⛔ REFLEX — RELOAD THE PER-SECTION CHECKLIST BEFORE EACH SECTION. Do not work from memory.**
 > Before building *any* section, re-open `site-build-protocol.md` → **"THE PER-SECTION CHECKLIST — run ALL
@@ -139,7 +139,7 @@ guessing a per-page slug.)
 | `docs/option-types/` | Per-option-type **value shapes** (multi-picker, background-pro, compact color, typography, unit-input, …) — the exact JSON to store for any option/att. |
 | `docs/animation-engine/` | Per-**module** effect shapes (hover, text-effects, scroll-motion, parallax, …) — the `fx`-block JSON to animate a node. Extension ships inactive. |
 | `docs/extensions/` | One **overview** per plugin extension (what it is, active-by-default, what it provides) — cross-links to the granular refs. |
-| `design-parity-checklist.md` | The metric set + the measurement algorithm (mockup ⟷ dev, ±2px tolerance). |
+| `docs/design-parity-checklist.md` | The metric set + the measurement algorithm (mockup ⟷ dev, ±2px tolerance). |
 | `assembled/unysonplus-theme-child/` | The **child-theme starter** you copy + rename per site. Ships a polished-chrome `design/design.json` so header/footer/container are ~90% right on activation. |
 | `tools/measure/measure.mjs` | The frame-metric harness (container/header/logo/footer/type). Run after every change. |
 | `tools/measure/compare.mjs` | Region-by-region **ensemble** — header↔header, each section↔section, footer↔footer, scored by geometry + pixelmatch + Resemble.js + a DOM-structure diff (fail-loud). |
@@ -148,7 +148,7 @@ guessing a per-page slug.)
 | `docs/build-a-site.md` | The **prompt → UnysonPlus site** workflow: how to go from "build me an X site" to a finished site (Theme Settings tokens → compose pages → wire animations → verify). The orchestration layer over the reference docs. |
 | `docs/conventions.md` | The **generalized UnysonPlus conventions** every build must follow (color presets, clean DOM, heading order, links, replaceable media, option-value shapes). Public, site-agnostic. |
 | `docs/extending.md` | **Create / convert shortcodes, option types, and extensions** — where things live, the anatomy of each, the best reference extension per case, the conventions (thumbnail icon spec, settings-page layout, migrations, keep-docs-in-sync). |
-| `sample-shortcode/` | **The shortcode TEMPLATE** — a complete, installable skeleton of a page-builder element. Every file present and documented inline, with commented-out reference code for repeaters, uploads, dimensions, icons, conditional options and design variants. `HOW-TO.md` beside it is the procedure for porting a standalone component (a CodePen, a demo, a bought template) into an element. **Copy this folder to start a new element** — don't hand-assemble one. |
+| `samples/sample-shortcode/` | **The shortcode TEMPLATE** — a complete, installable skeleton of a page-builder element. Every file present and documented inline, with commented-out reference code for repeaters, uploads, dimensions, icons, conditional options and design variants. `HOW-TO.md` beside it is the procedure for porting a standalone component (a CodePen, a demo, a bought template) into an element. **Copy this folder to start a new element** — don't hand-assemble one. |
 | `assembled/unysonplus/` · `assembled/unysonplus-theme/` | The plugin + parent theme. **Assembled, gitignored** — see `assemble.ps1`. Read them for options/shortcode shapes; the working-copy source of truth is your local plugin/theme repos (siblings of this kit — see `assemble.ps1 -WorkDevRoot`). |
 | `assembled/UnysonPlus-Capture-Service/` · `assembled/UnysonPlus-Site-Converter-Extension/` | The **automated** conversion pipeline (capture service + converter). This manual kit shares their standards; keep them in sync. |
 | **`tools/README.md`** | **The TOOLS INVENTORY — organized by capability ("when you need to DO X, run Y").** Check it BEFORE concluding the kit lacks a tool or building your own. |
@@ -198,7 +198,7 @@ WordPress with the UnysonPlus plugin AND the unysonplus-theme parent active** �
 - **For a CONVERSION, also activate the Site Converter extension.** It ships **inactive by default**, so
   enable it under **Unyson+ → Extensions → Site Converter** before you convert — otherwise the
   "Unyson+ → Convert" screen (the PHP file-upload path) won't exist. A fresh build doesn't need it.
-- **Critical:** the plugin MUST be the **release bundle / assembled `./unysonplus`** (all 21 extensions).
+- **Critical:** the plugin MUST be the **release bundle / assembled `./unysonplus`** (all 22 extensions).
   A `git clone` of the `UnysonPlus` repo is **core-only** (blog + update) — it activates cleanly but has
   **no page builder and no shortcodes**, so nothing can be built. Never install the site from a clone of
   the core repo.

@@ -38,8 +38,8 @@ key is usually `effect`, but some modules use `mode` or `role` (noted per file).
 ## All modules
 `backgrounds` · `confetti` · `cursor` · `flip-card` · `horizontal-scroll` · `hover` · `marquee` ·
 `motion-path` · `motion-sequence` · `page-transitions` · `parallax` · `physics` · `preloader` · `scroll-color-shift` ·
-`scroll-loop` · `scroll-motion` · `scroll-progress` · `scroll-reveal` · `scroll-text-highlight` ·
-`scrollytelling` · `sticky-stack` · `text-effects`
+`scroll-keyframes` · `scroll-loop` · `scroll-motion` · `scroll-progress` · `scroll-reveal` · `scroll-text-highlight` ·
+`scroll-var` · `scrollytelling` · `smooth-scroll` · `sticky-stack` · `text-effects` · `viewport-units`
 
 Extension overview: `../extensions/animation-engine.md`. AE shortcodes (gallery-3d, image-sequence,
 model-viewer, svg-draw, svg-morph, webgl-object) live in `../shortcodes/`.

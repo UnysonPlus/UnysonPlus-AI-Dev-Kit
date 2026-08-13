@@ -31,6 +31,7 @@ An image paired with an optional eyebrow, title, text, icon and button — a por
 | `subtitle_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Eyebrow color. |
 | `content_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Body text color. |
 | `icon_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Icon color (font icons only). |
+| `icon_badge_preset` | border-style picker | `''` | `''` \| `iconb-<slug>` | A reusable Icon Badge preset (Theme Settings → Components → Icon Badges) — a shaped tile with its own icon colour/size + hover fx. Stamps `.iconb-<slug>` on the icon wrapper. See [../option-types/icon-badge-presets.md](../option-types/icon-badge-presets.md). |
 | `accent_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Button / arrow / frame accent (`kind: bg`). |
 | `image_style` | image-style-picker | `''` | `''` (none) · `imgs-rounded` · `imgs-circle` · `imgs-portrait-card` · `imgs-monochrome` · `imgs-duotone` · `imgs-diagonal` · `imgs-hexagon` · `imgs-cinematic` | Preset visual treatment (shape / filter) applied to the box image. |
 
@@ -62,7 +63,8 @@ An image paired with an optional eyebrow, title, text, icon and button — a por
   "subtitle_color": { "predefined": "", "custom": "" },
   "content_color": { "predefined": "", "custom": "" },
   "icon_color": { "predefined": "", "custom": "" },
-  "accent_color": { "predefined": "", "custom": "" }
+  "accent_color": { "predefined": "", "custom": "" },
+  "icon_badge_preset": ""
 }
 ```
 

@@ -11,6 +11,7 @@ An overline + title + subtitle heading block with per-element alignment, color a
 | `overline_icon` | icon-v2 | none | icon-v2 object (see Notes) | **Overline Icon** (Icons tab). Optional icon shown inside the overline label; recolours via `overline_color` when it uses `currentColor`. |
 | `overline_icon_position` | select | `'before'` | `before` \| `after` | Overline icon before or after the overline text. |
 | `title_icon_position` | select | `'before'` | `before` \| `after` | Title icon before or after the title text. |
+| `icon_badge_preset` | border-style picker | `''` | `''` \| `iconb-<slug>` | A reusable Icon Badge preset (Theme Settings → Components → Icon Badges) — a shaped tile with its own icon colour/size + hover fx. Stamps `.iconb-<slug>` on the Title Icon wrapper. See [../option-types/icon-badge-presets.md](../option-types/icon-badge-presets.md). |
 | `subtitle` | text | `''` | string (inline HTML allowed) | Supporting line under the title. |
 | `heading` | select | `'h2'` | `h1` `h2` `h3` `h4` `h5` `h6` | Semantic/SEO tag for the title (not visual size). |
 | `alignment` | alignment | `''` (inherit) | `''` `left` `center` `right` | Master alignment for all three lines. |
@@ -47,6 +48,7 @@ An overline + title + subtitle heading block with per-element alignment, color a
   "overline_uppercase": "yes",
   "overline_icon": { "type": "none" }, "overline_icon_position": "before",
   "icon": { "type": "none" }, "title_icon_position": "before",
+  "icon_badge_preset": "",
   "overline_marker": "", "overline_marker_position": "before", "overline_container": "",
   "element_spacing": "",
   "block_max_width": { "value": "", "unit": "px" },

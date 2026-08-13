@@ -11,8 +11,8 @@ For *using* what already exists, see `docs/shortcodes/`, `docs/option-types/`,
 
 | To add / modify… | Lives under… | Start from |
 |---|---|---|
-| A **shortcode** (page-builder element) | the shortcodes extension → `shortcodes/<name>/` | **[`../sample-shortcode/`](../sample-shortcode/)** |
-| A **child theme** (one site's / brand's bespoke look + elements) | `wp-content/themes/<slug>/` | **[`../sample-child-theme/`](../sample-child-theme/)** |
+| A **shortcode** (page-builder element) | the shortcodes extension → `shortcodes/<name>/` | **[`../samples/sample-shortcode/`](../samples/sample-shortcode/)** |
+| A **child theme** (one site's / brand's bespoke look + elements) | `wp-content/themes/<slug>/` | **[`../samples/sample-child-theme/`](../samples/sample-child-theme/)** |
 | An **option type** (a new field UI + value shape) | the framework's `includes/option-types/<name>/` | an existing type's folder |
 | An **extension** (a feature module: options, admin page, assets) | `framework/extensions/<name>/` | the reference extensions below |
 | An **Animation Engine module** | the animation-engine extension → `modules/<name>/` | an existing module |
@@ -24,7 +24,7 @@ editing. See *[Reading the real source](#reading-the-real-source)* for how to ge
 
 ## Creating a child theme
 
-**Use the template: [`sample-child-theme/`](../sample-child-theme/).** Two files — `style.css`
+**Use the template: [`samples/sample-child-theme/`](../samples/sample-child-theme/).** Two files — `style.css`
 (the header + your CSS, which loads LAST in the cascade so plain selectors win) and
 `functions.php` (a guarded `child-style` enqueue fallback + reference blocks for fonts, shipped
 elements and template overrides). It installs and runs as-is. Its `README.md` has the full
@@ -41,7 +41,7 @@ goes in the plugin instead.
   header/footer, Custom CSS). Do not re-configure them; prefer Theme Settings over CSS even here.
 - **Ship bespoke elements** under `framework-customizations/extensions/shortcodes/shortcodes/<name>/`
   (or `.../includes/option-types/<name>/`) — no registration call; the loaders scan the child theme
-  when active. Build the element from [`sample-shortcode/`](../sample-shortcode/).
+  when active. Build the element from [`samples/sample-shortcode/`](../samples/sample-shortcode/).
 - **Staging:** a demos-network child theme lives in the demos install
   (`htdocs/demos/wp-content/themes/<slug>/`, network-enabled + activated on its subsite) with a
   tracked source under `unysonplus-website/wordpress/demos/demo-themes/<slug>/`; a standalone child
@@ -52,10 +52,10 @@ goes in the plugin instead.
 
 ## Creating a shortcode
 
-**Use the template: [`sample-shortcode/`](../sample-shortcode/).** It is a complete, installable
+**Use the template: [`samples/sample-shortcode/`](../samples/sample-shortcode/).** It is a complete, installable
 skeleton — every file present, each documenting the rule it enforces, with commented-out
 reference code for repeaters, media uploads, dimensions, icons, conditional options and design
-variants. `sample-shortcode/HOW-TO.md` covers porting an existing standalone component (a
+variants. `samples/sample-shortcode/HOW-TO.md` covers porting an existing standalone component (a
 CodePen, a demo, a bought template) into an element.
 
 ### Leaf or section-like
@@ -169,7 +169,7 @@ child theme" is the *default*, but they're different axes: a **reusable** shortc
 **distribute as their own add-on** goes in a **standalone extension**, not the core plugin — so don't
 silently fold a would-be product into the framework. If the task doesn't make the intent clear, ask.
 
-The porting procedure (`sample-shortcode/HOW-TO.md`) is **identical for all homes** — only the destination
+The porting procedure (`samples/sample-shortcode/HOW-TO.md`) is **identical for all homes** — only the destination
 folder (and the version marker) changes.
 
 **References:** the `newbingosite` child theme ships `mini-reviews` / `pros-cons` / `casino-matcher` /

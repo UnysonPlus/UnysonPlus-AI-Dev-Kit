@@ -231,7 +231,7 @@ The **Element** picker defaults to **`custom_html`**, so it's tempting to paste 
 
 | Column content | Correct element |
 |---|---|
-| A list of links / a nav | **Menu** — a registered WP menu (Appearance → Menus), picked via `menu_id` — best when the same menu is reused/managed centrally. Or **Links** — an *inline* `{label,url}` list (heading + rows) stored on the element itself, so the links can never vanish from a missing menu object. The Site Converter maps footer link columns to **Links** for exactly that reason. Never custom HTML for links. |
+| A list of links / a nav | **Menu** — a registered WP menu (Appearance → Menus), picked via `menu_id` — best when the same menu is reused/managed centrally. Or a **Heading** element (the column title) + a stack of **Link** elements — atomic, inline links (`link_label` + `link_url` + `link_target`) stored on each element, so a link can never vanish from a missing menu object, and each is reordered / restyled independently. The Site Converter maps footer link columns to a **Heading + Link stack** for exactly that reason. Never custom HTML for links. |
 | A logo image | **Footer Logo** (or Logo) |
 | A heading, paragraph, brand blurb, rich text, the © line | **Text** (`wp-editor`; `wpautop` preserves block tags like `<h5>`) |
 | A row of social icons | **Social Icons** |
@@ -242,7 +242,7 @@ The **Element** picker defaults to **`custom_html`**, so it's tempting to paste 
 
 Rule of thumb: **links → Menu, words → Text, logo → Footer Logo; Custom HTML only when nothing else fits.** Tag any element needing CSS with its **CSS Class** field (`element_css_class`) — it lands on the `.footer-element` wrapper (`.footer-element.<class>`) — rather than wrapping the content in a classed `<div>`. Menu elements render `.builder-menu-list`; Text elements render `.builder-text-element`, so target those (scoped by your element class) in Custom CSS.
 
-*Worked example — a link column* = **Text** (`<h5>Bingo</h5>`, class `fcol-title`) **+ Menu** (the "Footer — Bingo" menu, class `fcol-links`). A compliance-badge strip stays **Custom HTML** (an image row has no element). The © bar = **Text** (© line) + **Menu** (a "Footer Legal" menu).
+*Worked example — a link column* = a **Heading** element (`Bingo`, level `h3`) **+ several Link** elements (each Label + URL), stacked. (A registered **Menu** works too when the links are centrally managed.) A compliance-badge strip stays **Custom HTML** (an image row has no element). The © bar = **Text** (© line) + **Menu** (a "Footer Legal" menu).
 
 ### Element — `element_type` (multi-picker, picker `element` = select)
 - **Default**: `custom_html`
@@ -254,7 +254,8 @@ Rule of thumb: **links → Menu, words → Text, logo → Footer Logo; Custom HT
 | `footer_logo` | Footer Logo |
 | `menu` | Menu |
 | `menu_area` | Menu Area |
-| `links` | Links (inline `{label,url}` rows; heading via `links_title`, rows via `links_items`) |
+| `heading` | Heading (a single heading; text via `heading_text`, level `h2`–`h6` via `heading_level`, default `h3`) |
+| `link` | Link (a single inline link; `link_label`, `link_url`, `link_target` = `_self`/`_blank`) |
 | `cta_button` | CTA Button |
 | `icon_text` | Icon Text |
 | `search` | Search |
@@ -271,6 +272,8 @@ Rule of thumb: **links → Menu, words → Text, logo → Footer Logo; Custom HT
 
 - **Saved value shape**: `[ 'element' => 'text', '<element>' => {…sub-options…} ]`
 - **Per-element sub-options**:
+  - `heading` → `heading_text` (text), `heading_level` (select `h2`/`h3`/`h4`/`h5`/`h6`, default `h3`). Renders `<{level} class="footer-links-title hf-heading">`; use it above a stack of `link` elements to title a column.
+  - `link` → `link_label` (text), `link_url` (text — full URL or in-page anchor), `link_target` (select `_self` Same tab / `_blank` New tab, default `_self`). Renders one `<a class="footer-link hf-link">` (New tab adds `rel="noopener noreferrer"`); stack several under a `heading` to build a link column. Replaces the old compound `links` element.
   - `cta_button` → `cta_text` (text, default `Get Started`), `cta_link` (text, default `#`), `cta_style` (`button-style-picker` from Theme Settings → Buttons; fallback select `filled` Filled/`outline` Outline/`pill` Pill (Rounded)), `cta_size` (`button-style-picker` sizes).
   - `icon_text` → `icontext_icon` (icon-v2), `icontext_text` (text), `icontext_link_type` (select: `none` No link, `url` Website URL, `email` Email (mailto:), `phone` Phone (tel:); default `none`), `icontext_link` (text).
   - `custom_html` → `custom_html_content` (textarea).
@@ -290,7 +293,7 @@ Rule of thumb: **links → Menu, words → Text, logo → Footer Logo; Custom HT
   - `social_icons` → no per-element options; it renders the profiles from **Theme Settings → Social** (`general_social` — each item `{ 'icon' => ['type'=>'icon-font','icon-class'=>'fab fa-instagram'], 'url' => '…' }`). Set the profiles there first, or no icons render.
   - `menu` → `menu_id` is the WP menu **term id** (or the menu **name/slug** `wp_get_nav_menu_object()` accepts). Create the menu with `wp_create_nav_menu()` + `wp_update_nav_menu_item()` first, then reference it.
   - `cta_button` → `cta_style`/`cta_size` are a **button-style-picker** storing the chosen preset slug (e.g. `'filled'`/`'outline'`/`'pill'`); the picker's choices come from Theme Settings → Buttons.
-  - `text` → `text_content` is raw WYSIWYG HTML; runs through `wpautop`+`do_shortcode`. A footer column **title** is an `<h2>` here (styled small via CSS), and links belong in a **Menu** element, not typed as `<ul>` in Text.
+  - `text` → `text_content` is raw WYSIWYG HTML; runs through `wpautop`+`do_shortcode`. A footer column **title** belongs in a **Heading** element (not typed as a heading here), and links belong in **Link** elements or a **Menu**, not typed as a `<ul>` in Text.
   - `custom_html` → `custom_html_content` runs `do_shortcode()` (so `[wc_mini_cart …]` etc. work). Reserve it for markup with no native element (e.g. a newsletter `<form>`).
 
 - **Rendered output / CSS hook per element** (every element is wrapped in `.footer-element.footer-element--<type>` + your `element_css_class`; target the inner node):
@@ -299,6 +302,8 @@ Rule of thumb: **links → Menu, words → Text, logo → Footer Logo; Custom HT
   | `logo` / `footer_logo` | the site logo lockup / footer image | `.site-logo` / `.footer-logo img` |
   | `menu` | the chosen WP menu as a `<ul>` | `.builder-menu-list` |
   | `menu_area` | the theme menu at a location (primary → inline nav) | `.builder-menu-list` / theme nav |
+  | `heading` | a single `<h2>`–`<h6>` (the chosen level) with the heading text | `.footer-links-title.hf-heading` |
+  | `link` | a single `<a>` (Label → URL; New tab adds `rel="noopener noreferrer"`) | `.footer-link.hf-link` |
   | `text` | WYSIWYG HTML (`wpautop`+`do_shortcode`) | `.builder-text-element` |
   | `icon_text` | `<i class="icon-class">` + text, optionally linked (`mailto:`/`tel:`/URL; external → new tab) | `.icon-text` (icon `<i>` + `<span>`) |
   | `social_icons` | Theme Settings → Social profiles as icon links | `.social-icons a` |

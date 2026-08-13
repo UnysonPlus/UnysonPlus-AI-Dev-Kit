@@ -33,8 +33,8 @@ already know a filename.
 
 | I need to… | Read |
 |---|---|
-| Create / convert a shortcode, option type, or extension | [`extending.md`](extending.md) + [`../sample-shortcode/`](../sample-shortcode/) (copy the skeleton; `HOW-TO.md` is the porting procedure) |
-| Create a child theme | [`extending.md`](extending.md) + [`../sample-child-theme/`](../sample-child-theme/) |
+| Create / convert a shortcode, option type, or extension | [`extending.md`](extending.md) + [`../samples/sample-shortcode/`](../samples/sample-shortcode/) (copy the skeleton; `HOW-TO.md` is the porting procedure) |
+| Create a child theme | [`extending.md`](extending.md) + [`../samples/sample-child-theme/`](../samples/sample-child-theme/) |
 
 > Docs are kept in sync with the plugin via `sync.mjs` + `.doc-manifest.json`. When you change a
 > documented surface, update its doc in the same turn and re-run `node docs/sync.mjs check | stamp <doc>

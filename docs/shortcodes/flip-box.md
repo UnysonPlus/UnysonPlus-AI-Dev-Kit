@@ -41,6 +41,7 @@ A two-sided 3D card that flips on hover or click. Front: icon + title + text (or
 | `back_image` | upload | `''` | attachment | Optional back background image (any design; dark overlay). |
 | `back_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Back text color. |
 | `font_size_preset` | font-size preset | `''` | preset slug | Named font-size preset. |
+| `icon_badge_preset` | border-style picker | `''` | `''` \| `iconb-<slug>` | A reusable Icon Badge preset (Theme Settings → Components → Icon Badges) — a shaped tile with its own icon colour/size + hover fx. Stamps `.iconb-<slug>` on the icon wrapper. See [../option-types/icon-badge-presets.md](../option-types/icon-badge-presets.md). |
 | `button_style` | button-style picker | first preset | preset slug | Back button style (Theme Settings → General → Buttons). |
 | `button_size` | button-style picker | first preset | size slug | Back button size. |
 
@@ -74,6 +75,7 @@ A two-sided 3D card that flips on hover or click. Front: icon + title + text (or
   "back_image": "",
   "back_color": { "predefined": "", "custom": "" },
   "font_size_preset": "",
+  "icon_badge_preset": "",
   "button_style": "btn-primary",
   "button_size": ""
 }

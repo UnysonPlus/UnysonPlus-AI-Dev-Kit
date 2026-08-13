@@ -316,7 +316,7 @@ For the section you're on, in order:
    CSS is ONLY for a genuine pixel tweak or decor the options can't express — and every such use is
    **flagged**.
 4. **[ ] Bespoke pieces → the real shortcode, not a raw HTML blob.** Swap each `code_block` placeholder
-   for a proper element; to build a new one use [`sample-shortcode/HOW-TO.md`](../sample-shortcode/HOW-TO.md)
+   for a proper element; to build a new one use [`samples/sample-shortcode/HOW-TO.md`](../samples/sample-shortcode/HOW-TO.md)
    (capture → replica → port → teach-the-converter). A store section → real WooCommerce (Rule 5).
 5. **[ ] VERIFY — by the right proof for the build type (do not conflate the two).**
    - **CONVERSION: the PRIMARY proof is the browser-free class-string fixture** (`tailwind-matrix.test.mjs`)

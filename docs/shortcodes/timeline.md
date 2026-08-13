@@ -22,6 +22,7 @@ A sequence of milestones (date, title, text, marker icon, image, link) in a vert
 | `card_bg` | color-preset | `{predefined:'',custom:''}` | compact color object | Card background (`kind: bg`). |
 | `date_color` / `title_color` / `text_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Per-part text colors. |
 | `font_size_preset` | font-size preset | `''` | preset slug | Named body font-size preset. |
+| `icon_badge_preset` | border-style picker | `''` | `''` \| `iconb-<slug>` | A reusable Icon Badge preset (Theme Settings → Components → Icon Badges) — a shaped tile with its own icon colour/size + hover fx. Stamps `.iconb-<slug>` on the icon wrapper. Applies to every milestone marker's icon (Marker = Icon). See [../option-types/icon-badge-presets.md](../option-types/icon-badge-presets.md). |
 | `howto_schema` | switch | `'no'` | `yes` \| `no` | Emit **HowTo** / **HowToStep** JSON-LD so the timeline reads as a step-by-step guide for search engines. |
 
 ## Ready-to-use example (the atts object)
@@ -40,7 +41,8 @@ A sequence of milestones (date, title, text, marker icon, image, link) in a vert
   "date_color": { "predefined": "", "custom": "" },
   "title_color": { "predefined": "", "custom": "" },
   "text_color": { "predefined": "", "custom": "" },
-  "font_size_preset": ""
+  "font_size_preset": "",
+  "icon_badge_preset": ""
 }
 ```
 

@@ -365,6 +365,8 @@ Each header column is an `addable-popup` whose `popup-options` add elements. Per
 | `logo` | Logo |
 | `menu` | Menu |
 | `menu_area` | Menu Area |
+| `heading` | Heading (a single heading; text via `heading_text`, level `h2`–`h6` via `heading_level`, default `h3`) |
+| `link` | Link (a single inline link; `link_label`, `link_url`, `link_target` = `_self`/`_blank`) |
 | `cta_button` | CTA Button |
 | `icon_text` | Icon Text |
 | `search` | Search |
@@ -384,6 +386,8 @@ Each header column is an `addable-popup` whose `popup-options` add elements. Per
   - `custom_html` → `custom_html_content` (textarea).
   - `menu` → `menu_id` (select; choices = existing WP nav menus by term_id).
   - `menu_area` → `menu_location` (select; default `primary`; choices `primary` Primary menu, `secondary` Secondary menu, `footer` Footer menu, plus any registered theme locations).
+  - `heading` → `heading_text` (text), `heading_level` (select `h2`/`h3`/`h4`/`h5`/`h6`, default `h3`). Renders `<{level} class="footer-links-title hf-heading">`. (Shared with the footer builder; see [footer.md](footer.md).)
+  - `link` → `link_label` (text), `link_url` (text — full URL or in-page anchor), `link_target` (select `_self` Same tab / `_blank` New tab, default `_self`). Renders one `<a class="footer-link hf-link">` (New tab adds `rel="noopener noreferrer"`). Stack several under a `heading` to build a link column — the atomic replacement for the removed compound `links` element.
   - `text` → `text_content` (`wp-editor`, tinymce/shortcodes; supports `{{current_year}}`).
   - `widget_area` → `sidebar_id` (select; default `sidebar-right`; choices = registered sidebars incl. `sidebar-right`,`sidebar-left`,`header-1..3`,`footer-1..5`).
   - `builder_section` → `builder_post_id` (select; saved page-builder layouts).

@@ -13,6 +13,7 @@ A numbered steps / process flow in five designs (horizontal, vertical, alternati
 | `title_tag` | select | `'h3'` | `h2` `h3` `h4` `h5` `div` | Step title HTML tag. |
 | `accent_color` | color-preset | `{predefined:'',custom:''}` | compact color object (`kind:bg`) | Marker / connector color. |
 | `marker_text_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Marker number/icon color. |
+| `icon_badge_preset` | border-style picker | `''` | `''` \| `iconb-<slug>` | A reusable Icon Badge preset (Theme Settings → Components → Icon Badges) — a shaped tile with its own icon colour/size + hover fx. Stamps `.iconb-<slug>` on the icon wrapper. Applies to every item's icon (Marker = Icon). See [../option-types/icon-badge-presets.md](../option-types/icon-badge-presets.md). |
 | `title_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Title color. |
 | `text_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Description color. |
 | `font_size_preset` | font-size preset | `''` | preset slug | Named font-size preset. |
@@ -35,6 +36,7 @@ Each **step** object: `title` (text), `content` (textarea — accepts HTML and s
   "title_tag": "h3",
   "accent_color": { "predefined": "", "custom": "" },
   "marker_text_color": { "predefined": "", "custom": "" },
+  "icon_badge_preset": "",
   "title_color": { "predefined": "", "custom": "" },
   "text_color": { "predefined": "", "custom": "" },
   "font_size_preset": ""

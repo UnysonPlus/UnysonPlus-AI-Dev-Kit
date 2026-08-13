@@ -119,3 +119,23 @@ builder UI**. So:
 - Front end: the page renders, effects animate, no console errors, no PHP notices.
 - A11y/SEO: heading outline descends, links are descriptive, contrast passes, images have `alt`.
 - Editability: the page opens in the visual builder; every image/text is replaceable.
+
+## Admin control heights (WordPress 7+)
+
+WordPress 7.0 raised `select` and `.button` to a **40px minimum height** (a touch-target
+change) while text inputs stayed at **30px**, so any admin row mixing them renders ragged —
+a text field beside a dropdown, or a select beside a submit button.
+
+The plugin ships `framework/static/css/admin-controls.css`, enqueued on every admin page
+from `FW_Backend::_action_admin_enqueue_scripts()`, which pins select, button and text
+input to a single **30px** height.
+
+- It is **scoped** to Unyson+ surfaces — our own screens (`.wrap[class*="fw-"]`), the
+  Extensions manager, and anything the options framework renders (`.fw-backend-option`,
+  the builder, the options modal, which also appear on post/term/theme screens). Core
+  WordPress screens and other plugins keep WordPress's own sizing on purpose: overriding
+  an accessibility decision site-wide is not the plugin's call.
+- `select[multiple]`, `select[size]`, `.button-large` and `.button-hero` are exempt by
+  design, and `textarea` is untouched.
+- When adding a new admin screen, wrap it in `<div class="wrap fw-…">` and the heights
+  come out right automatically.

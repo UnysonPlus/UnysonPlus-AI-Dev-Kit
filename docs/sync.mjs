@@ -23,8 +23,12 @@ import { dirname, join, resolve } from 'path';
 const DOCS = dirname(fileURLToPath(import.meta.url));
 const KIT = resolve(DOCS, '..');
 const pick = (cands) => cands.find(p => p && existsSync(p));
-const PLUGIN = pick([process.env.KIT_SRC_PLUGIN, join(KIT, '..', 'unysonplus'), join(KIT, 'unysonplus')]);
-const THEME  = pick([process.env.KIT_SRC_THEME,  join(KIT, '..', 'unysonplus-theme'), join(KIT, 'unysonplus-theme')]);
+// Source candidates, in order: env override → working copies as siblings of the kit → a copy INSIDE
+// the kit → the assembled bundle (assemble.ps1 populates assembled/, which is the only source a
+// non-maintainer checkout has). Without the assembled/ fallback, `check`/`build` failed with
+// "Source not found" on any machine that only ran assemble.ps1.
+const PLUGIN = pick([process.env.KIT_SRC_PLUGIN, join(KIT, '..', 'unysonplus'), join(KIT, 'unysonplus'), join(KIT, 'assembled', 'unysonplus')]);
+const THEME  = pick([process.env.KIT_SRC_THEME,  join(KIT, '..', 'unysonplus-theme'), join(KIT, 'unysonplus-theme'), join(KIT, 'assembled', 'unysonplus-theme')]);
 const MANIFEST = join(DOCS, '.doc-manifest.json');
 
 const md5 = (b) => createHash('md5').update(b).digest('hex');
@@ -68,7 +72,7 @@ const SC_OVERRIDE = {
 const NARRATIVE = new Set([
   // top-level guides
   'build-a-site.md', 'building-pages.md', 'cloning-gotchas.md', 'conventions.md',
-  'extending.md', 'fidelity-verification.md', 'site-build-protocol.md',
+  'design-parity-checklist.md', 'extending.md', 'fidelity-verification.md', 'site-build-protocol.md',
   // aggregate reference docs (no single source dir)
   'option-types/containers.md', 'option-types/declaring-options.md', 'option-types/icon-v2.md',
   'option-types/icon-v3.md', 'option-types/primitives.md', 'theme-settings/programmatic-setup.md',

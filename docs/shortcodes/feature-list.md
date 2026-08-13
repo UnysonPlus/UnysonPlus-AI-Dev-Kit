@@ -17,6 +17,7 @@ An icon-led list (checklist / per-item icons / numbered / bullets / badge) with 
 | `box_style` | box-style picker | `''` | box-preset picker object | Apply a Box Preset to each feature item. |
 | `marker_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Marker / icon color (`kind: bg`). |
 | `marker_size` | unit-input | `{value:'',unit:'px'}` | units `px rem em` | Marker / icon size. Empty = default. |
+| `icon_badge_preset` | border-style picker | `''` | `''` \| `iconb-<slug>` | A reusable Icon Badge preset (Theme Settings → Components → Icon Badges) — a shaped tile with its own icon colour/size + hover fx. Stamps `.iconb-<slug>` on the icon wrapper. Applies to every item's icon. See [../option-types/icon-badge-presets.md](../option-types/icon-badge-presets.md). |
 | `text_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Item text color (`kind: text`). |
 | `sub_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Sub-text color (`kind: text`). |
 | `font_size_preset` | font-size preset | `''` | preset slug | Named font-size preset. |
@@ -42,6 +43,7 @@ An icon-led list (checklist / per-item icons / numbered / bullets / badge) with 
   "box_style": "",
   "marker_color": { "predefined": "", "custom": "" },
   "marker_size": { "value": "", "unit": "px" },
+  "icon_badge_preset": "",
   "text_color": { "predefined": "", "custom": "" },
   "sub_color": { "predefined": "", "custom": "" },
   "font_size_preset": ""
