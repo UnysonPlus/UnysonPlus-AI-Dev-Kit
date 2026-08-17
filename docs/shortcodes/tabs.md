@@ -63,6 +63,20 @@ A horizontal or vertical tabbed-content widget; each tab has a title and a body 
 }
 ```
 
+## Site Converter — automatic design detection
+
+The Site Converter classifies the source tabs widget and sets the closest **`orientation`** + nav **`design`** (`FW_Site_Converter_Stitch::detect_tabs_design()`), instead of always the horizontal underline default:
+
+| source signal | → att |
+|---|---|
+| tablist is a side COLUMN (`flex-col` / `aria-orientation="vertical"`) | `orientation = vertical` |
+| nav items `rounded-full` | `design = pills` |
+| 2–3 options in a rounded pill CONTAINER (`bg-gray` + `rounded-full`) | `design = segmented` |
+| bordered rounded tabs | `design = boxed` |
+| otherwise | `design = underline` (default) |
+
+Conservative — unclear styling stays `underline`; `minimal`/`buttons`/`popover` and the `media` layout are not auto-selected.
+
 ## Notes
 - `tab_content` is a WYSIWYG (`wp-editor`) field — keep it plain semantic HTML with no classes on `<p>`/`<li>` (see `text-block.md`).
 - `is_active` is per-item, not a global setting. Set exactly one entry to `yes`; if none is set the first tab opens by default.

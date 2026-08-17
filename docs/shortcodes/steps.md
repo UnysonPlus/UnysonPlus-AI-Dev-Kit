@@ -43,6 +43,10 @@ Each **step** object: `title` (text), `content` (textarea — accepts HTML and s
 }
 ```
 
+## Site Converter — automatic design detection
+
+The Site Converter sets the closest steps **`design`** (`detect_steps_design()`): steps STACKED (`flex-col` / `grid-cols-1`) → `vertical`; each step a bordered/elevated BOX → `cards`; otherwise the `horizontal` default. `alternating`/`circles` are not auto-selected.
+
 ## Notes
 - Leave a step's `number` empty to auto-number by position; set it to override the marker label. `icon` (icon-v2, see `icon-box.md`) is only used when `marker=icon`.
 - `connector` only affects Horizontal / Vertical / Alternating — Cards and Circles have no line.

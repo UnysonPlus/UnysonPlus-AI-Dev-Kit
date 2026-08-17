@@ -94,6 +94,28 @@ A data-driven query grid: pulls content from the WordPress post DB (`WP_Query`) 
 }
 ```
 
+## Site Converter — automatic blog-listing detection
+
+The deterministic Site Converter detects a **source blog / post listing** and converts it to this DYNAMIC `posts` feed (`FW_Site_Converter_Stitch::is_posts_grid()` / `detect_posts_design()`), instead of freezing the source cards as static content. **Trade-off:** `posts` is a live `WP_Query` (`post_type=post`), so it renders the TARGET site's own posts (or the empty-state on a fresh site) — not the source's exact cards. The source cards' text/images are intentionally not reproduced; the section becomes an auto-updating feed.
+
+**Recognizer (strict, to avoid stealing feature grids / timelines):** a grid/flex of ≥2 cards where **nearly every card** has (a) a heading, (b) a FEATURED IMAGE, and (c) a blog signal — a `<time>`/date string, a `by Author` byline, or a "Read more / Continue reading" link. The image requirement is what separates a post feed from an imageless date-stamped **timeline** (and a plain service grid has no dates/read-more). Runs at priority 98 (above `timeline`), so a clear blog grid wins while real timelines stay timelines.
+
+**What it maps** (only the layout/design + which meta the source showed — content is the live query):
+
+| source signal | → posts att |
+|---|---|
+| slider / `snap-x` / `overflow-x-auto` / marquee | `layout_mode = slider` |
+| `columns-1..6` / `masonry` | `layout_mode = masonry` |
+| single stacked column of wide cards (`grid-cols-1` / `flex-col`) | `layout_mode = list` |
+| plain multi-column grid | `layout_mode = grid` (+ `columns_desktop` from the grid) |
+| card image OVER text (`absolute inset-0` overlay w/ the heading) | `card_style = overlay` |
+| image BESIDE text (horizontal card / list) | `card_style = side-left` |
+| image on top, text below | `card_style = standard` |
+| no image in card | `card_style = minimal` |
+| source showed a date / an author byline | `meta_items.date` / `meta_items.author` on |
+
+`post_type=post`, `posts_per_page` = the source card count, `orderby=date DESC`, `pagination_type=none`. Card-level designs beyond image placement (editorial / timeline / polaroid / glass / …) are not auto-selected.
+
 ## Notes
 - The largest option surface in the set; every att has a sensible default, so a minimal atts object (post_type + count + layout + card_style) renders fine — the rest fall back.
 - **Storage vs. flat keys.** The builder now stores several options as **multi-pickers** — `design` (`{mode:'grid'|'masonry'|'list'|'slider', <mode>:{columns,gaps,slider…}}`), `card` (`{style:'standard'|'side'|'side-left'|'side-right'|'hero-split'|'alternating'|'listicle'|'newslist'|'postcard'}`), `readmore` (`{style:'text-link'|'button'}`), and `pagination` (`{type:'none'|'numeric'|'prev_next'|'ajax_loadmore'}`). The view resolves the picker path FIRST and falls back to the legacy flat key — e.g. `design/mode` → `layout_mode`, `card/style` → `card_style`, `pagination/type` → `pagination_type`, `readmore/style` → `readmore_style`. **So a generator may keep emitting the flat keys above and they still work**; emit the picker shape only when you need the mode-specific sub-options (columns, slider settings).

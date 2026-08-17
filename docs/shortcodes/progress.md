@@ -48,6 +48,10 @@ Each **bar** object: `label` (text), `percent` (slider `0`–`100`, default `80`
 }
 ```
 
+## Site Converter — automatic type detection
+
+The Site Converter sets the progress **`layout.type`** (`detect_progress_design()`): an SVG ring (`<circle>` + `stroke-dasharray`) or a `conic-gradient` / radial → `circle`; otherwise the horizontal `bar` default. `gauge` is not auto-selected.
+
 ## Notes
 - `layout` is a multi-picker; the saved shape includes the chosen `type` plus that type's sub-option key (e.g. `{ "type":"circle", "circle": { "circle_size":"120", ... } }`). For `bar` no sub-options are needed.
 - `percent` is a numeric slider value (0–100), not a string. Switches are strings (`'yes'`/`'no'`).

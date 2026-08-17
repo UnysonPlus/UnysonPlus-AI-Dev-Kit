@@ -230,6 +230,25 @@ end to end.
   `fw()->backend->render_options()`. Leaf ids stay the same, so save and enqueue paths are
   unchanged.
 - **Tabs are native WordPress `nav-tab-wrapper` markup**, not a hand-rolled pill UI.
+- **Any `wp_ajax_nopriv_*` endpoint gets `fw_rate_limit_ajax()` right after its nonce
+  check.** A nonce is printed into every page a visitor receives — it proves the request
+  came from a page we rendered, not that it is the first of thousands. Pick the limit from
+  what the request *costs*: core uses `fw_rate_limit_ajax( 'x', 5, 600 )` for newsletter
+  signup (it sends mail on every call) and 40–90 per minute for query-backed endpoints.
+  The IP is salted-hashed (never stored in cleartext), `edit_posts` users are exempt, and
+  it fails open. Available since core 2.16.20; full reference:
+  [PHP Helpers → Rate limiting](https://unysonplus.github.io/docs/helpers/php#rate-limiting).
+- **Guard destructive actions with `fw.confirm()`, and declare `'fw'` in BOTH the script and
+  the style dependency arrays.** The confirm dialog renders WordPress's own `.media-modal`
+  markup and takes its appearance from the `fw` **style** handle. Declaring only the script is
+  the trap that has bitten this codebase: `fw.confirm()` runs, but with no `fw.css` the dialog
+  renders as unstyled text in normal document flow at the bottom of the page, leaving the
+  action unconfirmable. So `array( 'jquery', 'fw' )` for the script *and* `array( 'fw' )` for
+  the style. `fw.css` pulls in core's `media-views` itself, so `wp_enqueue_media()` is not
+  needed for a confirm (it still is for `fw.OptionsModal`, which needs the media JS). The
+  action goes inside the callback — the dialog is asynchronous, so there is no return value to
+  branch on. The dialog sizes itself to its message; never add height for longer text. Full
+  API: [JavaScript Helpers → Confirmation](https://unysonplus.github.io/docs/helpers/javascript#confirmation).
 - **`thumbnail.svg` follows a strict spec** so every extension card looks like one set:
   `viewBox="0 0 256 256"`, **monochrome white** (`#ffffff`) line glyph, **no background** (the
   manager draws the dark tile — a self-drawn one renders as a dark box inside the tile), thick
@@ -335,3 +354,18 @@ Bump the affected component's version on any meaningful change. Then verify, in 
 option renders in the builder, it **saves and survives a reload**, the front end renders with no
 PHP notices or JS errors, and **two instances on one page** work independently. That last one
 catches the `document.querySelector` and hardcoded-id bugs that nothing else will.
+
+**If you touched an option type, value handling, or the builder's stored JSON, run the core
+contracts suite** — it guards the things that fail silently rather than loudly (nested value
+access, option value shapes, and the page-builder round trip):
+
+```
+php D:/xampp/wp-cli.phar --path=D:/xampp/htdocs/core-upgrade eval-file \
+    "D:/xampp/htdocs/core-upgrade/wp-content/plugins/unysonplus/framework/tests/core-contracts-test.php"
+```
+
+Exit 0 = all pass, 1 = something regressed. It is deliberately small — it does not chase coverage,
+it pins the contracts whose breakage shows up later as corrupted saved data. Two things it
+encodes that are easy to get wrong from reading the code alone: `fw_akg()` treats `0`, `''` and
+`false` as **values**, not as missing; and the `switch` option type's wire format (`'true'`) is
+not its storage format (`true`), so its output is not valid as its own input.

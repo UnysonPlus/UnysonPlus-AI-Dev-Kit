@@ -48,6 +48,49 @@ A multi-item testimonial widget with swappable designs (carousel, grid, marquee,
 }
 ```
 
+## Designs at a glance (visual signature → best source match)
+
+The `design` key selects one of **11 registry designs** (the wrapper gets class `testimonials design-<key>`); the Classic design has three sub-modes via `layout_choice`, so there are **12 effective layouts**. Pick by what the source testimonial section *looks like*:
+
+| design | renders as | best source match | # items |
+|---|---|---|---|
+| `default` + `single` | one quote centred in a ~700px column, no slider chrome | a lone hero/editorial quote (stars + quote + author) | 1 |
+| `default` + `grid` | even N-column tiled card grid (`row-cols-1..4`) | a static grid/row of quote cards | few–many |
+| `default` + `carousel` | Splide horizontal slider (arrows + dots, 1–3 per view) | a classic "quote + avatar" slider | few–many |
+| `marquee` | one continuously auto-scrolling row of 320px cards (loop, edge-fade) | a sideways-scrolling testimonial ticker / wall | many |
+| `masonry` | Pinterest `column-count` wall, uneven card heights | a wall of many quotes with ragged/uneven heights | many |
+| `split` | big photo column beside a big quote, one per Splide slide | "photo beside quote" featured slider / block (needs per-item photos) | few |
+| `bubble` | grid of chat cards — quote in a rounded speech balloon w/ tail, author below | chat/message-styled or balloon-quote grid | few–many |
+| `stacked` | minimal vertical list, hairline `border-bottom` dividers, no cards | long-form single-column list of quotes with dividers | few–many |
+| `thumbnav` | large single quote synced to a row of circular avatar thumbnails (click-a-face nav) | slider where you pick a person's avatar to switch quotes (needs photos) | few |
+| `spotlight` | coverflow — active card full-size, neighbours scaled .84 + dimmed .4 | carousel with a prominent centre card + dimmed side previews | few–many |
+| `bento` | asymmetric grid; `testimonials[0]` is a 2×2 featured tile, rest fill 1×1 | "hero quote + smaller supporting quotes" mosaic (item 0 = the strongest) | ≥3 |
+| `zigzag` | full-width rows, photo alternates left/right down the page | alternating image/text feature-rows applied to testimonials (needs photos) | few |
+| `pullquote` | one oversized editorial statement at a time (giant quote mark, crossfade) | rotating magazine-style pull-quote | 1 at a time |
+
+**Rendered part classes** (for scoped CSS / per-part overrides): quote `.testimonial-quote` (a `<blockquote>`), name `.testimonial-author` (`fw-semibold`), role `.testimonial-job`, site link `.testimonial-site`, rating `.testimonial-rating` (`.ts-star--full/half/empty`), card root `.testimonial-item`, quotemark `.ts-card__quotemark`; structural designs also emit per-design BEM roots (`.ts-marquee__* .ts-masonry__* .ts-split__* .ts-bubble__* .ts-stacked__* .ts-thumbnav__* .ts-spotlight__* .ts-bento__* .ts-zigzag__* .ts-pullquote__*`).
+
+**Card Rows scope (which designs it drives):** only `default`, `split`, `zigzag`, `thumbnav`, `bubble` route through `sc_render_card` and honour `card_rows`; `masonry, bento, stacked, marquee, spotlight, pullquote` build their card markup directly and **ignore** `card_rows`.
+
+**Gotchas:** the ONLY thing required to select a design is `design_settings/design` (all sub-options default); an unknown key falls back to `default`. `default` shows arrows/dots only when `count > items_per_slide`; a grid needs `layout_choice=grid` explicitly (else it defaults to carousel). `split`/`zigzag`/`thumbnav` need per-item `author_avatar` photos or their media column/thumb rail is empty. `bento` uses `testimonials[0]` as the featured hero — order matters. At least one entry is mandatory (empty → "No testimonials found."). Write alignment/choice **keys** (`center`, not `text-center`) — the reader maps them.
+
+## Site Converter — automatic design detection
+
+The deterministic Site Converter **classifies the source testimonial section and picks the closest design** (`FW_Site_Converter_Stitch::detect_testimonial_design()`), instead of always emitting Classic. It's conservative — high-confidence structural signals only, else a safe Classic fallback:
+
+| source signal (class / markup) | → design emitted |
+|---|---|
+| `marquee` / `animate-marquee` / an infinite-scroll animation | `marquee` |
+| a slider lib (`swiper`/`slick`/`embla`/`splide`/…), `role[description]=carousel`, `snap-x`, `overflow-x-auto` | `default` + `carousel` |
+| `columns-1..4` / `masonry` (≥3 items) | `masonry` (+ `masonry_columns`) |
+| a grid whose FIRST child spans `col-span-2`/`row-span-2` (≥3 items) | `bento` |
+| a 2-col (`grid-cols-2` / `md:flex-row`) item with a LARGE non-avatar photo (`w-1/2`/`aspect-*`/`object-cover`) | `split` |
+| a single-column list with `divide-y` dividers (≥2 items) | `stacked` |
+| ≥2 items in a plain grid | `default` + `grid` (column count carried) |
+| exactly 1 item | `default` + `single` |
+
+`bubble`, `thumbnav`, `spotlight`, `zigzag`, `pullquote` are not auto-selected yet (they overlap too much with grid/carousel to detect deterministically) — they fall back to `grid`/`carousel`/`single`. Detection also carries the source author **uppercase + letter-spacing** kicker onto `.testimonial-author`/`.testimonial-job` via scoped `custom_css`.
+
 ## Notes
 - `design_settings` is a **multi-picker**: shape is `{ design:'<key>', '<key>':{ …that design's options… } }`. Designs: `default` (Classic — carousel/grid/single), `marquee`, `masonry`, `bubble`, `split`, `thumbnav`, `spotlight`, `zigzag`, `pullquote`, `stacked`, `bento`. Only the chosen design's options appear. `stacked` and `bento` have no design-specific options.
 - For the Classic design, `default.layout_type` is a nested multi-picker: `{ layout_choice:'carousel'|'grid'|'single' }`; the `grid` choice reveals `grid_columns` (`row-cols-1` `row-cols-2` `row-cols-3` `row-cols-4`) + `gutter` (`''` `g-0` `g-1` `g-2` `g-3` `g-4` `g-5`). Carousel options (`carousel_*`) are stored but inert in grid/single.

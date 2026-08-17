@@ -62,6 +62,10 @@ Each **plan** object: `plan_title` (text), `icon` (icon-v2), `subtitle` (text), 
 }
 ```
 
+## Site Converter — automatic detection
+
+The Site Converter already carries the **featured/highlighted plan** (from a `featured`/`popular`/`recommended` class + its ribbon) and the **column count** (= plan count). It also sets the closest **`design`** (card fill) from the plan cards styling (`detect_pricing_design()`): a gradient fill → `gradient`; a dark fill → `dark`; bordered cards with NO fill → `outline`; else `classic`. `modern`/`minimal` and the monthly/yearly `billing_toggle` (needs dual price capture) are not auto-selected.
+
 ## Notes
 - `featured_style` is a **multi-select array** of composable emphasis treatments — pick any combination; an empty array = no emphasis. A featured plan shows a top badge only when both `featured:'yes'` and the `badge` emphasis are active.
 - In `features`, a line beginning with `-` or `!` renders crossed out (unavailable); all other lines render as available.

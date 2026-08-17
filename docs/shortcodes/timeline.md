@@ -46,6 +46,10 @@ A sequence of milestones (date, title, text, marker icon, image, link) in a vert
 }
 ```
 
+## Site Converter — automatic layout detection
+
+The Site Converter sets the closest timeline **`design`** (`detect_timeline_design()`): milestones in a ROW (`flex-row` / horizontal scroll / `snap-x`) → `horizontal`; otherwise the vertical **`alternating`** default. The one-sided `left`/`right` variants are not auto-picked (not reliably distinguishable from alternating without rendering).
+
 ## Notes
 - `items[].icon` uses the **icon-v2** shape. No icon: `{ "type":"none", "icon-class":"", "icon-class-without-root":false, "pack-name":false, "pack-css-uri":false }`. Lucide: `{ "type":"svg", "svg-source":"library", "svg-id":"lucide/<name>" }`.
 - `link_target` stores the anchor `target` value literally (`_self` / `_blank`), not `yes`/`no`.

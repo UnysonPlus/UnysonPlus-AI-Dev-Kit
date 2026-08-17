@@ -48,6 +48,20 @@ A multi-image gallery with 20+ layout designs (grid, masonry, carousel, coverflo
 }
 ```
 
+## Site Converter — automatic design detection
+
+The deterministic Site Converter **classifies the source image gallery and picks the closest design** (`FW_Site_Converter_Stitch::detect_gallery_design()`), instead of always emitting the uniform Grid. Conservative — high-confidence structural signals only, else a safe Grid fallback (which still carries the source col-spans as a per-column ratio, so a featured tile stays wider):
+
+| source signal (class / markup) | → design emitted |
+|---|---|
+| `marquee` / `animate-marquee` / an infinite-scroll animation | `marquee` |
+| a slider lib (`swiper`/`slick`/`embla`/`splide`/…), `role[description]=carousel`, `snap-x`, `overflow-x-auto` | `carousel` (`per_view` from item count) |
+| `columns-1..6` / `masonry` (CSS multi-column wall) | `masonry` (+ `columns.count`) |
+| a grid whose tiles carry VERTICAL spans (`row-span-2…`) — a true bento mosaic | `metro` (+ `columns.count`) |
+| a plain image grid (or horizontal col-spans only) | `grid` (col-spans → `col_ratio`) |
+
+Only the chosen `design` + its column/`per_view` count are set; the shortcode fills the rest from its own defaults. `justified`, `coverflow`, `filmstrip`, `slideshow`, `thumbslider`, `spotlight`, `honeycomb`, `polaroid`, `showcase`, `cards`, `accordion`, `flipcards`, `stack` are not auto-selected (they overlap too much with grid/masonry/carousel to detect deterministically) and fall back to `grid`/`masonry`/`carousel`.
+
 ## Notes
 - `design_settings` is a **multi-picker**: `{ "design": "<slug>", "<slug>": { …that design's options… } }`. You only need the branch object for the chosen design; the safest generator emits the full set of branches (all defaulted) plus the active one — that's what the proven `gallery()` helper does. Designs: `grid` `masonry` `justified` `metro` `carousel` `polaroid` `showcase` `cards` `slideshow` `thumbslider` `coverflow` `marquee` `filmstrip` `spotlight` `honeycomb` `accordion` `flipcards` `stack`.
 - **`grid` columns is nested** (a footer-style multi-picker): `columns: { "count": "3", "3": { } }`. For unequal/featured widths add `col_ratio` inside the count branch: `"3": { "col_ratio": [ { "w":25 }, { "w":50 }, { "w":25 } ] }` (ratios only for 2/3/4/6 columns; 5 and 1 are fixed equal). Other designs use a **plain** `columns: "3"` scalar.

@@ -54,6 +54,18 @@ An icon (or emoji/SVG) paired with an optional title and body content — the st
 }
 ```
 
+## Site Converter — automatic icon-placement detection
+
+The Site Converter sets the icon_box **`style`** (icon placement) from the source card geometry (`FW_Site_Converter_Stitch::detect_icon_layout()`), instead of always `top-title`:
+
+| source card geometry | → `style` |
+|---|---|
+| icon in a horizontal flex row with the TITLE only (content below) | `inline-left` / `inline-right` |
+| icon in a horizontal flex row beside the title+content BLOCK | `stack-left` / `stack-right` |
+| icon above the title (vertical) | `top-title` (default) |
+
+LEFT vs RIGHT is taken from DOM order. Card alignment (left/centered) + the box skin (border/shadow/fill) are carried separately (via the `center` flag + Box Presets). `between-title-content` is not auto-selected.
+
 ## Notes
 - `icon` uses the **icon-v2** shape. Lucide: `{ "type":"svg", "svg-source":"library", "svg-id":"lucide/<name>" }`. No icon: `{ "type":"none", "icon-class":"", "icon-class-without-root":false, "pack-name":false, "pack-css-uri":false }`. Emoji/custom SVG are other `type`s from the same picker.
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, NOT a raw hex string. See `README.md`.
