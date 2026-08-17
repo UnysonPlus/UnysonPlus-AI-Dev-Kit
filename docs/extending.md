@@ -230,6 +230,14 @@ end to end.
   `fw()->backend->render_options()`. Leaf ids stay the same, so save and enqueue paths are
   unchanged.
 - **Tabs are native WordPress `nav-tab-wrapper` markup**, not a hand-rolled pill UI.
+- **Every Gutenberg block ships with its own documentation page, in the same change.**
+  Pages live at `unysonplus-site/docs/extensions/gutenberg/<block>.md` and are linked from
+  that folder's `index.md` table. A page must list **exactly which options the sidebar
+  exposes** — a block exposes a *curated subset* of its element's options, so without that
+  list there is no way to know what you get short of inserting one and looking. Also record
+  anything block-specific: an inert preview and why, an empty state, and any option
+  deliberately left page-builder-only. Adding the block without the page is an incomplete
+  change, not a follow-up.
 - **Any `wp_ajax_nopriv_*` endpoint gets `fw_rate_limit_ajax()` right after its nonce
   check.** A nonce is printed into every page a visitor receives — it proves the request
   came from a page we rendered, not that it is the first of thousands. Pick the limit from
