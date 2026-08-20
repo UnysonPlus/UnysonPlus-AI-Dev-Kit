@@ -1,13 +1,20 @@
 @echo off
 REM ============================================================================
 REM  UnysonPlus Converter - START EVERYTHING (double-click this)
-REM  First run: assembles the kit automatically (plugin/theme/services + Ollama
-REM  runtime). After that it just boots the capture service + dashboard
+REM  First run: installs the prerequisites (Node.js + Git) automatically via
+REM  winget if they're missing, then assembles the kit (plugin/theme/services +
+REM  Ollama runtime). After that it just boots the capture service + dashboard
 REM  (http://localhost:4600 opens automatically) + Ollama for the Experimental
 REM  local AI. Keep the window open while you convert.
 REM ============================================================================
 setlocal
 set "SVC=%~dp0assembled\UnysonPlus-Capture-Service\tools\design-capture"
+
+REM --- Prerequisites: make sure Node.js (always) and Git (for the first assemble) are on PATH,
+REM     auto-installing them via winget on a fresh machine so a new user can just double-click. ---
+call :ensure_node
+if errorlevel 1 exit /b 1
+if not exist "%SVC%\serve.mjs" call :ensure_git
 
 REM --- First-time setup: assemble the kit if it isn't populated yet -----------
 if not exist "%SVC%\serve.mjs" (
@@ -61,6 +68,49 @@ echo   ^(the 5 newest run logs are kept in %LOGDIR%^)
 
 cd /d "%SVC%"
 call start-converter.bat
+exit /b 0
+
+REM --- ensure Node.js is on PATH; auto-install via winget on a fresh machine ---
+:ensure_node
+where node >nul 2>nul && exit /b 0
+echo.
+echo   Node.js was not found - attempting a one-time automatic install via winget...
+where winget >nul 2>nul
+if errorlevel 1 (
+  echo   winget is not available on this system. Please install Node 20+ from https://nodejs.org/
+  echo   then double-click start-converter.bat again.
+  echo.
+  pause
+  exit /b 1
+)
+winget install -e --id OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements
+REM winget updates the PERSISTENT PATH but not this already-open window; add the default install dir now.
+if exist "%ProgramFiles%\nodejs\node.exe" set "PATH=%ProgramFiles%\nodejs;%PATH%"
+where node >nul 2>nul
+if errorlevel 1 (
+  echo.
+  echo   Node.js was installed but isn't on this window's PATH yet. Please CLOSE this window,
+  echo   reopen it, and double-click start-converter.bat again. ^(One-time step.^)
+  echo.
+  pause
+  exit /b 1
+)
+echo   Node.js is ready.
+exit /b 0
+
+REM --- ensure Git is on PATH (needed only for the first assemble); auto-install via winget ------
+:ensure_git
+where git >nul 2>nul && exit /b 0
+echo.
+echo   Git was not found - attempting a one-time automatic install via winget...
+where winget >nul 2>nul
+if errorlevel 1 (
+  echo   winget is unavailable; the assemble step needs Git. Install it from https://git-scm.com/
+  echo   then run this again. ^(Continuing - assemble may fail without Git.^)
+  exit /b 0
+)
+winget install -e --id Git.Git --accept-source-agreements --accept-package-agreements
+if exist "%ProgramFiles%\Git\cmd\git.exe" set "PATH=%ProgramFiles%\Git\cmd;%PATH%"
 exit /b 0
 
 REM --- assemble subroutine (PowerShell 7 if present, else Windows PowerShell) --

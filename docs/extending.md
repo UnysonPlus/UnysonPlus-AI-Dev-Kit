@@ -291,6 +291,56 @@ existing behaviour.
 If you do add one: document its **stored shape** and its **config keys** in
 `docs/option-types/<name>.md`, in the same change.
 
+### The React control — a second renderer for the same schema
+
+`_render()` produces PHP-generated HTML. A **Gutenberg block's settings sidebar is a React app**
+and will not take ready-made markup, so an option type that needs to appear in a block gets a
+second renderer: a component under
+`framework/static/js/controls/src/controls/<type>.jsx`, registered in that folder's
+`index.jsx`.
+
+Both renderers read the **same schema** and must produce the **same saved value**. That second
+half is the whole contract, and it is where the bugs are:
+
+- **Emit the WIRE format, not the stored format.** `_get_value_from_input()` is still the only
+  validator. A `switch` receives `'true'` and stores `true`; a `multi-select` receives a
+  delimited string and stores an array. A control that emits the *stored* shape hands PHP
+  something it cannot parse.
+- **Match the validator's tolerance exactly.** `color-picker` accepts hex only and silently
+  substitutes the default for `rgba()` — so the control normalises to hex. `typography` is
+  *stricter* than `color-picker`. `icon` treats a URL the *opposite* way to `upload`. The
+  dangerous instinct here is consistency with the control you wrote last, not with the PHP you
+  are pairing with.
+- **Read the PHP, then assert it.** Every control gets cases in
+  `framework/tests/core-contracts-test.php` (`$parity_cases`): the value the React control emits,
+  and the value PHP must store. Three real defects were caught this way before shipping, and
+  three of the *assertions* turned out to be wrong rather than the code — which is the point of
+  writing them from the PHP rather than from memory.
+
+Two structural types are worth knowing before adding a third:
+
+- **`addable-popup`** (the repeater) does **not** run its children's `_get_value_from_input()` —
+  it stores the item objects as handed over.
+- **`multi-picker`** **does** run them, for the picker and the selected branch alike, and prunes
+  every unselected branch on save.
+
+So the same child control is correct in both only because it emits the wire format. Render
+children through the shared registry (`get()` from `registry.js`) rather than re-implementing
+them, and that stays true by construction.
+
+Presentation may differ between the two renderers where the surface demands it — the repeater
+opens a modal in the page builder and expands inline in a sidebar; `image-style-picker` draws
+real preview tiles in a sidebar while `border-style-picker` cannot, because its preset CSS loads
+into the canvas iframe rather than the admin document. Differing on **presentation** is fine.
+Differing on **stored value** is a bug.
+
+There is no `import React` anywhere in that bundle and there must never be: JSX compiles to
+`wp.element.createElement`, so WordPress's own React is the only copy that ships.
+
+Document the control in the option type's page on the docs site
+(`unysonplus-site/docs/options/option-types/<name>.md`) under
+*"In Gutenberg blocks (the React control)"*, in the same change.
+
 ---
 
 ## Converting an existing site into UnysonPlus

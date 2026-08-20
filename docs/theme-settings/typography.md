@@ -88,8 +88,9 @@ Six options (`h1`,`h2`,`h3`,`h4`,`h5`,`h6`), each built by the `$heading_overrid
 | `h6` | H6 Heading (override) | 16 | 1.45 | 0 |
 
 - **Choices**: `family` empty = inherit the Heading Font / preset; otherwise dynamic family list. `variation` dynamic (default `regular`).
-- **Saved value shape**: `{ "family": "<Family|''>", "variation": "<variation>", "size": <px>, "line-height": <number>, "letter-spacing": <number>, "color": "<hex|''>" }`
+- **Saved value shape**: `{ "family": "<Family|''>", "variation": "<variation>", "size": <px>, "line-height": <number>, "letter-spacing": <number>, "color": "<hex|''>"[, "text-transform": "<uppercase|lowercase|capitalize|none>"] }`
 - **Notes**: Fine-tune individual headings on top of the Preset / Heading Font. Any empty field keeps the preset scale / theme default; empty family inherits the Heading Font. These defaults are the no-preset baseline (progressive taper, negative tracking on the three largest headings).
+- **`text-transform` (casing) — emitted token, not yet a UI component (2026-08-20).** `css-tokens.php` emits `--h{N}-text-transform` when the per-heading value carries a `text-transform`, and the theme's `h1`…`h6` rules consume it (`text-transform: var(--h{N}-text-transform, revert)`). The **Site Converter sets this** (`detect_typography()` captures each level's computed `text-transform`), so a source whose headings are uppercased purely by CSS (a display face like Syncopate — no `uppercase` class) reproduces its casing after conversion. The typography-v2 control does **not** yet render a casing component, so this field is currently write-by-converter / read-by-CSS only; adding a `text-transform` component to the typography-v2 UI would make it user-editable (see the Site Converter doc's heading-mapping note).
 
 ---
 

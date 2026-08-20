@@ -477,8 +477,8 @@
       "src": [
         "{plugin}/framework/includes/option-types/addable-popup/class-fw-option-type-addable-popup.php"
       ],
-      "hash": "046036303320495b0555ce69d8fc1c12",
-      "synced": "2026-08-14"
+      "hash": "a523ec98569f669f2a88f85c0712fe0e",
+      "synced": "2026-08-18"
     },
     "option-types/background-image.md": {
       "kind": "option-type",
@@ -705,8 +705,8 @@
       "src": [
         "{plugin}/framework/includes/option-types/multi-picker/class-fw-option-type-multi-picker.php"
       ],
-      "hash": "2977d2df811030b73a91e0897ef4d97b",
-      "synced": "2026-08-14"
+      "hash": "52e950b5f9260e5adf5dd56f7bdaa987",
+      "synced": "2026-08-18"
     },
     "option-types/multi-select.md": {
       "kind": "option-type",
