@@ -53,3 +53,30 @@ node shot.mjs "http://localhost/<site>/" --text "24/7 Care" --pad 20 --out card.
 If either tool returns empty matches or a "This site can't be reached" title, the local server is down —
 start XAMPP/Apache, not the tool. Reach for a hand-written probe only when you need something these
 genuinely can't express.
+
+## Auditing a CONVERSION section-by-section — `section-audit.mjs` (DON'T paste screenshots)
+
+When you're checking a converted site against its source and want to *see* what's off band-by-band —
+header, then footer, then each section — **run `section-audit.mjs`, don't ask the user for screenshots
+and don't hand-roll per-section shots.** It loads BOTH the live source and the build in system Chrome,
+auto-splits each into `<header>` / every `<section>` / `<footer>`, matches them by heading text, and
+writes ONE labelled PNG per band (SOURCE stacked above CONVERTED). You then `Read` each PNG top-to-bottom
+and conclude — one image per section, both versions in view.
+
+```
+# every band (writes NN-<label>.png + manifest.json into ./section-audit)
+node section-audit.mjs --source https://source.example/ --converted http://localhost/
+
+# just some bands (matches the heading text or header/footer keyword)
+node section-audit.mjs --source https://source.example/ --converted http://localhost/ --only header,footer
+node section-audit.mjs --source https://source.example/ --converted http://localhost/ --only losing,standards
+```
+
+- The **source must be reachable** (it screenshots the live URL, not the captured HTML — the capture has
+  no CSS assets, so it can't be re-rendered faithfully). If the source is offline, fall back to the
+  capture's `full.png` and crop by hand.
+- This is the **VISUAL** counterpart to `compare.mjs` (which returns pass/fail METRICS on ONE named
+  region). Use `section-audit.mjs` for the "what's visibly different across the whole page" sweep, then
+  `probe.mjs --vs` / `fidelity-check.mjs` to pin the exact numbers on the band that looks wrong.
+- A band with no build-side match is written source-only and tagged `(no converted match)` — usually a
+  section the converter dropped or merged; investigate that.

@@ -412,8 +412,8 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "eb73eb202e9b3df54e3518dd7d482d16",
-      "synced": "2026-08-14"
+      "hash": "8f1e0e6ab4b72a26ad25aa5db3dcdfe8",
+      "synced": "2026-08-21"
     },
     "extensions/snippets.md": {
       "kind": "extension",
@@ -898,7 +898,7 @@
         "{plugin}/framework/includes/option-types/unit-input/class-fw-option-type-unit-input.php"
       ],
       "hash": "597be9a59ec0d69db195eddc397bd970",
-      "synced": "2026-08-14"
+      "synced": "2026-08-21"
     },
     "option-types/upload.md": {
       "kind": "option-type",
@@ -1907,8 +1907,8 @@
         "{plugin}-theme/framework-customizations/theme/options/general-typography.php",
         "{plugin}-theme/framework-customizations/theme/options/general-fonts.php"
       ],
-      "hash": "c14669366dc297b3689d2ec0fb273d81",
-      "synced": "2026-08-14"
+      "hash": "a9185cbebad0e46919b53e97ad26cf9c",
+      "synced": "2026-08-21"
     },
     "theme-settings/woocommerce.md": {
       "kind": "theme-settings",

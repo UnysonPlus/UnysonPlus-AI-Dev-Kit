@@ -113,12 +113,30 @@ so the converted DOM stays clean instead of carrying raw utilities.
   all-caps, else no — a normal-case overline is NOT force-uppercased) and a leading/trailing overline
   **`<svg>` icon** → the native `overline_icon` (inline-svg, kept OUT of the text, with `overline_icon_position`).
   JS `to-pages` `headingNode` + capture-extract (overline `textTransform`/`iconSvg`) / PHP `Mapper::n_heading`.
-- **Product-card grid → `wc_products` (2026-07-31; rows 2026-08-01).** A grid whose cells are product
-  cards (an `<img>` + a price token, ≥60% of cells) maps to ONE `wc_products` placeholder grid — not N static
-  `icon_box`es — emitting the **`card_rows`** designer (default four rows; empty slots/rows collapse) so the
-  converted grid reproduces a modern card. (`wc_products` is **rows-only** since 2026-08-01 — the old
-  `card_layout` Classic/Slot att was removed, so the converter no longer emits it.) JS `to-pages`
+- **Product-card grid → `wc_products` (2026-07-31; rows 2026-08-01; GATED 2026-08-21).** A grid whose cells
+  are product cards (an `<img>` + a price token / a `.product`/`type-product` card, ≥60% of cells) maps to ONE
+  `wc_products` placeholder grid — not N static `icon_box`es — emitting the **`card_rows`** designer (default
+  four rows; empty slots/rows collapse) so the converted grid reproduces a modern card. (`wc_products` is
+  **rows-only** since 2026-08-01 — the old `card_layout` Classic/Slot att was removed.) JS `to-pages`
   (`cellIsProduct`/`wcProductsNode`) + PHP `Mapper::cell_is_product`/`n_wc_products`.
+  - **Gated (2026-08-21) by the "Map to WooCommerce" convert option** so a non-store site never ships an
+    unrenderable `[wc_products]`. The option (Convert panel checkbox) is `disabled` unless WooCommerce is
+    active; the build reads it as `map_woocommerce` and threads it to `Mapper::set_map_woocommerce()`. The
+    mapping fires only when **all three** agree: the option is on, WooCommerce is active, AND the source scans
+    as a store (`FW_Site_Converter_Sources::is_woocommerce_source()` — scores `woocommerce`/price/add-to-cart/
+    `data-product_id`/WC-Blocks/`Product` JSON-LD/store URLs). Otherwise the product grid degrades to the
+    normal static `image_box` cards. Design rationale logged at `/decisions/woocommerce-conversion-detect-and-gate`.
+  - **Routing fix (2026-08-21):** when the option is on, `is_image_grid` DEFERS a product grid
+    (`grid_is_product_grid`) so it reaches the `card_grid → columns → wc_products` path instead of becoming a
+    gallery of static tiles. `cell_is_product` also recognises a DECOMPOSED product card (the parser drops the
+    raw price span but the `.product` class + image survive) — the live `[wc_products]` feed supplies real prices.
+- **Email-signup form → `newsletter` (2026-08-21).** A `<form>` with a text/email input (excluding login /
+  search forms) maps to the native `newsletter` shortcode instead of losing the input + degrading the submit
+  button to a text block. Maps the email (+ optional name) placeholder, submit label, alignment, field
+  roundness, and the submit button's real bg/text colours (the view hard-codes white button text, so a light
+  source button is re-asserted via scoped CSS). The section heading/copy stay as their own `special_heading`
+  above it. PHP recognizer `is_newsletter_form`/`newsletter_build` + `Mapper::n_newsletter`; JS `to-pages`
+  `newsletterNode` parity.
 - **Icon-box icon detail → native (2026-08-01).** A feature/icon card maps its icon's rendered **color**
   → `icon_color` and its filled **chip** (e.g. `bg-pink-100 rounded-lg`) → `icon_badge` (shape from the
   chip's border-radius: full→`solid-circle`, rounded→`solid-rounded`, none→`solid-square`) +
@@ -130,11 +148,17 @@ so the converted DOM stays clean instead of carrying raw utilities.
   the remaining Theme Settings → Components presets. All use the same DOM→Tailwind-compile→cluster pattern as
   `build_button_presets`/`build_section_style_presets`, and land through the preset-store seam via the
   already-whitelisted keys (`border_presets`, `font_sizes`, `image_styles`, `background_patterns`):
-  - **Box Presets** (`border_presets`) — `Stitch::build_box_presets()` walks every box-like element
-    (cards / containers / image frames), compiles its Tailwind → border / corner radius / shadow + the
-    **hover** shadow & lift, clusters the distinct designs, and appends them to the default library
-    (Card / Outline / Soft Shadow …). **Closes the old "box → global `.box` CSS" gap** — boxes are now
-    editable on-brand Box Presets, applied via the card/column Box Style picker (`boxp-{slug}`).
+  - **Box Presets** (`border_presets`) — `Stitch::build_box_presets()` (PHP) / `box-presets.mjs`
+    `buildBorderPresets()` (JS, fed by a browser **box census** over every element) reads each box's
+    **COMPUTED skin** (not just Tailwind) — **FILL** + border + corner radius + shadow + **backdrop-filter**,
+    plus the **hover** state (bg / border / shadow / lift / scale — nothing dropped). Fill is in the cluster
+    key so red vs green tint cards stay distinct; ALL kinds are kept (glass panels, tinted cards, chips,
+    pills — not just icon-box cards), up to 12, **on top of** the 4 defaults. Each element then **references**
+    its preset — a column via `border_preset` (renders on the inner wrapper → the gutter spaces a row of
+    boxes), an icon_box via `box_style` — instead of one-off CSS. A **local-AI naming pass** renames the
+    generic Card/Tinted/Glass into role names (Feature Card / Glass Stat Box / Problem Card), then the slug
+    map is recomputed so references stay valid. All of it is explicit in Live progress (detect → name →
+    assign). Applied via the card/column Box Style / Border Preset picker (`boxp-{slug}`).
   - **Text Styles** (`font_sizes`) — `Stitch::build_text_styles()` reads h1–h6 for the **display size scale**
     (largest rendered size per level across breakpoints + line-heights → `Display 1..N`, class `display-N`)
     and the **Eyebrow/overline** (uppercase + tracking → `.font-eyebrow`).
@@ -144,9 +168,41 @@ so the converted DOM stays clean instead of carrying raw utilities.
     captured per-section decorative backgrounds (`findPattern`: SVG data-URIs + repeating gradients) into
     pattern presets; emitted only when the source has one (else the 12 default patterns stand). This one is
     JS-side because patterns live in computed CSS the PHP stitch can't see.
+  - **Icon Badge Presets** (`icon_badge_presets`) — `Stitch::build_icon_badge_presets()` (PHP) /
+    `box-presets.mjs` `buildIconBadgePresets()` (JS, fed by each icon_box's harvested `_badge` tile skin)
+    clusters the distinct icon-chip designs (shape · fill · radius · border) and appends them to the default
+    Circle / Soft Tile / Outline Ring library. Applied via the icon_box Icon Badge picker.
   - **Tables (preteach)** — a verbatim `<table>` is wrapped in the default `.tbl-{slug}` Table Preset skin
     (whose CSS targets `> table > thead/tbody…`), so a raw source table renders styled without fragile
-    per-site table derivation. PHP `Mapper::n_code` + JS `to-pages` `codeBlock`.
+    per-site table derivation. PHP `Mapper::n_code` + JS `to-pages` `codeBlock`. **A table has no separate
+    preset detector — its FRAME (border/radius/fill) reuses the Box Presets**; the converter only needs to
+    detect the `<table>` element (it does, during decompose) and skip cleanly when the source has none.
+
+  **Component-preset DETECTOR status — check every new source for these (REQUIRED when updating detectors):**
+
+  | Preset / component | Detector | Status |
+  |---|---|---|
+  | Colors · Typography · Text Styles · Spacing | `toThemeSettings` / `build_*` | ✅ built |
+  | Section Styles (+ local-AI naming) | `build_section_style_presets` / `nameSectionStyles` | ✅ built |
+  | Box Presets (fill · hover · all kinds · AI-named · assigned) | `build_box_presets` / `buildBorderPresets` + box census | ✅ built |
+  | Button Presets | `build_button_presets` | ✅ built |
+  | Image Styles | `build_image_styles` | ✅ built |
+  | Background Patterns (SVG data-URIs + repeating gradients) | JS `to-presets.mjs` `backgroundPatterns()` (`findPattern`) | ✅ built (JS-only — patterns live in computed CSS the PHP stitch can't see) |
+  | Icon Badge Presets | `build_icon_badge_presets` / `buildIconBadgePresets` | ✅ built |
+  | Tables | reuse Box Presets on the frame; detect `<table>` in decompose | ✅ (no separate preset) |
+  | Background Patterns — APPLIED to their section | `detect_section_pattern` → `apply_section_pattern` (PHP) / `to-pages` overlay (JS) | ✅ built (inline-CSS overlay; `url(data:…)` unquoted so it survives the style attr) |
+  | Shape Dividers (wave / tilt / curve / triangle SVG at a section's top/bottom edge) | `detect_section_divider` → `apply_section_divider` (PHP) / `findDivider` → `to-pages` (JS) → native `divider_top`/`divider_bottom` | ✅ built — classifies the path silhouette by curve-command count (≥3 C→wave, 1–2→curve, lines→triangle/tilt), reads height/color/flip/placement. **Verified on a synthetic fixture** (all 4 shapes classify; end-to-end sets the option). Real-world robustness still wants a source that uses dividers. |
+
+  **Shape Dividers — IMPLEMENTED (verified on a synthetic fixture; wants a real source to harden).** For the
+  record, here is how it works / how to extend it. A shape divider is an inline
+  `<svg>` (or a `background-image` SVG) pinned to a section's TOP or BOTTOM edge (`position:absolute; bottom:0`
+  / `top:0`, full width, a wave/slant/curve `<path>`). The theme already has a **Section Dividers** option
+  (top/bottom shape + height + flip + color), so the detector's job is: (1) find a section-edge absolute SVG,
+  (2) classify the path shape (wave / tilt / curve / triangle) — a coarse match of the path's silhouette
+  against the built-in divider set, (3) read its height + fill + flip, (4) set the section's divider option
+  (NOT a preset). Build it in the same DOM-walk pass as the pattern detector. **Needs a source that actually
+  uses shape dividers to verify** — modfii's §9 is a `bg-gradient-to-b` overlay, NOT a divider, so it can't
+  validate this. Ask the user for a source URL with visible top/bottom section dividers before building.
   - **section-styles bug fix** — `sectionStyles()` read the always-empty `background` shorthand instead of
     `backgroundColor`, so pure colour-fill bands were dropped; fixed (+ `to-presets.test.mjs` fixture).
 - **Arbitrary-value SPACING is lossless + registered (2026-08-02).** `to-pages`/`Mapper` `sectionLayout`
@@ -184,6 +240,61 @@ It re-derives each source signal and compares it to what was emitted, so any new
 automatically graded. Use it as the objective "is the base faithful?" check — a scandi-haven-shop convert
 scores 100 (7/7). A check is only counted when the SOURCE carries that signal (a borderless source doesn't
 fail the border check).
+
+### Header chrome + faithful-base fixes (2026-08-21)
+
+Header chrome (all in `class-fw-site-converter-stitch.php` `tokens_to_theme_settings_chrome` + the theme
+generator; verified against a split-nav luxury source):
+
+- **Logo picks the image/brand, not a nav link.** `detect_logo` ranks home-href anchors: an anchor
+  containing an `<img>` (image logo) wins, else one OUTSIDE `<nav>`, else the first — fixing the "logo renders
+  the word HOME" bug (it used to grab the first `<a href="/">`, which was the "Home" nav item).
+- **Logo image survives import.** The theme-settings media step blanked a media value's whole `{url,
+  attachment_id}` before the sideloader could re-attach it (so the logo dropped to site-title text). `strip_media`
+  now blanks only the source `attachment_id` and KEEPS the url, so `localize_media` sideloads it — a general fix
+  for every theme-settings image/background, not just the logo.
+- **Split nav → Primary + Secondary.** `extract_menus` now emits a `primary` menu (first `<nav>` cluster) AND a
+  `secondary` menu (the rest) when a header has ≥2 clusters around a centered logo (`header_nav_clusters` /
+  `nav_links`). The chrome assembly places menu-left · logo-center (`detect_logo_centered`) · secondary-menu +
+  icons-right; the theme generator bootstraps a Secondary WP menu (both raw + native paths), and the header's
+  inline menu renderer is location-aware so the secondary renders inline (`.primary-menu`), not a bulleted block.
+- **Header icons.** `detect_header_icons` maps an icon-only search button → the native `search` element and a
+  cart/bag icon → a `custom_html` element carrying the source SVG (no native cart element). The theme's `search`
+  element now renders an **icon that toggles a field popover** (navigation.js) instead of an always-open box.
+
+Faithful-base / re-assertion fixes (the source is authoritative — see the re-assertion decision at
+`/decisions/source-reassertion-vs-overrule-detector`):
+
+- **Dark canvas.** `parse_tokens` returns an empty colour map for a Tailwind-v4 (external-stylesheet) source, so
+  `$tokens['colors']` is now enriched with `extract_semantic_colors`; `token_color` falls back to `color_to_hex`
+  for `rgb()` values; and the site-background lookup includes the `bg`/`canvas` keys — so a dark source finally
+  gets a dark `<body>` (was always white).
+- **Copyright font + border.** The converter now maps the © line's typography (`detect_copyright_typography`),
+  and its `copyright_custom_styling` is nested under `copyright_settings.yes` (where the theme reads it). The
+  theme's footer-bar custom-styling selectors were bumped to (0,3,0) so a custom copyright border beats the
+  footer-divider rule.
+- **Inline links + spans.** A `btn-link` CTA re-asserts the source's transform / tracking / size / weight /
+  padding (not just colour). A heading's nested `<span>` with an out-of-palette shadcn token (e.g.
+  `text-muted-foreground`) has its computed colour baked inline in `scrub()` before the class is stripped.
+- **Text Style tracking unit.** The Lead/body Text Styles keep the `px` unit on captured letter-spacing (a bare
+  number is read as em by the consumer → a `0.5px` source would render `0.5em`).
+- **Card title weight + button hover.** A product/card title re-asserts its captured `font-weight` (`titleWeight`
+  → scoped `.imgbox__title`). `build_button_presets` seeds its token map with the semantic palette (+ `muted`≈
+  `secondary`) so an inverting `hover:bg-muted hover:text-foreground` resolves instead of going white-on-white.
+- **Text Style colour.** A derived body Text Style carries its source `color` when it's a distinctive mid-tone
+  (a muted subtitle → its muted colour), skipping near-white/near-black ink (`is_near_bw`).
+
+### Inner-page vs homepage awareness (2026-08-21)
+
+A single-URL convert used to hard-code the page as the site's FRONT page (`front => true`) with a slug from the
+`<title>` — so converting an inner page (`/services`) hijacked the homepage pointer and re-derived the whole
+child theme + chrome. The build now infers the target from the source URL PATH (available as the `source_url`
+build opt): **root** (`/`, `/index.*`, `/home`) → the homepage (blank slug → `home`, set as front page); **any
+inner path** → a NEW page under the clean path-segment slug (`/services` → `services`), `front:false`, homepage
+untouched (idempotent by slug, so a re-convert updates that page, never Home). The Convert panel's **"Set as
+homepage"** checkbox (`set_as_homepage` opt — auto-ON for root, auto-OFF for inner) always overrides; typing an
+inner URL also auto-unchecks Create-child-theme / Capture-header / Capture-footer (content-only import) unless
+the user touched them. Rationale: `/decisions/inner-page-conversion-infer-from-url-path`.
 
 ### Translation rules still to add (known gaps — a conversion needs these; teach them + a fixture case)
 

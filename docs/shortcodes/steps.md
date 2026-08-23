@@ -11,6 +11,8 @@ A numbered steps / process flow in five designs (horizontal, vertical, alternati
 | `marker_shape` | select | `'circle'` | `circle` `rounded` `square` | Marker shape. |
 | `connector` | select | `'solid'` | `solid` `dashed` `none` | Line between markers (Horizontal / Vertical / Alternating). |
 | `title_tag` | select | `'h3'` | `h2` `h3` `h4` `h5` `div` | Step title HTML tag. |
+| `card_rows` | card-rows (addable-popup) | `[[title],[content]]` | array of rows `{ slots:[…], direction, justify, align, reverse }` | **Card tab.** The step BODY layout via the shared Card Rows slot designer (same as posts / testimonials). Slots: `icon` `number` `title` `content`. Each row is inline or stacked with distribute + align; a slot shows only when it's in a row and has content. The marker chip + connector **spine** stay owned by `design`/`marker`, so the flow layouts are untouched. Body renders through `sc_card_rows_render()` under the `steps-card` CSS prefix; no saved rows ⇒ classic Title-then-Description. |
+| `box_style` | border-style picker | `''` | `''` \| `boxp-<slug>` | **Card tab.** A reusable Box Preset (Theme Settings → Components → Box Presets) stamped as `.boxp-<slug>` on every `.fw-steps__item` — card fill / border / corners / shadow + hover. Most visible on the Cards design. |
 | `accent_color` | color-preset | `{predefined:'',custom:''}` | compact color object (`kind:bg`) | Marker / connector color. |
 | `marker_text_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Marker number/icon color. |
 | `icon_badge_preset` | border-style picker | `''` | `''` \| `iconb-<slug>` | A reusable Icon Badge preset (Theme Settings → Components → Icon Badges) — a shaped tile with its own icon colour/size + hover fx. Stamps `.iconb-<slug>` on the icon wrapper. Applies to every item's icon (Marker = Icon). See [../option-types/icon-badge-presets.md](../option-types/icon-badge-presets.md). |
@@ -45,7 +47,9 @@ Each **step** object: `title` (text), `content` (textarea — accepts HTML and s
 
 ## Site Converter — automatic design detection
 
-The Site Converter sets the closest steps **`design`** (`detect_steps_design()`): steps STACKED (`flex-col` / `grid-cols-1`) → `vertical`; each step a bordered/elevated BOX → `cards`; otherwise the `horizontal` default. `alternating`/`circles` are not auto-selected.
+The Site Converter sets the closest steps **`design`** (`detect_steps_design()`): steps STACKED (`flex-col` / `grid-cols-1`) → `vertical`; each step a bordered/elevated BOX → `cards`; otherwise the `horizontal` default. `alternating`/`circles` are not auto-selected. Boxed detection reads the step cards' **measured computed styles** (border / shadow / radius / fill), not just Tailwind classes.
+
+The converter also matches, from the source: each step's **icon** glyph (`step_icon()` → lucide library id / inline svg / img) with `marker` set to `icon` when steps carry glyphs; the **`marker_shape`** (from the number/icon chip's radius) and **`accent_color`** (from its fill); and, on the Cards design, a **`box_style`** Box Preset — the step-card skin is clustered into the Box Presets library and assigned like icon-box cards. `card_rows` is left at its default (Title → Description); the captured design lives in `design`/`marker`/`box_style`.
 
 ## Notes
 - Leave a step's `number` empty to auto-number by position; set it to override the marker label. `icon` (icon-v2, see `icon-box.md`) is only used when `marker=icon`.

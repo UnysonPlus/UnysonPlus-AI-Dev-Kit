@@ -139,21 +139,23 @@ Per-row sub-fields (`box-options`):
 
 ## Components → Text Styles — `font_sizes`
 
-Location: `unysonplus/framework/extensions/shortcodes/includes/theme-settings/components-typography.php`. A Text Style is a named, reusable typographic token: a size PLUS optional weight / line-height / letter-spacing / transform. Every property is opt-in — a blank field INHERITS from the element's tag token. Stored under the legacy `font_sizes` key. Populates the "Text Style" dropdown in shortcode Styling tabs.
+Location: `unysonplus/framework/extensions/shortcodes/includes/theme-settings/components-typography.php`. A Text Style is a named, reusable typographic token: a size PLUS optional weight / line-height / letter-spacing / transform / **color** / **custom CSS**. Every property is opt-in — a blank field INHERITS from the element's tag token. Stored under the legacy `font_sizes` key. Populates the "Text Style" dropdown in shortcode Styling tabs.
 
 - **Type**: `addable-box` (meta: `sortable => true`, `box-duplicate => true`, `width => full`, `size => medium`, `add-button-text => "Add another text style"`)
 - **Default value**: `unysonplus_default_font_size_presets()` (6 rows):
 
 | name | size | class |
 |---|---|---|
-| Display 1 | 96 | `display-1` |
-| Display 2 | 88 | `display-2` |
-| Display 3 | 72 | `display-3` |
-| Display 4 | 56 | `display-4` |
-| Display 5 | 48 | `display-5` |
-| Lead | 22 | `lead` |
+| Display 1 | 96px | `display-1` |
+| Display 2 | 88px | `display-2` |
+| Display 3 | 72px | `display-3` |
+| Display 4 | 56px | `display-4` |
+| Display 5 | 48px | `display-5` |
+| Lead | 22px | `lead` |
 
-- **Saved value shape**: array of rows — `[ { "name": "<str>", "size": "<px|''>", "weight": "<''|300..900>", "line_height": "<''|number>", "letter_spacing": "<''|number|len>", "transform": "<''|none|uppercase|lowercase|capitalize>", "class": "<literal-class|''>" }, … ]`
+(Default `size` values ship as unit-input `{ value, unit }`, e.g. `{ "value": "96", "unit": "px" }`.)
+
+- **Saved value shape**: array of rows — `[ { "name": "<str>", "size": "<{value,unit}|legacy-bare-number|''>", "weight": "<''|300..900>", "line_height": "<''|number|len>", "letter_spacing": "<{value,unit}|legacy-bare-number|''>", "transform": "<''|none|uppercase|lowercase|capitalize>", "color": "<compact-preset {predefined,custom}|''>", "class": "<literal-class|''>", "custom_css": "<str|''>" }, … ]`. **Back-compat:** the consumer (core `css-tokens.php`) still reads a legacy bare-number `size` (→ px) and a legacy bare-number `letter_spacing` (→ em); the `unit-input` control also coerces a legacy scalar for display so promoted rows never show blank.
 
 Per-row sub-fields (`box-options`):
 
@@ -161,7 +163,7 @@ Per-row sub-fields (`box-options`):
 - **Type**: text · **Default**: `''` · Free text. The dropdown label.
 
 ### Size — `size`
-- **Type**: text · **Default**: `''` · Optional pixels without the `px` unit. Blank keeps the element's own size (a style-only preset).
+- **Type**: `unit-input` (units `px` / `rem` / `em`) · **Default**: `{ value: '', unit: 'px' }` · Optional. Blank keeps the element's own size (a style-only preset — e.g. an eyebrow that only sets weight + tracking). A legacy bare number (no unit) is still read as px.
 
 ### Weight — `weight`
 - **Type**: `select` · **Default**: `''`
@@ -183,7 +185,7 @@ Blank keeps the heading/tag weight.
 - **Type**: text · **Default**: `''` · Optional unitless (e.g. 1.1) or a length. Blank inherits.
 
 ### Letter spacing — `letter_spacing`
-- **Type**: text · **Default**: `''` · Optional. Bare number read as em (e.g. -0.02 = tight); or include a unit (0.15em, 1px). Blank inherits.
+- **Type**: `unit-input` (units `em` / `px` / `rem`) · **Default**: `{ value: '', unit: 'em' }` · Optional tracking — em is relative to the font size (e.g. 0.15em), px is absolute. Blank inherits. A legacy bare number (no unit) is still read as em.
 
 ### Transform — `transform`
 - **Type**: `select` · **Default**: `''`
@@ -196,7 +198,13 @@ Blank keeps the heading/tag weight.
 | `lowercase` | lowercase |
 | `capitalize` | Capitalize |
 
+### Color — `color`
+- **Type**: compact color field (`sc_color_field_compact`; a Color Preset or a custom value) · **Default**: `''` · Optional text colour for this style. Blank inherits. Stored as `{ predefined, custom }`; emitted as `color: … !important` (resolved via `unysonplus_preset_color_to_css`). The Site Converter fills this on the Text Styles it derives when the source part is a distinctive mid-tone (a muted subtitle → its muted colour); near-white / near-black parts stay blank (they're the body ink).
+
 ### Class — `class`
 - **Type**: text · **Default**: `''` · Optional literal CSS class (e.g. `display-1` to override Bootstrap's `.display-1`). If blank, auto-derived as a safe `.font-<NAME>` class.
+
+### Custom CSS — `custom_css`
+- **Type**: `textarea` · **Default**: `''` · Optional freeform CSS for anything the fields above don't cover (text-shadow, gradient text, pseudo-states). Use `selector` (or the button-style `{{SELECTOR}}`) to target the style — e.g. `selector{ text-shadow:0 1px 2px rgba(0,0,0,.3) }`. A bare declaration block (no braces) is wrapped in the style's own rule; a block with braces is emitted verbatim with `selector` replaced by the style's `:root .font-{slug}` (or literal class) selector, into the raw CSS sink so full rules / pseudo-states work.
 
 - **Notes**: Each style becomes a `.font-{slug}` utility (or the literal `class` you set). Only filled properties are emitted, scoped to that class; blank properties inherit from the element's tag token. Mobile sizes are auto-reduced by `unysonplus_mobile_font_size_scale()` (tiered: ≥60px → ×0.60, ≥32px → ×0.75, ≥20px → ×0.85, else ×1.00; floor 14px; body-size text stays desktop-size). Live presets are read via `unysonplus_get_font_size_presets()` (saved rows override the defaults).

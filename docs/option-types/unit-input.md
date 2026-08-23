@@ -20,5 +20,5 @@ Examples: `{value:"2.5",unit:"rem"}`, `{value:"",unit:"px"}` (blank), `{value:"1
 - **Blank guard:** when `value===''` emit nothing (not a lone `px`). Consume via `FW_Option_Type_Unit_Input::to_string($saved)` which already returns `''` for blank.
 - `separate` config only changes `to_string()` output (`"24px"` vs `"24 inches"`); it doesn't change the stored shape.
 - Inside `multi-inline` (e.g. a border-width row) a unit-input child keeps the same `{value,unit}` shape.
-- Migrating a bare number/string option to unit-input is a value-shape change — tolerate the scalar as `{value:n,unit:<default>}` and add a JS migrator for existing page-builder items.
+- Migrating a bare number/string option to unit-input is a value-shape change — but the **view now coerces a legacy scalar for DISPLAY** (a bare `"96"` / a typed `"0.5px"` → `{value, unit}`, splitting any trailing unit, else the field's default unit), so a promoted option never shows blank. Storage still submits the decoded `{value,unit}` on save; a JS migrator for existing page-builder items is only needed where the value is consumed without ever rendering the control.
 - A typography `size` may be a unit-input hash OR a legacy int OR a JSON string — resolve it via `fw_typography_size_css()`.

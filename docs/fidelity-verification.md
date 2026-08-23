@@ -163,6 +163,36 @@ the CSS / it looks better in a screenshot" is not evidence; a re-measured `demo 
   `margin-top`), not inside `.heading`. Re-measuring is how you find that; eyeballing is how you miss it.
 - Batch fixes → **one comparison pass over all of them** at the end, then report only what the numbers confirm.
 
+## Rule 2.9 — Verification discipline: distrust your OWN probes (a "not found" is a suspect, not a fact)
+
+The rules above assume your *measurement* is trustworthy. The most dangerous failure isn't a wrong build —
+it's a wrong **check** that reports a false negative with false confidence. A hand-written one-off
+`page.evaluate` that filters too narrowly, or returns the FIRST match and stops, will say "no pattern /
+no border / not there" — which really means *"my throwaway script didn't find one."* Reported as fact
+("I checked, it's not there"), that manufactures confidence and sends the whole task down a wrong path.
+(Real case: a probe declared a CTA section "just a gradient, no pattern" — it had filtered for the wrong
+thing and early-returned before reaching the pattern div; the converter's `findPattern` had seen it the
+whole time.)
+
+- **Verify against the ACTUAL detector code, not a re-implementation.** To confirm what the converter sees,
+  *run the real function* (`findPattern`, `build_box_presets`, `backgroundPatterns`, the tailwind fixture) —
+  don't re-code the detection in a probe that can silently drift from it.
+- **A negative is a suspect, not ground truth.** If a probe says "not there", assume the PROBE is wrong
+  until confirmed by the real detector OR a second, independent method. Never report a negative as a fact
+  on one narrow query.
+- **Probes collect EXHAUSTIVELY — never first-match-and-return.** Gather all candidates and report the set;
+  an early `return` is how the pattern div got skipped.
+- **When something "isn't showing", trace build → import → render**, not just the first layer. The
+  background pattern was *detected and applied* yet invisible — the data URL was silently dropped between
+  `pages.json` and the rendered HTML by a `url("…")` double-quote inside a double-quoted `style="…"`. Only
+  tracing each layer (with temporary logging) found it; checking the render alone would have "confirmed" it
+  was never applied.
+- **Visual claims go through the cache-busted `section-audit.mjs`** (which disables HTTP cache), not a
+  bespoke DOM query — and remember the generated child-theme CSS caches under a stable URL, so a stale
+  stylesheet reads as "no improvement" (hard-refresh / cache-disable before judging).
+- **State your confidence explicitly** in the report: *verified by running the real detector* vs *verified
+  by a probe* vs *code-logic only, needs a live run*. Don't let "should work" read as "works".
+
 ## Rule 3 — The order (ties into the region loop)
 
 Header → Footer → sections top-to-bottom (see the protocol's region-loop). For **each** region:

@@ -3,8 +3,13 @@
   "version": "1.1.1",
   "private": true,
   "type": "module",
-  "description": "Design-parity harness — frame metrics (measure.mjs), region-by-region ensemble (compare.mjs: geometry + pixelmatch + Resemble.js + DOM-structure), and full-body property diff (props.mjs).",
-  "bin": { "measure": "measure.mjs", "compare": "compare.mjs", "props": "props.mjs" },
+  "description": "Design-parity harness \u2014 frame metrics (measure.mjs), region-by-region ensemble (compare.mjs: geometry + pixelmatch + Resemble.js + DOM-structure), and full-body property diff (props.mjs), and a section-by-section VISUAL audit (section-audit.mjs: auto-split header/sections/footer, source-vs-build stacked PNG per band).",
+  "bin": {
+    "measure": "measure.mjs",
+    "compare": "compare.mjs",
+    "props": "props.mjs",
+    "section-audit": "section-audit.mjs"
+  },
   "devDependencies": {
     "playwright": "^1.44.0",
     "pixelmatch": "^7.1.0",
