@@ -17,3 +17,7 @@ Thumbs.db
 /capture-out-v2/
 /capture-fresh/
 /logs/
+
+# Launcher once-a-day auto-update markers (local only; never shipped)
+.last-update-check
+.no-auto-update

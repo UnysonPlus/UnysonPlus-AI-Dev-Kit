@@ -57,19 +57,32 @@ The deterministic decompose maps a source element's utility classes into ONE cle
 (`compile_class_set()` in `class-fw-site-converter-tailwind.php` → `FW_Site_Converter_Mapper::box_style_class()`),
 so the converted DOM stays clean instead of carrying raw utilities.
 
-- **Detect a box.** `FW_Site_Converter_Mapper::is_box_class()` flags a column/card as a *box* when it
-  has a border / shadow / background / rounded — anything that reads as a card container.
-- **Where the box class goes (the key rule):**
-  - Card content is **only icon + title + content** (fits the `icon_box` shortcode) → put the box class
-    on the **`icon_box`'s own `css_class`**.
-  - Card has **extra content the icon_box can't hold** (most commonly a button, e.g. "Explore →") →
-    render `icon_box + button` in the column and put the box class on the **column's Inner Wrapper Class**
-    (`column atts['inner_class']`) so it wraps BOTH. That option exists precisely for boxed columns whose
-    contents exceed the icon_box.
-- **Self-contained box CSS.** The compiled `.box` rule is GLOBAL (not under `.sc-tw`), so the Tailwind
-  preflight doesn't reach it: when there's a `border-width`, also emit `border-style:solid` and
-  `box-sizing:border-box` — otherwise the border renders as `0px none`.
-- **De-dup by declaration set** — identical cards share ONE `.box` class (`.box`, `.box-2`, …).
+- **Detect a box.** `FW_Site_Converter_Mapper::is_box_class()` / `cs_is_box()` / `read_card_skin()` flag a
+  column/card as a *box* when it has a border / shadow / background / rounded — anything that reads as a card
+  container.
+- **The box is ALWAYS a real Box Preset, never a bare `box` class + Custom CSS.** Register the captured skin
+  with **`register_box_preset( $cardBox )`** (keyed by a hash of the normalized skin, so identical cards
+  share one preset; emitted in Theme Settings by `Stitch::build_box_presets()`), then point the native option
+  at the returned `boxp-<slug>`. Do **not** use `box_preset_slug()` for a freshly captured skin — that only
+  matches *pre-existing* theme presets (the box-lookup), so a fresh capture silently degrades to one-off CSS.
+  (This bit four card paths — Steps cards, counter grids, stacked cards, nested grids — all switched to
+  `register_box_preset` on 2026-08-24; `box_preset_slug` is retired.)
+- **Who OWNS the box — decide by DECOMPOSITION COUNT, not by re-sniffing content (the key rule, 2026-08-24):**
+  the converter already knows how many shortcodes a card cell becomes, so key the owner off that:
+  - Card collapses to **ONE `icon_box`** (icon + title + content, nothing else) → the **icon_box owns it**
+    via **`box_style = boxp-<slug>`** (self-contained + portable on export).
+  - Card becomes **TWO OR MORE shortcodes** (icon_box + `feature_list` / `button` / …, e.g. a "Loan Types"
+    card with a nested list) → the **column owns it** via **`border_preset = boxp-<slug>`** on the inner
+    wrapper (`column atts['border_preset']`), so the box wraps EVERY child.
+  - **N boxed icon_boxes in one column** → **each icon_box owns its own** `box_style` (the column boxes
+    nothing — it would wrap them all).
+  This is the content-type rule (list/button → column) expressed structurally: a card is 2+ shortcodes
+  *because* it holds content the icon_box can't represent. Rationale logged in Design Decisions
+  ("box-preset owner by decomposition count").
+- **Fallback (only when no preset can be registered — a trivial/empty skin).** The compiled `.box` class
+  rule is GLOBAL (not under `.sc-tw`), so the Tailwind preflight doesn't reach it: when there's a
+  `border-width`, also emit `border-style:solid` and `box-sizing:border-box` — otherwise the border renders
+  as `0px none`. De-dup by declaration set — identical cards share ONE `.box` class (`.box`, `.box-2`, …).
 - **Inline buttons / inline cells (side-by-side).** A page-builder COLUMN is
   `display:flex;flex-direction:column`, so two buttons in a column STACK. Lay them side-by-side with the
   column's **native `content_direction: 'row'` + `content_gap`** option — NOT a `.btn-row` CSS wrapper
@@ -84,6 +97,27 @@ so the converted DOM stays clean instead of carrying raw utilities.
   `icon_box` shortcode (so a card+CTA stays one element) vs. the current icon_box + button + Inner-Wrapper
   approach. The wrapper approach needs no schema/doc/screenshot changes, so it's the default for now.
 
+- **Card WITH a nested feature list → don't flatten it (2026-08-24).** A card cell whose body is
+  icon + heading + description **followed by a grid/flex of icon+text rows** (e.g. modfii's "Loan Types
+  Available" card) must NOT collapse into one `icon_box` — that drops the list. `grid_cols()` detects the
+  nested list (`cell_wraps_icon_text_list`) and decomposes the cell into an `icon_box` HEADER block +
+  a native `feature_list` block; `build_cell_items()` renders both. The card's box then lands on the
+  **column** (2+ shortcodes → column owns it, per the box-owner rule above).
+- **Inline link strip → ONE centered `text_block` (2026-08-24).** A flex row whose children are all short
+  inline `<a>` links + `<=3`-char separators (`•`/`|`/`/`), e.g. a footer policy-links line, is claimed by
+  the `inline_links` recognizer (priority 93, above `card_grid`) as a single centered text_block with the
+  anchors (href + text) and separators preserved — instead of a `card_grid`/`layout_row` splitting each link
+  into its own 1/1-column text_block (which dropped the separators + inline flow).
+- **Feature list — carry source label size + icon↔text gap (2026-08-24).** `n_feature_list` maps the label
+  span's font-size to `font_size_preset`; when no theme text preset is within ±1.5px (a 14px `text-sm` label
+  falls between the 12px Caption and 16px Small presets), it pins the exact size via scoped
+  `selector .fw-fl__text{font-size:Npx}`. The per-item icon↔label gap (`gap-2`) rides as
+  `selector .fw-fl__item{gap:Npx}` when it differs from the skin default.
+- **Testimonials footer stat → the `extra` field (2026-08-24).** A testimonial card's bordered footer stat
+  (a muted label + emphasized value, e.g. "Total savings" → "$14,200") maps to the shortcode's repeatable
+  **Extra Texts** `{label,value}` field (`testimonial_extra()` — two leaf texts, else split a single
+  "Label $Figure" run), and `n_testimonials` pins Card Rows with the `extra` slot — instead of cramming the
+  stat into the author role line. JS `capture-extract` `testimonialItem` + `to-pages` `testimonialsNode`.
 - **Heading-group → ONE `special_heading` with NATIVE options (2026-07-31).** A wrapper `[pill?, h, p]`
   collapses to a single `special_heading`, and its Tailwind layout/spacing classes are **translated to
   native options, not left as dead classes**: `text-center`→`alignment`, `space-y-N`→`element_spacing`,

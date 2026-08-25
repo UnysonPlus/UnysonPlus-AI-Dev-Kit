@@ -23,6 +23,7 @@ if not exist "%SVC%\serve.mjs" (
   echo   This downloads a fair bit and can take a few minutes. It only happens once.
   echo.
   call :assemble
+  set "UPWK_FRESH=1"
 )
 if not exist "%SVC%\serve.mjs" (
   echo.
@@ -32,6 +33,11 @@ if not exist "%SVC%\serve.mjs" (
   pause
   exit /b 1
 )
+
+REM --- Once-a-day auto-update: keep the assembled kit current (git-pull the clones + re-copy the
+REM     plugin/theme via assemble.ps1) so a returning user always converts with the latest engine.
+REM     Throttled to at most one check per calendar day; see :check_update below. ------------------
+call :check_update
 
 REM Ensure the Ollama runtime is present — fetch JUST it if missing (no full re-assemble), so an
 REM already-assembled kit still gains local AI on the next launch. Everything's ready after one click.
@@ -68,6 +74,30 @@ echo   ^(the 5 newest run logs are kept in %LOGDIR%^)
 
 cd /d "%SVC%"
 call start-converter.bat
+exit /b 0
+
+REM --- Once-a-day auto-update check. Throttled by a date marker (.last-update-check); skipped by a
+REM     .no-auto-update opt-out file or when Git is missing; NON-FATAL, so being offline just boots the
+REM     existing kit. Refreshes the converter engine from GitHub; leaves the 4GB Ollama alone (-NoOllama).
+:check_update
+if exist "%~dp0.no-auto-update" exit /b 0
+where git >nul 2>nul || exit /b 0
+for /f %%D in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd"') do set "TODAY=%%D"
+set "UPWK_MARK=%~dp0.last-update-check"
+REM Fresh assemble THIS launch, or already checked today -> just record the date and skip the update.
+if defined UPWK_FRESH ( > "%UPWK_MARK%" echo %TODAY%& exit /b 0 )
+set "UPWK_LAST="
+if exist "%UPWK_MARK%" set /p UPWK_LAST=<"%UPWK_MARK%"
+if "%UPWK_LAST%"=="%TODAY%" exit /b 0
+echo.
+echo   Checking for kit updates ^(runs at most once a day^) - refreshing the converter engine...
+where pwsh >nul 2>nul
+if %errorlevel%==0 (
+  pwsh -ExecutionPolicy Bypass -File "%~dp0assemble.ps1" -Source github -NoOllama
+) else (
+  powershell -ExecutionPolicy Bypass -File "%~dp0assemble.ps1" -Source github -NoOllama
+)
+> "%UPWK_MARK%" echo %TODAY%
 exit /b 0
 
 REM --- ensure Node.js is on PATH; auto-install via winget on a fresh machine ---
