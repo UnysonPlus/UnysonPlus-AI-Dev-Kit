@@ -667,6 +667,34 @@ considered and rejected — it silently drops exactly the responsive/opacity/arb
 (proven: a subtitle routed purely to `subtitle_class` rendered 18px/opaque instead of 20px/70%). The
 computed-value Custom CSS is what makes the residue pixel-exact.
 
+#### Native option AND an exact-CSS override — not either/or (when our preset only *approximates* the source)
+
+Tiers 1 and 3 are **not mutually exclusive**. Some options are *enums / presets* — they express an
+**intent** (Header → **Translucent / Glass**, a **Box Preset**, a card **hover**) but bake in one fixed
+look (e.g. the theme's glass frosts to ~72% of `--header-bg` with a set blur). When the source expresses
+the **same intent** with **different exact values** (its glass is `background: rgba(24,24,27,.5)` +
+`backdrop-filter: blur(8px)`, not our default frost), do **both**:
+
+1. **Set the native option** (`header_glass = yes`, `box_style = boxp-<slug>`) — so the intent is
+   semantic, the Theme-Settings / builder UI reflects it, and the user can keep editing it natively.
+2. **Write the source's EXACT CSS as a scoped, low-specificity override** in the child theme's stylesheet
+   (`header_css` for chrome, a Box Preset's `custom_css` for a card, the section's `custom_css` for a
+   band). Because it is scoped and low-priority, it **nails the exact source look** while the option still
+   wins if the user changes it later.
+
+This is the whole point of the **hi-fi editable base**: *every override for one of our options lives in
+the child stylesheet, layered on top of the native option — never instead of it.* The option carries the
+meaning and the editability; the child CSS carries the last mile of pixel fidelity. Applied examples:
+- **Frosted glass** — a `glass-card`'s `backdrop-filter: blur()` has no native Box-Preset field, so it
+  rides in the preset's `custom_css` on top of the translucent fill (so the card reads as real frosted
+  glass, not a flat translucent tint); a **glass header** sets `header_glass = yes` and carries the
+  source's exact `background` + `backdrop-filter` as scoped `header_css`.
+- **Box skins / hover** — the native Box Preset carries fill/border/radius/shadow/hover; a residual with
+  no field (a `group-hover:scale`, an exact padding) rides in the preset's `custom_css`.
+
+When you find a source look our option only approximates, **reach for this pattern before widening the
+option's schema** — the native option + scoped override is faithful today and stays fully editable.
+
 ### Special Heading: translate classes via the native part-class options, not Custom CSS (2026-08-02)
 
 The Special Heading shortcode exposes **Overline Class / Title Class / Subtitle Class** (text fields

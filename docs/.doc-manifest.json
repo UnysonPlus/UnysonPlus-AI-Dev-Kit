@@ -412,8 +412,8 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "803cb0f2fed4893333370d799314a887",
-      "synced": "2026-08-23"
+      "hash": "ed27c47a0843c0c8c405651ac0a17b04",
+      "synced": "2026-08-25"
     },
     "extensions/snippets.md": {
       "kind": "extension",
@@ -1918,6 +1918,24 @@
       ],
       "hash": "258948e0c1b130e2785770f6e7745e85",
       "synced": "2026-08-23"
+    },
+    "extensions/site-migration.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/site-migration/manifest.php",
+        "{plugin}/framework/extensions/site-migration/settings-options.php"
+      ],
+      "hash": "cf7553c29a9f1d6a0150ca1cd9355027",
+      "synced": "2026-08-27"
+    },
+    "extensions/seo.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/seo/manifest.php",
+        "{plugin}/framework/extensions/seo/settings-options.php"
+      ],
+      "hash": "4f5ad99f20af2a1c35eea4eb745db0dc",
+      "synced": "2026-08-27"
     }
   }
 }
