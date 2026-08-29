@@ -10,8 +10,8 @@
       "src": [
         "{plugin}/framework/extensions/animation-engine/modules/backgrounds/includes/backgrounds-settings.php"
       ],
-      "hash": "42793d60d032d7fea8315936709d2722",
-      "synced": "2026-08-23"
+      "hash": "ef05bf0ce8525f064f3b4f00cc5366a4",
+      "synced": "2026-08-29"
     },
     "animation-engine/confetti.md": {
       "kind": "ae-module",
@@ -106,8 +106,8 @@
       "src": [
         "{plugin}/framework/extensions/animation-engine/modules/preloader/includes/preloader-settings.php"
       ],
-      "hash": "182d054f7b86f584495c45f7ee591c82",
-      "synced": "2026-08-23"
+      "hash": "c9a073f7d61015d6334c55cc8dc4202d",
+      "synced": "2026-08-28"
     },
     "animation-engine/scroll-color-shift.md": {
       "kind": "ae-module",
@@ -412,8 +412,8 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "ed27c47a0843c0c8c405651ac0a17b04",
-      "synced": "2026-08-25"
+      "hash": "337c5a84f320047eb474b3a07ea95b81",
+      "synced": "2026-08-29"
     },
     "extensions/snippets.md": {
       "kind": "extension",

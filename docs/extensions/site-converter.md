@@ -330,6 +330,65 @@ homepage"** checkbox (`set_as_homepage` opt — auto-ON for root, auto-OFF for i
 inner URL also auto-unchecks Create-child-theme / Capture-header / Capture-footer (content-only import) unless
 the user touched them. Rationale: `/decisions/inner-page-conversion-infer-from-url-path`.
 
+### Ambient backgrounds + Preloader → Animation Engine, with AI fallback tiers (2026-08-29)
+
+Two site-wide/section chrome features now translate deterministically (in `class-fw-site-converter-stitch.php`),
+each with an **AI tier** for the ambiguous long tail. Both require/activate `animation-engine` (added to
+`theme-design.json` `needs_extensions`, so the importer auto-activates it, like `animation_cursor`).
+
+- **Ambient section backgrounds → stacked `bg_effect` slots.** `detect_section_bg_effects($node)` scans a
+  section's subtree for DECORATIVE, descriptively-named particle/ambient layers (a `<canvas>`, aria-hidden,
+  a `fg`/`particle`/`layer` marker class, or absolute/fixed position) and keyword-maps them to the nearest
+  built-in effect: leaf/leaves/sakura/petal→`snow`(petals), ember→`snow`(embers), snow/rain/starfield/
+  confetti/bubbles/fireflies/meteors/particles/grain→`noise`/matrix/aurora… De-duped, capped at 4. Stashed as
+  `$sec['bgEffects']`; `apply_section_bg_effects()` (mapper) writes `bg_effect`, `bg_effect__2`, … on the
+  section. **JS parity:** `findBgEffects()` (capture-extract) + `to-pages` apply. **AI tier:** an unnamed
+  animated backdrop (raw WebGL/three.js canvas) becomes a `bgFxCandidate` (tokens + engine hint); `bgFxMicroTask`
+  (to-ai) picks the closest catalog effect (or none) via the local model / Claude — non-destructive, only where
+  deterministic found nothing. *Verified on kage:* `fg-leaves`+`fg-sakura` → one `snow/petals` layer.
+
+- **Preloader → Preloader module "Custom (code)" style.** `detect_preloader($html)` finds a source loading
+  overlay — a NAME match (`preload`/`loader`/`splash`/terse `#pre`/`.pre-*`) AND an overlay trait (a hide-state
+  class like `done`/`loaded`, or the source CSS positions it fixed/absolute — the capture's `data-sc-cs` omits
+  position, so read the source sheet). It fills `animation_preloader.enable=yes` + `preloader_style` = `custom`
+  with: **HTML** (outer markup, `data-sc-*` stripped via DOM, hide-state class/inline opacity removed so it
+  renders), **CSS** (`extract_scoped_css` — only rules referencing the overlay subtree's `#id`/`.class` + the
+  `@keyframes` they animate), **JS** (`extract_preloader_js` — a self-contained loader script if present; `''`
+  when intertwined with the app). **AI tier (Part 3):** when JS is empty and "Refine with AI" is on
+  (`Mapper::$entrance_anim_ai` + `$entrance_anim_svc`), `Mapper::ai_preloader_js()` POSTs `{html,css}` to the
+  capture service's **`/ai-preloader-js`** (→ `synthesizePreloaderJs` in to-ai) for a cosmetic loader script
+  (animate the bar/counter, cycle phrases, call `window.upwPreloaderDone()`). Best-effort; stays JS-less on any
+  failure. *Verified on kage:* html 588B, css scoped to `#pre`/`.pre-*`, js `''` (welded to three.js → AI tier).
+  Detection is **PHP-only** (like `animation_cursor` — the JS capture path never mirrored chrome detection).
+
+### Word/line/char text reveals → Text Effects split_reveal (2026-08-30)
+
+`text_split_intent($el)` (stitch) detects a word/line/char SPLIT-reveal on source text — `.word-reveal`,
+`.mask-line`, SplitText/Splitting.js, or per-word/char span lockups — returning `words` | `lines` | `chars`.
+It's carried as the block's `text_fx`; `apply_block_anim` (mapper) and the `special_heading` builder (via the
+shared `text_effect_from_cls()`) then set the Text Effects **`split_reveal`** att (`{ split_by, direction:'up' }`)
+so the heading animates piece-by-piece — RICHER than the whole-element entrance (`anim_intent`), which it
+replaces when present. Requires animation-engine. *Verified on kage:* `.display … word-reveal` h2 → words,
+`.mask-line word-reveal` → lines; golden fixtures 362/0 + 20/0. PHP-only (the JS to-pages path has no
+block-animation mapping).
+
+### Scroll-animation capture tool (2026-08-30)
+
+`tools/design-capture/scroll-capture.mjs` (capture service) scrolls a page in N steps and records (a) a
+**filmstrip** of screenshots and (b) per-element **transform/opacity keyframes** across the scroll, then flags
+the elements that actually animate on scroll (transform/opacity varies). Emits `scroll-animation.json` (a
+machine-readable timeline — each animated element with its keyframes per scroll %) + `scroll-report.html`
+(filmstrip + table). CLI: `node scroll-capture.mjs <url> [outDir] [--steps N]`; or `import { captureScroll }`.
+Each animated element now carries a **`sig`** (tag + kept classes + text snippet, for matching to a converter
+node) and a **`suggest`** — a Scroll-Motion-shaped classification: `reveal` (with `direction` + `trigger` scroll %),
+`parallax`, or `motion` (validated: a fade+slide box reveals `up @22%`, another `up @78%`). NEXT: the converter
+matches `sig` → source node and sets the scroll-reveal / parallax att from `suggest`.
+**Scope:** it reads the DOM, so it captures DOM-driven scroll animation (GSAP ScrollTrigger, CSS scroll-timeline,
+transform/reveal-on-scroll) — validated on a synthetic page (3 fade+slide reveals detected with clean
+opacity 0→1 keyframes at their trigger %). A `<canvas>`/WebGL scene has no DOM to read (kage: 57 tracked, 0
+animated) — the filmstrip still shows the motion, but there are no per-element keyframes. NEXT: map the
+timeline → Scroll Motion / Scrollytelling atts, and wire the tool into the capture pipeline.
+
 ### Translation rules still to add (known gaps — a conversion needs these; teach them + a fixture case)
 
 These are captured-class effects the "rules to keep" list above does **not** yet translate. Each is a

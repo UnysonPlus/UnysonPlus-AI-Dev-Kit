@@ -9,7 +9,16 @@ Requires the `animation-engine` extension to be **ACTIVE**.
 The `preloader_style` picker (key **`style`**, default `spinner`): `spinner` · `dual_ring` ·
 `gradient` (ring) · `dots` (bouncing) · `dots_fade` · `orbit` · `bars` (equalizer) · `grid`
 (pulsing) · `pulse` · `ripple` · `square` (flip) · `bar` (progress) · `progress_ring` (%) ·
-`counter` (%) · `curtain` · `logo` (logo pulse — needs a logo set).
+`counter` (%) · `curtain` · `logo` (logo pulse — needs a logo set) · **`custom`** (code).
+
+### Custom (code) style
+
+`custom` reveals three `code-editor` fields in the picker (stored under `preloader_style.custom`):
+`html` (`htmlmixed`), `css`, `js`. The admin HTML becomes the overlay's content (output verbatim
+inside `.upw-preloader`); the CSS is injected via `wp_add_inline_style`; the JS via
+`wp_add_inline_script` **after** `preloader.js`. The overlay still auto-dismisses on load (honouring
+`preloader_min` / `preloader_fade`); custom JS may call **`window.upwPreloaderDone()`** to finish
+early. Admin-only (raw code); reproduces art-directed loaders the built-in styles can't.
 
 ## Value shape
 
@@ -18,6 +27,7 @@ Theme Settings options (enable lives in the `animation_preloader` multi; the res
 ```json
 "animation_preloader": { "enable": "no" },
 "preloader_style": { "style": "spinner" },
+// custom style: "preloader_style": { "style": "custom", "custom": { "html": "…", "css": "…", "js": "…" } }
 "preloader_bg": { "predefined": "", "custom": "#0b1220" },
 "preloader_accent": { "predefined": "", "custom": "#2f74e6" },
 "preloader_logo": [],
@@ -41,3 +51,5 @@ Theme Settings options (enable lives in the `animation_preloader` multi; the res
 
 - Ships disabled by default; front end only. `logo` style requires `preloader_logo` to be set.
 - All colours use the compact color-preset shape, staying live-linked to Theme Settings → Colors.
+- The Preloader tab is surfaced **right after the Animation Engine tab** in Site-wide UX (reordered in `theme-settings.php`).
+- **Site Converter:** `detect_preloader()` (stitch) finds a source loading overlay and fills the `custom` style — HTML (cleaned) + scoped CSS (+ `@keyframes`) + self-contained JS when present. When the source JS is intertwined with the app (can't be sliced out), it's left empty and the AI tier (`/ai-preloader-js` → `synthesizePreloaderJs`) synthesizes a cosmetic loader script. See `extensions/site-converter.md`.
