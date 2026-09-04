@@ -1,84 +1,131 @@
 # `flexbox` — Flexbox (the **Div** — default page-builder container)
 
 The default modern container primitive — a self-contained, **arbitrarily nestable** semantic container.
-In the element picker its palette tab is **"Structure"**, and it renders three tiles under **"Layout
-Elements"**: **Section** (`html_tag:section`, `display:block`), **Flexbox** (`div`, `display:flex`) and
-**Grid** (`div`, `display:grid`) — all the same shortcode, differing only by `html_tag`/`display`. In the
-**Theme Builder** it exposes the full semantic-tag set (used to build Header / Body / Footer parts).
+Its palette tab is **"Layout Elements"**, where it renders **four tiles** — all the same shortcode,
+differing only by `html_tag`/`display`:
+
+| Tile | `html_tag` | `display` | role |
+|---|---|---|---|
+| **Section** | `section` | `block` | A full-width page **band**. New sections default to a full-width band (`full_width:yes`) — background edge-to-edge, content contained (Divi/Bricks/Elementor-style). |
+| **Block** | `div` | `block` | A plain container that stacks its children — the simplest wrapper (grouping, spacing, a background). |
+| **Flexbox** | `div` | `flex` | One-dimensional layout — a row or a stack. |
+| **Grid** | `div` | `grid` | Two-dimensional column layout (CSS grid). |
+
+In the **Theme Builder** it exposes the full semantic-tag set (Header/Body/Footer parts). On normal
+pages the tag choices are trimmed to **`div` `section` `article` `aside`** — the landmark/chrome tags
+(`header` `footer` `nav` `main`) belong to the Theme/Header-Footer Builder and are omitted to avoid
+invalid duplicate-landmark markup.
+
 Node: `{ type:'flexbox', _items:[ /* children — elements OR nested Divs */ ], atts:{…} }` — plus the
 shared wrapper blocks (`common`, `fx`) documented in `README.md`. This file lists only the
 **shortcode-specific** atts.
 
 Children sit **directly** in `_items` (no `row`/`column` wrapper). Widths are set per child via its own
-`width` att and render as **`fw-span-{bp}-N`** (12-col span) house utility classes; container layout
-emits `fw-flex`/`fw-grid` + `fw-gap{bp}-*`/`fw-justify{bp}-*`/`fw-items{bp}-*` + order/grow classes.
+`width` att and render as **`fw-span-{bp}-N`** (12-col) utilities; container layout emits
+`fw-flex`/`fw-grid` + `fw-gap{bp}-*`/`fw-justify{bp}-*`/`fw-items{bp}-*` + order/grow/placement classes.
 Gap comes from the spacing-scale `gap` option, **not** Bootstrap `--bs-gutter`.
 
 Every layout/placement att is **responsive**: `{ base, md, lg }`, where a blank device inherits the next smaller one.
 
+## Option layout & conditional visibility
+
+The modal groups options (`type:'group'`) and **reveals only what applies to the current kind** (reactive
+JS in the page-builder item + live editor; the framework has no declarative `show_if`). Hidden options
+keep their values.
+
+- **Layout tab** — `Box` (html_tag, display) · `Grid` (shown when `display:grid`) · `Flex`
+  (direction/wrap/reverse — shown when `display:flex`) · `Arrange` (gap + justify/align — shown when
+  `display:flex` **or** `grid`) · `Container` (full_width, content_width, responsive_collapse) ·
+  `Placement` (shown when `html_tag` ≠ `section`).
+- **Styling tab** — `Background` · `Section Style` (pattern + variant — **section-only**) ·
+  `Shape Dividers` (**section-only**) · `Box Style` (border/min-height/ratio) · `Text` · `Spacing`.
+- Lone options: **Full-Width Band** shows only for `section`; **Responsive Collapse** only for flex/grid.
+
 ## atts — Container (how it arranges children)
 | key | type | default | value shape / choices | what it does |
 |---|---|---|---|---|
-| `html_tag` | select | `div` | `div` `section` `header` `footer` `main` `article` `aside` `nav` `figure` … | The semantic element this Div renders as. `section` = the Section tile. |
-| `display` | select | `flex` | `flex` `grid` `block` | Layout mode — Flexbox / Grid / plain block (the three "Layout Elements" tiles). |
-| `grid_columns` | responsive | `''` | integer count (or track template) | Column count when `display:grid` (the Grid tile). |
+| `html_tag` | select | `div` | pages: `div` `section` `article` `aside`; Theme Builder adds `header` `footer` `nav` `main` | Semantic element. `section` = the Section tile (a full-width band). |
+| `display` | select | `flex` | `flex` `grid` `block` | Layout mode (Flexbox / Grid / Block tiles). |
+| `grid_columns` | text | `3` | integer 1–12, `>12`, or a raw track template | Column count when `display:grid`. 1–12 use the cacheable `fw-grid-N` class; else an inline `grid-template-columns`. |
 | `grid_autofit` | switch | `no` | `yes` \| `no` | Auto-fit grid tracks (responsive card grids) instead of a fixed count. |
-| `grid_min` | unit-input | `''` | e.g. `240px` | Min track width when `grid_autofit:yes`. |
-| `content_width` | select / multi-picker | inherit | contained / full / custom | Cap the Div's content to the site width vs. run edge-to-edge. |
-| `direction` | responsive image-picker | `{base:'row',md:'',lg:''}` | `row` `column` | Main axis. Row = side-by-side (give children a Width to split); Column = stacked. |
-| `gap` | responsive short-select | `{base:'',md:'',lg:''}` | gap scale slug \| `''` (none) | Spacing between children (site-wide gap presets, NOT `--bs-gutter`). |
-| `row_gap` / `col_gap` | responsive short-select | `{base:'',md:'',lg:''}` | gap scale slug | Per-axis gap overrides (separate row vs. column spacing). |
-| `justify_content` | responsive image-picker | `{base:'',md:'',lg:''}` | `''` `start` `center` `end` `between` `around` `evenly` | Distribution along the main axis. |
-| `align_items` | responsive image-picker | `{base:'',md:'',lg:''}` | `''` `start` `center` `end` `stretch` `baseline` | Alignment on the cross axis. |
-| `wrap` | responsive switch | `{base:'yes',md:'',lg:''}` | `yes` \| `no` | Allow children to wrap to the next line (rows). |
-| `reverse` | responsive switch | `{base:'no',md:'',lg:''}` | `yes` \| `no` | Reverse the layout order (row/column-reverse) without changing markup. |
-| `align_content` | responsive image-picker | `{base:'',md:'',lg:''}` | `''` `start` `center` `end` `between` `around` | How wrapped lines pack on the cross axis (needs wrap + 2+ lines). |
+| `grid_min` | unit-input | `''` | e.g. `240px` (`px rem em %`) | Min track width when `grid_autofit:yes`. |
+| `grid_dense` | switch | `no` | `yes` \| `no` | Dense packing — backfill gaps left by spanned cells (`fw-grid-dense`). |
+| `direction` | responsive image-picker | `{base:'row',…}` | `row` `column` | Main axis (flex). Row = side-by-side; Column = stacked. |
+| `gap` | responsive short-select | `{base:'',…}` | gap scale slug \| `''` | Spacing between children (site gap presets, not `--bs-gutter`). **Applies to flex AND grid.** |
+| `row_gap` / `col_gap` | responsive short-select | `{base:'',…}` | gap scale slug | Per-axis gap overrides. |
+| `justify_content` | responsive image-picker | `{base:'',…}` | `''` `start` `center` `end` `between` `around` `evenly` | Distribution on the main axis (flex/grid). |
+| `align_items` | responsive image-picker | `{base:'',…}` | `''` `start` `center` `end` `stretch` `baseline` | Cross-axis alignment (flex/grid). |
+| `wrap` | responsive switch | `{base:'yes',…}` | `yes` \| `no` | Allow children to wrap (flex rows only). |
+| `reverse` | responsive switch | `{base:'no',…}` | `yes` \| `no` | Reverse order (row/column-reverse) without changing markup (flex). |
+| `align_content` | responsive image-picker | `{base:'',…}` | `''` `start` `center` `end` `between` `around` | Pack wrapped lines on the cross axis. |
+| `full_width` | switch | `no` (new **sections** are created with `yes`) | `yes` \| `no` | **Section-only.** Full-Width Band: background edge-to-edge (`fw-full-bleed`) with content inset to Content Width. `no` = a contained band (`fw-contained`). |
+| `content_width` | multi-picker | `{preset:'inherit'}` | `{preset:'inherit'\|<slug>\|'custom', custom?:{custom_width:{value,unit}}}` | Content max-width. Named presets come from the **Container Width** library (Narrow/Medium/Wide/…); `custom` reveals a unit-input (`px rem % vw`); `inherit` = no cap. A **legacy flat `{value,unit}`** still resolves as a custom width. |
+| `responsive_collapse` | switch | `yes` | `yes` \| `no` | Auto-stack a multi-column Grid/Flex down on smaller screens (shared collapse classes). Flex/grid only. |
 
-## atts — Placement (how it sits inside a parent Flexbox)
+## atts — Placement (how it sits inside a parent Flexbox/Grid)
 | key | type | default | value shape / choices | what it does |
 |---|---|---|---|---|
-| `width` | responsive popover | `{base:{preset:'none'},…}` | `{preset:'none'\|'1'..'12'\|'custom', width_custom?}` | This box's own width in a parent Flexbox row. Fractions (`1`=1/12 … `12`=1/1); `custom` reveals a unit-input (`% px rem vw`). |
-| `flex_grow` | responsive switch | `{base:'no',md:'',lg:''}` | `yes` \| `no` | Grow to absorb remaining free space (overrides fixed Width when there's room). |
-| `no_shrink` | responsive switch | `{base:'no',md:'',lg:''}` | `yes` \| `no` | Prevent this box from shrinking below its content/Width (`flex-shrink:0`). |
-| `align_self` | responsive image-picker | `{base:'',md:'',lg:''}` | `''` `start` `center` `end` `stretch` `baseline` | Override the parent's cross-axis align for just this box. |
-| `order` | responsive short-select | `{base:'',md:'',lg:''}` | `''` `first` `0`..`12` `last` | Reorder this box among siblings without changing markup. |
+| `width` | responsive popover | `{base:{preset:'none'},…}` | `{preset:'none'\|'1'..'12'\|'1_5'..'4_5'\|'fit'\|'max'\|'min'\|'custom', custom?:{width_custom}}` | This box's own width in a parent Flexbox, or its **grid span** in a Grid parent (fractions `1`=1/12 … `12`=1/1; fifths; content keywords; `custom` → unit-input). |
+| `flex_grow` | responsive switch | `{base:'no',…}` | `yes` \| `no` | Grow to absorb free space (flex). |
+| `no_shrink` | responsive switch | `{base:'no',…}` | `yes` \| `no` | Prevent shrinking (`flex-shrink:0`). |
+| `align_self` | responsive image-picker | `{base:'',…}` | `''` `start` `center` `end` `stretch` `baseline` | Override the parent's cross-axis align for just this box. |
+| `order` | responsive short-select | `{base:'',…}` | `''` `first` `0`..`12` `last` | Reorder among siblings (flex). |
+| `col_start` | responsive short-select | `{base:'',…}` | `''` (Auto) \| `1`..`12` | **Grid Column Start** — place this box at an exact grid column (`grid-column-start`, via `fw-col-start-{bp}-N`, scoped under `.fw-grid`), so you can position an item without empty spacer cells. Combine with `width` for the span. Inert outside a Grid parent. |
 
 ## atts — Styling
 | key | type | default | value shape / choices | what it does |
 |---|---|---|---|---|
-| `background` | background-pro | see Notes | background-pro object | Color / gradient / image / video background layers (they stack). |
-| `border_preset` | border-style picker | `''` | preset slug | Reusable box style — border, corners, shadow, optional fill + hover. |
-| `min_height` | responsive unit-input | `{base:{value:'',unit:'vh'},…}` | units `vh px rem %` | Minimum container height. Pair with `align_items: center` for a hero band. |
-| `aspect_ratio` | text / select | `''` | e.g. `16/9`, `1/1` | Lock the box to an aspect ratio (media-frame Divs). |
-| `spacing` | spacing block | see `README.md` | margin/padding scale classes | Per-Div margin/padding (spacing-scale utilities), same shape as other nodes. |
+| `background` | background-pro | see Notes | background-pro object | Color / gradient / image / video layers (they stack). |
+| `background_pattern` | multi-picker | `{pattern:'none'}` | `{pattern:<id>\|'none'}` | **Section-only.** Decorative SVG pattern layer over the background (from the Patterns library) → `.pattern-layer` + `upw-has-pattern`. |
+| `variant` | select | `''` | Section-Style preset slug (`''`=Default, `alt`/`light`/`dark`/…) | **Section-only.** Named Section Style that themes background + text together → `section--<slug>`. |
+| `divider_top` / `divider_bottom` | multi-picker | `{shape:'none'}` | `{shape:<slug>\|'none', <slug>:{color,height,flip}}` | **Section-only.** Shape divider on the top/bottom edge (Shape Dividers library) → `.sc-shape-divider` SVG + `section--has-divider`. |
+| `border_preset` | border-style picker | `''` | preset slug | Reusable box style — border, corners, shadow, optional fill + hover (`boxp-*`). |
+| `min_height` | responsive unit-input | `{base:{value:'',unit:'vh'},…}` | units `vh px rem %` | Minimum height. Pair with `align_items:center` for a hero band. |
+| `aspect_ratio` | text | `''` | e.g. `16 / 9`, `1` | Lock the box to a width : height ratio (`aspect-ratio`). |
+| `text_align` | alignment field | `''` (Inherit) | `''` `left` `center` `right` (+ justify) | Text alignment of inline/text content (`text-*` utility) — applies to **any** tag. |
+| `spacing` | spacing block | see `README.md` | margin/padding scale classes | Per-Div margin/padding (spacing-scale utilities). |
 
-## Ready-to-use example (the atts object)
+## Clean output
+An **empty** flexbox (no child content) drops its inert "lay out my children" classes — `fw-flex`,
+`fw-grid`/`fw-grid-N`, direction/wrap/justify/align/gap, `fw-collapse` — since they do nothing with no
+children. **Item-in-parent classes are kept** (`fw-span-*`, `fw-fifth-*`, `fw-col-start-*`, align-self,
+order, grow/shrink, border preset, band, background), so an empty grid **cell still occupies its track /
+placement**. Any box with content is emitted unchanged.
+
+## Live-editor placement (section-encapsulation)
+In the **live editor** the page root holds only **Sections**. Adding a Block/Flexbox/Grid nests it into
+the **last** section, or creates a section to hold it if the page has none — so a bare Div is never
+orphaned at the root. (The backend builder keeps Divs root-capable; this is a live-editor-only rule — see
+the decision log *"Why the live editor wraps Flexbox/Grid/Block in a Section"*.)
+
+## Ready-to-use example (a Section band with a 3-col grid)
 ```json
 {
-  "direction": { "base": "row", "md": "", "lg": "" },
-  "gap": { "base": "", "md": "", "lg": "" },
-  "justify_content": { "base": "center", "md": "", "lg": "" },
-  "align_items": { "base": "center", "md": "", "lg": "" },
-  "wrap": { "base": "yes", "md": "", "lg": "" },
-  "reverse": { "base": "no", "md": "", "lg": "" },
-  "align_content": { "base": "", "md": "", "lg": "" },
-  "width": { "base": { "preset": "none" }, "md": { "preset": "none" }, "lg": { "preset": "none" } },
-  "flex_grow": { "base": "no", "md": "", "lg": "" },
-  "align_self": { "base": "", "md": "", "lg": "" },
-  "order": { "base": "", "md": "", "lg": "" },
+  "html_tag": "section",
+  "display": "grid",
+  "grid_columns": "3",
+  "full_width": "yes",
+  "content_width": { "preset": "wide" },
+  "gap": { "base": "md", "md": "", "lg": "" },
+  "variant": "",
   "background": { "type": "none" },
-  "border_preset": "",
+  "text_align": "center",
   "min_height": { "base": { "value": "", "unit": "vh" }, "md": { "value": "", "unit": "vh" }, "lg": { "value": "", "unit": "vh" } }
 }
 ```
 
 ## Notes
-- **This is the DEFAULT page-builder container** — it renders user-facing tiles (Section / Flexbox /
-  Grid, under "Layout Elements") in the normal builder palette, not just the Theme Builder. (It was
-  previously hidden behind an admin-only filter; that is no longer the case.)
-- Nest Divs freely to build structural layouts — **arbitrary depth**, no one-level limit (unlike the
-  classic column). Children with a `width` span split a Flexbox row.
+- **The DEFAULT page-builder container** — the four Layout-Elements tiles are shown in the normal palette,
+  not just the Theme Builder.
+- Nest Divs freely — **arbitrary depth** (unlike the classic column). A child `width` splits a Flexbox
+  row or spans a Grid.
+- A **Section** is a full-width band by default (new sections carry `full_width:yes`); existing sections
+  saved before this keep their contained rendering (the option default is still `no`, and the flag is
+  baked only into freshly-created sections).
+- The Shape-Divider / Background-Pattern / Section-Variant / Container-Width sources are the shared
+  Theme-Settings preset libraries (Components → Shape Dividers / Background Patterns / Section Styles /
+  Container Widths), so user-added entries appear automatically.
 - The items-corrector wraps loose top-level content into a flexbox `<section>` (`wrap_into_flexbox`);
-  flexbox children pass through **untouched** (no forced `row`/`column`). Classic Column drops still
-  force `row > column` for back-compat — see [`row.md`](row.md) / [`column.md`](column.md).
+  flexbox children pass through untouched. Classic Column drops still force `row > column` for
+  back-compat — see [`row.md`](row.md) / [`column.md`](column.md).
 - `background` is a **background-pro** object; consult `../option-types/` for its shape.
