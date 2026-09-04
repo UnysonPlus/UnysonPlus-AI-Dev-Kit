@@ -1,8 +1,14 @@
-# `row` — grid row (structural, **auto-synthesized** — you don't author it)
+# `row` — classic/legacy grid row (structural, **auto-synthesized** — you don't author it)
 
-The middle layer of the page-builder hierarchy: **`section` → `row` → `column` → leaf shortcodes.** A
-row is one Bootstrap row of columns. It is **invisible in the editor** (no Layout-Elements thumbnail)
-and has **no user options** — it exists only to wrap columns.
+> **This is part of the CLASSIC (legacy) Bootstrap grid**, not the modern default. New pages lead with
+> the **flexbox "Div"** ([`flexbox.md`](flexbox.md)), whose children need no `row`/`column` wrapper and
+> nest arbitrarily. The `section`/`row`/`column` grid is still fully supported and is auto-synthesized
+> whenever a classic Column is dropped; reach for it only for existing classic pages.
+
+The middle layer of the classic page-builder hierarchy: **`section` → `row` → `column` → leaf
+shortcodes.** A row is one Bootstrap row of columns. It is **invisible in the editor** (no
+Layout-Elements thumbnail) and has **no user options** — it exists only to wrap columns. (A modern
+flexbox Div emits **no `.fw-row`** — that wrapper is generated for classic content only.)
 
 ## You do NOT emit `row` nodes — put columns directly in a section
 

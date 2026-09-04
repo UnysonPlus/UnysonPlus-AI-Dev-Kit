@@ -303,8 +303,8 @@
         "{plugin}/framework/extensions/builder/manifest.php",
         "{plugin}/framework/extensions/builder/config.php"
       ],
-      "hash": "4642e11f414ae0ed590b8971e67f18a5",
-      "synced": "2026-08-23"
+      "hash": "9dab6adaa87d05199256cf2f72796bcc",
+      "synced": "2026-09-03"
     },
     "extensions/chat.md": {
       "kind": "extension",
@@ -394,8 +394,8 @@
         "{plugin}/framework/extensions/shortcodes/manifest.php",
         "{plugin}/framework/extensions/shortcodes/settings-options.php"
       ],
-      "hash": "b935e31b560d0d4281e028df8d40a8e6",
-      "synced": "2026-08-23"
+      "hash": "768850f88c744135ee828667c9bb0d5b",
+      "synced": "2026-09-03"
     },
     "extensions/sidebars.md": {
       "kind": "extension",
@@ -412,8 +412,8 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "337c5a84f320047eb474b3a07ea95b81",
-      "synced": "2026-08-29"
+      "hash": "81276e95b8d912bbc7400084066a6524",
+      "synced": "2026-09-03"
     },
     "extensions/snippets.md": {
       "kind": "extension",
@@ -1057,8 +1057,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/column/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/column/options.php"
       ],
-      "hash": "a00c4c97aa0a67c11e95331b405a7354",
-      "synced": "2026-08-23"
+      "hash": "abd48c7fe60497cc9d77f63cb4172c3b",
+      "synced": "2026-09-03"
     },
     "shortcodes/comparison-table.md": {
       "kind": "shortcode",
@@ -1138,8 +1138,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/flexbox/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/flexbox/options.php"
       ],
-      "hash": "9757d9fbd33598aa059b68c9c1d7a436",
-      "synced": "2026-08-23"
+      "hash": "473fbdc75b1e63c75adee14a501ae382",
+      "synced": "2026-09-03"
     },
     "shortcodes/flip-box.md": {
       "kind": "shortcode",
@@ -1505,7 +1505,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/row/class-fw-shortcode-row.php"
       ],
       "hash": "93a6c151bc25bdccb43cdf928f0bd172",
-      "synced": "2026-08-23"
+      "synced": "2026-09-03"
     },
     "shortcodes/scroll-indicator.md": {
       "kind": "shortcode",
@@ -1531,8 +1531,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/section/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/section/options.php"
       ],
-      "hash": "8e631143fb7be7c1c42d2b55c6292e17",
-      "synced": "2026-08-23"
+      "hash": "f018439ae409f51ecad2948280d8568d",
+      "synced": "2026-09-03"
     },
     "shortcodes/site-logo.md": {
       "kind": "shortcode",
@@ -1898,8 +1898,8 @@
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/components-spacing.php",
         "{plugin}/framework/includes/presets/spacing-presets.php"
       ],
-      "hash": "12093ff5f47113aead758055fe9ddb1d",
-      "synced": "2026-08-23"
+      "hash": "830aaa0bfb10401a3e177d99b7ae06cf",
+      "synced": "2026-09-03"
     },
     "theme-settings/typography.md": {
       "kind": "theme-settings",

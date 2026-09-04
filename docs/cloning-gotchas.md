@@ -179,7 +179,12 @@ WordPress is swapping the **rendering**.
   for its dominant vertical rhythm. Measure the source's resolved spacing (`getComputedStyle` = the
   Tailwind value) and set the exact px; **flag the scale gap** to the maintainer rather than rounding to
   24/48. (Adding 32/40 natively means appended slugs — you can't renumber 0–12 without breaking saved pages.)
-- **Section "Gap" sets `--bs-gutter-y`, which cascades and double-stacks.** The Section Gap option emits
+- **The `--bs-gutter` / `.fw-row` gutter gotchas below are CLASSIC-GRID ONLY.** They apply to the
+  legacy Bootstrap `section`/`row`/`column` tree (`fw-row`/`fw-col`). The modern **flexbox "Div"** (the
+  default container — see [shortcodes/flexbox.md](shortcodes/flexbox.md)) emits **no `.fw-row`** and has
+  **no row-gutter cascade**: it spaces children with the `gap` option (spacing-scale slug), so the
+  gutter-y double-stacking and the `--bs-gutter` overrides here simply don't arise on Div-built pages.
+- **Section "Gap" sets `--bs-gutter-y`, which cascades and double-stacks (classic grid).** The Section Gap option emits
   `.section--gap-{slug} .row` (a **descendant** combinator) setting BOTH `--bs-gutter-x` and
   `--bs-gutter-y`; the gutter-y (a) cascades into a column's **nested** sub-column rows and (b) **adds** to
   any explicit `margin-top` on those children — so a 48px column gap silently injects 48px between stacked

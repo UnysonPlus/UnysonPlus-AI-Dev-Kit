@@ -35,6 +35,44 @@ fixture case and re-run it** — that is the regression guard, not a rendered sc
 the systematic miss via `--share` (below) and closes only this site's residual with native options /
 `misc_custom_css`. Either way: **you never hand-measure the render to derive the value.**
 
+## Structural model — column-first, with a PARTIAL single-level flexbox overlay (CURRENT REALITY)
+
+The page builder now defaults to the **flexbox "Div"** container (see
+[`../shortcodes/README.md`](../shortcodes/README.md) / [`../shortcodes/flexbox.md`](../shortcodes/flexbox.md)),
+but **the converter has only PARTIALLY adopted it.** Document the current behavior honestly — the
+converter does **not** yet duplicate the source tree as nested flexbox Divs with no `fw-row`s. That is
+an aspiration with open code gaps, not what it emits today.
+
+**PHP file-upload path (`class-fw-site-converter-mapper.php`) — a HYBRID:**
+
+- It builds classic **`column`** nodes first, then **opportunistically rewrites a SINGLE level of clean
+  rows** into a `flexbox` Div via `n_flexbox()` + `column_to_flexbox_cell()`, gated by `row_flex_safe()`:
+  a row flexes only when it has **≥2 cells**, **no** `inner_class` box wrapper, and **no**
+  `element_position`. The row becomes one `flexbox` (`display:flex`, `direction:row`, `wrap:yes`) whose
+  cells are child `flexbox` Divs carrying their Width as a 12-col span.
+- **Sections and containers are NEVER flexed** — they stay classic `n_section()` / `n_container()`.
+- **Non-recursive:** `column_to_flexbox_cell()` passes the cell's `_items` through **unchanged**, so any
+  **nested grid stays nested `column`s**. So boxed-card rows (`inner_class`), floating-card rows
+  (`element_position`), single-cell rows, and **any depth ≥2** nesting still emit `fw-row` / `fw-col`.
+
+**JS URL/capture path — now at PARITY for the single-level overlay.** `to-pages.mjs` carries the
+byte-faithful twins (`nFlexbox` / `flexWidthPreset` / `slugToSpan` / `rowFlexSafe` /
+`columnToFlexboxCell`) and `atom-templates.json` now has the `flexbox` atom, so a clean row emits one
+`flexbox` row of `flexbox` cells — the same overlay as the PHP path — instead of loose columns. Verified
+on shared captures (flexbox nodes now appear where the JS path previously emitted zero). Keep the PHP
+`n_flexbox`/`row_flex_safe`/`column_to_flexbox_cell` and their `to-pages.mjs` twins **in lockstep**.
+
+**Nesting is recursive.** `column_to_flexbox_cell` / `columnToFlexboxCell` run each cell's `_items`
+through `flexify_items()` / `flexifyItems()` (a mutually-recursive pass that flexes every run of ≥2
+clean `column` siblings at any depth), so a nested grid becomes a nested flexbox — depth ≥ 2 is mirrored
+now, not reverted to `fw-row` (verified to flexbox nesting depth 4 on a nested capture).
+
+**Net:** a clean multi-cell row — nested or not — converts to a flexbox Div (no `fw-row`) on **both**
+paths. What is **still** classic `column`/`fw-row`: sections/containers (never flexed), and boxed-card /
+floating-card / single-cell rows (`row_flex_safe` fallback — the box lives on the column's inner
+wrapper, so relaxing it needs visual verification). A nested-grid cell the extractor didn't split still
+decomposes to nested `column`s (PHP) or a `code_block` (JS). Those specific shapes remain a KNOWN GAP.
+
 ## Provides
 
 - **Shortcodes:** none — it's an importer toolkit, not builder elements (it *emits* page-builder trees + presets that shortcodes consume).
@@ -52,6 +90,16 @@ the systematic miss via `--share` (below) and closes only this site's residual w
 - **CSS completeness invariant — the global `util_css` bucket must carry EVERY page-matching utility (fixed capture-service v1.7.78 / site-converter v1.3.36).** The capture categorizer (`capture-extract.mjs` → `walkRules`) buckets a source sheet's rules into `base` / `util` / `header` / `footer`. The bug: it only promoted **global (`:root`/`body`) and header/footer-scoped** selectors to the global buckets, and fed `util` almost entirely from sheets whose **filename matched `VENDOR_RE`** (`tailwind`, `bootstrap`, …). A Tailwind/JIT source that ships utilities from an **inline `<style>` or a hash-named bundle** (e.g. `index-Cd4aA-AH.css`) is classified as first-party, so its **body-section** utilities (`.py-5`, `.feature-card`, card `.shadow`) fell through to per-section CSS only — and when the raw-chrome mirror theme was generated with an empty per-section merge, **every below-the-header section shipped unstyled** (the `freshpaws` "~10% done" conversion: hero styled, feature grid / CTA / footer bare). The fix promotes every **page-matching, non-global, non-chrome** selector into the global `util` bucket too (gated by `matchesPage()` so only used utilities are carried), making stylesheet-**filename** detection non-load-bearing for completeness. **Rule going forward: a section that renders must carry its full CSS at theme-generation time — never let completeness depend on the source's stylesheet filename or on a later per-section merge.** (The PHP upload path already carries the whole reproduced CSS blob, so it was already complete — but the invariant holds on both sides.)
 
 ## CSS Class Mapper & box columns (deterministic decompose — rules to keep)
+
+> **Note on the container node.** The box-owner / grid-mapping rules below are written against the
+> classic **`column`** node, which is still the converter's **primary** structural output (see
+> "Structural model" above). The **modern target** for a grid cell is a **flexbox Div child with a
+> `width` span** — and the PHP path already rewrites a *clean* multi-cell row into that (via
+> `column_to_flexbox_cell()`, which carries `border_preset`, `align_self`, content-layout, etc. onto the
+> Div). But the rewrite is gated (`row_flex_safe`): a cell that OWNS a box via `inner_class` or is a
+> positioned floating-card ancestor is **exactly what disqualifies** the row from flexing, so those box
+> cases stay `column`/`fw-row`. Read "column owns the box" below as "the column **or** its equivalent
+> flexbox cell owns it" — but the actual output is a `column` whenever a box wrapper is involved.
 
 The deterministic decompose maps a source element's utility classes into ONE clean **semantic class**
 (`compile_class_set()` in `class-fw-site-converter-tailwind.php` → `FW_Site_Converter_Mapper::box_style_class()`),
@@ -360,6 +408,18 @@ each with an **AI tier** for the ambiguous long tail. Both require/activate `ani
   (animate the bar/counter, cycle phrases, call `window.upwPreloaderDone()`). Best-effort; stays JS-less on any
   failure. *Verified on kage:* html 588B, css scoped to `#pre`/`.pre-*`, js `''` (welded to three.js → AI tier).
   Detection is **PHP-only** (like `animation_cursor` — the JS capture path never mirrored chrome detection).
+
+### Decorative image-layer scenes → the Parallax Scene shortcode (2026-08-30)
+
+The `decorative_scene` recognizer now emits an EDITABLE **`parallax_scene`** element instead of a frozen
+code_block when a scene decomposes into clean image layers. `scene_image_layers($el)` (stitch) turns each
+`<img>` into a layer, reading its wrapper for the entrance direction (`data-fg-in`), sway (a `sway` class),
+and flip (a `flip` class); z-order + a staggered delay come from DOM order; the capture omits layer POSITION
+so the anchor is inferred (entrance side; a wall/hill/backdrop → full-width). `n_parallax_scene()` (mapper)
+builds the node — a back-to-front parallax depth gradient, per-layer width by anchor, `placement:in_flow`,
+`source:scroll`. Falls back to the verbatim code_block when there aren't ≥2 real image layers. *Verified on
+kage:* 4 scenes → 4 `parallax_scene` nodes with their temple/tree/lantern layers; golden fixtures 362/0 + 20/0.
+The `parallax_scene` shortcode itself (shortcodes ext) is self-contained (own parallax/entrance/sway runtime).
 
 ### Word/line/char text reveals → Text Effects split_reveal (2026-08-30)
 

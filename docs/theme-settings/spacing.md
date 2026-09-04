@@ -44,7 +44,7 @@ Defines the spacing scale, gap scale, and site-wide default gaps that back Unyso
   | `''` | None (use Bootstrap default — 1.5rem horizontal, 0 vertical) |
   | *(one entry per gap-scale slug)* | the gap-scale names (`0`, `1`, `2`, `3`, `4`, `5`, plus any added) |
 
-- **Notes:** Sets both horizontal and vertical gap on every Bootstrap row site-wide.
+- **Notes:** Sets both horizontal and vertical gap on every **classic Bootstrap row** (`.fw-row`/`.row`) site-wide. It does **not** affect the modern **flexbox "Div"** container (the default) — a Div spaces its children with its own `gap` option (a gap-scale slug), not this row-level default. See [../shortcodes/flexbox.md](../shortcodes/flexbox.md).
 
 ### Default Gap X — `default_gap_x`
 

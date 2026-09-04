@@ -1,8 +1,15 @@
 # `section` — page band
 
-One per band of the page. Node: `{ type:'section', _items:[…columns], atts:{…} }`. Carries the
-shared `common` + `fx` blocks (see `README.md`); its atts below. Section spacing/background are
-**options** here — don't reach for CSS for them.
+One per band of the page — the **classic** Bootstrap section. Node:
+`{ type:'section', _items:[…columns], atts:{…} }`. Carries the shared `common` + `fx` blocks (see
+`README.md`); its atts below. Section spacing/background are **options** here — don't reach for CSS for
+them.
+
+> **Modern default:** a section's children are **flexbox Divs** now, not grid columns. New pages build a
+> band with a **flexbox `<section>` Div** (`html_tag:section`) holding nested Divs — see
+> [`flexbox.md`](flexbox.md); the "Section" tile in the palette is that flexbox Div, not this classic
+> `section` shortcode. This classic `section` (with grid `column`s) remains fully supported for existing
+> pages.
 
 ## atts (section-specific)
 

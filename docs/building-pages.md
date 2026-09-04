@@ -2,8 +2,9 @@
 
 Compose any UnysonPlus page — a full site page, a demo, or a quick test — as a page-builder tree,
 with Animation Engine effects that render, and with the page left **editable in the visual builder**.
-You describe sections/columns/elements as a PHP array and call `upw_build_page()`; it stores the value
-the way the builder itself does.
+You describe the page as a tree of **Div** layout primitives (`upw_div_section` → `upw_grid` /
+`upw_flexbox` → elements) — the modern default — or the classic `upw_section`/`upw_column` grid, as a
+PHP array, and call `upw_build_page()`; it stores the value the way the builder itself does.
 
 Helpers live in **`tools/upw-build-pages.php`**. This is the *mechanical* how-to. For the end-to-end
 "turn a prompt into a site" workflow, see **[build-a-site.md](build-a-site.md)**.
@@ -27,13 +28,19 @@ A page spec is ~15 lines:
 require __DIR__ . '/upw-build-pages.php'; // spec beside the lib; else an absolute path to your kit clone
 
 $page = array(
-  upw_section(array( upw_column('1_2', array(
-    upw_element('special_heading', array('title'=>'Welcome','heading'=>'h1','alignment'=>'left',
-      'scroll_keyframes'=> upw_skf(array('y'=>60,'opacity'=>0), null, array())) ),   // fade-up on scroll
-    upw_element('text_block', array('content'=>'<p>Intro copy.</p>')),
-  )), upw_column('1_2', array(
-    upw_element('image', array()),  // fill via Media Library / attachment id
-  )))),
+  // Modern Div-first: a <section> band (contained), holding a 2-column Grid of cells.
+  upw_div_section(array(
+    upw_grid(array(
+      upw_flexbox(array(   // left cell (groups its own content)
+        upw_element('special_heading', array('title'=>'Welcome','heading'=>'h1','alignment'=>'left',
+          'scroll_keyframes'=> upw_skf(array('y'=>60,'opacity'=>0), null, array())) ),   // fade-up on scroll
+        upw_element('text_block', array('content'=>'<p>Intro copy.</p>')),
+      )),
+      upw_flexbox(array(   // right cell
+        upw_element('image', array()),  // fill via Media Library / attachment id
+      )),
+    ), 2),   // 2 equal columns; use '1fr 2fr' for an uneven split
+  )),
 );
 
 echo upw_build_page('about', 'About Us', $page);   // slug (created if missing) or numeric ID
@@ -57,8 +64,11 @@ curl -s <your-site>/<slug>/ | grep -c  'scroll-keyframes.js' # >0 (the effect ru
 | Helper | Builds |
 | --- | --- |
 | `upw_element($shortcode, $atts)` | a leaf node (`special_heading`, `text_block`, `button`, `image`, `counter`, `icon_box`, …), auto `unique_id`. |
-| `upw_column($width, $items, $atts=[])` | a column — width `1_1`,`1_2`,`1_3`,`2_3`,`1_4`,`3_4`,`1_5`,`5_6`,… (`1_5` is the one supported fifth). |
-| `upw_section($columns, $atts=[])` | a section wrapping columns (`$atts` = section options: background, padding, bg_effect…). |
+| **`upw_div_section($items, $atts=[])`** | **(modern default)** a `<section>` band — a Flexbox **Div**, content contained to the site width. Children (elements or nested Divs) go straight in `$items`. The Div-first replacement for `upw_section`. |
+| **`upw_grid($items, $cols=3, $atts=[])`** | **(modern)** a **Grid** Div — columns. `$cols` = a number (equal columns) or a raw `grid-template-columns` value (`'1fr 2fr'` for 1/3 + 2/3). Children flow into the tracks; group a cell's content in a `upw_flexbox`. |
+| **`upw_flexbox($items, $atts=[])`** | **(modern)** a **Flexbox** Div — a 1-D row/stack, or a grid cell. `$atts`: `html_tag` (`div`/`section`/…), `display` (`flex`/`grid`/`block`), `grid_columns`, `content_width`, `width` (a grid-cell span). |
+| `upw_section($columns, $atts=[])` | *classic (Bootstrap grid)* — a section wrapping `upw_column`s. Still fully supported; prefer `upw_div_section` for new pages. |
+| `upw_column($width, $items, $atts=[])` | *classic* — a column inside a `upw_section`; widths `1_1`,`1_2`,`1_3`,`2_3`,`1_4`,`3_4`,`1_5`,`5_6`,… |
 | `upw_spacer($vh)` | a tall empty section — gives scroll-driven effects room to travel. |
 | `upw_skf($start,$mid,$end,$end_ease,$run_on_mobile)` | a `scroll_keyframes` att value (below). |
 | `upw_effect_defaults($shortcode)` | dump an element's injected effect-option default shapes (below). |
@@ -108,8 +118,14 @@ them if you ever store it by hand:
    shortcode's builder options, so a clean write keeps them. (Attribute completeness is *not*
    required; missing atts are filled with defaults on read.)
 
-The JSON shape matches a real builder-saved page exactly:
-`[ {type:'section', _items:[ {type:'column', width:'1_1', _items:[ {type:'simple', shortcode:'…', atts:{…}} ]} ]} ]`.
+The JSON shape matches a real builder-saved page exactly.
+
+**Modern (Div-first)** — a `flexbox` node per band / cell (`html_tag` + `display` in `atts`; children
+sit directly in `_items`, no column wrapper):
+`[ {type:'flexbox', atts:{html_tag:'section',display:'block'}, _items:[ {type:'flexbox', atts:{display:'grid',grid_columns:'2'}, _items:[ {type:'flexbox', _items:[ {type:'simple', shortcode:'…', atts:{…}} ]} ]} ]} ]`
+
+**Classic (Bootstrap grid)** — still valid for existing pages:
+`[ {type:'section', _items:[ {type:'column', width:'1_1', _items:[ {type:'simple', shortcode:'…', atts:{…}} ]} ]} ]`
 
 ## When to reach for something else
 

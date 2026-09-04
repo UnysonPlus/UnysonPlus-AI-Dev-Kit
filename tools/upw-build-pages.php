@@ -66,6 +66,36 @@ function upw_spacer( $vh = 60 ) {
 }
 
 /**
+ * A Flexbox (Div) — the MODERN layout primitive (prefer this over upw_section/upw_column for new pages).
+ * Children go DIRECTLY in $items (a flexbox lays them out itself — no column wrapper). $atts merges over
+ * the defaults; the ones you'll set:
+ *   html_tag:      'div' (default) | 'section' (a content band) | 'article' | 'aside' | 'main' | 'header' | 'footer' | 'nav'
+ *   display:       'flex' (default — a 1-D row/stack) | 'grid' (2-D columns) | 'block' (normal flow)
+ *   grid_columns:  for display=grid — a number ('3' = 3 equal columns) or a raw value ('1fr 2fr' for 1/3+2/3)
+ *   content_width: a { value, unit } max-width for a band's content (empty = full; a section-tag Div contains
+ *                  to the theme container by default)
+ */
+function upw_flexbox( $items, $atts = array() ) {
+	$atts = array_merge( array( 'html_tag' => 'div', 'display' => 'flex' ), $atts );
+	if ( ! isset( $atts['unique_id'] ) ) {
+		$atts['unique_id'] = substr( md5( 'flexbox' . wp_json_encode( $atts ) . mt_rand() ), 0, 13 );
+	}
+	return array( 'type' => 'flexbox', '_items' => $items, 'atts' => $atts );
+}
+
+/** A modern SECTION band — a Flexbox tagged <section>, block flow, content contained to the site width by
+ *  default. The Div-first replacement for upw_section(): children (elements or nested Divs) go in $items. */
+function upw_div_section( $items, $atts = array() ) {
+	return upw_flexbox( $items, array_merge( array( 'html_tag' => 'section', 'display' => 'block' ), $atts ) );
+}
+
+/** A GRID Div (columns). $cols = a number (equal columns) or a raw grid-template-columns value ('1fr 2fr').
+ *  Children flow into the grid tracks; nest upw_flexbox() cells with a `width` preset for spans. */
+function upw_grid( $items, $cols = 3, $atts = array() ) {
+	return upw_flexbox( $items, array_merge( array( 'html_tag' => 'div', 'display' => 'grid', 'grid_columns' => (string) $cols ), $atts ) );
+}
+
+/**
  * Build a `scroll_keyframes` att value (Animation Engine — Scroll Keyframes).
  * Each of $start/$mid.v/$end is a SPARSE array of any of:
  *   x, y, scale, rotation, rotationX, rotationY, opacity, blur   (unset = default: move/rot 0, scale 1, opacity 1, blur 0)

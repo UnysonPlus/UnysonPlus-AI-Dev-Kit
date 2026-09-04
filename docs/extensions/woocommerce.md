@@ -5,9 +5,46 @@ Integrates WooCommerce with UnysonPlus — makes any active theme WooCommerce-aw
 ## Provides
 
 - **Shortcodes (WooCommerce Elements tab):** `wc_products`, `wc_product`, `wc_product_page`, `wc_product_categories`, `wc_add_to_cart`, `wc_cart`, `wc_cart_link`, `wc_mini_cart`, `wc_free_shipping`, `wc_checkout`, `wc_account`, `wc_my_account`, `wc_order_tracking`, `wc_product_search`, `wc_product_filters` → `../shortcodes/` for atts. The commerce-page elements (`wc_cart`/`wc_checkout`/`wc_my_account`/`wc_order_tracking`/`wc_product_page`) are friendly wrappers around the matching classic WooCommerce shortcode. The **catalog / storefront** elements are **custom UnysonPlus markup with their own option UIs** — `wc_products` + `wc_product` on the shared **Card Rows** engine, `wc_product_categories` on the same card model, `wc_add_to_cart` + `wc_product_search` on the shared **Button Style** system, and `wc_product_filters` as a drag-sortable filter **panel** — see the per-element sections below.
-- **Settings/options:** a **Shop** settings page. Key ids include `shop_columns`, `products_per_page`, `shop_sidebar`, gallery thumbnail columns, related-products count (`catalog_box` / `single_box`), plus **Shop Behavior** toggles (Catalog Mode, sale-badge style, AJAX add-to-cart, breadcrumb, product-gallery zoom/lightbox/slider).
+- **Settings/options:** a **Shop** settings page at **Unyson+ → WooCommerce**, in four TABS (Catalog / Behavior / Catalog Mode / Shopper Tools — one form, hash-deep-linkable) (`admin.php?page=fw-woocommerce-settings`, `FW_Woocommerce_Settings_Page`; the menu entry appears only when the WooCommerce plugin is active, and the Extensions-manager card's Settings link points here too). Key ids include `shop_columns`, `products_per_page`, `shop_sidebar`, gallery thumbnail columns, related-products count (`catalog_box` / `single_box`), plus **Shop Behavior** toggles (Catalog Mode + Disable Purchasing, sale-badge style, AJAX add-to-cart, breadcrumb, product-gallery zoom/lightbox/slider) — see *Catalog Mode* below.
 - **Theme support:** if the current theme hasn't declared WooCommerce support, the extension declares it (+ gallery zoom/lightbox/slider) and enqueues a small generic stylesheet — so any theme renders a reasonable shop.
 - **Public hooks/filters:** bridges its settings to the active integration via the theme's `unysonplus_woocommerce_*` filters when present, else WooCommerce's own (`loop_shop_columns`, `loop_shop_per_page`, `woocommerce_product_thumbnails_columns`, `woocommerce_output_related_products_args`).
+
+## Shopper tools (all opt-in, `includes/`)
+
+Each is one self-contained file with its own settings gate; all are `require`d unconditionally and
+do nothing until switched on. Shared front end: `static/js/storefront.js` + `static/css/storefront.css`,
+enqueued only when at least one tool is on (`storefront_assets_needed()`), nonce `upwc_wc_storefront`.
+
+- **Wishlist** (`wishlist.php`, `wishlist-hf-element.php`) — user meta for signed-in visitors, a
+  90-day cookie for guests, merged on `wp_login`. Helpers: `upwc_wishlist_enabled/ids/has/toggle/save/button_html`.
+  Elements: `[wc_wishlist]`, a **Wishlist Link** header/footer element, a widget.
+- **Compare** (`compare.php`) — session cookie, max 2–6, refuses past the max rather than dropping the
+  oldest. `upwc_compare_table_html()` builds the side-by-side table; `[wc_compare]` renders it.
+- **Back in stock** (`back-in-stock.php`) — `_upwc_bis_emails` post meta, sent on
+  `woocommerce_product_set_stock_status` (and the variation equivalent), list cleared before sending.
+  Filter: `upwc_bis_notification`.
+- **Swatches** (`swatches.php`) — hooks `woocommerce_dropdown_variation_attribute_options_html` and
+  PREPENDS swatches while keeping Woo's own `<select>` (hidden, still authoritative). Colour/image read
+  from common swatch-plugin term-meta keys. `upwc_swatches_card_html()` for cards.
+- **Sticky add-to-cart + size guide** (`storefront.php`) — footer-rendered, `_upwc_size_guide` post meta
+  with a store-wide fallback.
+
+**State is client-hydrated**: hearts and compare toggles render "off" for everyone (cache-safe) and are
+painted by JS. Anything injecting cards must dispatch `upwc:products:updated` — Load More, Quick View and
+AJAX filtering already do.
+
+**CSS trap:** a component that sets a `display` AND toggles `[hidden]` needs an explicit
+`[hidden]{display:none}` rule — `display:flex` beats the UA `[hidden]` rule, which left the size-guide
+modal invisibly covering the page and swallowing clicks.
+
+## Catalog Mode (`catalog_mode` + `catalog_lock_purchasing`)
+
+Two Shop Behavior switches, layered:
+
+- **Catalog Mode** — the lookbook. Unhooks WooCommerce's price and add-to-cart templates on shop archives and single products (`woocommerce_template_loop_add_to_cart`, `woocommerce_template_loop_price`, `woocommerce_template_single_price`, `woocommerce_template_single_add_to_cart`). Presentational only: the store is still buyable through a crafted `?add-to-cart=<id>` URL, a cached AJAX button, or a bookmarked `/cart/`.
+- **Disable Purchasing** (`catalog_lock_purchasing`, applies with Catalog Mode on) — the actual lockdown. `woocommerce_is_purchasable` / `woocommerce_variation_is_purchasable` return false, `woocommerce_add_to_cart_validation` refuses every route (form post, AJAX, Store API), WooCommerce's `WC_Form_Handler::add_to_cart_action` is unhooked on `wp_loaded` @5 and the request parameter scrubbed, `woocommerce_get_price_html` and `woocommerce_loop_add_to_cart_link` resolve to empty strings store-wide, and `template_redirect` bounces Cart / Checkout to the shop. The **order-received** and **order-pay** endpoints are deliberately spared, so orders placed before the switch can still be paid and viewed.
+
+Under the lockdown the shop-only elements render nothing on the front end (an editor notice explains why in the builder): `wc_cart_link`, `wc_mini_cart` + the Mini Cart header/footer element, `wc_add_to_cart`, `wc_cart`, `wc_checkout`. They all gate on the shared helper **`upwc_wc_catalog_locked()`** (`helpers.php`) — use it for any new element that only makes sense in a shop that sells.
 
 ## Mini-cart branding (`wc_mini_cart`)
 

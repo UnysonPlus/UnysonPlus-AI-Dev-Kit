@@ -1,7 +1,15 @@
-# `column` — grid column
+# `column` — classic/legacy grid column
+
+> **This is part of the CLASSIC (legacy) Bootstrap grid.** For NEW pages, use the modern **flexbox
+> "Div"** instead ([`flexbox.md`](flexbox.md)) — its modern equivalents: a column's **`width`** →
+> the Div's responsive `width` span (`fw-span-{bp}-N`); **`content_direction`** → the Div's
+> `direction`; **`full_height`/`align_self`** → the Div's `flex_grow` / `align_self`; **`content_gap`**
+> → the Div's `gap`. The classic column still works and is force-synthesized (`section → row → column`)
+> whenever a classic Column tile is dropped — use it only for existing classic pages.
 
 Inside a `section` (or nested ONE level). Node: `{ type:'column', width:'1_1', _items:[…], atts:{…} }`
-— **`width` is on the node, not in atts.** Carries the shared `common` block (see `README.md`).
+— **`width` is on the node, not in atts.** Carries the shared `common` block (see `README.md`). Classic
+columns emit **`fw-col-{bp}-N`** classes (the modern Div uses `fw-span-{bp}-N`).
 
 ## `width` (node property)
 

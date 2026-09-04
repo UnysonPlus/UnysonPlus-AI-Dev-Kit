@@ -41,6 +41,13 @@ An interactive 3D model element (glTF / GLB) built on Google's `<model-viewer>` 
 | `hotspot_hide_backside` | switch | `'yes'` | `'yes'` \| `'no'` | Fade hotspots that rotate to the far side (needs a Normal). |
 | `background` | select | `'transparent'` | `transparent` `solid` | Viewer background. |
 | `bg_color` | color-preset | `{predefined:'',custom:'#f4f5f7'}` | compact color object | Solid background color (`kind: bg`), used when `background: solid`. |
+| `choreo_enable` | switch | `'no'` | `'yes'` \| `'no'` | **Scroll Choreography.** Pin the model in a fixed, transparent, z-indexed layer and drive its position / rotation / scale / opacity from scroll via `choreo_keys`. When on, auto-rotate and drag-to-orbit are disabled (scroll owns the motion) and `interpolation-decay` is lowered so the camera tracks tightly. |
+| `choreo_layer` | slider | `2` | −5 … 50 | z-index of the fixed 3D layer. A section with a higher z-index sits in front of the model; lower/negative puts the model behind normal content. |
+| `choreo_size` | slider | `60` | 15 … 100 (%) | Base model-box size, as a % of the smaller screen side (`vmin`). Each keyframe's `scale` multiplies this. |
+| `choreo_travel` | slider | `3` | 1 … 10 (screens) | How many screen-heights the whole choreography spans, measured from where the element sits. |
+| `choreo_smooth` | slider | `18` | 0 … 90 | Scroll smoothing/damping. 0 = locked to the scrollbar (frame-perfect); higher glides toward the scroll target. |
+| `choreo_guide` | switch | `'no'` | `'yes'` \| `'no'` | **Authoring aid** (turn off before publishing). Renders a marker in the scroll at each keyframe (`① 0%`, `② 22%`…) plus a live HUD of the current scroll % and the model's interpolated pose — so you can scroll your real page to find the exact `at` for each keyframe. |
+| `choreo_keys` | addable-popup | *(4 defaults)* | array — see Notes | Keyframes: the model's pose at each scroll %. Interpolated between, sorted by `at`. |
 
 ## Ready-to-use example (the atts object)
 ```json
@@ -77,7 +84,19 @@ An interactive 3D model element (glTF / GLB) built on Google's `<model-viewer>` 
   "hotspots": [],
   "hotspot_hide_backside": "yes",
   "background": "transparent",
-  "bg_color": { "predefined": "", "custom": "#f4f5f7" }
+  "bg_color": { "predefined": "", "custom": "#f4f5f7" },
+  "choreo_enable": "no",
+  "choreo_layer": 2,
+  "choreo_size": 60,
+  "choreo_travel": 3,
+  "choreo_smooth": 18,
+  "choreo_guide": "no",
+  "choreo_keys": [
+    { "at": 0,   "x": 0,   "y": -55, "scale": 80,  "yaw": -40, "pitch": 12, "opacity": 0,   "ease": "out" },
+    { "at": 25,  "x": 0,   "y": 0,   "scale": 100, "yaw": 0,   "pitch": 0,  "opacity": 100, "ease": "out" },
+    { "at": 60,  "x": -28, "y": 8,   "scale": 92,  "yaw": 130, "pitch": -4, "opacity": 100, "ease": "inout" },
+    { "at": 100, "x": 34,  "y": 30,  "scale": 66,  "yaw": 240, "pitch": 0,  "opacity": 100, "ease": "inout" }
+  ]
 }
 ```
 
@@ -86,3 +105,4 @@ An interactive 3D model element (glTF / GLB) built on Google's `<model-viewer>` 
 - `hotspots` is an **addable-popup** repeater; each item: `{ label, detail, link, position, normal }`. `position` (required) is the 3D `x y z`, e.g. `"0.1 0.25 0.05"` — get it from the free model-viewer editor. `normal` (optional `x y z`) lets a hotspot hide when it faces away.
 - Switch atts store the string `'yes'`/`'no'`, not booleans.
 - `bg_color` uses the **compact color-preset** shape `{ predefined, custom }`, NOT a raw hex string. See `README.md`.
+- **Scroll Choreography (`choreo_keys`)** is an **addable-popup** repeater; each keyframe: `{ at, x, y, scale, yaw, pitch, opacity, ease }`. `at` = scroll % (0–100). `x`/`y` = screen offset from center in `vw`/`vh` (negative = left/up). `scale` = % of `choreo_size`. `yaw` spins the turntable (camera orbit θ, can exceed ±360 across keys for multiple turns); `pitch` tilts (mapped to orbit φ = `90 − pitch`). `opacity` 0–100. `ease` (`linear`/`inout`/`out`/`in`) is the easing **into** that pose. The runtime interpolates between keys, damps toward the scroll target (`choreo_smooth`), and pins the model in a fixed, `pointer-events:none` layer so page sections scroll over/under it (`choreo_layer` z-index). Reduced-motion rests at the final pose without scrubbing. Place the element where the choreography should begin, then build the sections it travels across below it; roughly match `choreo_travel` to how many screens those sections occupy. This is the no-code path to the "pinned hero product that moves/rotates through every section."

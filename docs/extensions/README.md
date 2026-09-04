@@ -17,6 +17,7 @@ shapes live in `../shortcodes/`, `../option-types/`, `../theme-settings/README.m
 | `forms` | no | `[contact-form]` + a form-builder option type (needs `builder` + `mailer`) |
 | `portfolio` | no | `portfolio` CPT + `portfolio` / `project-gallery` shortcodes |
 | `breadcrumbs` | no | `[breadcrumbs]` shortcode + schema.org BreadcrumbList |
+| `seo` | no | Dynamic `%%tag%%` title/description templates with auto-generation, canonical URLs, robots control, XML sitemaps, live SERP preview → `seo.md` |
 | `custom-fields` | no | ACF-style fields → post meta (`fw_get_field()`) |
 | `post-types` | no | Custom post types / taxonomies |
 | `site-converter` | no | URL/HTML → UnysonPlus conversion (the automated pipeline) |
@@ -26,6 +27,7 @@ shapes live in `../shortcodes/`, `../option-types/`, `../theme-settings/README.m
 | `blog` | hidden (core) | Blog rendering (settings in Theme Settings → Blog) |
 | `mailer` | hidden (dependency) | Mail transport (`fw_ext_mailer_send_mail()`) |
 | `asset-optimizer` | no | CSS/JS combine + optimization (own settings page) |
+| `site-migration` | no | Whole-site push to another install via a connection key; signed transport, staging-and-swap → `site-migration.md` |
 | `sidebars` | no | Custom widget areas |
 | `chat` | no | Floating chat button (Theme Settings → Site-wide UX) |
 | `newsletter-crm` | no | Stores `[newsletter]` signups + the base a CRM (tags/segments, campaigns, ESP sync) grows onto → `newsletter-crm.md` |
