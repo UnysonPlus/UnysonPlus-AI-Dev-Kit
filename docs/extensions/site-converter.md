@@ -248,8 +248,14 @@ so the converted DOM stays clean instead of carrying raw utilities.
     corner radius / circle, aspect-ratio and colour filter; clusters; appends to the `.imgs-*` library.
   - **Background Patterns** (`background_patterns`) — JS `to-presets.mjs` `backgroundPatterns()` turns the
     captured per-section decorative backgrounds (`findPattern`: SVG data-URIs + repeating gradients) into
-    pattern presets; emitted only when the source has one (else the 12 default patterns stand). This one is
-    JS-side because patterns live in computed CSS the PHP stitch can't see.
+    pattern presets; emitted only when the source has one (else the 12 default patterns stand). A section's
+    backdrop is usually a `::before`/`::after` overlay (a faint diagonal-stripe `repeating-linear-gradient`) —
+    `getComputedStyle(el)`, and so the PHP stitch reading rendered.html, can't see a pseudo. **The capture now
+    STAMPS it as `data-sc-pattern` (+ `data-sc-pattern-opacity`) onto the hosting section block** (`capture.mjs`,
+    mirroring the `data-sc-hover` button-pseudo harvest), so BOTH paths apply it: PHP `detect_section_pattern`
+    reads `data-sc-pattern` first, `apply_section_pattern` registers the preset (`pattern_preset_entry` → a
+    `.pat-<id>` layer painting the gradient) and sets the section's Background Pattern option. A gradient carries
+    commas, so it MUST ride the preset (never `selector{…}` custom_css, which silently voids on a comma).
   - **Icon Badge Presets** (`icon_badge_presets`) — `Stitch::build_icon_badge_presets()` (PHP) /
     `box-presets.mjs` `buildIconBadgePresets()` (JS, fed by each icon_box's harvested `_badge` tile skin)
     clusters the distinct icon-chip designs (shape · fill · radius · border) and appends them to the default
@@ -269,7 +275,7 @@ so the converted DOM stays clean instead of carrying raw utilities.
   | Box Presets (fill · hover · all kinds · AI-named · assigned) | `build_box_presets` / `buildBorderPresets` + box census | ✅ built |
   | Button Presets | `build_button_presets` | ✅ built |
   | Image Styles | `build_image_styles` | ✅ built |
-  | Background Patterns (SVG data-URIs + repeating gradients) | JS `to-presets.mjs` `backgroundPatterns()` (`findPattern`) | ✅ built (JS-only — patterns live in computed CSS the PHP stitch can't see) |
+  | Background Patterns (SVG data-URIs + repeating gradients) | JS `to-presets.mjs` `backgroundPatterns()` (`findPattern`); PHP reads the capture's `data-sc-pattern` stamp | ✅ built (both paths — the capture stamps the section's `::before` pattern as `data-sc-pattern` so the PHP stitch sees it too) |
   | Icon Badge Presets | `build_icon_badge_presets` / `buildIconBadgePresets` | ✅ built |
   | Tables | reuse Box Presets on the frame; detect `<table>` in decompose | ✅ (no separate preset) |
   | Background Patterns — APPLIED to their section | `detect_section_pattern` → `apply_section_pattern` (PHP) / `to-pages` overlay (JS) | ✅ built (inline-CSS overlay; `url(data:…)` unquoted so it survives the style attr) |

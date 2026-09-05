@@ -20,6 +20,7 @@ A horizontal or vertical tabbed-content widget; each tab has a title and a body 
 | `mobile` | select | `'none'` | `none` `accordion` `scroll` | Narrow-screen behaviour: wrap (none), collapse-to-accordion, or horizontal-scroll. |
 | `tab_width` | select | `'auto'` | `auto` `fill` `equal` | How tab buttons share the row (Content layout): `auto` = each as wide as its label; `fill` = grow to fill the row proportional to labels; `equal` = every tab the same width. Replaces the old `justified` switch. |
 | `alignment` | select | `'start'` | `start` `center` `end` | Horizontal alignment of the tab nav (no visible effect when `tab_width` fills the row). |
+| `content_frame` | select | `'framed'` | `framed` `frameless` | The box around the content panel. `framed` = the classic border + radius + padding + white bg; `frameless` = no box (border/radius/bg + SIDE padding dropped, a top gap kept) so the content sits flush — best when it brings its own cards. Decoupled from `design` (any nav style can be frameless). |
 | `orientation` | select | `'horizontal'` | `horizontal` `vertical` | Tabs above content, or beside it in a side column (Content layout; ignored in Media). |
 | `layout` | select | `'content'` | `content` `media` | `media` = list of tabs on one side, a switching image on the other. |
 | `media_side` | select | `'right'` | `right` `left` | Which side the image sits on in the Media layout. |
@@ -76,6 +77,27 @@ The Site Converter classifies the source tabs widget and sets the closest **`ori
 | otherwise | `design = underline` (default) |
 
 Conservative — unclear styling stays `underline`; `minimal`/`buttons`/`popover` and the `media` layout are not auto-selected.
+
+It also carries the nav **placement** and, for a filled pill toggle, its **exact skin** — so the converted nav matches the source rather than the design's generic default:
+
+| source signal | → att |
+|---|---|
+| nav wrapper `flex justify-center` / tablist parent `mx-auto` | `alignment = center` (native Tab Alignment option) |
+| `justify-end` | `alignment = end` |
+| a FILLED segmented control (opaque track fill, or an opaque/large-radius active pill) | scoped `custom_css` repainting the pill — see below |
+| the source content panel (`role="tabpanel"` / `sc-tp*`) has NO border and NO opaque fill | `content_frame = frameless` (else `framed`) |
+
+**Content frame.** Most Tailwind/React tab panels are frameless — the content brings its own cards, so the tabs shortcode's default bordered/padded white box is a box the source never had. `detect_tabs_design()` reads the first tabpanel's `data-sc-cs`: a real `border-top-width` or an opaque `background-color` → `framed`; neither → `frameless`. Only set when a panel is found (else the shortcode's `framed` default stands).
+
+**Segmented-pill translator.** The built-in `segmented` design is a generic light/white pill; a source brand-pill toggle (e.g. jukebox's `bg-muted rounded-full border-2 border-primary` track with a `bg-primary` active pill) needs its real tokens. `detect_tabs_design()` reads them from the captured **`data-sc-cs`** on the tablist (track `background-color` / `border-top-width` / `border-top-color` / `border-radius`) and the active `<button>` (`background-color` / `color` / `border-radius` / `text-transform` / `letter-spacing`), and stashes them under `design.pill`. **These are captured BEFORE the `tab_style` classification's early `return`s** (a confidently-classified track returns immediately), so the block runs right after the active button's `data-sc-cs` is resolved, not at the end of the function. `FW_Site_Converter_Mapper::tabs_pill_css()` then assembles a scoped block:
+
+```
+selector .nav{background:#hex;border:2px solid #hex;border-radius:9999px !important}
+selector .nav .nav-link{border-radius:9999px;text-transform:uppercase;opacity:1 !important}
+selector .nav .nav-link.active{background:#hex !important;color:#hex !important;border-radius:9999px !important}
+```
+
+Two constraints baked in: colours are **hex** (`rgb_to_hex()`) because a comma-bearing `rgb()`/`hsl()` silently voids the `selector{…}` custom_css pipeline; and the visual overrides carry **`!important`** to beat the design stylesheet's equal-specificity defaults (e.g. the segmented active's `background:#fff`). The tabs wrapper scopes `selector` to a `.u{hash}` via `sc_build_wrapper_attr`, and when the tabs sit inside a snippet the snippet-CSS injection (snippets `helpers.php`) emits that scoped rule.
 
 ## Notes
 - `tab_content` is a WYSIWYG (`wp-editor`) field — keep it plain semantic HTML with no classes on `<p>`/`<li>` (see `text-block.md`).
