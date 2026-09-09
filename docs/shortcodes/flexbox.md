@@ -68,6 +68,8 @@ keep their values.
 | `width` | responsive popover | `{base:{preset:'none'},…}` | `{preset:'none'\|'1'..'12'\|'1_5'..'4_5'\|'fit'\|'max'\|'min'\|'custom', custom?:{width_custom}}` | This box's own width in a parent Flexbox, or its **grid span** in a Grid parent (fractions `1`=1/12 … `12`=1/1; fifths; content keywords; `custom` → unit-input). |
 | `flex_grow` | responsive switch | `{base:'no',…}` | `yes` \| `no` | Grow to absorb free space (flex). |
 | `no_shrink` | responsive switch | `{base:'no',…}` | `yes` \| `no` | Prevent shrinking (`flex-shrink:0`). |
+| `flex_basis` | responsive unit-input | `{base:{value:'',unit:'px'},…}` | units `px rem % vw` | Starting size before grow/shrink (`flex-basis`). Unlike `width` (a hard fixed size) this composes with `flex_grow` — the `flex: 1 1 300px` card pattern (`flex_basis` 300px + `flex_grow` on + a `min_width`). Scoped rule on the box's `fx-*` class. |
+| `min_width` | responsive unit-input | `{base:{value:'',unit:'px'},…}` | units `px rem % vw` | Smallest the box may shrink to (`min-width`). Stops a flexible box collapsing and forces a card grid to wrap. Scoped rule on the box's `fx-*` class. |
 | `align_self` | responsive image-picker | `{base:'',…}` | `''` `start` `center` `end` `stretch` `baseline` | Override the parent's cross-axis align for just this box. |
 | `order` | responsive short-select | `{base:'',…}` | `''` `first` `0`..`12` `last` | Reorder among siblings (flex). |
 | `col_start` | responsive short-select | `{base:'',…}` | `''` (Auto) \| `1`..`12` | **Grid Column Start** — place this box at an exact grid column (`grid-column-start`, via `fw-col-start-{bp}-N`, scoped under `.fw-grid`), so you can position an item without empty spacer cells. Combine with `width` for the span. Inert outside a Grid parent. |
@@ -80,6 +82,7 @@ keep their values.
 | `variant` | select | `''` | Section-Style preset slug (`''`=Default, `alt`/`light`/`dark`/…) | **Section-only.** Named Section Style that themes background + text together → `section--<slug>`. |
 | `divider_top` / `divider_bottom` | multi-picker | `{shape:'none'}` | `{shape:<slug>\|'none', <slug>:{color,height,flip}}` | **Section-only.** Shape divider on the top/bottom edge (Shape Dividers library) → `.sc-shape-divider` SVG + `section--has-divider`. |
 | `border_preset` | border-style picker | `''` | preset slug | Reusable box style — border, corners, shadow, optional fill + hover (`boxp-*`). |
+| `backdrop_blur` | unit-input | `{value:'',unit:'px'}` | units `px rem` | **Glass.** Frosted-glass blur of what shows through the box (`backdrop-filter:blur()` + `-webkit-`). Needs a translucent `background` to reveal. Empty/0 = off. Scoped rule on the box's `fx-*` class. Site-wide default lives in the theme `--glass-*` token / `.glass-surface` utility. |
 | `min_height` | responsive unit-input | `{base:{value:'',unit:'vh'},…}` | units `vh px rem %` | Minimum height. Pair with `align_items:center` for a hero band. |
 | `aspect_ratio` | text | `''` | e.g. `16 / 9`, `1` | Lock the box to a width : height ratio (`aspect-ratio`). |
 | `text_align` | alignment field | `''` (Inherit) | `''` `left` `center` `right` (+ justify) | Text alignment of inline/text content (`text-*` utility) — applies to **any** tag. |

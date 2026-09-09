@@ -20,6 +20,7 @@ them.
 | `container_width` | multi-picker | `{preset:'inherit'}` | preset: `inherit` (Inherit / global width) `narrow` (Narrow 768px) `medium` (Medium 896px) `wide` (Wide 1024px) `custom` (Custom…) — `{preset:'custom',custom:{custom_width:{value,unit}}}` for Custom |
 | `bg_color` | compact color | `{predefined:'',custom:''}` | quick solid background (prefer `background` for full control) |
 | `background` | background-pro | see below | color / gradient / image / **video** layers — see `../option-types/background-pro.md` |
+| `backdrop_blur` | unit-input | `{value:'',unit:'px'}` | **Glass band.** `backdrop-filter:blur()` (+ `-webkit-`) on the whole section — needs a translucent `background` color to reveal what's behind (e.g. an overlapping/sticky band over an image). Empty/0 = off. Site-wide default = theme `--glass-*` token. |
 | `padding_top` / `padding_bottom` | spacing-scale | `''` | e.g. `'pt-section'`, `'pb-sectionlarge'`, or responsive `{base,md,lg}` |
 | `min_height` | multi-picker | `{preset:'auto',custom:{custom_height:{value:'',unit:'px'}}}` | preset: `auto` (Auto / fit content) `40vh` (40% of viewport) `60vh` (60% of viewport) `80vh` (80% of viewport) `100vh` (Full viewport / 100vh) `custom` (Custom…) |
 | `content_valign` | select | `'top'` | columns vertical align (option id `column_valign`): `stretch` (Default / Stretched) `top` `center` `bottom` |

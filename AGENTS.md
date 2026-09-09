@@ -251,6 +251,63 @@ After every change **on a fresh build**: run `tools/measure/measure.mjs` and fix
 tolerance. **Measure — never eyeball.** *(On a conversion the equivalent is: re-run the class-string
 fixture after each converter fix — the render check is only the secondary confirmation.)*
 
+## Converter fixes: fix the CLASS, then PROVE it generalises (REQUIRED)
+
+Every fix to the deterministic Site Converter must target the **category** of source, not the site in
+front of you — and must then be **measured against the corpus**, not asserted.
+
+Two failure modes, and you need both guards:
+
+1. **Fixing the instance.** Matching `.slat-bar`, or a source's own class names, or one vendor's markup.
+   The next site has different names and the fix evaporates. Write the rule from *structure and computed
+   style* instead: "a mark whose glyph uses `currentColor`", "a row with >=2 zones carrying a border or
+   their own fill". Those survive a rename.
+2. **Generalising from n=1.** An abstraction invented from a single site is speculative — it just fails
+   on a different set of sites. This is the one that feels like good engineering and isn't.
+
+The second guard is the one that gets skipped, and it is cheap: **`tools/chrome-survey` already holds
+187 captured sites.** After a fix, count how many of them exhibit the pattern:
+
+```bash
+cd tools/chrome-survey
+node digest.mjs out/wegic.json out/openhero.json --section coverage
+```
+
+That number does three jobs: it says whether the fix was worth generalising, it sizes the blast radius
+of a regression, and — when a construct keeps landing in the **scoped-CSS fallback** rather than a
+native option — it is the evidence that the option should exist. A recurring CSS fallback is a missing
+feature with a counter attached.
+
+**Rule of thumb:** if you cannot say how many corpus sites a converter fix affects, you have not
+finished the fix.
+
+### A theme option is not "closed" until BOTH twins emit it (REQUIRED)
+
+Adding the Theme Settings option is half the job. A conversion can only reach it if the converter
+**emits** it — and there are two converters. `FW_Site_Converter_Bundle::import_dir()` re-runs
+`build_from_html()` and **overwrites** the JS-produced `theme-settings.json`, so on a WP bundle import
+the **PHP twin is authoritative** and a JS-only rule is silently discarded.
+
+Before you record a gap as closed:
+
+```bash
+node tools/option-reachability/check.mjs      # BOTH / JS-only / PHP-only / NEITHER, per option id
+```
+
+JS-only fails the run (the rule is thrown away on import). PHP-only is a ledger entry — the WP path is
+still correct. **NEITHER means the gap is not closed at all**, however complete the theme side looks:
+gap G3 was recorded `CLOSED in unysonplus-theme 2.5.90` with its five options emitted by no twin.
+
+Then add the rule's case to **both** parity fixtures, never just the twin you edited:
+
+| twin | fixture |
+|---|---|
+| JS | `design-capture/header-chrome-parity.test.mjs` |
+| PHP | `site-converter/tests/chrome-parity-test.php` |
+
+A `saturate` rule once shipped in PHP only, and a `header_shadow_depth` regex bug shipped in both —
+that option had shipped and never once worked. Neither was caught until fixtures existed on both sides.
+
 ## Hard rules
 
 - **Native options before CSS.** If a look is achievable via a Theme Settings

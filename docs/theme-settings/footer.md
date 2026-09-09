@@ -56,6 +56,11 @@ Top-level leaves plus grouped sections (`group_footer_mode`, `group_footer_color
 - **Default**: `{predefined:'',custom:''}`
 - **Notes**: Default link color for the whole footer.
 
+### Link Hover Color — `footer_link_hover_color` (`group_footer_colors`)
+- **Type**: same compact color (kind `text`)
+- **Default**: `{predefined:'',custom:''}`
+- **Notes**: Link colour on hover / focus, driving `--footer-link-hover`. Empty keeps the historic behaviour (the rest colour at `opacity: .85`). When a colour IS chosen, `theme-vars.php` also emits `--footer-link-hover-opacity: 1` so the new colour is not dimmed by that legacy fade. Measured need: **90% of 30 sampled real footers change their link colour on hover**, which the theme previously could not express.
+
 ### Border — `footer_border_top` (`group_footer_border`)
 - **Type**: `multi-inline` (via `unysonplus_hf_border_row_field`; fallback plain `unit-input`)
 - **Default**: `{ width:{value:'',unit:'px'}, style:'solid', color:{predefined:'',custom:''} }`
@@ -110,6 +115,18 @@ Top-level leaves plus grouped sections (`group_footer_mode`, `group_footer_color
 - **Type**: same spacing-scale select
 - **Default**: `''`
 - **Notes**: Space below Post-Footer, above the Copyright bar.
+
+### Custom Padding Top / Bottom — `footer_padding_top_custom`, `footer_padding_bottom_custom` (`group_footer_spacing`)
+- **Type**: `unit-input` (`px`,`rem`,`em`). **Default** `{value:'',unit:'px'}`
+- **Notes**: Exact overrides that win over the two spacing-scale selects above when filled, writing the same `--footer-pad-top` / `--footer-pad-bottom`. The selects are constrained to the site Spacing Scale, which tops out at 8rem — measured across 279 real footer padding values, 95% land on a scale step but the remainder are large (160–240px) and were **clamped to the ceiling, losing up to 112px**. Same preset-plus-numeric-override pattern the header's Floating Pill / Elevated Card designs use.
+
+### Column Gap — `footer_col_gap` (`group_footer_spacing`)
+- **Type**: `unit-input` (`px`,`rem`,`em`). **Default** `{value:'',unit:'px'}`
+- **Notes**: Gap between footer columns, read by all three row modes (`--footer-col-gap`; defaults 40px grid / 32px equal / 28px auto). Measured across 153 real footers, **80% use a gap other than the theme's fixed value** — 48px is the single most common at 43%.
+
+### Columns on Mobile — `footer_mobile_columns` (`group_footer_spacing`)
+- **Type**: `select`. **Default** `'1'`. **Choices**: `1` — stacked (default) / `2` — 2 columns
+- **Notes**: How many columns footer rows keep below 768px, via `--footer-mobile-cols` (the media query is `grid-template-columns: repeat(var(--footer-mobile-cols, 1), minmax(0, 1fr))`). The footer previously stacked unconditionally; 11% of measured footers deliberately keep a two-column pair on a phone. `1` reproduces the old behaviour exactly.
 
 ### Custom CSS Class — `footer_css_class`
 - **Type**: `text`. **Default** `''`. Class(es) on the footer wrapper.
@@ -433,3 +450,24 @@ When `yes` → group `widget_group`:
 | `container-fluid` | (Full-width container thumbnail) |
 
 - **Notes**: Container layout for the widget rows. Column content is filled from WordPress footer widget areas (`footer-1..5`).
+
+---
+
+## Auditing real-world footers against these options
+
+Before rebuilding a source site's footer, measure it rather than eyeballing it:
+
+```bash
+cd tools/chrome-survey
+node survey.mjs --urls ../converter-trainer/sites/wegic.txt --out out/wegic.json
+node digest.mjs out/wegic.json --section anatomy
+```
+
+The measurement that matters most here is the **column ratio**. The rows on this page are each driven
+by a split-slider (count + widths + names, up to 6 columns, *any* ratio), so a wide brand column beside
+narrow link columns is reproducible exactly — but only once you know the ratio. `survey.mjs` records the
+normalised widths plus an `equal` flag; `digest.mjs` reports the distribution, and scores every footer
+construct it finds against
+[`tools/chrome-survey/capability-map.json`](../../tools/chrome-survey/capability-map.json), which maps
+each one to the option on this page that reproduces it. Keep that map in sync when an option here
+changes. See [`tools/chrome-survey/README.md`](../../tools/chrome-survey/README.md).
