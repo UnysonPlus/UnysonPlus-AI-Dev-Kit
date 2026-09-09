@@ -16,7 +16,7 @@ A multi-item testimonial widget with swappable designs (carousel, grid, marquee,
 | `testimonials[].extra` | addable-popup | `[]` | array of `{ label, value }` | **Extra Texts** — optional stat / result rows shown at the card footer (a muted `label` over an emphasized `value`, e.g. `"Total savings"` → `"$14,200"`, or a value-only `"40% more closes"`). Placed via the **`extra` Card Rows slot**; renders only when a row has content. Blank `label` = value-only line. |
 | `design_settings` | multi-picker | `{design:'default'}` | see Notes | Picks the design and reveals only that design's options. |
 | `box_style` | box-style picker | see Notes | box-preset picker object | Box Preset applied to each card (border/corners/shadow/fill+hover) — on the **Card tab**. |
-| `container_type` | select | `'container'` | `''` `container` `container-fluid` | Outer width wrapper. |
+| `container_type` | select | `''` | `''` `container` `container-fluid` | Outer width wrapper. Defaults to **None** (`''`) since 1.14.81 — the theme/section owns width; set `container` to re-add the framework container. |
 | `text_align` | select | `''` | `''` `text-center` `text-end` | Text alignment where the design honours it. |
 | `avatar_shape` | select | `'rounded-circle'` | `rounded-circle` `rounded` `rounded-0` | Avatar corner radius. |
 | `avatar_size` | select | `'avatar-md'` | `avatar-sm` `avatar-md` `avatar-lg` | Avatar size (mainly the Classic design). |
@@ -35,7 +35,7 @@ A multi-item testimonial widget with swappable designs (carousel, grid, marquee,
   ],
   "design_settings": { "design": "default", "default": { "layout_type": { "layout_choice": "carousel" }, "items_per_slide": "1", "carousel_autoplay": "yes", "carousel_interval": "5000", "carousel_pause_hover": "yes", "carousel_controls": "yes", "carousel_indicators": "yes", "carousel_indicator_style": "dots", "carousel_wrap": "yes" } },
   "box_style": "",
-  "container_type": "container",
+  "container_type": "",
   "text_align": "",
   "avatar_shape": "rounded-circle",
   "avatar_size": "avatar-md",
@@ -56,7 +56,7 @@ The `design` key selects one of **11 registry designs** (the wrapper gets class 
 | design | renders as | best source match | # items |
 |---|---|---|---|
 | `default` + `single` | one quote centred in a ~700px column, no slider chrome | a lone hero/editorial quote (stars + quote + author) | 1 |
-| `default` + `grid` | even N-column tiled card grid (`row-cols-1..4`) | a static grid/row of quote cards | few–many |
+| `default` + `grid` | even N-column CSS-Grid of quote cards (`grid_columns` picks 1–4 cols) | a static grid of quote cards | few–many |
 | `default` + `carousel` | Splide horizontal slider (arrows + dots, 1–3 per view) | a classic "quote + avatar" slider | few–many |
 | `marquee` | one continuously auto-scrolling row of 320px cards (loop, edge-fade) | a sideways-scrolling testimonial ticker / wall | many |
 | `masonry` | Pinterest `column-count` wall, uneven card heights | a wall of many quotes with ragged/uneven heights | many |

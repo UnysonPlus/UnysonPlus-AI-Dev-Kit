@@ -27,6 +27,36 @@ This is what "prove `py-10` → `40px`" means. **When you teach or fix a transla
 fixture case and re-run it** — that is the regression guard, not a rendered screenshot diff. The rendered
 `fidelity-check.mjs` lenses are only the *secondary* check that the translated options assembled correctly.
 
+### A chrome rule needs a fixture on BOTH sides — PHP is authoritative for an import
+
+`tailwind-matrix.test.mjs` and `header-chrome-parity.test.mjs` exercise the **JS** twin. That is only
+half the guard for anything that lands in **theme-settings** (header/footer chrome), because
+`FW_Site_Converter_Bundle::import_dir()` re-runs `build_from_html()` and **overwrites** the JS-produced
+`theme-settings.json` so pages and design come from one engine. On a bundle import — the path the admin
+"Convert" button takes — **the PHP twin is what actually runs**, and a JS-only fixture guards the side
+nobody executes.
+
+So a chrome translation rule lands with a case in **both**:
+
+| path | fixture | run with |
+|---|---|---|
+| JS (`to-theme-settings.mjs`) | `header-chrome-parity.test.mjs` (capture service) | `node header-chrome-parity.test.mjs` |
+| PHP (`class-fw-site-converter-stitch.php`) | `tests/chrome-parity-test.php` (site-converter) | `php D:/xampp/wp-cli.phar --path=D:/xampp/htdocs/testsite --allow-root eval-file "<path>"` |
+
+The PHP fixture feeds synthetic HTML carrying the capture stamps (`data-sc-cs`, `data-sc-header`,
+`data-sc-scrolled`, `data-sc-footer`) through the real `build_from_html()` and asserts the emitted
+options. This is not a theoretical split: the `saturate`-pinning rule once shipped in **PHP only**, and a
+`header_shadow_depth` regex bug shipped in **both** — neither was caught until a fixture existed.
+
+**Before recording a converter gap as closed, run `tools/option-reachability/check.mjs`.** It reports, per
+header/footer theme option id, whether BOTH twins emit it, one only, or neither. A theme option nothing emits
+is not a closed gap — gap G3 was recorded `CLOSED in unysonplus-theme 2.5.90` while neither twin had ever
+emitted one of its options. JS-only drift is the failing case (a bundle import discards it); PHP-only is a
+ledger entry, since PHP is what runs on import.
+
+**Both fixtures pin a NEGATIVE per rule** (signal absent → option not emitted). That half is what keeps a
+default conversion unchanged, and it is the half that protects already-converted sites from drift.
+
 ### The fix loop (per wrong value)
 
 `captured class → converter translation → is the value right?` → **no →** fix the class→value rule in
@@ -76,9 +106,11 @@ decomposes to nested `column`s (PHP) or a `code_block` (JS). Those specific shap
 ## Provides
 
 - **Shortcodes:** none — it's an importer toolkit, not builder elements (it *emits* page-builder trees + presets that shortcodes consume).
-- **Admin page:** Unyson+ → **Convert**. Tools: Media scanner/importer, Styling Presets importer, Theme-settings importer, Pages importer, Menu importer, one-shot **Convert bundle** (`.zip`), and a **header/footer Theme Generator** (child or standalone). Two conversion methods (URL / file) with auto-detected source adapters + an optional **"Use AI"** fidelity pass and a human-in-the-loop "Review mapping first" editor.
-- **Reusable engines (`includes/`, all static):** `FW_Site_Converter_Media`, `_Presets`, `_Theme_Settings`, `_Pages`, `_Menus`, `_Bundle`, `_Theme_Generator`, `_Stitch` (deterministic no-AI section decompose + block recognizers), **`_Mapper`** (block → shortcode / Theme-Settings-preset mapping — the counterpart of the JS `to-pages`), **`_Tailwind`** (Tailwind class → CSS compiler **and** class → design-token translation: arbitrary `[…]` values, the full default colour palette, `shadow-*`), `_Sources` (source adapter registry).
+- **Admin page:** Unyson+ → **Convert**. Tools: Media scanner/importer, Styling Presets importer, Theme-settings importer, Pages importer, Menu importer, one-shot **Convert bundle** (`.zip`), a **header/footer Theme Generator** (child or standalone), and **"Duplicate as landing page"** (a verbatim, non-decomposed mirror import — see engines below). Two conversion methods (URL / file) with auto-detected source adapters + an optional **"Use AI"** fidelity pass and a human-in-the-loop "Review mapping first" editor.
+- **Reusable engines (`includes/`, all static):** `FW_Site_Converter_Media`, `_Presets`, `_Theme_Settings`, `_Pages`, `_Menus`, `_Bundle`, `_Theme_Generator`, `_Stitch` (deterministic no-AI section decompose + block recognizers), **`_Mapper`** (block → shortcode / Theme-Settings-preset mapping — the counterpart of the JS `to-pages`), **`_Tailwind`** (Tailwind class → CSS compiler **and** class → design-token translation: arbitrary `[…]` values, the full default colour palette, `shadow-*`), **`_Blocks`** (emits WordPress **core-block** markup from the section/block intermediate — the PHP twin of the capture service's `to-blocks.mjs` — so a conversion can output a portable **block-theme** page body; unmapped blocks degrade to a scoped `core/html` block), **`_Landing`** (the **"Duplicate as landing page"** action: imports a verbatim site mirror — capture service `GET /mirror` → `mirror.mjs` — into `uploads/unysonplus/landing/<slug>/` as a single `section → column → code_block` on the no-chrome **Landing Page** template; a frozen, deliberately non-decomposed WebGL-friendly copy), `_Sources` (source adapter registry).
 - **Public hooks/filters:** `fw_site_converter_sources` (register a builder adapter). The AI backend + capture service live **outside WordPress** (local `unysonplus-site-capture` service — `/capture`, `/capture-file` (renders an uploaded Stitch `.zip` / HTML through the same engine as a URL), `/ai-convert`).
+- **Training harness (`tools/converter-trainer/`):** a token-cheap loop for improving the converter against a corpus of demo sites (openhero/wegic/any URL list). `bash train.sh` batch-captures a `sites/*.txt` list (per-slug dirs so the shared capture slug doesn't collide), then runs each capture through `Stitch::html_to_mapping` + `Mapper::build_pages` headlessly and prints a **ranked list of fidelity flags** (`LIGHT_OVERLAY_WASH`, `LOW_CONTRAST_TEXT`, `NO_HERO_BG`, `EMPTY_SEC`, `VERBATIM`, `FEW_SECTIONS`) → `batch/_audit.csv`. After a converter edit, `train.sh <list> --audit-only` re-scores the existing captures in seconds (no browser) so you see whether flags cleared. Content signals read the MAPPING (heading text lives in a block's `text`), background/overlay signals read the BUILT tree. See its `README.md`.
+- **Training harness (`tools/converter-trainer/`):** a token-cheap loop for improving the converter against a corpus of demo sites (openhero/wegic/URL list). `capture.mjs` batch-captures a `sites/*.txt` list into per-slug dirs (no slug collision); `audit.php` runs each capture through Stitch+Mapper **headlessly** (no browser) and prints a ranked list of fidelity flags (`LIGHT_OVERLAY_WASH`, `LOW_CONTRAST_TEXT`, `NO_HERO_BG`, `EMPTY_SEC`, `VERBATIM`, …) + a CSV; `train.sh` orchestrates capture+audit, with `--audit-only` for a fast re-score after a converter edit. See its `README.md`. Use it to find WHICH sites regressed/drift before spending time looking at any — content signals come from the mapping, background/overlay from the built tree.
 
 ## Notes / gotchas
 
@@ -457,13 +489,42 @@ timeline → Scroll Motion / Scrollytelling atts, and wire the tool into the cap
 
 ### Translation rules still to add (known gaps — a conversion needs these; teach them + a fixture case)
 
+- **Segmented masthead (2-3 bordered "cards" instead of one bar)** — the zone boxes carry the design, and
+  the theme has per-ROW Custom Styling but **no per-COLUMN styling**, so there is no native target. Carried
+  as scoped CSS on `.header-col--*` from a `data-sc-zone` capture stamp. **MEASURED: 1 of 138 corpus sites
+  (0.7%)** — wegic 0/81, openhero 1/57. So it stays a scoped-CSS fallback and does **NOT** graduate to a
+  per-column option; a theme capability for one site in 138 is not worth the option surface. (This entry is
+  kept as the worked example of the rule in `AGENTS.md` -> "fix the CLASS, then PROVE it generalises": the
+  fix was proposed as the top candidate to graduate on the strength of ONE site, and the corpus count
+  reversed that. Measure before you build.)
+- **Decorative chrome widgets** (a progress/meter bar, a rule, a status pip beside the CTA) — no text and
+  no link, so every text-driven extractor skipped them even though they are often the only colour in the
+  header. Now emitted as `custom_html` from a `data-sc-decor` stamp, bar-shaped only (`w >= 3h`) so a
+  square icon tile is not duplicated out of the logo.
+- ~~**Capture completeness has no gate.**~~ — **LEDGER ADDED (capture-service 1.10.70).**
+  `capture-residue.mjs` audits each chrome region for CANDIDATE design properties that are outside
+  `data-sc-cs`'s 30-property allow-list and set to something other than their boring default, and writes
+  **`capture-residue.csv`** into the bundle plus a one-line summary during the capture. On the worked
+  example it surfaces, automatically and in the first rows, the three things that previously took a dozen
+  screenshot round-trips to find: `border-bottom/left/right-width` (the allow-list carries only
+  `border-top-*`), `width`/`height` 38px (an icon tile and a meter bar), and `min-height` 58px (the zone
+  height). It is a LEDGER, not a gate — under-capture is normal; what matters is that it is now VISIBLE
+  and countable across a corpus, so the allow-list grows from evidence.
+- **Old note, kept for context:** capture completeness has no gate. Several chrome misses were not translation bugs at all — the value
+  never reached the bundle (`data-sc-cs` stamps a fixed prop set: no width/height, nothing on the fill
+  child of a meter, nothing on a shadow-DOM icon). A translation can only be as good as the capture, and
+  nothing currently fails loud when a region is under-captured. Worth a gate of its own.
+
 These are captured-class effects the "rules to keep" list above does **not** yet translate. Each is a
 converter-fix opportunity (not a hand-tune), and each should land with a `tailwind-matrix.test.mjs` case:
 
 - **Gradients** — `bg-gradient-to-*` + `from-*`/`via-*`/`to-*` (and arbitrary gradient backdrops) → the
   `background-pro` / `gradient-v2` option (both exist as targets), not a flattened `bg_color`.
-- **`backdrop-blur-*` / `backdrop-filter`** → a scoped-CSS translation keyed off the element's `css_class`
-  (no native option yet; emit the CSS, don't drop it).
+- ~~**`backdrop-blur-*` / `backdrop-filter`** → scoped CSS (no native option yet)~~ — **CLOSED
+  (theme 2.5.90).** Native now: `header_glass` + `header_glass_blur` + `header_glass_saturate`
+  (`--glass-blur` / `--glass-saturate`). The converter emits the measured radius, and pins saturation to
+  100 when the source blurs *without* saturating (the theme's frost adds `saturate(1.4)` by default, which
+  over-saturates a blur-only source). Guarded by `header-chrome-parity.test.mjs`.
 - **`shadow-*` / border / blob radius on a standalone image** — box detection covers card & container skins
   (→ Box Presets) and image radius/aspect/filter (→ Image Styles), and the button preset covers buttons. A
   standalone image that carries a skin `media_image` can't express (border colour/width, box-shadow, an
@@ -494,6 +555,362 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   desktop nav never un-hid (permanent hamburger). Fix: negative-lookbehind so an escaped `\:` is preserved.
   A cross-origin CDN stylesheet that becomes CORS-unreadable at extraction time is now re-fetched + inlined
   before extract so its rules are readable.
+- **Dark `oklch()`/`oklab()`/`hsl()` section backgrounds now apply — the "cream hero" fix (site-converter 1.8.17).**
+  The mapper's `rgb_triplet()` (which decides a section's band fill → its native Background colour) parsed only
+  `rgb()`/`#hex`, returning null for the `oklch()` palettes AI builders (openhero, v0, …) emit. So a hero whose
+  computed `background-color` is `oklch(0.12 …)` (a near-black band) was dropped, the band fell back to the theme's
+  LIGHT default, and its white heading went invisible (the burger hero rendered cream-on-cream). `rgb_triplet()` now
+  falls back to `Stitch::color_to_hex()` (made public) for oklch/oklab/hsl → hex → triplet, keeping the "solid fill
+  only" contract (a modern `oklch(… / .3)` slash-alpha scrim is still skipped). This cascades to every rgb_triplet
+  caller (`norm_bg_color`, section-preset matching, button colours), so all oklch colours resolve now.
+- **Background-media SCRIM no longer grabs a decorative particle / caption card (site-converter 1.8.17).**
+  `media_bg_overlay()` (the legibility scrim carried onto a bg-video/image section's Background → Overlay) accepted
+  ANY absolutely-positioned semi-transparent element and picked the highest-alpha one. On the burger hero that was a
+  cream `rgba(255,242,216,.9)` — either a `.seed` sesame-dot particle (tiny, high-alpha) or the "Hydro-suspension
+  plating" caption card (text-bearing) — so a 90% cream wash covered the whole hero and buried the video + text. A
+  real scrim is FULL-BLEED and TEXT-FREE: the candidate must now show a coverage signal (`inset-0`, or `w-full`+`h-full`)
+  and carry no text of its own. Particles (not full-bleed) and cards (have text) are rejected; a genuine `inset-0` fade survives.
+- **Background-video HALLMARKS — a custom-CSS hero video is hoisted to the section bg (site-converter 1.8.22).**
+  A `<video>` whose cover-fill lives in a `<style>` rule rather than an `object-cover`/`w-full h-full` CLASS
+  (e.g. regenerative-landscapes' `#heroVideo` — `.hero video{position:absolute;object-fit:cover}`) read `$covers`
+  false, so the hero shipped a tiny inline video instead of a full-bleed background. A muted + autoplay + looping,
+  no-controls `<video>` is decorative by definition; when it's absolutely/fixed-positioned (itself or via a covering
+  ancestor) it is now treated as a section background even without the cover CLASS. Corpus **bg_media 75 → 88**.
+- **Header logo wordmark — brand-slot search now RECURSES (site-converter 1.8.24).** `header_brand_block` only
+  scanned the header's DIRECT children; when the brand sits inside a wrapper that also holds a status chip + a CTA
+  (regenerative-landscapes: `header-top` › `header-brand` + `season-chip` + `header-cta`, so the wrapper's combined
+  text overflows the 48-char guard) it returned NULL, the wordmark was dropped, and the theme fell back to the site
+  title ("Home"). `find_brand_slot()` now descends into a non-nav wrapper to find the leftmost brand slot inside it
+  (a nav / >1-anchor link-cluster is still skipped without recursing). Corpus **logo 82 → 93** (with the trainer's
+  logo scorer also updated to count an icon-only inline `<svg>` logo and to read only VISIBLE wordmark text).
+- **Container width — loose-text sections no longer render edge-to-edge (shortcodes 1.14.74).** The Site Converter
+  names a non-standard site content width as a `content-<px>` container slug (e.g. `content-1392`), and a contained
+  band with no `max-w-*` wrapper of its own inherits it as a fallback cap. But that slug is only registered as a
+  named preset when the source clustered that exact width, so a section that merely inherited it had no entry in
+  `unysonplus_container_width_map()` → the flexbox view's cap silently vanished and the band spanned the full
+  monitor (loose-text sections; the "content flush to the edges" complaint). The flexbox view now parses the px
+  straight from a `content-<px>` slug, so the cap always resolves. Corpus **container 83 → 100**.
+- **Icon-box INNER-wrapper padding → the icon_box's own spacing (site-converter 1.8.28, iconbox_pad 85 → 87).**
+  A source card whose inset lives on an INNER content wrapper (`.tile > .inner{padding:18px}`) rather than the
+  cell itself (`.tile` — no padding) lost that inset — the icon-box content sat flush against the card edge.
+  `card_from_cell` now records `contentPad` (the heading's nearest padded ancestor within the cell), and
+  `n_icon_box` applies it to the icon_box `spacing` — but ONLY when the cell carries no box skin (a rounded
+  fill/border card's padding rides its Box Preset column, so this avoids double-inset), and never on a minimal
+  gap-spaced card (no `contentPad` → correctly untouched, so regenerative stays 0). Still PARTIAL: a site with
+  several card LAYOUTS (master-built: `.inner` vs `.tile`) only gets the inner-padded ones — the flat `.tile`
+  cards are a separate sub-pattern.
+- **HARNESS — bg_media is now DETERMINISTIC (built from the builder, not a rendered video).** The old scorer
+  measured a hero video's RENDERED size, which races with autoplay load — the same site swung `bg_media` 100↔0
+  run-to-run, inflating the baseline and producing phantom regressions on every diff. Now `import-site.php` reports
+  whether the FIRST section got a `background.video`/`image`, matched against a source cover/positioned `<video>`;
+  the score is stable. Also raised the importer's PHP `memory_limit` to 1536M (large sites otherwise fataled →
+  phantom IMPORT-FAIL regressions).
+- **STALE-MENU contamination — a conversion inheriting the PREVIOUS site's nav (site-converter 1.8.45).** Found by
+  converting an UNSEEN real site (resend.com) through the improved converter: the hero + dashboard card were
+  faithful, but the header showed "Collection / Optics / Archive" — nav items that are NOT resend's (its nav is
+  Pricing/Docs/Features/…). Root cause: resend's nav is bare `<a>` links spread across THREE `<header>`s with no
+  `<nav>`/`<ul>`, which neither the capture-side nor PHP `extract_menus` reads well, so the conversion produced NO
+  `primary` menu — and on a REUSED install the `primary` theme-mod location kept pointing at a PRIOR conversion's
+  menu (#61 "Studio Denim Header" = urban-visionary). Fix (bundle Phase 5-guard): after the menu import, when this
+  chrome conversion assigned NO `primary`-located menu (with items), CLEAR the stale `primary` location so the
+  theme falls back to no/default nav instead of another site's. Verified: resend's `primary` → cleared (stale nav
+  gone); a normal site with a real nav is untouched (colosseum keeps "History Header": Hypogeum/Vomitoria/Velarium).
+  MENU FALLBACK (site-converter 1.8.46): when the capture bundle carried NO menu, the bundle now falls back to the
+  PHP `extract_menus(rendered.html)` for the PRIMARY (masthead) nav, so the header shows the SOURCE's real nav
+  ("Pricing" for resend) instead of nothing. QUALITY-GATED: a `//header` parse of a site whose "header" is a HERO
+  (getty/the-art-of-living's min-h-screen hero `<header>`) yields bogus empty-title items — so the fallback
+  requires EVERY item to carry a non-empty ≤40-char label, else the menu is dropped (→ the stale-guard clears the
+  location → no garbage nav). Verified isolated: resend → "Pricing"; getty → (none, bogus rejected); art-of-living
+  → "Collection, Materials, Residence"; colosseum → "Hypogeum, Vomitoria, Velarium" (real navs preserved). Menus
+  don't affect the scorer dimensions, so no corpus-score risk. Follow-ups: (1) on a REUSED install, re-importing
+  the SAME site doesn't re-fire the child theme's `after_switch_theme`, so the theme's BAKED `nav_menu_locations`
+  (in the generated functions.php) can override the bundle's assignment with a stale menu — a fresh generation
+  (or `switch_theme` away first) assigns correctly; reconciling the theme-generator's baked nav with the bundle
+  import is the deeper fix. (2) converter menus ACCUMULATE on a reused install (50+ "* Header"/"* Footer") — a
+  cleanup candidate. (3) `extract_menus` still only gets resend's minimal top-level nav (its dropdown/mega items
+  aren't reproduced).
+- **STATS mis-read as a pricing table + a PORTAL video hijacking the hero (site-converter 1.8.39).** Reported on
+  build-products-that-move-money: the hero rendered very poorly — a garbled "$4.2/mo" / "$18240000.00/mo" pricing
+  table and a washed-out hero. Two recognizer bugs: (1) `cell_price_parts` read STAT/METRIC numbers ("$4.2B"
+  processed volume, "$18,240,000.00" reference ledger) as plan prices, so `is_pricing_table` fired and the pricing
+  shortcode FABRICATED a "/mo" (neither "/mo" nor "Plan" exists in the source). Fixed: a currency number with a
+  magnitude suffix (`$4.2B`/`$18M`/`$9K`) or a value >= $10,000 is a stat, not a plan price → rejected. (2) The
+  video recognizer's bg-hallmarks path promoted a rounded "Portal stream" PIP reel (`div.portal`, radius 40px, an
+  autoplay/object-cover video in the right column) to the section BACKGROUND, washing out the hero. Fixed: a video
+  whose intermediate wrapper (up to the section, exclusive) is a ROUNDED card (border-radius >= 24px) is CONTENT,
+  not a backdrop → not promoted. Rounding is the discriminator, NOT the grid column — a genuine full-bleed hero
+  video can fill a `data-sc-col` column via inset-0 + h-full/w-full with SQUARE corners (the-art-of-living), so an
+  earlier data-sc-col clause wrongly demoted it and was removed. Corpus overall 99 unchanged, zero regressions;
+  build-products hero + real stats restored, verified visually. NB the scorer scored this site 86 while it rendered
+  badly — a real BLIND SPOT: per-section metrics passed the 2 surviving sections, and `bg_media` only flags a
+  MISSING backdrop, never a wrongly-ADDED one or within-section flattening. Hardening the harness to catch
+  structural failures (section-count vs source, hero presence, wrong-promotion, source/converted band diff) is the
+  standing follow-up, alongside the computed-layout structure walk + AI-as-classifier direction (see roadmap).
+  bleed layer only by the utility classes (`inset-0`, `w-full h-full`); a custom container named for what it is —
+  `fullscreen-video-container` (living-architecture) — was missed and its hero shipped with no backdrop. Pass 1
+  now also accepts a class matching `fullscreen|video-bg|bg-video|video-background|video-cover`, while still
+  excluding a shaped content window (`*-portal`, `*-mask`, `*-shell`). living-architecture **bg_media 0 → 100**,
+  visually verified (the video fills the hero at 1440×900). The other bg_media=0 sites (nox-liquid, the-line,
+  terraform, national-geographic, reactive-forest, kinetic-fashion, human-centric, build-products) are SHAPED
+  content videos the converter correctly leaves as content — the scorer's `srcHeroVideo` heuristic was
+  over-flagging them; import-site.php now matches the same promotion criteria (a real backdrop vs a portal/mask/
+  shell/column/rounded content clip), so those read bg_media=100 (N/A) honestly.
+- **SITE TITLE / logo wordmark — brand from `<title>` for brand-less pages (site-converter 1.8.36).** A single-scene
+  page with NO header/nav (crafting-the-nocturnal-web, synthetic-light) has no brand chrome, so `detect_logo`
+  returned empty and the masthead rendered the WP "Home" fallback. The site-title now derives the brand from the
+  source `<title>`'s first segment (before a `|`/`–`/`—`/`·`/`:` separator — the same derivation the theme NAME
+  already uses), so the masthead shows "Aether House" / "Lumina Gen" instead of "Home". **logo 0 → 100** on both;
+  homex (no header AND no `<title>`) legitimately stays the "Home" fallback.
+- **HARNESS — spacing excludes heroes + gap-spaced bands (score.mjs).** The metric counted any text section with
+  <24px vertical padding as collapsed, but a HERO uses min-height + vertical centering (autonomous-supply-chain's
+  1083px bg-video hero) and a `section--gap-<n>` band uses child GAP for rhythm (obsidian's `section--gap-32px`) —
+  both legitimately have ~0 section padding. Now a tall centered/flex/min-height/full-bleed-media section and a
+  `section--gap-≥16` band are N/A for the padding-collapse check (the gap px is read from the class, since the gap
+  often sits on an inner flexbox and `cs.rowGap` reads 0). Cleared the false collapses (autonomous 0→100,
+  crafting 75→100, obsidian 33→67); a genuinely flush content band still counts.
+- **SECTION-LEVEL bg-video hoist — inset-0 layers AND self-absolute `video-bg` videos (site-converter 1.8.31).**
+  A hero `<video>` (autoplay+muted hallmarks) that lives inside a section — either wrapped in an `absolute/fixed
+  inset-0` (or `w-full h-full`) text-free bleed LAYER, or as the video ITSELF being the full-bleed backdrop
+  (carrying a `video-bg`/`bg-video` class, or self-positioned absolute/fixed) — was previously DROPPED as decor
+  before the per-element video recognizer ran, so the hero shipped with no backdrop. New `detect_section_bg_video($node)`
+  (in `html_to_mapping`, called per section BEFORE block collection, mirroring `section_bg_image`) detects it, pulls
+  `<source>`/poster/scrim, REMOVES it from the DOM, and returns a bg-video descriptor set as the section's
+  `sectionBgVideo` (mapper → `apply_bg_video`). Pass 2 EXCLUDES a rounded (`border-radius ≥ 24px`) card or a
+  grid-column-scoped (`data-sc-col`) panel unless it has a bg class — so nox-liquid's tilted, rounded `video-portal`
+  content video in a 2-column [text|video] hero is correctly left as CONTENT, not promoted. Corpus **bg_media 76 → 85**,
+  overall **93 → 94**, zero regressions; the-seed/biophilic/colosseum each **+14/+15**. The remaining `bg_media` gap
+  is the genuine content-video-in-column framings (nox-liquid, terraform, reactive-forest, the-line) which are NOT
+  section backgrounds — the scorer's `srcHeroVideo` heuristic over-flags them; promoting them would be wrong.
+- **HEADER BRAND — stacked TWO-LINE text wordmark + tagline (site-converter 1.8.33).** A brand that stacks a short
+  wordmark over a tagline as plain `<div>`/`<span>` lines — no `<b>`/`<i>`, no `tagline`-ish class — was dropped:
+  the combined string ("Vesta Atelier Curated Living Spaces" = 5 words) blew the ≤4-word wordmark guard, so BOTH
+  lines fell and the theme rendered the WP "Home" fallback. `detect_logo` now, when there's no `<b>/<strong>`
+  primary, gathers the innermost text LEAVES of the brand slot in document order and splits the first SHORT line
+  (≤24 chars, ≤3 WHITESPACE tokens — so a dotted acronym "S.P.Q.R." counts as ONE token, not 4 as
+  `str_word_count` reads it) off as the wordmark, keeping the second as the tagline. Fixes art-of-living
+  ("Vesta Atelier"/"Curated Living Spaces") + colosseum ("S.P.Q.R."/"Roma Antiqua") — **logo 0 → 100** each,
+  visually verified. NB the remaining logo=0 sites (homex, synthetic-light) are genuinely BRAND-LESS sources
+  (no header/nav/logo/img/title) — the "Home" fallback is the honest result, not a fixable defect.
+- **IMAGE BOX — arbitrary VIEWPORT-unit card heights recovered (site-converter 1.8.33).** `box_decl_from_classes`
+  (both Stitch + Mapper twins) now recovers `h-[Nvh]`/`h-[Nvw]`/`h-[N%]`/`h-[Nem]` in addition to `h-[Npx|rem]`,
+  so an `object-cover` image in a viewport-height card (`min-w-[40vw] h-[80vh]` — urban-visionary's parallax
+  lookbook) stops collapsing to 0 height (the "empty white gap"). The card gets the height; the image fills + crops.
+- **ICON-BOX — inner-wrapper padding now applies to BOX-SKINNED cards too (site-converter 1.8.34).** `n_icon_box`
+  dropped the `contentPad` inset (the source card's padding on an INNER content wrapper — `card_from_cell` records
+  it, stopping AT the cell boundary so it never captures cell-ROOT padding) whenever the card was box-skinned,
+  on the assumption its padding "rode a Box Preset column." But a rounded fill/border card carries its SKIN, not
+  the inner wrapper's padding, so the gate dropped exactly the cards that most need the inset and their text ran
+  flush to the rounded edge (regenerative/master-built: `.copyzone{padding:36px}` inside a rounded `article.band`).
+  The gate is removed — `contentPad` applies in both cases, and since it only ever holds inner-wrapper (never
+  cell-root) padding there is no Box-Preset double-inset; the per-side `empty($pad[...])` guards still never
+  overwrite a real value. master-built **ibpad 25 → 100**, visually verified (no double-inset). NB a few
+  image-topped `band` cards (regenerative, crystal) still don't populate `contentPad` — a deeper `card_from_cell`
+  heading/cell resolution issue for image+copyzone bands — remaining minor lead.
+- **HARNESS — iconbox_pad only penalises a VISUAL BOX (score.mjs).** The metric counted ANY `.fw-icon-box` with
+  <1px horizontal padding as a miss, but a FLAT gap-spaced card (transparent, no border/radius — the-seed/the-line
+  stack icon+heading+text with `gap-*` and NO inner padding) legitimately has none, and a top-only `border-t` RULE
+  (solitary/regenerative: a thin top line + `pt-8`) is not a box either. Now only a card with a FILL or a
+  `border-radius ≥ 4px` is measured; flat + top-ruled cards are N/A. This cleared the false penalties (the-seed,
+  the-line, solitary → 100) and ISOLATED the genuine defects (rounded/filled cards actually missing padding), the
+  same de-noising discipline as the contrast fix.
+- **HARNESS — honest contrast (score.mjs) + min-sample guard.** Contrast is now judged ONLY over a MEASURABLE
+  colour backdrop: samples are restricted to text INSIDE a `<section>` (chrome — a stale/shared footer, skip-to-content
+  a11y links — is excluded), and text over a bg `<video>` (headless never paints it), a background-IMAGE/gradient,
+  or an absolutely-positioned media caption is SKIPPED (its real backdrop can't be luma-judged, so it produced
+  systematic FALSE low-contrast that swamped real defects). A min-sample guard (`contN >= 4`, else N/A) stops a
+  media-heavy page's tiny sample from whipsawing 0↔100 run-to-run. Honest corpus contrast **92 → 97**; the former
+  "outliers" (urban-visionary 51, cloud-forest, art-of-living) render FINE — their misses were all false positives.
+  NB: the full-corpus run itself is FLAKY (sequential imports under MySQL load → theme-gen failures read as logo/
+  contrast regressions); VERIFY any apparent regression with a deterministic `--only` re-run before trusting it.
+- **CONTRAST cluster is RENDER-CORRECT — the residual dings are scorer false positives (verified 2026-09-07).**
+  The remaining contrast<100 sites (the-art-of-the-burger, the-line, payment-operations, bespoke, cosmic, lumina,
+  perspective, rebalancing) were investigated end-to-end and **render CORRECTLY** — `detect_body_background` DOES
+  resolve the source's dark `oklch(0.12 …)` page canvas (`color_to_hex` → `#140000`), the body + sections paint
+  dark, and white text sits legibly on dark (burger + the-line screenshotted and confirmed clean). The scorer's
+  low reading has two harness causes, NOT a converter defect: (a) RENDER TIMING — the theme + generated preset CSS
+  + web fonts land after `domcontentloaded`, so an early measure caught an unstyled (white) page → white-on-white
+  false reading; `score.mjs` now waits for `document.fonts.ready` and polls until the body background is actually
+  painted before measuring. (b) DEEP NESTING — `bgLuma`'s 8-ancestor walk can fall back to the body on very deeply
+  nested text; harmless when the body is dark, but a residual source of noise. Net: the converter handles dark-theme
+  sites correctly; do NOT "fix" contrast by forcing colours. (Earlier a blanket token-canvas guard was tried and
+  measurement-REJECTED — that instinct was right to distrust.) Genuinely light bands with mis-applied white text
+  would still be a real defect, but none survived visual verification in the current corpus.
+- **HERO-HEADER mistaken for the masthead → hero swallowed (site-converter 1.8.42).** The FIRST defect the new
+  `structure` metric surfaced: getty-images rendered its hero band with NO headline. Root cause — its hero is a
+  `<header class="">` nested inside `<div class="… min-h-screen">` (the full-viewport height is on the header's
+  ANCESTOR, not the header), with no separate `<nav>`. `is_hero_header` only checked the element's OWN class/cs,
+  so it read the header as short → `header_root` took it as the MASTHEAD (its no-nav fallback `return $header`
+  kept a hero as chrome), and the hero h1 never became a body section. Two fixes: (1) `is_hero_header` now also
+  treats an element as a hero when a near ANCESTOR (≤3 levels) is full-viewport (`min-h-screen`/`h-screen`/
+  `h-[≥60vh]`), gated by the existing h1/h2 requirement; (2) `header_root`'s no-nav fallback returns NULL (no
+  masthead → the theme's default header) when the only `<header>` is a hero, so the hero flows into the body
+  sections and its headline renders. **structure 55 → 100 on getty**, and the SAME latent bug fixed
+  adaptive-high-fidelity-architecture (**+14**) and dark-forest-misty-morning (**+6**); corpus overall held at 99
+  with ZERO regressions — no real masthead was misclassified (the h1/h2 gate protects that). Visually verified
+  (getty's "Mastering the Optical Breach" hero now renders centered on its full-screen band).
+- **HARNESS — container flush ignores a horizontal MARQUEE (score.mjs).** getty's "FORMAT FIDELITY · SPECTRAL
+  PRECISION…" ticker spans far wider than the viewport by design (text L≈−80 → R≈5900), which read as a flush
+  container defect. The flush check now only counts a text band that is ~viewport-width (`R−L ≤ 1.4·vw`), so a
+  wide overflow scroller isn't a false flush. getty container 75 → 100; no other site affected (only getty had a
+  wider-than-viewport text band).
+- **HARNESS — a STRUCTURE dimension catches failures the per-section metrics miss (score.mjs).** The deepest
+  lesson from build-products: the scorer scored a badly-broken page 86 because every per-section metric passed
+  the 2 surviving sections — the harness was blind to the failures the USER hits (buried hero, flattening,
+  wrongly-added backdrop). New `structure` dimension (weight 1.3). Calibrated across the full corpus, only ONE
+  signal survived clean: **hero-present** (the first content section must lead with a prominent, >=28px, visible
+  heading) → `structure` 55 when absent. It flagged exactly one site — **getty-images**, whose hero renders with
+  NO visible headline (a genuine defect that scored 100 before) — with zero false positives. Two prototyped
+  signals were CUT after calibration because they false-flagged healthy sites: `flattened` (rendered h2/h3 count
+  can't tell a healthy 5-card features section from a real mega-section — false-flagged nox-liquid + das-wesen)
+  and `wrongBg` (a rounded video WRAPPER alone isn't a wrong promotion — financial-infrastructure's rounded
+  full-bleed hero video renders correctly). Both are still COMPUTED + reported (`php.wrongBg`, `m.flattened`) for
+  triage, just not scored, so they can't cause false regressions. Better inputs (a source-band vs rendered-section
+  comparison for flattening; video SIZE not just rounding for wrongBg) are the follow-up to make them scorable.
+  NB getty-images' missing hero is now a KNOWN real defect the hardened harness surfaced — a fix candidate.
+- **AI-AS-CLASSIFIER — structure verdicts advise the deterministic engine (PROTOTYPE, opt-in, site-converter 1.8.40).**
+  The antidote to whack-a-mole: instead of adding another class-name heuristic per site, let a model make the few
+  AMBIGUOUS structural calls that vary infinitely across markup, and keep the deterministic engine as the builder +
+  validator. Pipeline: PHP `FW_Site_Converter_Stitch::structure_summary($html)` emits a COMPACT per-section signal
+  summary (stable `sig` = first-heading slug, `dollars[]`, `hasPeriod`, `hasFeatureList`, per-video `{rounded,inColumn,
+  cover}`, `bands`) → `classify-structure.mjs` (capture-service; Ollama offline OR Claude, schema-constrained JSON via
+  `askModel`) returns a per-section verdict `{sig, kind, pricing, video_role}` to `ai-structure.json` → the bundle
+  importer loads it (gated: `FW_SC_AI_STRUCTURE` constant/`fw_sc_ai_structure` filter/env) and `set_ai_structure()`
+  installs it; `is_pricing_table()` and the video recognizer then consult `ai_verdict_for($el)` (walks to the section,
+  matches `structure_sig`) — ADVISORY: a verdict corrects the call, no verdict → heuristics decide. **Default OFF →
+  the deterministic path is byte-identical.** Verified end-to-end on build-products: both qwen3:4b AND Claude return
+  `pricing:false` (correctly reading "$4.2B"/"$18.24M" as STATS, not plan prices — the semantic win heuristics miss)
+  and `video_role:content`; flipping a verdict provably flips the converter's decision (the-art-of-living hero bg
+  video true→false on `video_role:content`). KEY FINDING: the AI wins the **semantic** call (stats-vs-pricing — both
+  models nailed it), while a **mechanical** computed-style fact (rounded frame → content) is more reliable as a crisp
+  rule than fuzzy reasoning (both models first said "background" until the prompt made the rounded→content rule
+  explicit). So the division is: **AI for semantic judgment, deterministic for mechanical facts.** The `background`
+  override is intentionally guarded by `in_card` (the AI can't force a clearly-rounded reel to full-bleed).
+  CORPUS MEASUREMENT (site-converter 1.8.44, qwen3:8b local/offline, 67 sites / 247 sections vs the deterministic
+  ground-truth proxy): **pricing 98.8%, video_role 96.8%, both 95.5%, 0 failures** — a small OFFLINE model
+  reproduces the ambiguous structural calls reliably enough to be a useful advisory tier (validator/fallback covers
+  the residual). The residual splits into: 3 pricing over-calls on number-heavy sections (apple-card/lumina-arctic/
+  planetary — exactly where the deterministic stat-guard catches it) and a handful of ambiguous bare-video cases.
+  SIGNAL ENRICHMENT that lifted it: `structure_summary`'s per-video signals gained `bleed` (a full-viewport inset-0/
+  fullscreen backdrop layer on the video OR a positioned ancestor) and a COMPUTED `object-fit:cover` check — the
+  class-only `cover` under-reported a container-styled backdrop reel (living-architecture read `cover:false` →
+  mislabelled; now `bleed:true` → correctly `background`). The canonical video_role rule (both prompt + truth):
+  rounded → content; else bleed → background; else cover → background; else content.
+  AUTO-WIRED INTO CAPTURE (capture-service 1.10.61): `capture.mjs` now, after writing a site's capture-out folder,
+  runs the classifier and writes `ai-structure.json` automatically — gated on env `FW_SC_AI_STRUCTURE` (opt-in;
+  unset = capture is byte-identical to before), best-effort (needs an AI backend + PHP/WP via env; any failure is
+  logged and skipped, never blocks capture). So capture → convert now carries the advisory verdicts with no manual
+  step, behind the same flag the importer reads. The classifier CLI now DEFAULTS to the selected LOCAL model
+  (`selectedLocalModel()`) rather than Claude: this task is schema-constrained and Ollama's `format` grammar
+  GUARANTEES valid JSON, whereas the Claude CLI path returns free text that missed the shape ("classifier returned
+  no sections"); `--model` still overrides, and with no local model selected it falls back to the active backend.
+  The pricing override is a one-directional VETO — `is_pricing_table` honors `pricing:false` (suppress a wrong
+  table) but NEVER `pricing:true`, so the model's 3 pricing false-positives can't fabricate a pricing table or
+  regress a stat site; the `background` override is `in_card`-guarded. This is what makes AI-on SAFE to enable.
+  Next: run the same measurement on the Claude backend for a quality ceiling; expand verdicts to section-split + a
+  full role map; measure AI-on vs AI-off rendered scoring (expected ~neutral on the tuned corpus — heuristics are
+  already correct — with the lift landing on UNSEEN sites where heuristics fail).
+- **ROADMAP — improve the LOCAL-AI tier (Ollama backend in `to-ai.mjs`).** The local models (Qwen3 4B/8B, `to-ai.mjs`)
+  are the free/offline tier and, per the code, "well below Claude." The cheap win is already in — the Ollama calls
+  pass a JSON **schema to `format`** (constrained decoding → always-valid JSON, `think:false, temp 0`), so the model
+  never emits malformed JSON. Remaining levers, cheapest first: (1) **few-shot / retrieval** — inject 2–3 similar
+  SOLVED mappings from the corpus into the prompt before each call (no training, big lift for a small model on a
+  patterned task; probably not wired yet). (2) **base/quant** — bigger Qwen3 if the hardware allows. (3) **fine-tune
+  via distillation** (the deep step, only after 1–2 plateau) — run Claude over the corpus for gold outputs, LoRA-tune
+  a Qwen3 with **Unsloth** (fastest single-GPU + GGUF export) or **LLaMA-Factory** (NOT the `Soup` repo — it's a thin,
+  unproven wrapper over these), export GGUF → serve via the existing Ollama backend → validate with the converter-trainer
+  harness. Determinism is unaffected (this only powers the optional AI-assist tier). The real cost is building +
+  maintaining the distillation dataset as the builder-JSON schema evolves; a larger captured corpus directly helps.
+- **Container max-width — content no longer sits flush to the screen edges (site-converter 1.8.21 + core presets).**
+  Three linked gaps made converted sections span the full monitor width: (1) `unysonplus_container_width_map()`'s
+  safety net only guaranteed `narrow`/`medium`/`wide`, so a section mapped to `wide-l`/`wide-xl`/`wide-xxl`/`small`/
+  `prose` (e.g. a `max-w-7xl` = 1280 → `wide-xl`) resolved to NOTHING when the source had no `max-w-*` wrapper to
+  cluster that width → the band rendered edge-to-edge; the safety net now guarantees all **eight** standard slugs,
+  and the converter seeds the full scale in `build_container_width_presets` so they're registered + labelled.
+  (2) `--container-max-desktop` was left EMPTY when a capture carried no `data-sc-content-width` stamp AND no
+  header/footer `.container` chrome (apple-card) — `tokens_to_theme_settings_chrome` now ALWAYS resolves a width:
+  stamped → header/footer box → the dominant centered content max-width across the body (`detect_dominant_container_width`)
+  → 1280 default. (3) A section whose content is a root **flexbox** renders it full-width (the items-corrector skips
+  the section's own `.fw-container` for a self-managed flex band), so the cap must live on the flexbox's own
+  `content_width`; when the section had no detectable container (full-width flex + px gutters, no `max-w-*`), the
+  mapper now falls back to the SITE container width (`Mapper::set_site_container_width`, gated on `!$hero_fullbleed`
+  so bg-media heroes stay full-bleed). Verified: apple-card / build-products went from edge-to-edge to a centred
+  1280px column at 1920px viewport.
+- **Computed `position` is now stamped (capture 1.10.57) so custom-CSS full-bleed media is detectable.** The
+  capture's `data-sc-cs` never carried `position`, so the recognizers' `sc_css($el,'position')` calls (video /
+  image full-bleed detection) always read '' — a hero `<video class="w-full h-full object-cover">` whose
+  full-bleed positioning lives in a `<style>` rule (`.portal-container{position:absolute}`) was invisible to the
+  detector and dropped. Now a NON-default position (absolute/fixed/sticky only — static/relative skipped to
+  avoid bloat) is stamped, so a cover-fill hero video/image in a custom-CSS **section-level** absolute container
+  is hoisted to the section background.
+- **PAGE-LEVEL fixed backdrop video → the first hero section's background (site-converter 1.8.16).** Some
+  hand-authored sources pin a `position:fixed` (or `absolute inset-0`/`w-full h-full`) `<video>` as a body-level
+  SIBLING of the content — a viewport-wide backdrop that shows behind the hero (high-performance-automotive-dynamics's
+  car loop, payment-operations). Because it lived OUTSIDE every `<section>`, the per-section video-bg recognizer never
+  saw it and the hero shipped with no background (a flat dark band). `detect_page_bg_video()` (in `html_to_mapping`)
+  now finds that page-level backdrop — a positioned, essentially text-free layer, outside all section roots, carrying a
+  `<video>` — pulls its `<source>`/poster + any gradient/rgba scrim, REMOVES it from the DOM, and attaches it to the
+  FIRST section as `sectionBgVideo`; the mapper feeds that into the existing `apply_bg_video` (so it frames as a real
+  hero with the scrim as the Background → Overlay). Only fires when the hero has no in-flow bg video of its own.
+  Videos only — a page-level fixed `<img>`/oval-mask portal (national-geographic's SVG-clipped video) is a separate
+  bespoke pattern the capture-service (verbatim) path handles better.
+- **Logo wordmark carried for a longer multi-word brand (site-converter 1.8.14 / capture 1.10.56).** A div-based
+  logo lockup (`<div class="nav-logo"><div class="logo-rect">[icon]</div> NATIONAL GEOGRAPHIC CONSERVATION
+  TECHNOLOGY</div>`, no `<a>` link) whose wordmark is a 4-word / 43-char label was classified **icon-only** — the
+  brand-block detector (`header_brand_block` / `_mkBrandBlock`) and the wordmark guard both capped brand text at
+  24 chars (a limit meant to reject a glued nav row), so the long-word brand fell through to the whole header →
+  too much text → dropped. Both now allow up to 48 chars WHEN the text is genuinely multi-word (≥2 space-
+  separated words); a single glued token (`ModFiiFinancingResources…`) stays capped at 24. Verified:
+  national-geographic now renders `inline-left` icon+wordmark (was icon-only, site_title "Home"). NB: a two-line
+  brand (`<br>` between the lines) still glues without a space in the extracted text — a minor known nit.
+- **Gradient text on the HEADING element itself is now carried (site-converter 1.8.13).** A hero heading whose
+  gradient-text is on the `<h1>` DIRECTLY (`bg-clip-text text-transparent bg-gradient-to-r from-white via-gray
+  to-[oklch]`) with a colour override in an inner span (swiss-luxury: "Orange Sapphire." gradient + "<span
+  text-white>Absolute Fusion.</span>") rendered the direct text INVISIBLE — the Tailwind classes are dead on the
+  body (transparent fill, but the gradient + clip never apply). `extract_gradtext_css` only handled gradient
+  `<span>`s (crystal-universe's "Glass."), not a heading-level gradient. New `heading_self_gradtext_css($h)`
+  reads the source heading's computed gradient from `title_cs` and emits a scoped `.heading-title` gradient-text
+  rule (`background-image + clip:text + fill:transparent`), re-asserting any inline-coloured child span's own
+  colour (`-webkit-text-fill-color:currentColor`) so it isn't swallowed. Verified: swiss "Orange Sapphire." shows
+  the white→gray→orange gradient, "Absolute Fusion." stays white; crystal's span gradient unaffected.
+- **Section-less `<main>` no longer collapses to ZERO sections (site-converter 1.8.12).** A `<main>` that holds
+  the whole page as plain divs with NO `<section>` tags AND isn't a full-viewport hero (the-global-destination's
+  `<main class="fractal-container pt-32">`) fell through `walk_section_roots` entirely — the dive found no
+  section roots → **SEC=0, a totally blank conversion**. Now a semantic `<main>` with no `<section>`s is always
+  segmented: ≥2 content bands → claim each; exactly 1 → claim it; a hero with no inner bands → whole; and a
+  `<main>` with no detectable bands is claimed whole rather than dived-and-lost. Verified: the-global-destination
+  SEC 0→3 (hero + product cards + copy render); payment-operations (2) and crystal (3, section-based) unchanged.
+  This generalizes the full-viewport-hero segmentation below to any section-less `<main>` content wrapper.
+- **Section-less full-viewport `<main>` is SEGMENTED into bands (content-drop fix, site-converter 1.8.11).** An
+  openhero `<main class="min-h-[120vh]">` that holds the hero PLUS a feature grid / gallery / CTA as sibling
+  `<div>`s (no `<section>` tags) was claimed as ONE band by `walk_section_roots`, dropping everything after the
+  first screen (payment-operations lost its 3-card feature grid; anime-environment-engine collapsed to 1
+  section). New `segment_bands()` detector: when such a container splits into ≥2 content bands, each is claimed
+  as its own section; a genuine single hero (no inner bands) stays whole. Helpers `is_content_band()` (heading /
+  grid-cols / ≥3 media-or-paragraphs / ≥120 chars) and `is_decor_layer()` (an absolute/fixed bg-glow-scrim with
+  no heading and <30 chars rides as background, not a band). Verified via builder JSON: payment-operations
+  1→2 sections with all feature cards; anime 1→4; crystal (section-based) unchanged (the detector's trigger —
+  section-less + full-viewport + ≥2 bands — never fires on a normal `<section>` page, so no regression).
+- **Consolidated openhero audit (66-site list, 35 captured/analysed 2026-09-06).** The dominant remaining
+  decomposition gap is the **verbatim `code_block` fallback**: ~2-3 sections/site fall back, dominated by
+  `detected=html`/`section-html` — whole sections (`py-NN relative overflow-hidden bg-*`) that match no
+  section recognizer (52 cases / 22 sites) — and `image-composite` cards (an image + text-overlay card kept
+  verbatim so its overlay anchors to the image). These render through the incomplete `.sc-tw` reproducer, so
+  they read as low-fidelity / partially-dropped. NOTE on audit method: a rapid reset→import→screenshot sweep
+  gives UNRELIABLE per-page RENDER metrics — `reset()` breaks the `page_on_front` linkage so a later screenshot
+  can show a STALE prior conversion (measure the builder JSON per post, or convert one site and verify before
+  the next, instead). The reliable signals are the per-section `conversion-report.csv` `fallback`/`why` columns
+  and the source `rendered.html` — not a shared-homepage screenshot.
+- **Hero CTA-button pair no longer mis-detected as TABS (capture-service 1.10.55).** The capture's tab-bar
+  normalizer treated any div whose only children are 2-5 `<button>`/`<a href="#">` as a tablist — so a hero's
+  CTA pair ("Deploy habitat" + "View logistics map") got wrapped into an sc-tabs widget, hiding the hero
+  heading + image + badges inside an inactive tab panel (red-planet-architecture rendered with NO visible
+  "Ares Logistics" heading; crystal-universe lost "Universes in Glass."; contemplative-realms too). Fix: after
+  clicking each candidate tab and capturing its panel, REJECT the group when EVERY panel is identical — a real
+  tabs widget TOGGLES content (clicking renders a different panel), a CTA/nav button row toggles nothing. The
+  detection markers are stripped on rejection so nothing downstream sees tabs. Verified: red-planet/crystal
+  heroes decompose to `special_heading` + real buttons (0 tab markers); a genuinely-toggling tab set (distinct
+  panels) still normalizes to sc-tabs. This was the biggest single hero-fidelity bug in the openhero corpus —
+  most "tabs" detections there were CTA/nav button rows, not real tabs.
 - **2-col media hero decomposes instead of falling back verbatim.** A hero's content column (heading + CTA
   buttons + a rating/social-proof row) collapsed to one `text` block (dropping the buttons) and its image+
   floating-badge column classified as nothing → the whole section stayed a verbatim `code_block`. Now the
@@ -506,6 +923,23 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
 - **Full-bleed background layer → section background.** A CTA whose green band is painted by an inner
   `absolute inset-0 bg-primary` (section's own bg transparent) lost its background; `sectionComputed` now
   reads a full-bleed absolute layer's colour as the section `bg_color`.
+- **Dark site canvas → Site Background (capture-service 1.10.54 + site-converter 1.8.10).** A dark AI page
+  (openhero: apple-vision-pro / orbital-horizon / the-art-of-the-burger / red-planet) converted with a WHITE
+  body below the hero — its light body text then invisible in every uncovered gap. Root causes, all fixed:
+  (1) the capture stamped computed styles on `body *` but **never on `<body>`/`<html>`**, so the page canvas
+  (a `class="dark"` theme, an `oklch()` body rule, a CSS var, or a dark full-bleed wrapper div) was never
+  recorded — `capture.mjs` now stamps the effective canvas (body → html → largest full-bleed wrapper) onto
+  `<body>`/`<html>` data-sc-cs; (2) the capture's palette normalizer (`normc`) + `isDark` only parsed hex/rgb,
+  so an `oklch()`/`hsl()` palette colour was dropped and `--color-bg` defaulted WHITE (white bg + white text)
+  — both now convert oklch/oklab/hsl→rgb (mirrors PHP `color_to_hex`); (3) PHP `tokens_to_theme_settings`
+  now reads the **rendered `<body>`/`<html>` canvas FIRST** (ground truth, resolves oklch) and only falls
+  back to the palette `bg`/`canvas` token (which the builder sometimes mis-defaults to white); (4) a
+  **light-text ⟹ dark-canvas safety net** — when no canvas is detectable (a fixed/WebGL/full-page-video
+  backdrop) but the resolved body ink reads light, infer a neutral near-black Site Background so light text
+  stays legible. Result on the 10-site openhero audit: 9/10 now get a correct canvas (was ~2/10). A residual
+  theme CSS-delivery quirk can still leave one dark site white even though the correct `site_background` is
+  written — the conversion output is correct; the cascade/asset-optimizer delivery is the follow-up.
+- **Full-viewport `<main>` / `<div>` hero with NO `<section>` → claimed as a band (capture reliability, site-converter 1.8.7).** An AI-page shape `body > (bg layers) > nav > main.min-h-[120vh] (the hero, holding the h1, zero nested `<section>`s) > footer` captured **0 elements**: `walk_section_roots` only claimed `<section>` / hero-`<header>` and dived through `<main>`, reaching no sections (the openhero `payment-operations` hero — heading came out empty). Now `walk_section_roots` also claims a `<main>`/`<div>` child that is `is_hero_header()` (full-viewport-tall AND leads with a heading) **AND contains no nested `<section>`** (else it's a page-wrapper `<main>` — dive in for those). The hero heading then decomposes onto a real band instead of vanishing. NB: a page-LEVEL full-bleed `bg-video-container` that is a *sibling* of the hero (not inside it) IS now hoisted onto the first hero section's background video (`detect_page_bg_video`, site-converter 1.8.16 — see the page-level-fixed-backdrop note above); before that fix the dark band rendered on its solid fallback colour.
 - **Heading FONT from a real heading, not the logo.** The heading-font picker sampled the logo's `<a>`
   wrapper (which computes to the BODY font) first → mis-detected Inter when every `<h1>/<h2>` is Nunito.
   Priority is now section heading → brand sample → logo.

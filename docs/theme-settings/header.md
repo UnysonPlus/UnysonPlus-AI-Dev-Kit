@@ -121,8 +121,13 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
   | `centered` | Centered |
 
   **Saved shape** `[ 'design' => 'pill', 'pill' => {…} ]`. Each non-classic design reveals its own selects:
-  - `pill` → `pill_radius` (`full` Full (pill) / `large` Large / `medium` Medium; default `full`), `pill_inset` (`none` None / `small` Small / `large` Large; default `none`), `pill_shadow` (`soft` Soft / `medium` Medium / `strong` Strong; default `medium`).
-  - `card` → `card_radius` (`small` Small / `medium` Medium / `large` Large; default `medium`), `card_shadow` (`soft`/`medium`/`strong`; default `medium`).
+  - `pill` → `pill_width` (`hug` / `fixed`; default `hug`), `pill_radius` (`full` Full (pill) / `large` Large / `medium` Medium; default `full`), `pill_inset` (`none` None / `small` Small / `large` Large; default `none`), `pill_shadow` (`soft` Soft / `medium` Medium / `strong` Strong; default `medium`), plus three NUMERIC overrides that win over the presets when filled — `pill_offset` (unit-input `px`,`rem`,`em`; Top Offset, empty = `.75rem`), `pill_radius_custom` (exact corner radius), `pill_inset_custom` (exact left/right inset, also accepts `%`).
+  - `card` → `card_radius` (`small` Small / `medium` Medium / `large` Large; default `medium`), `card_shadow` (`soft`/`medium`/`strong`; default `medium`), plus `card_offset` (Top Offset, empty = `1rem`) and `card_radius_custom` (exact corner radius), both overriding the presets when filled.
+
+  > These design vars (`--header-design-radius` / `-inset` / `-offset` / `-shadow`) are resolved in
+  > `inc/includes/layout.php` (`unysonplus_header_design_css_vars()`) and written onto the header
+  > ELEMENT. Do NOT emit them from `theme-vars.php` as `:root` values — a `:root` value loses the
+  > cascade to the preset every time.
   - `centered` → `centered_gap` (`tight` Tight / `normal` Normal / `roomy` Roomy; default `normal`).
 
 #### `vertical` reveal → `vertical_side` + `vertical_width`
@@ -168,27 +173,52 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
 - `mobile_min_height` — **Type** `unit-input` (`rem`,`px`,`em`). **Default** `{value:'',unit:'rem'}`. Below 768px; empty reuses desktop.
 - `mobile_breakpoint` — **Type** `select`. **Default** `lg`. **Choices**: `lg` Below 992px (tablet & phone), `md` Below 768px (phone only).
 
-### Scroll behavior
-- `header_behavior` — **Type** `select`. **Default** `static`. **Choices**:
+### Position & motion (`group_behavior`)
+- `header_position` — **Type** `select`. **Default** `static`. **Choices**:
 
 | value | label |
 |---|---|
 | `static` | Static (scrolls away with the page) |
-| `sticky` | Sticky (follows scroll) |
-| `sticky-shrink` | Sticky + Shrink on scroll |
-| `hide-on-scroll` | Sticky, hide on scroll down / reveal up |
-| `transparent-overlay` | Transparent over the first section |
+| `sticky` | Sticky (pins to the top on scroll) |
+| `overlay` | Transparent overlay (sits over the first section, then pins) |
 
-- `sticky_shrink_height` — **Type** `unit-input` (`px`,`rem`). **Default** `{value:'',unit:'px'}`. Shrunk logo height (default 40px).
+- `header_hide_on_scroll` — **Type** `switch`. **Default** `no`. Slide the header up on scroll down, reveal on scroll up (Sticky / Overlay only).
 
-### Appearance / chrome
-- `bg_color` — **Type** `predefined-colors-color-picker-compact` (kind `bg`; fallback `rgba-color-picker` default `''`). Main Header Background. Empty = transparent. **Saved shape** `{predefined:'bg-{slug}',custom:'#hex'}`.
-- `header_border` — **Type** `switch`. **Default** `no`. right `yes`/On, left `no`/Off. Hairline rule under header.
-- `header_shadow` — **Type** `switch`. **Default** `no`. Same switch shape. Soft drop shadow.
-- `header_glass` — **Type** `switch`. **Default** `no`. Frosted/translucent backdrop blur.
+> Position is **orthogonal** to appearance: shrink / hide / a different look on scroll are separate
+> options, so any combination is possible (e.g. a transparent overlay that frosts and shrinks once
+> stuck). A per-page "Transparent" setting still overrides this for that page.
+
+### Appearance — At Top (`group_attop`)
+The resting look. Composes with any position/design.
+
+- `bg_color` — **Type** `predefined-colors-color-picker-compact` (kind `bg`, picker `rgba-color-picker`; fallback `rgba-color-picker` default `''`). Main Header Background. Empty = transparent. **Saved shape** `{predefined:'bg-{slug}',custom:'#hex'}`.
+- `header_glass` — **Type** `switch`. **Default** `no`. Frosted / translucent backdrop blur.
+- `header_glass_blur` — **Type** `unit-input` (`px`,`rem`). **Default** `{value:'',unit:'px'}`. Blur radius for **both** glass states. Empty = `10px`. Drives `--glass-blur`.
+- `header_glass_saturate` — **Type** `slider` 100–200 step 5. **Default** `140`. Saturation boost behind the frost. Drives `--glass-saturate` (only when it differs from the 140 default).
+- `header_border` — **Type** `switch`. **Default** `no`. Hairline rule under the header.
+- `header_shadow` — **Type** `switch`. **Default** `no`. Soft drop shadow.
+- `header_shadow_depth` — **Type** `select`. **Default** `medium`. **Choices** `soft` / `medium` (default) / `strong`. Scales what the shadow toggles emit, via `--header-shadow`. Applies to on-scroll shadow too.
 - `header_uppercase_nav` — **Type** `switch`. **Default** `no`. Uppercase primary menu links.
 
-*(All four toggles share the same switch: `right-choice {value:'yes',label:'On'}`, `left-choice {value:'no',label:'Off'}`.)*
+*(Every toggle above shares the same switch shape: `right-choice {value:'yes',label:'On'}`, `left-choice {value:'no',label:'Off'}`.)*
+
+### Appearance — On Scroll (`group_onscroll`)
+Turn the master switch on to give the header a DIFFERENT look once it sticks; leave it off and the
+scrolled header keeps the At-top look. Every field composes independently.
+
+- `header_scroll_change` — **Type** `switch`. **Default** `no`. When on, the fields below REPLACE the At-top look once stuck.
+- `scroll_bg_color` — same compact colour control as `bg_color`. Header fill once stuck. Empty = keep the At-top background. Drives `--header-scroll-bg`.
+- `scroll_glass` — **Type** `switch`. **Default** `no`. Frost the header once stuck (uses `header_glass_blur` / `header_glass_saturate`).
+- `scroll_border` — **Type** `switch`. **Default** `no`. Add the hairline rule once stuck.
+- `scroll_shadow` — **Type** `switch`. **Default** `no`. Add the drop shadow once stuck (depth from `header_shadow_depth`).
+- `scroll_shrink` — **Type** `switch`. **Default** `no`. Tighten header padding (a fixed `.25rem`) and shrink the logo once stuck.
+- `scroll_height` — **Type** `unit-input` (`rem`,`px`,`em`). **Default** `{value:'',unit:'px'}`. **Scrolled Header Height** — the numeric counterpart to `scroll_shrink`. Sets the stuck row height exactly; empty resolves to the at-rest height (`min_height`), so nothing changes unless set. Drives `--header-height-stuck`.
+- `scroll_link_color` — compact colour control (kind `text`; fallback `color-picker`). Colour of header links once stuck. Empty keeps the At-top link colour — set it when a light-on-hero header lands on a solid bar. Drives `--header-scroll-link`, scoped to `.site-header--scroll-change.is-stuck`.
+- `sticky_shrink_height` — **Type** `unit-input` (`px`,`rem`). **Default** `{value:'',unit:'px'}`. Shrunk **logo** height (default 40px). Drives `--header-shrink-logo`.
+
+> **Preset contract.** `_unysonplus_preset_group_header_layout()`'s `allowed_keys` lists this whole
+> two-state surface, including the numeric fields above. That list is also what a preset RESETS, so a
+> new key omitted from it would strand a hand-set value after the user picks a different header preset.
 
 ### Row alignment / spacing
 - `header_valign` — **Type** `select`. **Default** `center`. **Choices**: `top` Top, `center` Center, `bottom` Bottom.
@@ -349,8 +379,9 @@ item colours via `var(--menu-link-hover)` (Header → Menu). Leave off for multi
 | `bottom-bar` | Bottom Bar |
 | `top-bar` | Top Bar |
 | `highlight` | Highlight |
+| `fade` | Fade |
 
-- **Notes**: Value → `body.menu-style-{slug}` class. Fills (Pill/Box/Highlight) use Item Hover/Active Background; Underline & bars use Hover/Active Color.
+- **Notes**: Value → `body.menu-style-{slug}` class. Fills (Pill/Box/Highlight) use Item Hover/Active Background; Underline & bars use Hover/Active Color. `fade` rests the links at `--menu-fade-rest` (`.7`) and brings them to full opacity on hover / for the current item — the one common source treatment the other presets cannot express.
 
 ### Typography & spacing
 - `menu_font` — **Type** `typography`. **Default** `{family:''}`. `components`: family only (size/line-height/letter-spacing/color off). Empty inherits Body Font.
@@ -485,6 +516,7 @@ Each header column is an `addable-popup` whose `popup-options` add elements. Per
 | `icon_text` | Icon Text |
 | `search` | Search |
 | `social_icons` | Social Icons |
+| `theme_toggle` | Light / Dark Toggle |
 | `custom_html` | Custom HTML |
 | `text` | Text |
 | `widget_area` | Widget Area |
@@ -506,7 +538,10 @@ Each header column is an `addable-popup` whose `popup-options` add elements. Per
   - `widget_area` → `sidebar_id` (select; default `sidebar-right`; choices = registered sidebars incl. `sidebar-right`,`sidebar-left`,`header-1..3`,`footer-1..5`).
   - `builder_section` → `builder_post_id` (select; saved page-builder layouts).
   - `snippet` → `snippet_id` (select; published Snippets, from Snippets extension).
-  - `logo`, `search`, `social_icons`, `spacer`, `divider` → no extra options.
+  - `logo`, `search`, `social_icons`, `spacer`, `divider`, `theme_toggle` → no extra options.
+  - `theme_toggle` renders the light/dark control INLINE in the column (class `theme-toggle theme-toggle--inline`,
+    `position: static`). It renders nothing unless Dark Mode is on (Site-wide UX → Dark Mode), and it
+    **suppresses the floating corner button** so a page never shows two toggles.
 
 ### visibility — `visibility`
 - **Type**: `checkboxes`. **Default** `[]`. **Choices**: `hide-xs` Mobile (< 768px), `hide-sm` Tablet (768–991px), `hide-md` Desktop (≥ 992px).
@@ -543,3 +578,33 @@ When `yes`, reveals 4 groups (container-only ids):
 - **Type**: `multi-inline`
 - **Saved value shape**: `{ width:{value,unit}, style:'solid', color:{predefined,custom} }`
 - `fw_multi_options`: `width` (unit-input `px`,`em`,`rem`), `style` (select: `solid` Solid, `dashed` Dashed, `dotted` Dotted, `double` Double), `color` (compact color-preset). Renders only when both width and color set.
+
+---
+
+## Auditing real-world headers against these options
+
+Before rebuilding a source site's header, measure it rather than eyeballing it — and check what these
+options can actually express:
+
+```bash
+cd tools/chrome-survey
+node survey.mjs --urls ../converter-trainer/sites/wegic.txt --out out/wegic.json
+node digest.mjs out/wegic.json
+```
+
+`digest.mjs` scores every construct it finds against
+[`tools/chrome-survey/capability-map.json`](../../tools/chrome-survey/capability-map.json) — which maps
+each construct to the option on this page that reproduces it, and flags the ones where the option exists
+but its value is fixed or quantised. That map is the fast answer to "can Theme Settings do this?"; keep
+it in sync when an option here changes. See [`tools/chrome-survey/README.md`](../../tools/chrome-survey/README.md).
+
+**Granularity gaps — `G1`–`G7` are CLOSED as of theme 2.5.90.** The header can now express, from
+settings alone: a numeric **Scrolled Header Height** (`scroll_height`), a **Scrolled Link Color**
+(`scroll_link_color`), **Glass Blur** + **Glass Saturation** (`header_glass_blur` /
+`header_glass_saturate`), a **Shadow Depth** select (`header_shadow_depth`), a **Top Offset** and
+numeric **radius / side-inset overrides** on the Floating Pill and Elevated Card designs
+(`pill_offset` / `*_radius_custom` / `pill_inset_custom`), a **Fade** hover preset, and an inline
+**Light / Dark Toggle** header element. Measured effect across the 180-site corpus: sites needing any
+custom CSS went **21 to 0**, and construct-level fidelity from 88.5% to **100%** (Wegic) and 90.5% to
+**99.8%** (OpenHero). Only `G8` (a bottom-anchored dock chrome mode) is still open, and it needs no
+action — one site in 180, reachable with a Snippet element plus `position: fixed`.
