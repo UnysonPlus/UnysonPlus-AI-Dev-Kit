@@ -1,9 +1,0 @@
-{
-  "name": "unysonplus-chrome-survey",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "description": "Corpus-scale site-chrome survey — measure how N sites build their header (structure, chrome, both scroll states, hover, mobile drawer) and score every construct against the UnysonPlus theme's header settings.",
-  "bin": { "survey": "survey.mjs", "digest": "digest.mjs" },
-  "devDependencies": { "playwright-core": "^1.44.0" }
-}

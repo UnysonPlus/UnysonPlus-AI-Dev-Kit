@@ -27,3 +27,6 @@ Thumbs.db
 
 # Local-only converter trainer (source-site brand fixtures — never ship)
 /tools/converter-trainer/
+
+# Local-only chrome survey tool (source-site brand fixtures — never ship)
+/tools/chrome-survey/
