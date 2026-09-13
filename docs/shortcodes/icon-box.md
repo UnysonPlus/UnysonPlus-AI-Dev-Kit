@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `icon_box` — Icon Box
 
 An icon (or emoji/SVG) paired with an optional title and body content — the standard feature-grid / stat card. Leaf node: `{ type:'simple', shortcode:'icon_box', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

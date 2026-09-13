@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `scroll_to_top` — Scroll to Top & Progress
 
 A fixed back-to-top button and/or a reading-progress bar, both tied to page scroll. Place once per page. Leaf node: `{ type:'simple', shortcode:'scroll_to_top', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

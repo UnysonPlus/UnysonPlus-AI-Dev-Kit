@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `image_box` — Image Box
 
 An image paired with an optional eyebrow, title, text, icon and button — a portfolio tile, team card, feature box or hover-overlay panel. The look is chosen with a Design **family** picker (Stacked / Side / Overlay / Card / Frame), each revealing its own variation fields. Leaf node: `{ type:'simple', shortcode:'image_box', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

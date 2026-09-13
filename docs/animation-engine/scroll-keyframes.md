@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # scroll-keyframes — Scroll Keyframes (Animation Engine)
 
 The builder's **motion timeline**: an element interpolates between a **Start**, an optional **Middle**

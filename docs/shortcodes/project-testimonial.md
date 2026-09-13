@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `project_testimonial` — Project Testimonial
 
 The client testimonial (quote + author + company) from a portfolio project's Project Details, rendered as a styled blockquote. Single-project **template part**. Requires the **`portfolio`** extension. Leaf node: `{ type:'simple', shortcode:'project_testimonial', _items:[], atts:{…} }` (+ shared wrapper blocks → `README.md`).

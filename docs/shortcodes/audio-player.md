@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `audio_player` — Audio Player
 
 A styled HTML5 audio player for a single track or a multi-track playlist, with several design skins. Leaf node: `{ type:'simple', shortcode:'audio_player', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

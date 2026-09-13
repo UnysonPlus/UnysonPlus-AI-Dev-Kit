@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `section` — page band
 
 One per band of the page — the **classic** Bootstrap section. Node:

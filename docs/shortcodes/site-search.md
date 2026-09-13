@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `site_search` — Search
 
 A site search form. `inline-form` is always visible; `icon-toggle` shows a magnifier button that reveals the form on click. A header/footer element. Leaf node: `{ type:'simple', shortcode:'site_search', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

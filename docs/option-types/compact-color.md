@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # compact-color (`predefined-colors-color-picker-compact`)
 
 A compact one-row control: a palette-**PRESET dropdown** + an inline **custom color picker** (mutually exclusive). The exact control the Styling tab's Text Color / Background Color use. Built via `sc_color_field_compact(['kind'=>'text'|'bg'])`. Keeps element colors tied to Theme Settings → Colors (live-linked) instead of one-off hex.

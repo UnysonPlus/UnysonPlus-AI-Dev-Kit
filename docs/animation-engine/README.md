@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Animation Engine — effects by module
 
 > 📖 **Human manual (live, always current):** [Animation Engine on the UnysonPlus docs](https://unysonplus.github.io/animation-engine) — module pages with live playgrounds. These kit files are the AI-optimized reference; the live manual is the human companion.

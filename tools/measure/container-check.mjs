@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Container CONTENT-width check — verify a build's section container renders the SAME content width
 // as its source (or an expected px value). This is the width that actually holds the design, i.e.
 // `max-width` MINUS the left/right gutter/padding — the dimension a "Container Width = 1280" setting

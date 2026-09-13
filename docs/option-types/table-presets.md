@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # table-presets
 
 A Border-Presets-style repeater for reusable table looks. Each entry is a named preset (→ CSS class `.tbl-<slug>`) with structural fields plus six per-section skins (Header / Body / Striped / Hover / Footer / Caption). Consumed by the `table-style-picker` option, which stores the resulting class.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `post_content` — Post Content
 
 A **dynamic post-data element** (used in post / archive templates) that outputs the full content of the post or page being viewed. There is nothing to type — you style it where it appears. Leaf node: `{ type:'simple', shortcode:'post_content', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

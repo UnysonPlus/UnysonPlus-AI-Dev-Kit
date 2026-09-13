@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `post_terms` — Post Terms
 
 A **dynamic post-data element** (used in post / archive templates) that outputs the taxonomy terms (categories, tags, or a custom taxonomy) of the post being viewed. Leaf node: `{ type:'simple', shortcode:'post_terms', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

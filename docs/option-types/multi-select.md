@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # multi-select
 
 Select multiple values from a source — a custom `choices` array, or live posts / taxonomy terms / users (with autocomplete). Stores a flat array of the selected keys/ids.

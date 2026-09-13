@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Fidelity verification — capture-first + multi-lens comparison
 
 How to verify a build actually matches its source. The recurring failures (13px uppercase footer titles

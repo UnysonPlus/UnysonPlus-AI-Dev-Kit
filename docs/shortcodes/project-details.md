@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `project_details` — Project Details
 
 A portfolio project's details list (client, date, role, industry, services, tools, repository, website) as a definition list. One of the five single-project **template parts** — drop it anywhere to build a custom project page in the builder. Requires the **`portfolio`** extension. Leaf node: `{ type:'simple', shortcode:'project_details', _items:[], atts:{…} }`. This file lists only the shortcode-specific atts (shared `common`/`fx`/`spacing` wrapper blocks → `README.md`).

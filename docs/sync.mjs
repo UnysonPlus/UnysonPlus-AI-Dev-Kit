@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 /**
  * sync.mjs — keep the kit docs in sync with the plugin/theme WITHOUT re-reading everything.
  *
@@ -121,6 +122,7 @@ function sourcesFor(docRel) {
       colors:       [c('components-color.php'), p('color-presets.php')],
       typography:   [c('components-typography.php'), t('general-typography.php'), t('general-fonts.php')],
       buttons:      [c('components-buttons.php'), p('button-presets.php')],
+      'hover-animations': [c('components-hover-animations.php'), p('button-presets.php')],
       boxes:        [c('components-box.php'), c('components-section-styles.php'), c('components-patterns.php'), c('components-table.php')],
       spacing:      [c('components-spacing.php'), p('spacing-presets.php')],
       general:      [t('general-settings.php'), t('general-base.php'), t('general-layout.php'), t('general-sidebar.php')],

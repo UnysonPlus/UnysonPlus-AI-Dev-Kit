@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # backgrounds — Animated Backgrounds (Animation Engine)
 
 Renders an animated canvas/CSS background layered *behind* a container's content. It rides the element's **Animations tab** as a **multi-instance card** (`sc_animation_fields`), so several effects **stack** on one element (e.g. petals + rain + embers). Gated to CONTAINERS ONLY — a `fw_shortcode_get_options` filter prunes the card off non-container shortcodes (`upw_bg_containers()` = `section` / `bleed-section` / `masonry-section` / `row`). Requires the `animation-engine` extension ACTIVE (ships inactive). Global on/off: Theme Settings → Animations → Backgrounds. Honours "reduce motion" (static frame) and pauses off-screen.

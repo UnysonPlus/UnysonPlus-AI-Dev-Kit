@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # icon-badge-presets
 
 A manager for reusable **icon badge** styles — each preset is a named, shaped *tile* around an icon (a fixed-size circle / rounded / square / hexagon with a centered glyph), with Default + Hover state tabs, producing a `.iconb-<slug>` class. Lives in Theme Settings → Components → Icon Badges; icon-bearing shortcodes consume it via an `icon_badge_preset` picker. A sibling of `border-presets` (Box Presets), reshaped for icons: where a box preset is a content-fit card skin, a badge is a set-size shaped container whose glyph has its own colour + size.

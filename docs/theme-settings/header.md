@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings → Header
 
 Authoritative reference for every Header option (Theme Settings → Header). Sub-tabs: **Identity**, **Layout**, **Menu**, **Mega Menu** (only when the Mega Menu extension is active, spliced right after Menu), **Top Bar**, **Main Header**, **Bottom Bar**. Every choice value below is verbatim.

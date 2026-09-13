@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `badge` — Badge (formerly Announcement Pill)
 
 A compact rounded badge with an optional leading sub-tag, a message, markers/icons, and an optional link — the "New / Beta / We just shipped" strip. Leaf node: `{ type:'simple', shortcode:'badge', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # mailer extension
 
 Central email/SMTP configuration used by other extensions (Forms, etc.) to send mail. **Active by default:** yes (loads as a dependency; `display => false`, `standalone => false`). Version: 1.2.20.

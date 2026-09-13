@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `menu_toggle` — Menu Toggle
 
 A hamburger / dots button that opens an off-canvas navigation drawer. Leaf node: `{ type:'simple', shortcode:'menu_toggle', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

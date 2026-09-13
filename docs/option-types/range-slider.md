@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # range-slider
 
 A dual-handle (double) ion.rangeSlider for picking a numeric **from/to** range. Stores both endpoints as an object.

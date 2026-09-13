@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `masonry_section` — Masonry Section
 
 A section that packs its child columns of any width into a masonry (tetris-style) grid — no fixed column count. Container node: `{ type:'section', shortcode:'masonry_section', _items:[ /* columns */ ], atts:{…} }`. Drop columns of any width (`1_2`, `1_3`, `2_3`, `1_4` …) inside `_items`; each keeps its width and they stack to fill gaps. Carries the shared wrapper blocks (`common`, `fx`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

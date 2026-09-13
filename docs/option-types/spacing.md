@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # spacing
 
 Composite Margin + Padding widget (Elementor-style): a Phone/Tablet/Desktop switcher, then one row per section with a link toggle (linked = one "All" value; unlinked = Top/Right/Bottom/Left). Saved value is a nested array of **Bootstrap utility class names** — not raw CSS lengths.

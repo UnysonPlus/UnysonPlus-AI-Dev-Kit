@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # multi-picker
 
 A "pick one, then reveal its sub-options" control. Ubiquitous in Theme Settings & shortcode atts wherever a choice unlocks a nested group (site width mode, header design, copyright toggle, Animation Engine effect pickers, min-height presets).

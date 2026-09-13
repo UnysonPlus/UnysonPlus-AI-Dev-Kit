@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `project_results` — Project Results
 
 A portfolio project's results/metrics band ("+38% — Conversion rate") from its Project Details `project_results` repeater. Single-project **template part**. Requires the **`portfolio`** extension. Leaf node: `{ type:'simple', shortcode:'project_results', _items:[], atts:{…} }` (+ shared wrapper blocks → `README.md`).

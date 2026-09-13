@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # unit-input
 
 A numeric field + a small unit dropdown (px / em / rem / % / vh / …). Used everywhere a length is set: widths, heights, gaps, paddings, font sizes, offsets, border widths.

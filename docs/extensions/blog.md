@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # blog extension
 
 Adds Blog Posts functionality (post listing / blog page plumbing) to the framework. **Active by default:** yes (bundled with core; `display => false` so it is hidden from the Extensions UI). Version: 1.0.3.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `newsletter` — Newsletter
 
 An AJAX email-signup form wired to the site mailer and a hook for list integrations (Mailchimp, etc.). Leaf node: `{ type:'simple', shortcode:'newsletter', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.
@@ -18,7 +19,9 @@ An AJAX email-signup form wired to the site mailer and a hook for list integrati
 | `design` | image-picker | `'inline'` | `inline` `stacked` `boxed` | Form layout design. |
 | `align` | alignment | `'left'` | `left` `center` `right` | Content alignment. |
 | `rounded` | select | `'rounded'` | `rounded-0` (square) `rounded` `pill` | Field / button corner roundness. |
-| `accent_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Button color (`kind: bg`). |
+| `field_icon` | icon-v2 | `{type:'none'}` | icon-v2 value (a pack glyph, an SVG `{type:'svg','svg-source':'library','svg-id':'lucide/mail'}`, an upload, an emoji) | A glyph rendered INSIDE the email field before the placeholder; the input pads past it. |
+| `field_icon_color` | color-preset | `{predefined:'',custom:''}` | compact color object | The field icon's colour (`kind: text`); inherits the field text colour when empty. |
+| `button_preset` | button-style-picker | `''` | `''` (None) or a preset slug, e.g. `btn-primary` `btn-outline-secondary` | Themed Button Preset (Theme Settings → General → Buttons) for the submit button. None = the accent button (theme primary colour). |
 | `field_bg` | color-preset | `{predefined:'',custom:''}` | compact color object | Input field background (`kind: bg`). |
 | `bg_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Box background for the `boxed` design (`kind: bg`). |
 | `text_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Text color. |
@@ -40,7 +43,7 @@ An AJAX email-signup form wired to the site mailer and a hook for list integrati
   "design": "inline",
   "align": "center",
   "rounded": "pill",
-  "accent_color": { "predefined": "", "custom": "" },
+  "button_preset": "btn-primary",
   "field_bg": { "predefined": "", "custom": "" },
   "bg_color": { "predefined": "", "custom": "" },
   "text_color": { "predefined": "", "custom": "" },
@@ -49,6 +52,10 @@ An AJAX email-signup form wired to the site mailer and a hook for list integrati
 ```
 
 ## Notes
+- **Field icon.** `field_icon` renders via `sc_icon_render` inside a `.fw-nl__field--icon` wrapper around the email input (`.fw-nl__field-icon`, absolutely placed at the field's left inset, `--nl-icon` colour). The Site Converter fills it from a converted signup form: an inline `<svg>` verbatim, a Lucide / FA id, or a semantic Lucide fallback for another icon set (`ph:envelope-simple` → `lucide/mail`).
+- **`button_preset` may carry a size too** (`btn-silk btn-lg`): each space-separated token is sanitized and added to the submit's classes.
+- **The live region takes no room while empty** (`.fw-nl__msg:empty{display:none}`), so a form measures like the design it came from.
+- **The submit button takes a Button Preset, not a colour.** With `button_preset` set the button carries the theme's `.btn .btn-<id>` classes and the preset owns colour, padding, radius and hover; the element's own button CSS steps aside via `:not(.fw-nl__btn--preset)` rather than fighting on specificity. Leave it `''` for the element's accent button, which follows the theme's primary colour.
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, not raw hex. See `README.md`.
 - The form submits via AJAX to `admin-ajax`. The admin notification always goes to `admin_email` (never a client address); a nonce + honeypot guard the endpoint.
 - Integrations hook `fw_newsletter_subscribe` (receiving `list_id`); return a `WP_Error` from `fw_newsletter_subscribe_result` to surface a failure.

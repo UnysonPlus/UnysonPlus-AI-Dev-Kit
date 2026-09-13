@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Site-build protocol (STRICT — read before building ANY site)
 
 The strict rules for reproducing a source (a screenshot, a URL, a template) as a UnysonPlus site.

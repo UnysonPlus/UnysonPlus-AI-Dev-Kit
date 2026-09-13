@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings — Site-wide UX
 
 The **Site-wide UX** tab consolidates global chrome/UX affordances: Dark Mode, Preloader, Scrolling, and the Scroll-to-Top button. Each option is enumerated with all valid values.

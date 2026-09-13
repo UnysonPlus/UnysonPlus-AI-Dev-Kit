@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # popup
 
 Groups a set of sub-options behind an "Edit" button that opens a modal (the `fw.OptionsModal`). Stores the **values of its nested `popup-options`** — a keyed map of leaf option id → that option's saved value.

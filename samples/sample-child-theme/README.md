@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `sample-child-theme` — the child-theme template
 
 A complete, installable child theme of **`unysonplus-theme`**. Copy this folder, rename it,

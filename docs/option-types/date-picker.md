@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # date-picker
 
 A single date field (bootstrap-datepicker). The value is a plain date string in the picker's display format.

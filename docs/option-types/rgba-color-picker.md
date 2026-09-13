@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # rgba-color-picker
 
 A color field (Coloris, alpha ON) that emits an **`rgba()`** color string with opacity. A thin variant of `color-picker`. Stores a single color string.

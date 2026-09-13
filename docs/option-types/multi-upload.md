@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # multi-upload
 
 Upload / pick MULTIPLE media items (a gallery of images, or any files) from the WP media library. Stores an array of attachment objects.

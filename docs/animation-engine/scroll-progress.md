@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # scroll-progress — Scroll Progress (Animation Engine)
 
 A **site-wide** reading-progress indicator (16 styles). This is NOT a per-node `fx` slot — it is a

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings — Social
 
 The **Social** tab holds site-wide social profiles (consumed by the header Social Icons element and the footer) plus their global icon styling. Each option is enumerated with all valid values.

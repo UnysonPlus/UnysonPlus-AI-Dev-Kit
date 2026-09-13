@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Extensions — overview index
 
 > 📖 **Human manual (live, always current):** [Extensions on the UnysonPlus docs](https://unysonplus.github.io/docs/extensions/overview). These kit files are the AI-optimized reference; the live manual is the human companion.

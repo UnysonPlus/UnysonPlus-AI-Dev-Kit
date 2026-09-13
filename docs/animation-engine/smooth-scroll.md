@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # smooth-scroll — Smooth (Inertia) Scroll (Animation Engine)
 
 Site-wide momentum wheel/trackpad smoothing (powered by **Lenis**) across the whole page. A

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings — Miscellaneous
 
 Site-wide developer/utility settings: Custom CSS, custom scripts, analytics, 404 handling, performance tweaks, custom image sizes, maintenance mode, export/import, reset, and developer tools. Most are stored theme-scoped under a `multi` container whose leaf keys keep their feature prefix.

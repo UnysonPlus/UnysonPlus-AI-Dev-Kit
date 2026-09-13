@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `portfolio` — Portfolio Grid
 
 A filterable grid of portfolio projects (from the Portfolio custom post type), with category filters, ordering and per-card styling. Requires the **`portfolio`** extension active. Leaf node: `{ type:'simple', shortcode:'portfolio', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

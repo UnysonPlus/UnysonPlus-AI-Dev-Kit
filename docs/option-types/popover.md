@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # popover
 
 **Container option.** A compact trigger field that reveals its inner option(s) in an anchored, in-flow disclosure panel (optionally tabbed). Stores nothing of its own — either passes ONE inner option's value straight through, or a keyed hash of several.

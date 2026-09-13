@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings → Components → Buttons
 
 Authoritative reference for the three Button option groups (Presets, Sizes, Hover Animations) — every choice, saved-value shape, seeded default, and the CSS class each emits — so an AI agent can wire the Button shortcode without reading source.
@@ -81,6 +82,7 @@ The option type also supports **typography**, **box**, **shadow**, and **custom 
 | `padding_y` | unit-input | units `px` / `em` / `rem`, min 0 | — |
 | `padding_x` | unit-input | units `px` / `em` / `rem`, min 0 | — |
 | `border_radius` | unit-input | units `px` / `%` / `em` / `rem`, min 0 | — |
+| `min_height` | unit-input | units `px` / `em` / `rem`, min 0 (optional). A FIXED button height (a source `h-11` = 44px, `.btn{height:58px}`); the button centres its content to it (`display:inline-flex`) — used instead of Padding Y when the source sizes by height. The admin row preview honours it too. | — |
 | `min_width` | unit-input | units `px` / `%` / `rem` / `em`, min 0 (optional) | — |
 | `max_width` | unit-input | units `px` / `%` / `rem` / `em`, min 0 (optional) | — |
 
@@ -91,6 +93,7 @@ The option type also supports **typography**, **box**, **shadow**, and **custom 
 ```
 
 - **Notes**: emits **`.btn-{slug}`** controlling dimensions only (border-width is NOT a size concern — it lives on the Button Preset skin). Pair with a preset: `class="btn btn-primary btn-lg"`.
+- **Converted sites — how many sizes, and what they are called.** The Site Converter creates exactly as many sizes as the source has *distinct* button boxes (near-identical computed values cluster into one), ranked by the box a reader perceives (fixed height, else font-box + paddings — so a tall pill with small type still ranks as the bigger size). Names: the source's own (`btn-sm` / `btn-lg` / `button--large`) win; otherwise the **most-used size is "Default"** (`md`) and the others are named relative to it — Large / X-Large above, Small / X-Small below. One size → *Default*; two → *Default + Large* (or *+ Small*); three → *Small / Default / Large*. Full algorithm: [`extensions/site-converter.md`](../extensions/site-converter.md) → "Size algorithm".
 
 #### Seeded default sizes (5)
 
@@ -102,27 +105,9 @@ The option type also supports **typography**, **box**, **shadow**, and **custom 
 | 0000010002 | Small | `sm` | 13px | 1.4 | 6px | 12px | 5px |
 | 0000010001 | Extra Small | `xs` | 12px | 1.4 | 2px | 6px | 3px |
 
-## button_animations box
+## Hover Animations — moved to the shared library
 
-### Hover Animations — `button_animations`
-
-- **Type**: `addable-box` (sortable; add-button text "Add Animation"; row template `<span class="btn btn-primary btnfx-preview-{{id}}">{{name}}</span>`).
-- **Default**: the 5 seeded sample animations from `unysonplus_default_custom_hover_animations()`.
-- **Choices**: none fixed — user-defined. Per-row sub-fields:
-
-| box-option | type | details | default |
-| --- | --- | --- | --- |
-| `id` | unique | (auto) | auto |
-| `name` | text | — | `""` |
-| `css` | code-editor | mode `css`, height 160; tokens `{{BTN}}` = this button, `{{ANIM}}` = a unique @keyframes name | placeholder scale-pulse snippet |
-
-- **Saved value shape**:
-
-```json
-{ "id": "0000020001", "name": "Pulse Ring", "css": "{{BTN}}:hover { animation: {{ANIM}} 1.1s ease infinite; }\n@keyframes {{ANIM}} { … }" }
-```
-
-- **Notes**: each entry appears in the Button shortcode's Hover Animation dropdown and emits **`.btnfx-c-{slug}`** (slug = `name` sanitized, `-2`/`-3` dedupe, via `unysonplus_custom_hover_animation_slug_map()`). At render `{{BTN}}` → `.btnfx-c-{slug}`, `{{ANIM}}` → a unique keyframes name. Consumed as `class="btn btn-primary btnfx-c-pulse-ring"`. These are user SAMPLES; the 22 built-in effects live in `hover-fx.css` and are separate.
+The custom hover-animation list no longer lives under Buttons. It is the **shared Hover Animations library** — Theme Settings → Components → **Hover Animations** (its own tab, right before Box Presets), key `hover_animations`, documented in [`theme-settings/hover-animations.md`](hover-animations.md). One list feeds both the Button shortcode's Hover Animation picker **and** a Box Preset's Hover Animation field; the legacy `button_animations` key is still read as a fallback. Entries use `{{SELECTOR}}` (element) + `{{ANIM}}` (keyframes name); `{{BTN}}` remains an alias. Each emits **`.btnfx-c-{slug}`** (slug = `name` sanitized, `-2`/`-3` dedupe, via `unysonplus_custom_hover_animation_slug_map()`), consumed as `class="btn btn-primary btnfx-c-pulse-ring"`. The built-in effects live in `hover-fx.css` and are listed in the same pickers.
 
 #### Seeded default hover animations (5)
 

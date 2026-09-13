@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # physics — Physics Effects (Animation Engine)
 
 Physics-driven motion (spring / verlet, no library) applied to any page-builder node. Rides the node

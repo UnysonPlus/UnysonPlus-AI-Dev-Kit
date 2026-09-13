@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // 4-LENS fidelity check for a single region (capture-first). Verifies a build
 // region against its source with four independent lenses, because no one lens
 // catches everything:

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # border-presets
 A manager for reusable column/card "box" border skins — each preset is a named style (border, radius, padding, background, box-shadow) with Default + Hover state tabs, producing a `.boxp-<name>` class. Lives in Theme Settings; columns consume it via a `border_preset` picker.
 
@@ -37,7 +38,8 @@ An **array of preset entries**, one per box preset:
 | `border_radius` | object | `unit-input` `{ value, unit }`. |
 | `padding` | object | `spacing` value (mode `padding`) — per-side Bootstrap-style class map under `padding`. |
 | `transition` | string | milliseconds (default `"200"`). |
-| `hover_fx` | array | `multi-select` of `lift`\|`zoom`\|`tilt`\|`glow`\|`shine` (default `[]`). |
+| `hover_animation` | string | `button-hover-animation` picker — one effect from the shared Hover Animations library (built-in `btnfx-*` or a custom `btnfx-c-{slug}`), or `""`. The presets stylesheet re-emits it onto `.boxp-<slug>` (`unysonplus_hover_fx_css_for()`); no class is added to the element. |
+| `hover_fx` | array | `multi-select` of `lift`\|`zoom`\|`tilt`\|`glow`\|`shine` (default `[]`) — box-specific composites layered on top. |
 | `custom_css` | string | `code-editor` CSS, `{{SELECTOR}}`-aware. |
 | `states` | object | keyed `default` + `hover`; each holds the per-state skin (see below). |
 | `states.<state>.background` | object | `background-pro` value (color/gradient/image; video disabled). |

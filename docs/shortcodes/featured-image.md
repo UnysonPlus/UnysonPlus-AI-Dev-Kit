@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `featured_image` — Featured Image
 
 Outputs the current post / page's featured image at a chosen registered size, optionally linked. A dynamic-content element (it pulls the post thumbnail, not an uploaded image). Leaf node: `{ type:'simple', shortcode:'featured_image', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

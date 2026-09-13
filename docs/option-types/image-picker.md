@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # image-picker
 
 A grid of clickable image tiles — pick one choice key (or several with `multiple`). Used everywhere a visual choice is nicer than a select: layout modes, header/menu/dropdown designs, logo layout, alignment, icon frames, sidebar position, etc.

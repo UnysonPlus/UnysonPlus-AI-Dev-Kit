@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # button-presets
 A manager for reusable button styles — each preset is a named button skin (font + per-state colors/border/shadow) across Default/Hover/Active/Focus/Disabled tabs, producing a `.btn-<id>` class. Lives in Theme Settings → Buttons; the button element consumes it via a style picker.
 
@@ -46,6 +47,7 @@ An **array of preset entries**, one per button preset:
 | `states.<s>.box_shadow` | object | `box-shadow` value. |
 
 ## Notes / gotchas
+- **Row headers auto-flip dark for a LIGHT preview.** The collapsed header *is* the preview button; a white / cream / pale-gradient / translucent-outline preset would vanish into the light (#f6f7f7) header. `framework/static/js/preset-preview-contrast.js` (enqueued by this type and by `addable-box`, so Sizes / Hover Animations rows get it too) measures each preview's effective surface — gradient stops or the background composited over the header, falling back to text + border ink for a transparent outline button — and adds `.is-light-preview` to that header when the luminance is ≥ 0.80 or the contrast ratio to the header is < 1.45; `preset-preview-contrast.css` then paints the header `#2c3338`. Re-evaluates on live edits (debounced MutationObserver). Solid coloured presets (blue / grey / amber / red) keep the light header.
 - **Default value is an empty array `[]`.** `null` = defaults; non-array = empty list; a `'~'` sentinel string marks an empty submitted list and is skipped.
 - Each leaf is parsed by its OWN option type — nested shapes follow their own docs. Colors are `{ predefined, custom }`, NOT hex strings.
 - **Back-compat migration:** presets saved before state tabs (flat `normal_*`/`hover_*` keys, no `states`) are auto-migrated into `states.default`/`states.hover` on read.

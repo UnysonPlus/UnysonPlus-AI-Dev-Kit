@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `call_to_action` — Call To Action
 
 A focused promotional block: a title + rich-text message on one side and a single button on the other. Lighter than an `icon_box`. Leaf node: `{ type:'simple', shortcode:'call_to_action', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

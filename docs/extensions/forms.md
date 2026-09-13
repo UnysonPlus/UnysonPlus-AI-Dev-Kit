@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # forms extension
 
 A drag-and-drop **contact-form builder** plus the `[contact-form]` shortcode/element to place forms on any page. **Active by default:** yes.

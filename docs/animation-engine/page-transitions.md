@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # page-transitions — Page Transitions (Animation Engine)
 
 A full-screen overlay reveals each page on load and covers it when the visitor navigates, so pages

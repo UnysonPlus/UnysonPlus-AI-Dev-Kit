@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # extension-points — Stable Hooks & Helpers for Extending UnysonPlus
 
 The durable, public surface an extension or theme author (or an AI modifying the

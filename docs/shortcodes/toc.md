@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `toc` — Table of Contents
 
 An auto-generated, clickable outline of the page's headings, built client-side. Leaf node: `{ type:'simple', shortcode:'toc', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

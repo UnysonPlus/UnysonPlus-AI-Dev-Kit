@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `video_popup` — Video Popup
 
 A poster image with a play button that opens a YouTube / Vimeo / self-hosted video in a lightbox. Leaf node: `{ type:'simple', shortcode:'video_popup', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

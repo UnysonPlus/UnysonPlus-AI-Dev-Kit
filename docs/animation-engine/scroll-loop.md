@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # scroll-loop — Infinite Scroll Loop (Animation Engine)
 
 Turns a run of consecutive full-height **Sections** into a seamless terminal infinite scroll loop

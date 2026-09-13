@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `carousel` — Carousel / Slider
 
 A touch-friendly carousel (built on Splide) of configured slides — supports hero sliders (full-bleed background image with overlaid text) and multi-slide strips. Leaf node: `{ type:'simple', shortcode:'carousel', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

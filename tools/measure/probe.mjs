@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // probe.mjs — the GENERAL element probe. Measure an element's computed props on a page, or DIFF the same
 // element on two pages (source vs. build). This replaces the endless one-off Playwright scripts an agent
 // writes to answer "what's the fontSize / margin / width of X?" — run this instead of hand-rolling a probe.

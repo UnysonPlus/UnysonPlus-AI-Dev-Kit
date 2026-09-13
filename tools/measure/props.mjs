@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 /**
  * props.mjs — full-body PROPERTY diff. Walks both bodies, captures each element's computed
  * style + geometry, and reports NAMED property deltas (no pixels, no video noise).

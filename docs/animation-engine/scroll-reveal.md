@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # scroll-reveal — Scroll Reveal (Animation Engine)
 
 Un-masks an element as it scrolls into view — an animated **clip-path wipe**, or a Canvas

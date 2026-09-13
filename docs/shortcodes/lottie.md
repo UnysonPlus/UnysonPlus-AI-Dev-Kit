@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `lottie` — Lottie Animation
 
 Embeds a Lottie / Bodymovin `.json` animation (from a URL or the media library) with playback controls. Leaf node: `{ type:'simple', shortcode:'lottie', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

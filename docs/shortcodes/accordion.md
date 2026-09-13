@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `accordion` — Accordion / FAQ
 A stack of collapsible title+panel items — the standard FAQ / expandable-list element, with optional FAQ rich-snippet schema. Leaf node: `{ type:'simple', shortcode:'accordion', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.
 

@@ -21,3 +21,6 @@ Thumbs.db
 # Launcher once-a-day auto-update markers (local only; never shipped)
 .last-update-check
 .no-auto-update
+
+# Local-only training extractor (contains source-site brand content — never ship)
+/tools/training/

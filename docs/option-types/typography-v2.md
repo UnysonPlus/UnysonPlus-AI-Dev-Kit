@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # typography-v2
 
 **Same option type as [`typography`](typography.md) — see that page for the full value shape, fields, and gotchas.** `typography-v2` is a deprecation alias: it saves identically and requires no data migration (the type string isn't stored, so v2-authored values load unchanged under `typography`).

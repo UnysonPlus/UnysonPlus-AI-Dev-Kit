@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Container types — `box`, `group`, `tab`, `popup`
 
 Containers hold other options. They are **layout only**: with one exception noted below, a

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # slider
 
 A single-handle ion.rangeSlider for picking one number. Stores a single numeric value.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `timeline` — Timeline
 
 A sequence of milestones (date, title, text, marker icon, image, link) in a vertical or horizontal layout. Leaf node: `{ type:'simple', shortcode:'timeline', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

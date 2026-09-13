@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Tools inventory — the kit's runnable tools (check here BEFORE building your own)
 
 > **REFLEX (read this first).** Before you conclude "the kit doesn't have a tool for X" or start

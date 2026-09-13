@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `flexbox` — Flexbox (the **Div** — default page-builder container)
 
 The default modern container primitive — a self-contained, **arbitrarily nestable** semantic container.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `column` — classic/legacy grid column
 
 > **This is part of the CLASSIC (legacy) Bootstrap grid.** For NEW pages, use the modern **flexbox

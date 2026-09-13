@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `logo_grid` — Logo Grid
 
 A set of client / partner logos arranged as a grid, boxed grid, carousel or marquee ticker — the "trusted by" strip. Leaf node: `{ type:'simple', shortcode:'logo_grid', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

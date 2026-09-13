@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # scroll-text-highlight — Scroll Text Highlight (Animation Engine)
 
 Lights up an element's text **word-by-word (or char-by-char)** as it scrolls through the viewport —

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `site_logo` — Site Logo
 
 Renders the site logo or title. Self-contained (no theme functions) so it works in any theme: a custom uploaded image, else the Customizer custom logo, else the site title text. A header/footer element. Leaf node: `{ type:'simple', shortcode:'site_logo', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

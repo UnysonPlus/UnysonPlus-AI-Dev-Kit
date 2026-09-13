@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # preloader — Preloader (Animation Engine)
 
 A full-screen loading screen shown until the page is ready, then faded away. **Site-wide** —

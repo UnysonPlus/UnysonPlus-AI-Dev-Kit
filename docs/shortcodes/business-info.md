@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `business_info` — Business Info
 
 A business card block: opening hours (with a live open/closed status), plus address, phone, email, website, and map link. Leaf node: `{ type:'simple', shortcode:'business_info', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

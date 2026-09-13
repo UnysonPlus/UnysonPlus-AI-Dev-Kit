@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings — Typography
 
 Authoritative reference for the Typography-related Theme Settings options (General → Typography, General → Typography → Custom Fonts, and Components → Text Styles). Every option's full choice set is enumerated verbatim below.

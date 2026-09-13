@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Building pages programmatically (page-builder + Animation Engine)
 
 Compose any UnysonPlus page — a full site page, a demo, or a quick test — as a page-builder tree,

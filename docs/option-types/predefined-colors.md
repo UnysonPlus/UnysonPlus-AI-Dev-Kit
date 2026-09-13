@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # predefined-colors
 
 A swatch grid bound to a hidden `<select>`. Clicking a swatch selects that color; with `blank => true` a swatch can be deselected. Stores the **single chosen color value** as a plain string.

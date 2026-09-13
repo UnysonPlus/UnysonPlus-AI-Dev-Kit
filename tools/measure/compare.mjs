@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 /**
  * compare.mjs — ENSEMBLE region-by-region parity. Four INDEPENDENT signals per region
  * (header↔header, each section↔section, footer↔footer), aggregated FAIL-LOUD:

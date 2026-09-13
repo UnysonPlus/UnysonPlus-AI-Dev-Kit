@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Option types — stored value shapes
 
 > 📖 **Human manual (live, always current):** [Option types on the UnysonPlus docs](https://unysonplus.github.io/docs/options/option-types). These kit files are the AI-optimized reference; the live manual is the human companion.

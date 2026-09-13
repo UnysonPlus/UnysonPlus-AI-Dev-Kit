@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # chat extension
 
 A floating, multi-channel contact button rendered site-wide — WhatsApp, Messenger, Telegram, SMS, Email or any custom link. **Active by default:** no (ships INACTIVE — activate it under Extensions). Version: 1.0.3.

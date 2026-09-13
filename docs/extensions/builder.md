@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # builder extension
 
 The base **Page Builder** option type — the drag-and-drop `builder` option that the page-builder (and Forms' form builder) are built on top of. **Active by default:** yes (core). Version: 1.2.73.

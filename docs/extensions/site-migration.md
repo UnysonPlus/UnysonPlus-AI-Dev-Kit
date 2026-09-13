@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Site Migration extension
 
 Moves a **whole** WordPress site to another install over HTTP. Ships **inactive**;

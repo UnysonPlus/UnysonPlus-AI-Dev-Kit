@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # icon
 
 **THE icon option type** — `icon-v2` and `icon-v3` are retired, so `'type' => 'icon'` is the only one to use. It runs the canonical modern picker (merged Icons/Custom tabs, Emoji, SVG upload, favorites, and — with the Animated Icons extension — Animated/Lottie/Rive). The engine class (`FW_Option_Type_Icon`) lives in the `icon` folder and extends `FW_Option_Type` directly — its internal asset handles / CSS classes / `wp.template` names still carry a legacy `-v3` prefix, but that's a naming leftover, not a separate type. The stored value is a typed object whose keys depend on `type`.

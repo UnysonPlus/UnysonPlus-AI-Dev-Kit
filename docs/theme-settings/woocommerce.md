@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings — WooCommerce
 
 The Theme Settings → WooCommerce tab is a POINTER only, not a settings surface — it holds no configurable options.

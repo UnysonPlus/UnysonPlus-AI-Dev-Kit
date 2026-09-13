@@ -1,5 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # button-hover-animation
-A select-like dropdown whose panel is a 3-column grid of live buttons, each previewing a hover effect. Selecting writes the effect's CSS class. Used on the button element / button presets for the hover-animation field.
+A select-like dropdown whose panel is a 3-column grid of live buttons, each previewing a hover effect. Selecting writes the effect's CSS class. Used on the button element (`hover_animation`) **and** on a Box Preset's `hover_animation` field — both pickers list the same shared library: the built-in `.btnfx-*` effects plus the user entries from Theme Settings → Components → Hover Animations (`btnfx-c-{slug}`); see [`theme-settings/hover-animations.md`](../theme-settings/hover-animations.md). Feed it `sc_get_hover_animation_choices()` as `choices`.
 
 ## Stored value shape
 ```json

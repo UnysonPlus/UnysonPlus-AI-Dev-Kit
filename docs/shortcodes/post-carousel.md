@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `post_carousel` — Post Carousel
 
 A **dynamic post-data element** (used in post / archive templates and any page) — a Splide slider of posts (any post type) with featured image, title, excerpt, date, meta and read-more, in three card designs. Leaf node: `{ type:'simple', shortcode:'post_carousel', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

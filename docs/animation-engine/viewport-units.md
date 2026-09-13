@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # viewport-units — Stable Viewport Units (Animation Engine)
 
 Publishes **stable viewport-unit CSS custom properties site-wide** — `--vh` = `innerHeight / 100` (px)

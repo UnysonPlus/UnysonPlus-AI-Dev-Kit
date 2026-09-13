@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `text_block` — Text Block
 
 A rich-text (WYSIWYG) content block with color, size, alignment, column, drop-cap and readability controls. Leaf node: `{ type:'simple', shortcode:'text_block', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.
@@ -11,6 +12,7 @@ A rich-text (WYSIWYG) content block with color, size, alignment, column, drop-ca
 | `link_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Color for links inside the block. |
 | `font_size_preset` | font-size preset | `''` | preset slug (see `README.md`) | Named body font-size preset. |
 | `text_align` | alignment | `''` (inherit) | `''` `left` `center` `right` | Horizontal text alignment (output as `text-*` class). |
+| `box_style` | border-style-picker | `''` | `''` or a `boxp-{slug}` Box Preset class (Theme Settings → Components → Box Presets) | Wrap the block in a reusable Box Preset — fill, border, corners, shadow, padding, hover (a callout, a glass card, a floating note). Stamped on the block wrapper like a card's Box Style. |
 | `max_width` | multi-picker | `{preset:'full'}` | see Notes | Constrain block width for readability. |
 | `columns` | select | `'1'` | `'1'` `'2'` `'3'` | Flow text into newspaper columns. |
 | `balance` | switch | `'no'` | `yes` \| `no` | CSS `text-wrap: balance` to even out line lengths. |
@@ -46,3 +48,4 @@ A rich-text (WYSIWYG) content block with color, size, alignment, column, drop-ca
 - `dropcap` is a **multi-picker**. Off = the string `"no"` (or `{ "enabled": "no" }`). On = `{ "enabled": "yes", "dropcap_style": "dropped|accent|boxed|outline", "dropcap_font": "", "dropcap_lines": 3, "dropcap_chars": 1, "dropcap_gap": "md", "dropcap_color": { "predefined": "", "custom": "" } }`.
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, NOT a raw hex string. See `README.md`.
 - Prefer the Styling atts (`text_color`, `font_size_preset`, `text_align`) over inline HTML styling so the block stays theme-consistent.
+- **Boxed block rhythm** (`box_style` set): the shortcode CSS zeroes the first child's top margin and the last child's bottom margin inside the box (`.text-block[class*="boxp-"] > :first-child / :last-child`), so the preset's padding is the only inner spacing — a paragraph's UA `margin-block-start: 1em` would otherwise add dead space at the top and make the box read asymmetric. Scoped to boxed blocks; an unboxed block keeps the normal document rhythm (no global `* { margin: 0 }` reset — that would strip every heading/list/paragraph rhythm site-wide).

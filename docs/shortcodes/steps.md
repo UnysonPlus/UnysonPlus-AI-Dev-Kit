@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `steps` — Steps / Process
 
 A numbered steps / process flow in five designs (horizontal, vertical, alternating, cards, circles), each step with a marker, title and description. Leaf node: `{ type:'simple', shortcode:'steps', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

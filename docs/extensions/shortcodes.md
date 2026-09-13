@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # shortcodes extension
 
 The core drag-and-drop content-element system — the parent that owns every UnysonPlus page-builder element and the shared styling/animation/icon helper layer. **Active by default:** yes (hidden parent; pulled in automatically by `page-builder` + `wp-shortcodes`, which the theme auto-activates).

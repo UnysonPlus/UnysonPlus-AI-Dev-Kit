@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # text-effects — Text Effects (Animation Engine)
 
 A typographic animation applied to an element's text (split-text reveal, decode, typewriter,

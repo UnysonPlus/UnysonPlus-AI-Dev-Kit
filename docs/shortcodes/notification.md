@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `notification` — Notification
 
 A Bootstrap-style alert box — eight color schemes, three border treatments, optional icon, dismiss / auto-dismiss, and a display mode that can pin it as a site-wide announcement bar or floating toast. Leaf node: `{ type:'simple', shortcode:'notification', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

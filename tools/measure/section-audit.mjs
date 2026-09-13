@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // section-audit.mjs — VISUAL section-by-section comparison of a SOURCE site vs a CONVERTED/build site.
 //
 // Where compare.mjs is a per-region METRIC ensemble (you name one selector on each side and it prints a

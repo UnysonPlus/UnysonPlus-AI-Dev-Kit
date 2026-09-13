@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # newsletter-crm extension
 
 Stores and manages the people who sign up through the `[newsletter]` element, and is the base a

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings → Footer
 
 Authoritative reference for every Footer option (Theme Settings → Footer). Sub-tabs: **Footer Layout** (overall), **Pre-Footer**, **Main Footer**, **Post-Footer**, **Copyright**. (Footer Widgets is the legacy widgetized layout, documented last.) Every choice value below is verbatim.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `post_meta` — Post Meta
 
 A **dynamic post-data element** (used in post / archive templates) that outputs a custom-field (post meta) value of the post being viewed, with optional before / after text. Leaf node: `{ type:'simple', shortcode:'post_meta', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

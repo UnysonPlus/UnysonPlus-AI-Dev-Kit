@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `button` — Button
 
 A single call-to-action link styled from Theme Settings button presets, with icon, size, shape, width, alignment and hover-animation controls. Leaf node: `{ type:'simple', shortcode:'button', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

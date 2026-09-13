@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # site-converter extension
 
 Bring an AI-generated / existing website into WordPress — imports media, styling presets, theme settings, pages and menus (piecemeal or as a one-shot bundle) and can generate a matching header/footer child theme. Converts **from a URL** (via a local capture service) or **from a file** (upload an AI-builder export, auto-detected). **Active by default:** no (enable it under Extensions).
@@ -360,6 +361,770 @@ It re-derives each source signal and compares it to what was emitted, so any new
 automatically graded. Use it as the objective "is the base faithful?" check — a scandi-haven-shop convert
 scores 100 (7/7). A check is only counted when the SOURCE carries that signal (a borderless source doesn't
 fail the border check).
+
+### The deterministic header audit: rows by geometry, nothing inherited from the last conversion (2026-09-12)
+
+Converting a second source on a test site produced the FIRST source's header shape (a two-row masthead) with the
+second source's content — "the converter keeps the last header". The audit found the real causes; every fix is a
+measured rule in both engines (golden `[M]` ↔ `header-audit-parity.test.mjs`), and the report is
+`site-converter-header-audit.docx`:
+
+- **rows by geometry** — the two-row detector walked the header's children in DOM order, so a classic one-row
+  masthead (logo · links · actions as flex siblings) read as a nav row under a brand row and the menu went to the
+  Bottom Bar; the capture now stamps each zone's `x:` / `y:` and `header_rows` ↔ `header.rows` require the nav box to
+  lie below / above the brand box (no stamps → the container's own layout decides);
+- **secondary text links** — a plain "Sign in" sharing a parent with a button-styled CTA → a native `list_item` ahead of
+  the CTA in the right zone with its own colour / size / weight + hover (`header_text_links` ↔ `header.textLinks`);
+- **menu typography by MODE across visible links** (a hidden drawer's 16px/400 list, or a "Sign in", was the first
+  anchor sampled); the odd colour is the active item only as a minority of one among ≥ 3 links;
+- **clean colour values** — a utility framework's `rgb(255 255 255 / var(--tw-text-opacity, 1))` (truncated by the
+  capture) was stored as-is; in the theme's generated `:root{}` its unbalanced parenthesis swallowed every later token
+  (menu colour / size, logo rules) and the nav fell back to the brand primary. `clean_color_value` ↔ `cleanColor`
+  strip the var() alpha and rebalance; the theme's `unysonplus_hf_css_val` drops any unbalanced value;
+- **a one-page anchor nav is never "current"** — WordPress marks `/#features` items `current-menu-item` on the page they
+  point into and the whole nav took the active colour; the theme now strips the current classes from any `#` link;
+- **the tagline follows the source on every path** — the admin build imports from a JSON-only temp dir (no
+  `rendered.html`), so the tagline stayed from the previous site; the source `<title>` now rides theme-design.json
+  (`site_title`) and the importer reads it first;
+- **nothing inherited by omission** — the importer replaced only the chrome containers it owns and merged the rest, so a
+  key the new source had no signal for (drawer / mobile-bar colours, footer border, scroll accent, …) kept the previous
+  conversion's value; `OWNED_KEYS` (47 keys, the union both engines can emit) reset to the theme's DECLARED default when
+  a full conversion's payload lacks them.
+
+Verified through the real admin Convert: source A → B → A again each gets its own header (1440px screenshots); the
+corpus's genuine two-row header still converts as two rows. `masthead.test.mjs` no longer names any site — its sample
+list lives in a gitignored `masthead-sample.local.txt`.
+
+### Reconverting a second source on a reused install: stacked zones, menu assignment (2026-09-12)
+
+Converting site A, then B, then A again broke A's header: (1) the capture now stamps every zone's x / y, so a STACKED masthead (a full-width ticker over a full-width brand bar) produced two zone stamps that the segmented-header rule read as side-by-side slats — the ticker's red fill landed on a 1440px start column and the menu collapsed; segments must share the row's y and never span the row. (2) The generated theme assigns its header menu once behind a `<fn>_header_menu_assigned` flag; the different-site cleanup purges the previous menus (clearing the location) but the flag from A's earlier run survived, so A's rebuilt menu was never assigned and the header rendered with no nav. The bootstrap now re-assigns whenever the location is empty / dangling (a location pointing at another existing menu is the user's choice), the cleanup drops the flags, and an existing menu carrying DUPLICATE top-level labels (two runs appended) is rebuilt. Golden `[M]` +1.
+### No class dropped: wrapper spacing, strip labels, icon chips, preset variants (2026-09-12)
+
+A second source converted through the admin Convert surfaced seven fidelity gaps; each is a general measured rule in both
+engines (golden `[Q]` ↔ `spacing-strip-parity.test.mjs`, 747 / 0 and 66 / 0), verified on the live reconvert — the hero's
+content, its "trusted by" strip and the pricing heading gap now measure identically to the source at 1440:
+
+- **a flattened wrapper's margin AND padding ride its boundary blocks** — `collect_blocks` / the decompose dive stamp
+  `mtAdd` on the first block and `mbAdd` on the last from the wrapper's margin + padding (`text-center mb-20` under a
+  section heading = 80px; a `mt-auto pt-24 pb-12` strip = 152 above / 48 below); the section-level heading flush, the
+  cell-level flush, the logo-strip caption and every own-column native (`carry_wrap_margins` ↔ `carryWrapMargins`)
+  put them on the node's Spacing. An inner part's explicit zero (`mb-0`) never blocks the group's gap. The heading's
+  h-tag section rule no longer re-applies them (a hero h1 sat 48 + 48 px under the header);
+- **an overline-only heading keeps its own bottom margin** (a kicker's `mb-8` over a logo strip), and a lone title asserts
+  its captured `margin-top` (zero included) so the theme's default hN margin cannot double a carried gap;
+- **a button inherits a wrapper's margin only when that wrapper holds nothing but buttons** — a hero column's `mt-12`
+  belongs to the column, not the CTA;
+- **hero header clearance reads only the first in-flow child** — a bottom-pinned strip's `pt-24` is its own spacing;
+- **an icon chip is the card's icon, never decoration** — an empty painted box that holds an `<iconify-icon>` / `<i>` /
+  custom element / svg / img is excluded from the `sc-deco-N` hooks (`holds_icon_or_media` ↔ `decorBoxesOf`);
+- **icon brand strips keep their names** — an `<iconify-icon>` mark beside visible text is a mark, not a wordmark, so the
+  logo_grid shows the labels (`label` on the strip items); the JS engine now captures svg / iconify strips at all, and both
+  carry the strip's measured desktop gap (`md:gap-16` = 64, not the bare phone class), the mark size, opacity, grayscale,
+  and the item's own gap / padding / label typography as scoped CSS (the shortcode's `.35rem` item padding grew a 28px
+  row to 35);
+- **a role's second distinct button skin becomes its own preset** — "Outline" (the common slate plan buttons) and
+  "Outline 2" (the white-bordered header CTA with its brand hover); a semantic class still resolves to the winner, only a
+  colour match reaches a variant, so the header CTA renders `btn-outline-2` with the source's border and hover;
+- **a frosted overlay header shows its fill** — the theme's `.site-header--transparent` utility rule now honours
+  `--header-bg` (a translucent `bg-slate-950/40` bar over the hero rendered transparent);
+- **a stale per-page `hide_site_footer` / `hide_site_header` is reset** on re-import when the new source has that chrome.
+
+### Utility-class probe, batch 2 + the CSS probe closed + the golden fixtures green (2026-09-12)
+
+The CSS probe reaches **35 / 35 in both engines** and the utility-class probe **48 / 55 at render level** (from 42); the
+corpus's water and contact bands are now exact at 390 / 820 / 1440, and both golden fixtures are green (717 / 0, 20 / 0 —
+the nine carried failures were stale shapes: the hero rating cluster is kept verbatim again, the [13] hero checks read
+flexbox cells, fixture 2's signup is the native Newsletter). Every rule is measured, in both engines:
+
+- **child rhythm** — the SECOND paragraph's top margin / hairline + padding (a `space-y-*` / `divide-y` card) →
+  `.icon-box__content p + p` (`bodyRhythm`);
+- **a side-by-side card** — a cell that computes `flex-direction:row` with the heading block and the paragraph as its
+  children → the icon_box inner becomes a row from the tier the source is a row at, the title first or last as the source
+  orders it (`card_row_layout` ↔ `cardRowOf`; targets `.icon-box__head` and the top style's `.icon-box__inner>.icon-box__title`);
+- **a form field's `:focus` skin** — the capture resolves `:focus` / `:focus-visible` / `:focus-within` rules (Tailwind's
+  `--tw-ring-*` vars → a literal ring) and stamps `data-sc-focus`; the newsletter input's `:focus` carries it (`field_focus` ↔ `fieldFocus`);
+- **empty painted boxes inside a card** (an aspect-ratio placeholder, a pattern tile, a colour swatch) → a class hook
+  `<div class="sc-deco-N">` in the description in document order + scoped CSS; an inline-SVG data URL rides with its tags
+  percent-encoded (the custom-CSS scrubber strips raw `<` `>`), and the capture CSS-escapes a `;` inside `url()` so the
+  stamp's `;`-list survives (`bodyDecor` ↔ `decorBoxesOf`; the JS text-card path emits a raw box);
+- **a stray inline label** (a `<span class="label">` outside any `<p>`) → its own paragraph, and an inline element's own
+  treatment that differs from its parent (writing-mode + `display:inline-block`, tracking, case, size, weight, decoration)
+  → kses-safe inline style (`scrub($node, $parent_cs)` ↔ `rawHtmlOf` inline bits);
+- **the WIDE tier** — a fourth capture viewport (1920 → `data-sc-cs-xl`, the `2xl:` tier): section padding, a card's inset
+  and its title / description size ride `@media (min-width:1536px)` rules (`sectionCsXl`, `cardCsXl`, `*CsXl` ↔ `computedXl`, `padXl`, `*FsXl`);
+- **a layout-centred card** (`grid place-items-center`, `flex flex-col items-center`; the capture stamps `justify-items`) reads as centred;
+- **a band's inset per tier** — a wrapper's measured 390 / 820 inset (`el_inset_x_tier` ↔ `insetXOf` tiers) rides
+  `max-width:767px` / 768–991px `selector[class]` rules beside the desktop token, and a SKINNED wrapper (or the sole child
+  of one) no longer adds its padding to its children's inset (the panel's preset already carries it — the corpus's water
+  band was inset twice, 1056px for 1224px);
+- **a chip row that stays a row on phones** (the 390 stamp keeps it a flex row) → `responsive_collapse:no` (`keepRowSm`);
+- **the phone gutter override** is `!important` (the theme's generated `:root{--container-gutter}` came later in the combined stylesheet and won).
+
+Five latent regexes in the PHP engine carried a literal backspace where `\b` was meant (`<header\b`, `\b(footer|colophon|
+site-info)\b`, `\bgrid-cols-[2-9]\b`) — repaired; patch scripts must be written with the Write tool, never a heredoc.
+Still differing on the utility probe: a lone input inside a card, `odd:` / `first:` list variants, a link inside a card
+that becomes the box link, and a hover shadow's second-layer colour. Fixtures: golden `[U2]` (10) ↔
+`utility-probe-parity.test.mjs` batch 2 (9).
+
+### Utility-class probe: generated classes are reproduced from measurements, never from a list (2026-09-12)
+
+There is no finite list of utility classes (a utility grammar × values × stacked variants is unbounded), and the
+converter does not keep one: for a CAPTURED site the runtime-generated stylesheet is carried whole, scoped under
+`.sc-tw` (every `md:` / `dark:` / `print:` / `has-[]` / `aria-[]` / `before:` / arbitrary-value rule), and every
+DECOMPOSED element is rebuilt from the computed values the capture stamps. A 36-card probe page of utility families ×
+variants, graded on the RENDERED result (source vs converted computed values, 55 checks at 390 / 820 / 1440 / 1920),
+went from 24 to 42 matches through general rules, each fixed in both engines:
+
+- a coloured card's inherited ink (a brand-filled `text-white` tile) → the native Title / Content Colour when the title's /
+  description's colour differs from the PAGE ink (the body stamp; `prime_mapper` → `set_page_ink` ↔ `titleInk` / `bodyInk`);
+- a utility-built shadow computes with two transparent ring placeholders FIRST — `visible_shadow` drops placeholder layers
+  before judging (four gates had rejected every real `shadow-[…]` / `shadow-lg` behind them);
+- a card's hover INK (`hover:text-white`) and a child's own / GROUP hover (`.group:hover .title`: the capture stamps the
+  descendant with `data-sc-hover-group`, and MERGES the several `:hover` rules that target one block) → `selector:hover
+  .icon-box__title{…}` (`child_hover_decls` ↔ `hoverGroupOf`); the stamp hover now merges into a class-only hover;
+- the card title's / description's tracking, case and a truncate (`letter-spacing` / `text-transform` / `text-overflow`, the
+  capture stamps `text-overflow`) ride `.icon-box__content`; their measured 390 / 820 font sizes ride `max-width:767px` /
+  768–991px rules (`titleCsSm/Md`, `bodyCsSm/Md` ↔ `titleFs*` / `bodyFs*`);
+- a card image's own box + radius (a `size-16 rounded-full` avatar; the capture stamps an `<img>`'s rendered width) → the
+  image keeps 64px / 9999px, and an own-sized image_box drops its forced crop ratio (`img_extra_css` ↔ `imgExtraOf`);
+- the grid's MEASURED track count at 820 / 390 (`tracksMd` / `tracksSm` on every grid row block) → each cell's tablet /
+  phone device width, a N-track tablet rule (`repeat(N,minmax(0,1fr))`) for a Grid, and a cell's own tablet fraction
+  (`track-frac`, stamped for grid / flex-row children) wins over the equal split (a `md:col-span-2` card);
+- a cell hidden per TIER (`md:hidden`, `lg:hidden`: display at 1440 / 820 / 390) → the native Responsive Hide per tier;
+- a thin accent-bar pseudo (a 4px `before:` rule: one side ≥ 24px, the other ≥ 2px) qualifies as a decor layer, thin sides
+  stay px, and a SMALL layer paints ABOVE the fill (`above:1` → `z-index:1`; the source's own `z` when set).
+
+Two theme-side bugs surfaced by the render grade: the image_box crop ratio never applied (`imgbox--ratio-ratio-16-9` — the
+option value's own `ratio-` prefix was doubled) and `.imgbox__img{height:100%}` lost to a page-level `.woocommerce-page img
+{height:auto}` (now `.imgbox .imgbox__img`). Still open on the probe: a focus ring on an input inside a card, `divide-y` /
+`odd:` / `first:` child utilities, a card that is itself a `md:flex-row`, `place-items`, and the 1536px (`2xl:`) tier.
+Fixtures: golden `[U]` (18) ↔ `utility-probe-parity.test.mjs` (17).
+
+### JS engine: a rounded / framed image stays a native media_image (2026-09-12)
+
+The JS decomposer sent any `<img>` with a border-radius, box-shadow or a border / ring / rounded class to a VERBATIM
+code block ("nothing dropped"), so its object-position / filter long tail (and the editable element) were lost there
+while the PHP engine kept the image native. The media_image builder already reproduces radius / shadow / filter /
+object-position on `selector img`; `imgSkin` now also reads the image's own uniform border and outline (+ offset), so
+the verbatim fallback is reserved for what the element cannot express — a decorative `blob` class or a per-side border.
+Probe: JS 33 / 35, level with PHP. Fixture: `long-tail-parity.test.mjs` (+1).
+
+### Tablet tier + phone gutter: the responsive pass completes (2026-09-12)
+
+The phone pass grew a TABLET viewport (820px → `data-sc-cs-md`, diffed against desktop like the phone stamp) feeding the md
+tier of the same options (section padding / cell padding / cell min-height), so 768–991px no longer inherits the phone tier;
+and a ONE-track grid at 820px (a source that stacks at its own 900px breakpoint while the theme grid only collapses below
+768) gets a 768–991px rule that stacks the row (`apply_tablet_stack` ↔ `applyTabletStack`; `tracks_count_at` ↔ `tracksMd`).
+The container's PHONE gutter (the shell's resolved 390px margin → `data-sc-content-gutter-sm`; PHP `declared_container_gutter_sm`
+falls back to the winning shell class's phone stamp) rides a `max-width:767px` `--container-gutter` override in the misc
+CSS, because the native Container Gutter is one value. Measured on the corpus (source → converted, section heights): 390px
+story 1097 → 1068, fields / core exact, water 898 → 964; 820px story / fields / core / contact EXACT, slider 1016 → 992,
+water 712 → 787; 1440px unchanged. Fixtures: golden `[V]` (+3) ↔ `phone-pass-parity.test.mjs` (+3).
+
+### The phone pass: a second capture viewport, first cut (2026-09-12)
+
+The capture sampled ONE viewport (1440), so every `@media` rule a source wrote for phones was invisible — the
+converted page relied on the theme's own responsive behaviour plus a 112px clamp guess on section padding. Now
+`capture.mjs` renders the page at 390px BEFORE the extraction, records a small property set per element
+(padding / margin / font-size / line-height / gap / display / flex-direction / grid tracks / text-align / max-width /
+min-height) and keeps only the values that DIFFER from desktop as `data-sc-cs-sm`, plus a page flag
+`data-sc-phone-pass` so an engine can tell "no diff" from "no pass". Both engines consume it (PHP `sectionCsSm` /
+`csSm` / `el_padding` / `cell_geometry` / `phonePass` ↔ JS `computedSm` / `fontSizeSm` / `padWithPhone` / `minHSm` /
+`phonePass`), always into something the theme already expresses responsively:
+
+- **Section rhythm**: `padding_top/bottom` BASE tier = the measured phone value, desktop on `lg`. When the pass ran
+  and found no difference, the base is the EXACT desktop value — the 112px clamp is gone for phone-passed captures.
+- **Cell padding**: the pad record's base tier = phone, desktop on `lg` (`apply_cell_pad` already emits the
+  `min-width:992px` tier; JS `padLgCss` now does the same for panels / rows).
+- **Cell min-height**: the flexbox Min Height's own tiers — base = the phone minimum or NONE (`min-height:auto` at
+  390px), desktop on `lg`. This alone fixed the corpus story band on phones (a 640px desktop card minimum was
+  stretching the stacked image cell to 640px).
+- **Type**: a heading's / paragraph's / folded subtitle's phone font-size (+ line-height) → a `max-width:767px`
+  rule; a fluid `clamp()` size needs no phone tier (it already scales). Also fixed a damaged regex in the
+  section-level subtitle fold that never captured `subtitle_lh`.
+- **Cover-fill images** only fill beside their text: the fill rides `min-width:992px`, so a stacked phone image sits
+  at its natural height like the source.
+- **Hidden on phones**: an element (or cell) that is `display:none` at 390px → the native Responsive Hide
+  (`hide-xs` + `hide-sm`), desktop visible — including a salvaged lone leaf (a chip).
+
+Measured on the corpus at 390px (source → converted, section heights): story 1097 → 1068, fields 2427 → 2427,
+core 743 → 743, slider 1280 → 1294, water 898 → 964, contact 509 → 551; desktop (1440 / 1920) unchanged. Fixtures:
+golden `[V]` (10) ↔ `phone-pass-parity.test.mjs` (9). Still open at phone: the theme's Container Gutter is one
+value (the source uses 16px on phones, 24px above), chip rows that wrap differently, and tablet (768–991) which
+inherits the phone tier for cell padding — a third viewport would settle it.
+
+### The CSS long tail: 35-feature coverage audit → capture stamps + carriers in both twins (2026-09-12)
+
+A probe page with one card per modern CSS feature (35 features), captured through the real pipeline and graded on
+each card's output node + the Box Preset it points to, scored **2 / 35** on the PHP engine. Root cause: the PHP path
+only ever sees a property the capture stamps into `data-sc-cs` (38 properties), so 22 features were never stamped;
+5 were stamped but dropped; 3 are structural (one viewport). After this change: **PHP 31 / 35, JS 30 / 35**. The probe
+site + grader live in the session scratchpad and re-run in about a minute; re-run them after any stamp change.
+
+- **Capture** (`capture.mjs` PROPS + `skip` defaults, non-default values only): opacity, filter, clip-path, mask-image,
+  mix-blend-mode, text-shadow, font-style, text-decoration thickness / offset / colour, -webkit-line-clamp, column-count /
+  -gap, writing-mode, text-wrap, text-indent, hyphens, font-variant-numeric, font-feature-settings, white-space,
+  -webkit-text-stroke, outline (+offset), LEFT / RIGHT border sides, border-image, background-size / position / repeat,
+  object-position, translate / rotate / scale, aspect-ratio, min-width, order, align-self. `width` is deliberately NOT
+  stamped (every element has one; it would read as a cap everywhere). A second HOVER pass stamps `hover-self{…}` on any
+  sizeable block a `:hover` rule targets (the first pass only looked at buttons), so a card's lift survives.
+- **Carriers (PHP ↔ JS)**: `box_extra_css` ↔ `boxExtraOf` (box-level long tail → the Box Preset's own CSS, and the slug /
+  skin key now includes the resting shadow, the extra string and a lift / border / shadow hover — so an opacity card, a
+  lift-only card and a plain card are DIFFERENT presets; before, the first-registered plain preset won and the lift /
+  inset shadow vanished); `read_card_skin` ↔ `boxSkinOf` read the 1–4 value padding SHORTHAND first (padding-inline /
+  -block used to collapse to the top value); `text_long_tail_props` + `block_rule_fixups` ↔ `textLongTailOf` (prose
+  profiles, icon_box title / content via `titleCs` / `bodyCs` ↔ `titleExtra` / `bodyExtra`, text cards via
+  `longTail` / `subtitleLongTail`; line-clamp brings `display:-webkit-box; -webkit-box-orient; overflow`; a
+  background-image is kept ONLY as gradient text); `img_extra_css` ↔ `imgExtraOf` (filter / object-position /
+  aspect-ratio → the image's `<img>` on media_image, icon_box and image_box); `cell_geometry` ↔ rowCols placement
+  (order → native Order, align-self → native Align Self, min-width / sticky → cell CSS; the card grid now carries
+  geometry too). `color_to_hex` ↔ `_csrgb` parse `color(srgb …)` (what the browser computes for `color-mix()`; wide
+  gamuts folded to sRGB). JS also gets its OWN card skin on every cell (`boxSkinOf`) — before, a plain heading+text card
+  lost its box entirely (the audit's side finding) — and the derived Box Preset cap rises from 12 to 40 (PHP is unbounded).
+- **Still not carried (by design / next tier)**: an EMPTY painted box inside a card (an aspect-ratio placeholder, a
+  pattern tile); inline elements inside prose (an `<a>` with its own underline metrics, a `<span>` with writing-mode);
+  a paragraph colour inside a card; and anything that only exists at another viewport (`@media`, `@container`,
+  `prefers-*`) — the second-viewport capture is a separate plan.
+
+Fixtures: golden `[T]` (11 — padding shorthand, keyed opacity preset, accent bar + outline, inset multi-shadow,
+color(srgb), lift-only hover, title / description long tail, cell order / align-self) ↔ `long-tail-parity.test.mjs`
+(13, + image filter / object-position and a text card's title / subtitle long tail). No golden regressions (666 / 9
+pre-existing); the corpus page measures unchanged at 1440 and 1920.
+
+### Sweep pseudo-layers: an animated `::before` / `::after` rides its declared rule + keyframes (2026-09-12)
+
+Question: can the deterministic engine map a moving pseudo-element such as `.silk::after{inset:-120%; background:
+linear-gradient(120deg, transparent 44%, rgba(255,255,255,.78) 50%, transparent 56%); transform:translateX(-140%)
+rotate(12deg); animation:sheen 8s ease-in-out infinite; mix-blend-mode:screen}`? It could not: the decor-pseudo
+stamp read only the COMPUTED style (one mid-animation frame — a matrix, not the author's transform), dropped any
+layer covering ≥90% of its box as "a scrim" (a sweep is larger than the box), and carried no transform / animation /
+blend / keyframes. Rule, both twins; fixtures golden `[K]` (9) ↔ `sweep-pseudo-parity.test.mjs` (9):
+
+- **Capture** (`capture.mjs` for PHP, `capture-extract.mjs` for JS — shared helper text): `declaredPseudoRule(el, pe)`
+  reads the DECLARED stylesheet rule of `el::pe` (last matching rule wins, applying `@media` entered), rebuilding the
+  animation shorthand NAME-FIRST from the longhands (the browser serialises it name-last); `keyframesFor(name)`
+  returns the `@keyframes` block's cssText. `sweepLayerOf()` accepts a painted (gradient) pseudo that MOVES (a declared
+  transform and/or animation), read BEFORE the covering gate, and records inset / edges / size / background /
+  transform / animation / blend / opacity / filter / radius + `clip` (the host's `overflow:hidden|clip`). Stamped as
+  `sweep:1;…` in `data-sc-decor-pseudo` and the keyframes in `data-sc-keyframes` (per element, de-duplicated).
+- **Where it lands**: a card's own layers now ride the card (`card_from_cell` → `decor`; JS `cardOf` → `decor`) into
+  `n_icon_box` / `iconBoxNode`, next to the existing panel (`panel_build`) and grid-cell paths.
+- **Emit** (`Mapper::sweep_pseudo_css` ↔ `to-pages sweepPseudoCss`): host `position:relative; isolation:isolate` (+
+  `overflow:hidden` when the source clipped), pseudo `content:""; position:absolute; pointer-events:none` + the declared
+  inset / geometry / gradient / transform / animation / mix-blend-mode — painting ABOVE the content like the source (no
+  `z-index:-1`). The animation and its `@keyframes` are renamed to a per-element `sc-<name>-<md5(keyframes)[0:6]>` so two
+  converted sites' "sheen" never collide; both twins derive the same hash. Every value is whitelisted; keyframes are
+  scrubbed (no `<`, `url(`, `expression(`, `javascript:`, `@import`) and capped at 4000 chars; unreadable or
+  mismatched keyframes → the static layer stays with NO dangling animation. The theme's element-CSS scrubber keeps
+  `@keyframes`, so the block renders from the page's scoped CSS.
+
+Verified on a fixture site captured through the real pipeline and imported into a test install: the converted card's
+`::after` computes `animation-name: sc-sheen-983495`, 8s, infinite, `mix-blend-mode: screen`, host `overflow:hidden`,
+and the renamed keyframes are present in the page stylesheet.
+
+### Admin path parity: one mapper setup, declared container shells, the native Container Gutter (2026-09-12)
+
+An admin URL convert (Convert → prepare → build) rendered every band edge-to-edge while the SAME source imported
+through `import_dir` capped at the source container. Audit of the two paths found three gaps, all fixed:
+
+1. **One mapper setup for both paths — `Stitch::prime_mapper( $html, $hifi )`.** The bundle path primed the
+   mapper inline (style config + semantic colours, hi-fi, Section Style / Box / Button / Text presets, the SITE
+   CONTAINER WIDTH); the admin build step re-created only style config + hi-fi + assets + source URL + entrance
+   flags, so `Mapper::build_pages` ran with a ZERO site width — the flexbox band fallback cap (`content_width`)
+   never fired — and without the preset links. Both paths now call `prime_mapper`. The prepare→build stash also
+   carries the UNCAPPED source html (`html_full`; the 120k-char `html` cap is only for the AJAX payload), so a
+   bigger page's trailing `<style>` — its declared container rule, presets, colours — survives into the rebuild.
+2. **A DECLARED container shell is not an inset.** `.section-shell{width:min(1440px, calc(100% - 48px));
+   margin:0 auto}` computes to `margin:0 24px` at the 1440 capture viewport and read as a 24px inset (the band
+   inset rule above) — correct at 1440, wrong on a wider screen where the source stays 1440 wide and centred.
+   `el_inset_x()` now reads the DECLARED stylesheet rule first (`stylesheet_decl` width / max-width / auto
+   margins): a declared width, cap or auto side → 0/0; the band's measure rides its Content Width cap instead.
+   JS twin `insetXOf` already read `sheetDecl` the same way.
+3. **The declared gutter → the native Container Gutter.** `declared_container_rule()` (shared by
+   `declared_container_cap` / `declared_container_gutter`) also reads the `100% - Gpx` of the winning shell rule
+   (per side = G/2) → Theme Settings `general_layout.layout_container_gutter` (24px) → `--container-gutter`. The
+   flexbox Content Width renders `max-width:min(cap, 100% - 2×gutter); margin:auto`, so a converted band keeps
+   the source's exact inset BELOW the cap and its exact centred cap ABOVE it. JS: `capture.mjs` stamps
+   `data-sc-content-gutter` from the same rule; `capture-extract` exposes `contentGutter` + `contentWidth`;
+   `to-theme-settings` emits the gutter, and falls back to the stamped site width when the header / footer carry
+   no container of their own.
+
+Fixtures: golden `[W]` (6 — declared shell → no band margin, `wide-xxl` cap, gutter 24 + width 1440 in
+theme-settings, `build_pages` after `prime_mapper` keeps the cap) ↔ `band-inset-parity.test.mjs` (+3).
+Measured on the corpus: every band 24+1392 at 1440 AND 240+1440 at 1920, both equal to the source shells; the
+core ring stays centred. Verified through the real admin Convert flow, not only `import_dir`.
+
+### Band inset: a flattened shell wrapper's side margin / padding rides onto its band (2026-09-12)
+
+A manual reconvert showed every band running edge-to-edge (0 → 1440) while the source sat 24px in. Cause: the
+section shortcode renders a flexbox child DIRECTLY (no `.fw-container`), so the only thing holding a band off the
+viewport edge is the source's plain-CSS shell (`.section-shell{margin:0 24px}`, `.core-shell`, `.footer-shell`) — a
+styling-free single-child wrapper that `collect_blocks` / the JS dive flattens, and whose horizontal inset was
+dropped (only its vertical margin was carried as `mtAdd` / `mbAdd`). Rule, both twins; fixtures golden `[I]` (8) ↔
+`band-inset-parity.test.mjs` (9): `el_inset_x()` / `insetXOf()` read the wrapper's own left/right margin + padding
+(Tailwind `mx-/ml-/mr-/px-/pl-/pr-` first, else the computed shorthand) and stamp it on every block the wrapper
+produced as `mxAdd {l,r}`; nested wrappers ADD UP (shell 24 + `px-6` 24 → 48). A centred cap is NOT an inset —
+`mx-auto` / `container` / `max-w-*`, a computed max-width or fixed width, an `auto` side, or a margin beyond a
+quarter of the viewport returns 0/0 (its resolved auto margins are centring; the measure rides `maxWidth`).
+`apply_inset_x()` / `applyInsetX()` then put it on the node's native Spacing margin as `ms-*` / `me-*` tokens
+(off-scale → `ms-[24px]`, rendered by the dynamic-CSS arbitrary-spacing rule) — on a section-level row band, a
+nested row (via `_row_lay.mx`), a heading group's special_heading (both flushes), and every block through
+`apply_block_anim` / `blockToNode`; a node with no Spacing option gets scoped `margin-left/right` CSS. A
+SELF-CENTRED block (a capped panel with auto side margins — the core ring) ignores the inset, else the side margin
+would override its centring and shove it left. Measured on the corpus at 1440: every band now sits at 24+1392 like
+the source shells, the ring stays centred (384+672 vs 391+659).
+
+### Chrome presence: no source footer / header → the page's native Hide switches (2026-09-12)
+
+A source with NO `<footer>` (its last band carries the brand line itself) still grew the theme's default footer
+(the 414px colophon) under the converted page. Rule, both twins; fixtures golden `[P]` (4) ↔
+`chrome-presence-parity.test.mjs` (3): `source_chrome()` (a `<header>` / `<nav>` / `role=banner`; a `<footer>` /
+`role=contentinfo`) rides on the page spec as `chrome`; `chrome_page_options()` turns a missing footer into
+`page_options.hide_site_footer = 'yes'` (a missing header → `hide_site_header`), and the pages importer sets each
+`page_options` key with `fw_set_db_post_option` — the theme's own per-page switches (Page → Layout), so the editor
+shows them and they can be flipped back. JS: `page_options` on the page entry from `capture.footer` /
+`capture.header`. A source with a footer asks for nothing; the theme-settings footer content is still generated
+(a user can un-hide it).
+
+### Signup lockups → the native newsletter form: gate, field skin, preset button, field icon (2026-09-12)
+
+Contact-section pass — a form-LESS signup: a `space-y-3` div holding a paper-pill FIELD wrapper (gradient,
+hairline, blur 26, inset + drop shadow, radius 999, padding 12/16, an `iconify ph:envelope-simple` glyph beside a
+transparent email input) and a full-width silk submit 12px below (54px, 14px sentence-case). The existing
+newsletter path (`newsletter` recognizer → `n_newsletter` → `require_extension('newsletter-crm')`, which the
+importer auto-activates) never fired: its gate wanted a `<form>`, a form-named class, or ≥2 controls. The field
+went verbatim and the button became a text line. Now equal to the source (form column 615 × 116 at y=75, field
+615 × 50, button 615 × 54, section 344) and a test submission lands in the Newsletter CRM's subscriber table.
+Rules, both twins; fixtures golden `[N]` (11) ↔ `newsletter-signup-parity.test.mjs` (10):
+
+- **A SIGNUP LOCKUP is a form.** `is_newsletter_form` (JS `signupLockup`) also accepts an anonymous container with
+  exactly ONE email / text input, ONE labelled submit-shaped button and no other substantial content (no heading /
+  prose / media; a "search" placeholder or a password field still rejects). The multi-control and named gates stay.
+- **Design from geometry.** The button on its own row (a column stack, a `w-full` / 100%-wide button, a grid) →
+  `stacked` (the shortcode's stacked design = a full-width submit); beside the field → `inline`. The stack gap
+  (the button's margin-top, else the container gap) → `.fw-nl__fields{gap}`.
+- **The FIELD WRAPPER is the field.** The nearest ancestor of the input (inside the container) with a skin or a
+  radius decides the roundness (`pill` ≥ 40px) and its skin — gradient / fill, hairline, shadow, backdrop blur,
+  padding, height, plus the input's font-size / colour — rides on `.fw-nl__input` (scoped; only a flat fill has the
+  native `field_bg`). The placeholder colour comes from the `placeholder:text-[…]` utility (JS: `::placeholder`).
+- **The submit through the shared Button Preset matcher.** `button_preset_for(cls, cs)` (JS `_buttonPresetFor`) →
+  the native `button_preset` (colour + size slug; the view now sanitizes per token) and no one-off accent; the
+  submit's OWN type (font-size, transform, tracking, line-height, weight, height) is re-asserted as scoped CSS
+  because the preset carries the site's button font (the header's 11px uppercase CTA) while this one is 14px
+  sentence-case.
+- **The field icon is native.** New shortcode options `field_icon` (icon-v2) + `field_icon_color` (rendered by
+  `sc_icon_render` in a `.fw-nl__field--icon` wrapper). The converter maps the glyph before the input: an inline
+  `<svg>` verbatim, `lucide:<name>` / `data-lucide` → `lucide/<name>`, a font `<i>` class → icon-font, and
+  `icon_semantic_lucide()` (JS `iconSemanticLucide`) for another set's id by MEANING (`envelope|mail` → `mail`,
+  `phone`, `user`, `search`, `send`, …) — the theme bundles FA / Lucide / Tabler, not Phosphor. Colour → hex.
+- **A cell that IS a signup form is claimed whole** (`newsletter` joins the `claim_element` content-row list).
+- Also fixed on the way: `el_padding` cascade (an unset `lg` inherits `md`, not the base — `p-6 md:p-8` stayed 24
+  at desktop), and the newsletter live region takes no room while empty (`.fw-nl__msg:empty`).
+
+### Horizontal scroll strip, no-wrap rows, capped cells, cells that ARE rows (2026-09-12)
+
+Slider-section pass — a header row (`flex; justify-content:space-between; align-items:flex-end; gap:22`; eyebrow +
+fluid h2 left, a `.slider-head p{max-width:400px}` intro right) over a `.strip` (`grid-auto-flow:column;
+grid-auto-columns:minmax(78%, 980px); gap:18; overflow-x:auto; scroll-snap-type:x mandatory`) of three strip
+cards, each a `.95fr 1.05fr` grid (radius 38, gradient, hairline, shadow, clipped, min-height 360) of a 34px copy
+cell + a painted image half. It converted as three squeezed icon boxes in a 3-column grid with the intro dropped
+under the heading. Now equal to the source (section 789; header 970/400 at x=1016; three 1086px cards, 515/569
+tracks, h3 44/41.8/-2.2, meta at 604). Rules, both twins; fixtures golden `[X]` (13) ↔
+`slider-strip-parity.test.mjs` (12):
+
+- **A horizontal SCROLL STRIP is a row that scrolls.** Recognizer `scroller` (92, above card_grid; JS `scrollerOf`
+  on the row block): a grid / flex with `overflow-x:auto|scroll` and a column auto-flow, a scroll-snap, or
+  computed tracks wider than the box → the `layout_row` block carries `scroll:{item, snap, pad_b}`, the item width
+  being the sheet's `grid-auto-columns` (`minmax(78%, 980px)` → `max(78%, 980px)` — a strip track is at least its
+  min) or the computed track share. `apply_scroll_strip` (JS `applyScrollStrip`): the row flexbox gets `wrap:no`
+  (native) and scoped `overflow-x:auto; scroll-snap-type; scrollbar hidden; >*{flex:0 0 <item>; width:<item>;
+  scroll-snap-align}` with content-sized cells — never a squeezed N-column grid.
+- **A row that does not wrap keeps one line.** `layout_row` records `nowrap` (the computed `flex-wrap` is
+  `nowrap`, or a grid); the mapper sets the native `wrap:no` (both the section-level and the nested `_row_lay`
+  paths; JS `rowBlk.nowrap`). Before, every converted row wrapped and a capped intro dropped under its heading.
+- **A capped cell in a justify row is size-frozen.** `freeze_capped_cell` (JS inline): a cell carrying a
+  `max-width` cap — on itself or on its sole inner wrapper (a two-node cell) — gets `flex-shrink:0` and the row
+  gets `>*{flex:0 1 auto;min-width:0}`, so the uncapped cells absorb the shrink exactly as the source's flex does
+  (400 stays 400; the heading takes 970). `element_max_width()` now reads the computed / cascade-matched sheet
+  value (`.slider-head p{max-width}`) before the legacy rightmost-compound scan.
+- **A cell that IS a row is claimed whole.** `claim_element` accepts `scroller` / `layout_row` too, so a strip
+  card (itself a grid) becomes one nested `row` block inside its cell — `rowBox` on that row, the cell keeps no
+  `cardBox` and no duplicate padding (`$as_row`). JS: `rowCols` runs `decompose(c, …, selfOnly)` on the cell and
+  `rowBlockToItems` builds a nested row from a cell's blocks (`c.blocks` with a `row` → `rowBlockToItems`,
+  the rest one group).
+- **A nested heading keeps its exact size.** `heading_metrics_css` also emits the computed `font-size` (a nested
+  h3 fell to the theme's h3 size); JS `headingNode` pins the source px alongside a display preset (44 stayed 44,
+  not the preset's 48) — a fluid title keeps its clamp() instead.
+- Admin: `define( 'FW_SITE_CONVERTER_ALL', true )` in `wp-config.php` lists the roadmap outputs as enabled without
+  the badge — a recording / showcase switch only, no emitter behind it (a Convert still runs the Page Builder
+  output). The first output is now labelled **Unyson+ Page Builder** (child theme).
+
+### Rounded shell band: media-aware sheet reading, multi-layer fills, row layout, stack cells, edge skins (2026-09-12)
+
+Water-section pass — a 1392px rounded SHELL (`width:min(1440px, calc(100% - 48px))`, radius 48, clipped, a radial
+glow over a linear wash, shadow; an inner wrapper pads 82/84/42) holding a `1.1fr .9fr` grid (gap 56,
+`align-items:end`) of a copy column and a single-track stack (gap 16) of two glass stat cards (label + 42px
+serif value), then a footer row (`margin-top:64; padding-top:26; border-top` hairline; `space-between`) with a
+brand line left and three plain tag spans right. Now equal to the source on every row (section 590, shell
+1392×494, tracks 642/526, cards 526×121, footer 1224×48, tags at x=1108). Rules, both twins; fixtures golden
+`[S]` (18 checks) ↔ `water-band-parity.test.mjs` (16):
+
+- **The stylesheet reader honours @media.** `sheet_unwrap_at_rules()` unwraps the at-rules the capture viewport
+  (SHEET_VW = 1440) satisfies and blanks the rest (`@media (max-width:768px)` no longer hands a mobile
+  `.shell{width:…}` to the desktop reading); JS `mediaApplies` = `window.matchMedia`.
+- **A multi-layer background is not "a linear gradient".** `parse_linear_gradient` / `parseLinearGradient` return
+  null for more than one gradient layer, so the whole stack rides verbatim in the Box Preset CSS (the radial
+  glow stayed) instead of the native field keeping only the linear layer. `read_card_skin` reads `overflow`
+  from the sheet too (`css_or_decl`) so a clipped shell clips.
+- **A shell-expression panel IS the section container.** A panel whose declared width is the site's own cap
+  (`min(Npx, calc(100% - Gpx))` and friends) drops the width — the section container already provides it (a
+  nested cap subtracted the gutter twice: 1344 for 1392). `shell:true` on the block.
+- **A panel absorbs a sole plain wrapper's padding** (`.shell > .inner{padding:82px 84px 42px}` — the wrapper
+  is flattened, so its inset rode nowhere) and **counts block children carrying text as content** (a stat card's
+  label + value divs); **a skinned panel is a substantial stack child** (two glass cards → `stack`, gap 16).
+- **A row keeps its own layout in the nested path.** `layout_row` records `justify` (space-between / around /
+  center / end) and its own `pad`; `carry_row_skin` stashes gap / valign / justify / mt / mb / pad as `_row_lay`
+  and `flexify_items` applies them (native Gap / Align Items / Justify with CONTENT-sized cells, Spacing,
+  padding CSS); every cell of one source row shares a `_row_id` so two stacked rows never merge into one run.
+  `column_to_flexbox_cell` carries `_row_lay`. JS: `rowBlockToItems` reads `justify` / `valign` / `pad` / mt / mb.
+- **An EDGE skin.** `read_edge_skin()` (JS `edgeSkinOf`): a one-sided hairline with no radius / fill → a Box
+  Preset whose `border_sides` is that side (`sides` keys `box_slug` / `skinSig`).
+- **A cell that IS a content row is claimed whole.** `cell_is_decomposable` accepts a media-free cell that a
+  CONTENT-ROW recognizer claims as a whole (`claim_element`: stack / chip_row / counter_grid / icon_text_list /
+  inline_links / text_list — never the media / collage / card recognizers, which salvaged strays) or a bare text
+  leaf (a brand line → one text block); `cell_geometry` records `stack_gap` (a single-track grid cell) →
+  `content_gap` on the column (JS `cell.stackGap`).
+- **A plain tag row is a chip row.** `is_chip_row` / `chipRowOf` accept a flex row whose leaves are ALL unboxed
+  short text (a gap, no `space-*` justify, span/div/li leaves) → text blocks with typography and the gap, no
+  Box Preset; `collapse_word_split_spans` leaves a flex container with a gap alone (its spans are a row, not a
+  split line); the `row_flex_safe` heading-stack veto ignores a heading that sits inside a nested panel.
+- **A big-display word is a stat value** (`is_stat_number`: 'High' beside '84%', ≥36px, ≤2 words) so both cards
+  fold as label → value headings. **A nested title keeps its computed line-height / letter-spacing**
+  (`heading_metrics_css`; JS `headingNode`) — no section-scoped rule reaches a heading inside a panel — and
+  **a title with no subtitle keeps its own bottom margin, zero included** (the card grew 16px on the theme
+  default). A nested text block emits its computed line-height at normal specificity (`nested` flag; JS
+  already did).
+
+### Skinned panels: a ring / card that HOLDS content, decor layers, descendant selectors (2026-09-12)
+
+Core-section pass — a centred grid shell → a 672px RING (radial fill, hairline, glow + inset shadow,
+`width:min(78vw,42rem)`, `aspect-ratio:1`, an inner hairline `::before` + a blurred bloom `::after`,
+`place-items:center`) → a 620px translucent CARD (padding 26/28, radius 32, hairline, shadow, text centred)
+→ eyebrow → a fluid h2 declared as `.core-copy h2{font-size:clamp(…)}` → p → a centred row of three chip
+SPANS. It converted as a flat, full-width column with the chips as a stray subtitle line. Now equal to the
+source on every measured row (1440 and 1920). Rules, both twins; fixtures golden `[R]` (16 checks) ↔
+`core-panel-parity.test.mjs` (15):
+
+- **A skinned wrapper around content is a PANEL.** Recognizer `panel` (86; JS `panelOf`): a div/article/aside/
+  section/figure with a fill, gradient, border or shadow whose subtree holds block content (heading / p / list /
+  media, or ≥80 chars) and whose children are not all inline (a pill / badge is not a panel). A skinned ROW keeps
+  its `layout_row` path (rowBox), a chip row its own, the legacy opaque content-card verbatim path its claim.
+  Block `{t:'panel', box, pad, width, maxw, aspect, align, self_center, center_h, center_v, decor[], mt, mb,
+  blocks}`; the `panel` builder (JS `panelNode`) emits ONE flexbox column wearing the Box Preset
+  (`register_box_preset` / the JS census via `_box`), its padding (`apply_cell_pad`), the sheet's own
+  `width` / `max-width` / `aspect-ratio` expressions as scoped CSS (no native field holds an expression),
+  `margin-left/right:auto` when the parent centres it (`justify-items` / `place-items` / a centred flex /
+  auto margins), native `align_items` / `justify_content` center when the panel centres its content, native
+  `text_align`, the decor layers, and its blocks built as ONE group (eyebrow + title + intro coalesce) and
+  flexified. Nested panels recurse (ring → card).
+- **The stylesheet reader matches like a browser.** `stylesheet_decl()` now parses every rule's selector list
+  into compounds (tag / #id / .class, descendant and child combinators), matches the last compound on the element
+  and the earlier ones on its ancestors, and picks the HIGHEST SPECIFICITY (sheet order breaks ties) — so
+  `.core-copy h2{font-size:clamp(…)}` reaches the h2 and Tailwind's later `h1,h2{font-size:inherit}` cannot
+  beat it. `css_or_decl()` reads a computed value when stamped, else the sheet (place-items / justify-items are
+  not in the captured property set but decide centring). JS already matched via `el.matches`.
+- **Every decor pseudo-layer survives — bordered ones too.** The capture stamps ALL qualifying layers of a box
+  joined with `||` (`before…||after…`), and a layer qualifies when painted OR bordered (a border / box-shadow
+  with no paint: an inner hairline ring); the stamp carries `border:` and `shadow:` parts. PHP
+  `parse_decor_pseudos()` (list) + `decor_pseudo_css()` emits border / box-shadow; JS `decorPseudosOf` /
+  `decorPseudoCss` mirror it. The cell path keeps the first layer.
+- **A non-linear fill rides in the preset CSS.** Background-Pro's gradient is linear-only; a radial / conic /
+  multi-layer `gradient` skin is emitted verbatim as `{{SELECTOR}}{background-image:…}` in the Box Preset's
+  custom CSS (both the scanned and the registered branches; JS `rawGradOf` keys the signature too).
+- **Boxed spans are chips, never split-text.** `collapse_word_split_spans` (PHP-only pre-pass that unwraps
+  ≥3 short leaf spans as an animation word-split) now skips a span with its own padding / fill / border
+  (`span_is_boxed`), so a `.core-tags` row of three pill spans reaches `chip_row`.
+- **The eyebrow→title gap is exact, zero included.** `title_mt_px` is recorded whenever the title's style was
+  captured (a capture omits a zero margin, so absent = 0) and the overline rule emits `margin-bottom:` = the
+  overline's own margin-bottom + the title's margin-top — the theme's 16px default no longer opens a gap the
+  source doesn't have. JS: `overlineMarginBottom` + the same emission.
+
+### A fluid heading keeps its relative metrics (2026-09-12)
+
+"The section heading looks smaller than the source" — only on a screen wider than the capture. The source
+declares `font-size:clamp(2.9rem,5.6vw,6rem); line-height:.9; letter-spacing:-.06em`; the heading node
+already carried the clamp() (fluid-title rule), but the SECTION-SCOPED prose styler (`#fields h2 {…}` from
+`style_profiles`) pinned the computed 80.64px / 72.576px / -4.8384px snapshot with `!important` on top of
+it, so the title froze at the 1440 capture size (96px in the source at 1920). Rules, both twins; fixtures
+golden `[G4]`+`[F]` ↔ `heading-rhythm-parity.test.mjs`:
+
+- **A fluid font-size wins everywhere.** `collect_section_style()` swaps the profile's computed `font-size`
+  for `fs_decl` when the block carries one; JS `exactHeadingSize` / display-preset snapping are skipped for
+  a `fsDecl` heading (no px, no preset).
+- **Its line-height and letter-spacing scale with it.** Stitch `fluid_relative_decls()` (JS
+  `fluidRelativeDecls`) reads the sheet's own RELATIVE declaration (unitless / em / %) and otherwise derives
+  the ratio from the computed pair (72.576 ÷ 80.64 → `.9`; -4.8384 ÷ 80.64 → `-0.06em`) → `lh_decl` /
+  `ls_decl` (JS `lhDecl` / `lsDecl`), emitted with the clamp() in both the section rule and the heading's
+  `.heading-title` rule. A static-px heading is untouched.
+- Note the source's `bloom` reveal (`transform: scale(.98)` until the block scrolls into view,
+  `animation-timeline: view()`) makes its heading measure 2% smaller while off-screen — that is animation,
+  not type; in view both sites measure identical at 1440 (80.64 / 145.1) and 1920 (96 / 172.8).
+
+### Band stack: zero padding, shell width, single-track stack, band cards with painted panels (2026-09-12)
+
+Fields-section pass — a `pt-0` section whose 896px heading sits over a single-track grid (22px gap, 120px
+above) of three full-width band CARDS, each a `.8fr/1.2fr` grid of an EMPTY gradient-painted "visual" cell +
+a 36px-padded copy cell (flex column, space-between; eyebrow → h3 → p). Now measures equal to the source on
+every planned row (bands 1392×302, tracks 556/834, radius 38, shadow, clipped; panel 556×300 with its three
+gradient layers; copy 834×300 pad 36; h3 42/39.9/-2.1; p 640 @ 16/30.4). Rules, both twins; fixtures golden
+`[F]` (21 checks) ↔ `band-stack-parity.test.mjs`:
+
+- **Zero padding is a value.** A section whose COMPUTED padding is exactly `0px` on a side gets the explicit
+  `pt-[0px]` / `pb-[0px]` token (Pass #5); an empty value fell back to the theme's default 64px. JS:
+  `sectionLayout`.
+- **The section container is the shell, not a sibling's cap.** `section_content_max_width()` skips a capped
+  block that has CONTENT SIBLINGS (a `max-w-4xl` heading beside a full-width card stack) — that cap is the
+  block's own measure. `wrapper_maxw()` now also reads a LEFT-aligned cap (no `mx-auto`, or the computed
+  max-width) and the wrapper-inherit pass carries it as `block_max_width` (safe: it only centres when the
+  alignment is center) — the golden "no mx-auto → no max-width" negative was inverted accordingly.
+- **A single-track grid is a stack.** `is_single_track_stack()` (a computed one-track grid / `grid-cols-1` /
+  a flex column, no wider responsive override); `is_card_grid` rejects the GRID form (a flex-column card
+  container keeps its historic claim — golden fixture 2). Recognizer `stack` (91, above card_grid) claims a
+  stack that spaces ≥2 substantial children with a gap → `{t:'stack', gap, mt, mb, items}`; the `stack`
+  builder emits a flexbox COLUMN with the gap + margin, building + flexifying EACH item on its own (so two
+  band rows never merge into one). JS: `stackOf` + `stackNode`; the section row-cell loop was lifted into
+  `rowBlockToItems()` so a nested row uses the same cell logic.
+- **A painted empty panel is content.** `is_painted_panel()` (no text / media, a gradient or colour
+  background, ≥80px tall) counts as a substantial cell and `layout_cols` keeps it as `{paint}`;
+  `apply_panel_paint()` puts one linear layer on the flexbox's native Background gradient, a multi-layer
+  stack as the cell's scoped `background-image`. JS: `isPaintedPanel` / `cell.paint`.
+- **A band row wears its card.** `layout_row` carries the row's own `read_card_skin()` as `rowBox` (+ `clip`
+  when a cell is painted — the panel reaches the card edge) and its `min-height`; `carry_row_skin()` stashes
+  them on every column and `flexify_items` registers the Box Preset + min_height on the row flexbox. JS:
+  `rowBox` / `minh` → `_row_box` / `_row_minh` → `_box` on the row (the census assigns `border_preset`).
+- **The copy cell keeps its layout.** `el_padding()` gained a computed-shorthand fallback (`.copyzone{padding:
+  36px}`), applied via `apply_cell_pad()` in nested rows too; `cell_geometry` → `vjustify` (space-between /
+  around / end) → `content_v` between / around / bottom (`content_layout_over` maps them). A `heading` (h3+)
+  that follows a pending overline-only head becomes that head's TITLE, so `label → h3 → p` fold into ONE
+  special heading; the nested-row loop now builds `blocks` cells (they were dropped).
+
+### Card shadows, heading rhythm, decorative glows (2026-09-12)
+
+Story-section pass, steps 3 / 5 / 6 — the section now measures equal to the source on every planned row
+(cards 737×640 / 627×640, two shadow layers, clipped glow, cover-filled tile, eyebrow / title / copy / pills at
++154 / +185 / +353 / +445, title fluid 80.6px@1440 → 56px@1000). Rules, both twins; fixtures golden `[G2]`
+(shadow), `[G4]` (rhythm), `[G5]` (glow) ↔ `grid-geometry-parity.test.mjs` + `heading-rhythm-parity.test.mjs`:
+
+- **Multi-layer box shadow (step 3).** `build_box_presets`: `$shadow_layers()` splits a shadow on top-level
+  commas (transparent / all-zero layers dropped); the native Box Shadow field takes the MOST VISIBLE layer
+  (`$parse_shadow` — a non-inset drop over an inset highlight, then the widest blur; the first-listed layer of
+  `inset 0 1px 0 …, 0 22px 60px …` was only the 1px highlight) and `$shadow_css()` puts the FULL value in the
+  preset CSS as `{{SELECTOR}}{box-shadow:… !important;}` (the native state rule is `!important` too; this
+  lands later in source order). The derived census keeps `shadow_full` beside its most-visible `shadow`. The
+  button-preset rule, applied to boxes. JS: `shadowLayersOf` / `parseShadow` / `shadowCss` in `box-presets.mjs`.
+- **Heading rhythm (step 5).** (a) `is_pill()` (the eyebrow gate) is framework-agnostic: computed
+  `text-transform:uppercase` + `letter-spacing ≥ 1px` + `font-size ≤ 14px`, a text leaf, NOT boxed — a
+  plain-CSS `.section-label` div folds into the native Overline (JS `isOverline` computed branch). (b) The
+  overline's exact type + the title's own `margin-top` as the gap under it → scoped `.heading-overline{…}`
+  (no native size field). (c) The title→subtitle gap may live on the SUBTITLE's `margin-top` (`subtitle_mt_px`
+  → `title_mb_px` fallback → the exact `.heading-title{margin-bottom}` rule + `element_spacing`). (d) A subtitle
+  at the BODY size (no Text Style preset matches) carries `font-size:16px;line-height:32px` explicitly — the
+  heading's subtitle scale would otherwise enlarge it. (e) An explicit ZERO subtitle bottom margin → the block's
+  outer margin `mb-0` (the next row's margin-top carries the gap; the theme default doubled it). (f) A FLUID
+  title: the heading recognizer reads the declared `font-size` from the source stylesheet (`stylesheet_decl`
+  now reads the `<style>` blocks off the owner document) and, when it is `clamp()` / `min()` / `max()` / vw,
+  carries the expression as `.heading-title{font-size:…}` so the title scales with the viewport (JS:
+  `sheetFontSizeDecl` → `fsDecl`).
+- **Decorative pseudo-layer (step 6).** `capture.mjs` stamps a NON-covering, painted, text-free
+  `::before/::after` on any section/main element as `data-sc-decor-pseudo` — offsets on the two nearest edges +
+  size as PERCENTAGES of the box (so it scales), background, filter, opacity, radius. `Stitch::cell_geometry`
+  → `parse_decor_pseudo` → `Mapper::carry_cell_geometry` → `decor_pseudo_css()`: `selector{position:relative;
+  isolation:isolate;}selector::before{…;z-index:-1}` — under the content, over the card's fill. A glow that
+  reaches OUTSIDE the box (negative offset, or offset + size > 100%) sets the card skin's `clip`, so its Box
+  Preset carries `overflow:hidden` like the source. `read_card_skin` also reads a stamped computed
+  `overflow:hidden|clip` into `clip`. JS: `cell.decorPseudo` (`capture-extract`) → `decorPseudoCss` (`to-pages`).
+
+### Chip row: pill labels → a flex row of boxed Text Blocks (2026-09-12)
+
+Story-section pass, step 4 (taken ahead of the shadow step). `.inline-metrics > .metric × 3` — a flex row
+of 10px uppercase tracked labels in 50%-white pills — was claimed by `layout_row` as a 3-column grid: each
+pill became a bare 18px text_block in a third-width cell (the verbatim path stripped the skin; the long
+label wrapped). Rules, both twins; fixtures golden `[G3]` ↔ `chips-parity.test.mjs`:
+
+- **Recognizer `chip_row` (priority 83, above `layout_row` 82).** Gate `is_chip_row()`: a flex container
+  (computed `display:flex` / `inline-flex` or the utility, not a column) with 2–12 element children, EVERY one
+  a short text leaf (own text 1–40 chars; no link / button / media / heading / paragraph / list inside; an
+  empty dot/pip div is allowed) that is BOXED (`Mapper::text_is_box` — a fill, gradient, border or shadow) or
+  pill-shaped (radius ≥ 40px). Emits `{ t:'chips', gap, align, mt, mb, items:[ text blocks ] }` — each item
+  the same `{t:'text', cls, cs, text, html}` shape `collect_blocks` uses for a leaf. JS: `chipRowOf()` +
+  the walker's `chips` branch in `capture-extract`; the text-leaf fields were factored into
+  `textLeafBlock()` so a chip and a plain paragraph share one builder.
+- **Builder `chips`.** A wrapping flex row (`display:flex`, `wrap`, `align_items:center`, the source gap
+  via `gap_slug`, `justify_content` from the row's `justify-content`, the source margin via
+  `spacing_token`) whose cells are the chips themselves through the **`text` builder** — so the existing
+  boxed-text rule gives each a Box Preset on its native Box Style (fill / border / radius / padding — the
+  three share one preset) and the base carries only typography (10px, uppercase, tracked). Chips size to
+  content (a flex item's default), so nothing wraps. JS: `chipsNode()` + `textBlock()` per chip; the skin
+  rides `_box` → the capture.mjs census assigns `box_style`.
+- Measured on the corpus source at 1440px: 188 / 135 / 204 × 41px pills, 12px gap, 28px above, radius
+  999, 50% white, hairline, 10px / 2.2px uppercase — all equal to the source.
+
+### Framed photo tile: cell box → clipping Box Preset, lone image → media_image FILL (2026-09-11)
+
+Story-section pass, step 2. A grid cell that is itself a card (radius + fill / gradient / border) and holds
+ONE image that fills it (`.split-right` — 627×640, radius 42, gradient, hairline, shadow, `<img>` at
+100%/100% object-fit cover) rendered as an unframed, letterboxed 455px image: the verbatim cell path
+strips computed styles, so the structural mirror unwrapped to a bare `<img>`. Rules, both twins;
+fixtures golden `[G2]` ↔ `grid-geometry-parity.test.mjs` "framed photo tile":
+
+- **A cell's OWN card skin rides on every cell shape.** `layout_cols` now reads `read_card_skin($cell)`
+  (the cell element only, no descent) once and attaches `cardBox` to the image-composite, lone-video and
+  verbatim cells too (the decomposed content column already had it). JS: `cell.cardBox` in the
+  `cell.image` path (`capture-extract`), carried through `columnToFlexboxCell` as `_box` (single- and
+  two-node cells) and assigned by the capture.mjs census as `border_preset` on a **flexbox** cell as on a
+  column.
+- **Lone image in a card → native `media_image` in FILL mode.** `cell_is_lone_image()` (one `<img>`, no
+  text / video / svg) + `image_fills_cell()` (computed `object-fit: cover` — stamped by capture ≥1.10.82 —
+  or `object-cover` / `w-full h-full`, or the image as tall as its frame within 4px) → an `image` block
+  with `fill`, on a column with `stretch` (`content_v = top` → a flex column, `justify start`). The
+  builder appends `selector{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;}selector
+  img{flex:1 1 auto;width:100%;min-height:0;object-fit:cover;display:block;}` — scoped, because the core
+  image helper honours `object-fit` only with an aspect ratio (width+height both set → contain). A lone
+  image with NO card box stays verbatim on purpose (organic-blob masks ride the Tailwind path).
+- **A media frame clips.** `cardBox.clip` (set for lone-image / lone-video cells) → `register_box_preset`
+  stores it, `box_slug()` keys it (only when set, so text-card slugs are unchanged), and
+  `build_box_presets` emits `{{SELECTOR}}{overflow:hidden;}` in the preset CSS — a tile preset is
+  distinct from the same skin on a text card. JS: `skinSig` + the derived-preset `ccss`.
+- Capture PROPS gained `object-fit` (skip `fill`) and `overflow` (skip `visible`).
+- Measured on the corpus source at 1440px: tile 627×640 with radius 42 / gradient / hairline / clip,
+  image 625×638 object-fit cover — all matching the source (was: no frame, 682×455, fit fill).
+
+### Grid cell geometry: unequal tracks, card min-height, vertical centring (2026-09-11)
+
+Story-section pass, step 1 (a two-card split band: 1.08fr / .92fr glass panel + image tile, 640px tall,
+content centred). Rules, both twins; fixtures golden `[G]` ↔ `grid-geometry-parity.test.mjs`:
+
+- **Unequal source tracks → a native Grid with the exact track list.** `Stitch::grid_px_tracks()` reads the
+  parent's computed `grid-template-columns` (a plain px list matching the child count) and stamps each
+  cell's track on its column (`track`); the mapper's `cells_track_list()` turns a run whose tracks differ
+  by more than 2% into `display:grid` + `grid_columns = "1.08fr 0.92fr"` (each = track/sum × N; the flexbox
+  view accepts a raw template natively and still collapses to one column on phones) and drops the cells'
+  12-span widths. Equal tracks keep the span / equal-grid paths. Applied in both row assemblers
+  (`flexify_items` and the section-level hybrid row). JS: `capture-extract` `cell.track` (rendered width),
+  `to-pages` `trackList()` in `flexifyItems` + the section row.
+- **A cell's fixed min-height and vertical centring ride on the cell.** `Stitch::cell_geometry()` reads the
+  cell's computed `min-height` (px, ≥120) and `display:flex; flex-direction:column; justify-content:center`;
+  `Mapper::carry_cell_geometry()` puts `min_height_px` / `content_v = middle` on every column shape (counter
+  row, nested grid, section row), and `column_to_flexbox_cell` emits the flexbox `min_height` (px; on the
+  inner Div of a two-node cell, since the card is the inner) while `content_layout_over` turns `content_v`
+  into a flex column with `justify_content: center`. JS: `cell.minH` + `flex.dir/justify` →
+  `min_height_px` / `content_v` in the cell replay, consumed by `columnToFlexboxCell`.
+- Measured on the corpus source at 1440px: tracks 736.5 / 627.5 (source 736.5 / 627.5), both cards 640px,
+  left content centred — all three were 682 / 682 / 577 / top-aligned before.
+
+### Full-width header inset + pseudo-element scrims (2026-09-11)
+
+- **A header with NO wrapper is Full Width, at the source's own inset.** `detect_chrome_container($root,
+  $bare_is_fluid)`: a plain-CSS wrapper now counts by its COMPUTED max-width alone (≥900px, no utility class
+  needed); when the bar has no container class and no capped wrapper at all it returns `'fluid'` (opt-in from
+  `detect_header_chrome_styles`, and only when the header is not a floating pill — a hug-width pill also has
+  no wrapper and must not stretch). `header_layout.container = container-fluid` + the bar's own side padding
+  (`hstyle.pad_x`: the header's `padding-left`, else the first padded row within 3 levels) →
+  `.site-header .header-main .fw-container-fluid{padding-left/right:Npx}`; a two-row header's Bottom/Top Bar
+  inner container goes flush (`padding:0`) because the bar row already carries the source padding. Before,
+  the theme's default fixed container put the logo 80px in where the source had 28px. JS: `to-theme-settings`
+  fluid branch (bar `max-width:none`) + `rows.brand_pad_x` / `bar.padding`. Fixtures: golden `[H]` (3 new
+  checks) ↔ `header-chrome-parity.test.mjs`.
+- **Pseudo-element scrim → native overlay + scoped remainder.** A hero tint painted by `.hero::after{inset:0;
+  background: radial-gradient(…), linear-gradient(…)}` lives in no DOM element, so the converter never saw it.
+  `capture.mjs` now stamps a covering `::before`/`::after` (absolute/fixed, inset 0 or ≥90% of the box, a
+  gradient background without `url()` or a translucent colour) as `data-sc-scrim` (+ `data-sc-scrim-opacity`);
+  `capture-extract` records the same as `section.pseudoScrim`. PHP `pseudo_scrim_of($el)` (element + 4
+  ancestors, alpha scaled by the layer opacity) is the fallback in `media_bg_overlay()` and both video-band
+  readers. The mapper's `overlay_layers()` splits the value on top-level commas: the first linear gradient /
+  colour is the NATIVE `background.overlay` (editable), every other layer (a radial vignette) rides as
+  `selector::after{…background-image:<rest>}` via `append_overlay_rest_css()` — `z-index:1` on a video band
+  (above the video, under the lifted content), `z-index:-1` + `isolation:isolate` on an image band. Nothing
+  dropped, nothing painted twice; the flat 35% fallback is skipped when the source scrim was only non-native
+  layers. Fixture: golden `[V]`. Known JS gap: `to-pages` has no section-background-video path (it emits a
+  `media_video` element), so `pseudoScrim` is captured for parity but not yet emitted there.
+
+### Site container width = the DECLARED cap, not the viewport-limited measurement (2026-09-11)
+
+The capture stamps `data-sc-content-width` = the browser-MEASURED main content width. That measurement is
+viewport-limited: a `.shell{width:min(1440px, calc(100% - 48px))}` container measures 1392px at the 1440px
+capture viewport, so the converted site's Container Width (`general_layout.layout_container_width.lg`, the
+flexbox `content_width` push, `--container-max-desktop`) was pinned at 1392 and never reached the design's
+1440 on a wider screen. Both twins now prefer the source's DECLARED cap when it is larger:
+
+- **PHP** `Stitch::declared_container_cap($html, $measured)` (used by `detect_site_content_width`, so both the
+  theme-settings emit and the mapper's site-width seed agree): root-level stylesheet rules (every `@media`
+  block is brace-stripped — a responsive `.container` ladder is the container-ladder emit's job) declaring
+  `width:min(Npx, …)` / `max-width:min(Npx, …)` / `max-width:Npx` on a single-class selector that ≥2
+  elements carry (a per-section shell), with `measured ≤ N ≤ 1.25 × measured` (the measurement IS the
+  declared cap squeezed by the viewport, so they must agree — an unrelated wide rule can't hijack it). Most
+  occurrences wins. Fixture: golden `[W]` (1392 stamp + `min(1440px…)` shell → 1440; no rule → 1392; a
+  1900px rule → not trusted → 1392).
+- **JS** `capture.mjs` stamp: after the heaviest-bucket measurement, the winning bucket's elements are matched
+  against the CSSOM's root-level rules with the same three declaration forms and bounds; the stamp becomes
+  N when larger. `capture-extract.mjs` `containerMax` also parses `min(Npx…)` / `width:min(Npx…)` (its
+  `parseFloat` read `min(` as NaN and never saw such a shell).
+
+### Two-row masthead, every header CTA, header chips (2026-09-11)
+
+Header structure rules in `tokens_to_theme_settings_chrome` (PHP `detect_header` → `ctas` / `rows` / `chips`;
+JS `capture-extract` `header.ctas` / `header.rows` / `header.chips` → `to-theme-settings`). Fixtures: golden
+`[H]` ↔ `header-chrome-parity.test.mjs` "two-row masthead". Verified against a two-row glass masthead in the
+conversion corpus (brand row 78px over a 38px links-only nav row).
+
+- **Two-row masthead → the native Bottom Bar (or Top Bar).** `header_rows()` finds a header direct-child row that
+  is LINKS-ONLY (≥2 short non-button links, no image/button, the row's whole text = its links) beside a distinct
+  BRAND row (an image / `data-sc-logo-svg` / a `brand|logo` class). The brand row keeps logo · chips · CTAs;
+  the nav row's menu lands in `header_bottombar.bottombar_{left|center|right}` by the row's `justify-content`
+  (a nav row ABOVE the brand row → `header_topbar`, unless a utility top bar already claimed it). The row's
+  rule line → `bottombar_custom_styling` `bottombar_border` (width/style/colour — an `rgba()` hairline keeps
+  its alpha, never flattened to a hex) + `bottombar_border_sides` = the edge FACING the brand row; its fill →
+  `bottombar_background`; its exact padding / min-height / link line-height / item gap (no native fields) →
+  scoped rules in the chrome residual (`.site-header .header-bottombar{…}`, `.header-row{min-height:0}`,
+  `.primary-menu{gap}`). `header_layout.min_height` = the BRAND row's height (78), not the two rows stacked
+  (117) — the theme lays the bar out as its own row. Hidden rows (bare `hidden`, `md:hidden`, display:none) are
+  skipped so a mobile drawer never reads as a nav row. Negative: a one-row header keeps `menu_area` in the main
+  row and an EMPTY bottom bar (always emitted, so a prior conversion's bar can't persist).
+- **EVERY masthead action → a `cta_button`.** `header_actions()` lists all actions in DOM order (≤4): a
+  `<button>` outside the nav with a text label (no `aria-controls`/`aria-haspopup` — those are dropdown
+  triggers), a button-styled `<a>` (class `is_button` OR computed `cs_is_button`), a `tel:` link. Each resolves
+  through the SHARED resolver `FW_Site_Converter_Mapper::button_preset_for()` / `button-match.mjs` to the
+  colour + size preset matching its OWN skin (`cta_style` = `btn-{slug}`, `cta_size` = `btn-{slug}`) — the
+  button presets are now built beside `header_main` and handed to the mapper, not only at the pages step.
+  Fallbacks: no style match → the first CTA's fill-class role, else `''` (the bare `.btn`); no size match →
+  `btn-lg` only when a Large preset EXISTS, else `btn-md` (the old "any sizes → btn-lg" hack is gone).
+- **Translucent (glass) skins match their preset.** The resolver compared opaque triplets only — an
+  `rgba(255,255,255,.2)` fill on an `rgba(95,73,42,.08)` hairline was "no fill" on both sides and every glass
+  button fell to the bare `.btn`. Both twins now compare RGBA quads (`rgba_quad` / `rgbaQuad`; alpha weighted
+  ×400 so a .1 alpha step ≈ the 40-unit colour tolerance). `button-match.mjs` is the one JS resolver (to-pages
+  body buttons + to-theme-settings header CTAs share it).
+- **Decorative text chip → `list_item`.** `header_chips()`: an element in the header with its OWN short text
+  (≤80 chars) that is not a link/button/nav item/brand and is pill-shaped (radius ≥40px) or a filled padded
+  box → a `list_item` (`li_text`, `li_link_type:none`); a tiny empty child (≤12px, own fill) → an inline SVG
+  circle `li_icon` in its colour; the source's `@media (max-width:N){.chip{display:none}}` → the element's
+  `visibility` (`≤767` → `hide-xs`, wider → `hide-xs`+`hide-sm`; never `hide-md`, which would hide every
+  desktop); `element_css_class` = `sc-hdr-chip` and its pill skin (only properties the source set: gap,
+  padding, radius, fill, colour, type, border) + the dot's size/glow ride as scoped CSS on the theme's own
+  `.list-item` / `.list-item__icon` markup. Two-row header → the chip sits in `main_center`; one-row → ahead
+  of the icons/CTAs in `main_right`.
+- **Header hairline from the source sheet + its exact colour.** `detect_header_chrome_styles` falls back to
+  `stylesheet_decl($html, $chrome, 'border-bottom')` — the header's own `.class{border-bottom:1px solid …}`
+  rule — when the computed stamp carries no bottom border (captures before 1.10.78 stamped `border-top-*`
+  only; `capture.mjs` PROPS now include `border-bottom-*`). A known hairline colour (computed or declared)
+  → `.site-header.site-header--border{border-bottom:1px solid <colour> !important}` so a faint translucent
+  rule reads like the source instead of the theme's default tint (JS: `header.element.borderBottom*`).
+- **Menu hover from the captured `:hover`.** `detect_menu_styles` reads `data-sc-hover` `hover-self{color:…}`
+  on the nav links (the source's own `a:hover{color}` rule, any framework) and it BEATS the "odd colour =
+  active" guess. JS: `hoverStyle()` falls back to scanning the stylesheets' `:hover` rules that match the link.
+- **Padding-less nav links pin the theme inset to 0 + carry the gap.** ≥2 nav links with NO padding (a flex
+  row spaced by `gap`) → `menu_link_padding_x/y = 0` and `.site-header .primary-menu{gap:Npx}`; the theme's
+  default 0.5rem × 1rem inset otherwise inflated a 15px source row to 36px. Links WITH padding keep the
+  median inset (JS now ports the PHP H3 padding rule too).
 
 ### Header chrome + faithful-base fixes (2026-08-21)
 
@@ -1513,6 +2278,35 @@ wavy underline or bounce — not the place a value is derived.
   - **Button Colour/Size Presets from the source skin** → `button_colors` + `button_sizes` Theme-Settings
     presets (bg/text/border/`box_shadow` per state; padding/radius/font). `buildButtonPresets()` (JS) /
     `FW_Site_Converter_Stitch::build_button_presets()` (PHP).
+    - **Size algorithm (both twins, fixtures `[B6]` PHP / §6 JS).** (1) *Cluster*: every short-text `a`/`button`
+      skin is bucketed by (font-size ±1px, padding-x ±3, padding-y ±3, fixed height ±3) so noisy computed values
+      collapse to one preset; each property's value is the cluster MODE. (2) *Rank* by the box a reader perceives —
+      a fixed height (`.btn{height:58px}` / `h-11`), else `font-size × 1.3 + 2 × padding-y` — with font-size, then
+      frequency, as tie-breaks. Size = the box, not the type: a 58px pill with 10px uppercase text ranks above a
+      padded 54px button with 14px text. (3) *Name*: **the source's own size names win** (`btn-sm` / `btn-lg` /
+      `button--large` / `btn-xl`, majority vote per cluster); otherwise **the most-used size is "Default"**
+      (slug `md`) and every other size is named by where it sits relative to it — bigger → Large, X-Large,
+      2X-Large; smaller → Small, X-Small, 2X-Small (7-step ladder, ids `0000010000`–`0000010006`). So one size
+      → *Default*; two → *Default + Large* or *Default + Small*; three → *Small / Default / Large*, or *Default /
+      Small / X-Small* when the default is the biggest. A source-named most-used size keeps its name and is
+      marked "(Default)". The previous fixed ladder always started at "Large", so a lone size was "Large" and
+      the ladder said nothing about which size the site actually used.
+  - **Boxed text + floating chips (both twins, fixtures `[C3]` PHP / `boxed-text-parity.test.mjs` JS).** A text
+    element that *is* a box — a visible fill (solid or gradient), a real border, or a shadow (`text_is_box()`; an
+    inert `border-radius:0px` doesn't count) — is never folded into a heading's subtitle: a subtitle can't carry
+    a box. It becomes a `text_block` wearing a **real Box Preset** on its native `box_style` (the skin read from
+    the computed style: fill, gradient, border, radius, shadow, 1–4-value padding, backdrop blur → `register_box_preset()`),
+    with the preset owning those properties and the block keeping its OWN line-height at normal specificity
+    (the section-level text styler would otherwise average it with the band's chips). An **out-of-flow** text
+    (`position:absolute` — a note pinned over a hero) also gets the native **Position** option
+    (`element_position`): the sides the source DECLARED (Tailwind `left-[8%] top-[18%]` compile to exact lengths,
+    a `%` stays a `%`; else the computed offsets anchored to the nearer edge per axis), z-index from the source
+    or `2` (above a band's media z:0 / overlay z:1). Such a chip is **hoisted** to be a direct child of its
+    section: the section becomes Position: relative (the source's containing block), and — because the theme
+    positions every direct child of a media band and would turn the chip's auto container into a zero-height
+    containing block — the section's Custom CSS frees just that container (`selector > .fw-container:has(.u{id8})
+    {position:static !important}`). A floating badge inside a *card* keeps the column as its anchor, as before.
+    Capture stamps `top/right/bottom/left/z-index` (`capture.mjs` PROPS) so non-Tailwind sources work too.
   - **Structural testimonials detection** (a flex/grid of quote-cards → `testimonials`, no class name needed).
   - **Fewer `code_block` fallbacks** — an unrecognised text cell → editable `text_block`. A **genuinely
     styleless** empty cell (no class, no inline style, nothing to render) is dropped; a decorative flourish

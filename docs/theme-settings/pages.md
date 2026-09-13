@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings — Pages
 
 Global page defaults under **Theme Settings → Pages** (layout, hero header, header/footer presets) plus the **per-page** and **per-post** meta-box overrides. Globals are read via `unysonplus_pages_get()` (`inc/includes/layout.php`); the layout cascade is: per-page meta → template → these globals → per-context/site defaults.

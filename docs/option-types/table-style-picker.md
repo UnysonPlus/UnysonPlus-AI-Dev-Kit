@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # table-style-picker
 
 A popover dropdown that previews each choice as a REAL mini `<table>` (styled by the enqueued `.tbl-<slug>` preset CSS). A drop-in replacement for a plain `<select>` that picks one Table Preset. Stores just the class string.

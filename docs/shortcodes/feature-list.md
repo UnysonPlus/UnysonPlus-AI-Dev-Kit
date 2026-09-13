@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `feature_list` — Feature List
 
 An icon-led list (checklist / per-item icons / numbered / bullets / badge) with optional sub-text, per-item links, a right-aligned value, 1–3 columns, and vertical-list **or** horizontal-strip orientation. Leaf node: `{ type:'simple', shortcode:'feature_list', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

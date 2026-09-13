@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # addable-option
 A repeatable single option — an "Add" button that appends more instances of ONE inner option type (text, select, image, …). Used wherever a variable-length list of a single field is needed.
 

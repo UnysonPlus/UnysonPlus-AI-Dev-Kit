@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # sticky-stack — Card Stack (Animation Engine)
 
 Turns a Section's stacked child cards (its columns) into the "deck of cards" scroll effect: each

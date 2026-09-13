@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # template-library extension
 
 A browsable catalog of premade page-builder templates — sections, columns and whole pages — that install into the builder's Templates menu ready to drop in. **Active by default:** no (enable it under Extensions).

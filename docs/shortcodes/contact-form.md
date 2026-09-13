@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `contact_form` — Contact Form
 
 A contact form with a drag-and-drop field builder plus mailer/notification settings. Requires the **`forms`** extension (with the Contact Forms sub-extension) active. Leaf node: `{ type:'simple', shortcode:'contact_form', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # image-style-picker
 
 A dropdown of **image style presets** with a live visual preview of each. The image-side

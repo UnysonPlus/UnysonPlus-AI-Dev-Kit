@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Architecture & internals
 
 How the framework works *under the hood* — the render pipeline, option value-shapes, extension

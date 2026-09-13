@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # oembed
 
 A single URL field for an oEmbed-able resource (YouTube, Vimeo, Twitter, etc.) with a live embed preview. Stores just the URL string.

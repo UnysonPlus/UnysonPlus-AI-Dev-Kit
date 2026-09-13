@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `media_video` — Video
 
 An embedded (YouTube/Vimeo/oEmbed) OR self-hosted (MP4/WebM) video. Leaf node: `{ type:'simple', shortcode:'media_video', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

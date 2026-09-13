@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings — Blog
 
 Global blog defaults under **Theme Settings → Blog** (posts listing, single post, archives/search, card design). Read at runtime via `unysonplus_blog_get()` / `unysonplus_single_get()` / `unysonplus_archive_get()` (`inc/includes/blog.php`); every Single Post toggle is overridable per-post via the Post Settings meta box (`post_options`).

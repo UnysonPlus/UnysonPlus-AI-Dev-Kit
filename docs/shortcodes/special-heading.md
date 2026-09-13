@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `special_heading` — Special Heading
 
 An overline + title + subtitle heading block with per-element alignment, color and typography controls. Leaf node: `{ type:'simple', shortcode:'special_heading', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

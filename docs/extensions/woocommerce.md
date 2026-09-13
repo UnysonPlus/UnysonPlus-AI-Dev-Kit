@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # woocommerce extension
 
 Integrates WooCommerce with UnysonPlus — makes any active theme WooCommerce-aware and adds a **WooCommerce Elements** tab to the page builder (product grids/carousels, single product, categories, add-to-cart, cart icon & mini-cart, cart/checkout/account/order-tracking pages, product search & filters). **Inert until WooCommerce is installed and active.** **Active by default:** no (enable it under Extensions).

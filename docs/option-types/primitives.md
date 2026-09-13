@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Primitives — the built-in option types
 
 The ~20 option types the framework defines in one file (`framework/includes/option-types/simple.php`)

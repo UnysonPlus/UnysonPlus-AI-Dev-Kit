@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # megamenu extension
 
 Turns any WordPress nav-menu item into a rich, multi-column dropdown **mega-panel** (columns of links, images, rich content, widget areas or raw HTML) for the theme's header navigation. **Active by default: no** — enable it under Extensions. Version: 1.1.28.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Build a UnysonPlus site from a prompt
 
 The orchestration layer: how to go from *"build me a &lt;kind&gt; site"* to a finished, editable

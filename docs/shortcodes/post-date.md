@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `post_date` — Post Date
 
 A **dynamic post-data element** (used in post / archive templates) that outputs the published or last-modified date of the post being viewed. Leaf node: `{ type:'simple', shortcode:'post_date', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

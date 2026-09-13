@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # update extension
 
 Keeps the framework, extensions, and theme up to date — the update-service backbone for in-place upgrades. **Active by default:** no (not in the theme's `supported_extensions`; it's an infrastructure extension). Version: 1.0.19.

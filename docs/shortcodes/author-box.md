@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `author_box` — Author Box
 
 An author / profile box — avatar, name, bio, social links and a "view all posts" link — for the current post author, a chosen user, or fully custom content. Leaf node: `{ type:'simple', shortcode:'author_box', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

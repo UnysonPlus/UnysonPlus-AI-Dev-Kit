@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # UnysonPlus build conventions
 
 The rules every UnysonPlus site/page/element should follow, whether you build by hand in the builder,

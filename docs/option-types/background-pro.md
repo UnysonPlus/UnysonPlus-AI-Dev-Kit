@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # background-pro
 
 Composite background field with five stacking layers (bottom → top): **color → gradient → image → overlay → video**. One field replaces separate color + image + gradient controls. Used for site background, section/column backgrounds, header/footer backgrounds, box-preset fills.

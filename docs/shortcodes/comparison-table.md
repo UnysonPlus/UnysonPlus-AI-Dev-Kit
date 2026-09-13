@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `comparison_table` — Comparison Table
 
 A feature-comparison matrix — plans across the top, feature rows down the side. Leaf node: `{ type:'simple', shortcode:'comparison_table', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

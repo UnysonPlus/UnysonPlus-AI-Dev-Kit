@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `flip_box` — Flip Box
 
 A two-sided 3D card that flips on hover or click. Front: icon + title + text (or a background image); back: title + text + button. Multiple flip effects and designs. Leaf node: `{ type:'simple', shortcode:'flip_box', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

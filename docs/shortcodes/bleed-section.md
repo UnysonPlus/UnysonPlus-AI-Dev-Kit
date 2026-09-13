@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `bleed_section` — Bleed Section
 
 A split section: content on one side and a full-bleed image on the other that extends to the viewport edge. Leaf node: `{ type:'simple', shortcode:'bleed_section', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # addable-box
 
 A repeater: an add/remove/reorder list of "boxes", each box being a fixed set of sub-options. Stored as an **array of row objects**. Used for palettes (`theme_colors`), custom fonts, social profiles, and any "list of structured rows" setting.

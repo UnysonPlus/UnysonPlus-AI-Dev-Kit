@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Porting a standalone component into a shortcode
 
 The procedure for turning a CodePen, a demo page, or a bought HTML template into a UnysonPlus

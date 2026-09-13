@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `project_gallery` — Project Gallery
 
 The image gallery of a single portfolio project — as a responsive grid with optional lightbox and captions. Requires the **`portfolio`** extension active. Leaf node: `{ type:'simple', shortcode:'project_gallery', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

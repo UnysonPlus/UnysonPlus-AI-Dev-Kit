@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `counter` — Animated Counter
 
 An animated running number that counts from a start value to a target when it scrolls into view. A focused number widget: the optional prefix/suffix double as inline left/right captions — there is no label and no icon (put those in a separate `text_block`/`special_heading`). Leaf node: `{ type:'simple', shortcode:'counter', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

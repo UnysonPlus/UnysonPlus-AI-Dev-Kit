@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # scroll-var — Scroll Variable (Animation Engine)
 
 Publishes an element's **in-view scroll progress (0→1) to a CSS custom property you name**, so you can

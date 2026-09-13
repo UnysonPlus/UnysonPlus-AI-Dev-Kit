@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # typography
 
 Rich typography control: font **family / style / weight / size / line-height / letter-spacing / color** (+ Google-font subset & variation). The canonical type (promoted from `typography-v2`, which is now a thin alias saving identically). Used for body/heading fonts, per-heading overrides, menu font, footer typography, and shortcode text options.

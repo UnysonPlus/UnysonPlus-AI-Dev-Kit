@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # fw-multi-inline
 
 Renders N child fields side-by-side on ONE row (short-text / text / color / rgbacolor / select / short-select). Used by the Spacing/Padding T-R-B-L control and similar.

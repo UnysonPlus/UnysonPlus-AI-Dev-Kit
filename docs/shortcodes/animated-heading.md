@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `animated_heading` — Animated Heading
 
 A **self-contained rotating headline** (no Animation Engine required): static before/after text and a rotating set of words, animated with one of several effects (typewriter / fade / slide / flip / zoom / clip / blur / 3D-rotate). Leaf node: `{ type:'simple', shortcode:'animated_heading', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

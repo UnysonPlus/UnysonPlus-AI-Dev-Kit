@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # switch
 
 A two-state toggle (an on/off pill with left/right labels). Stores ONE of the two configured choice values — nothing else.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # datetime-range
 
 A start/end pair of date-and-time fields (two linked datetime-pickers). The value is a `{from, to}` object of formatted datetime strings.

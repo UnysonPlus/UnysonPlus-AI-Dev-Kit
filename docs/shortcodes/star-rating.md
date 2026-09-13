@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `star_rating` — Star Rating
 
 A rating display with partial (half / decimal) fill — stars, hearts, circles or a bar — plus an optional label, value and count text. Leaf node: `{ type:'simple', shortcode:'star_rating', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

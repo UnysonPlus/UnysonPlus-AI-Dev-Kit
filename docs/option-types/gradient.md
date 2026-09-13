@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # gradient
 
 The legacy two-color gradient picker (a `primary` + `secondary` hex pair). For the modern multi-stop / angle / linear-radial control use `gradient-v2` instead.

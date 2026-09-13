@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `highlight_text` — Highlight Text
 
 A short run of text (heading, paragraph or inline `<span>`) given a decorative effect — marker highlight, gradient fill, underline, outline, glow or drop cap. Leaf node: `{ type:'simple', shortcode:'highlight_text', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

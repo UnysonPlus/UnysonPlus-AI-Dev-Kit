@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `countdown` — Countdown Timer
 
 A live countdown to a target date & time — days / hours / minutes / seconds, ticking once a second in the browser. Use it for launches, sales and event starts. Leaf node: `{ type:'simple', shortcode:'countdown', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

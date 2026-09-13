@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `row` — classic/legacy grid row (structural, **auto-synthesized** — you don't author it)
 
 > **This is part of the CLASSIC (legacy) Bootstrap grid**, not the modern default. New pages lead with

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # scroll-motion — Scroll Motion (Animation Engine)
 
 GSAP entrance + scroll-scrubbed motion on any page-builder node (section, column, leaf). Rides the

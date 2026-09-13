@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # multi
 
 **Container option.** Groups several inner options into one logical unit rendered as stacked rows. It stores nothing of its own — just a flat map of its inner-options' values keyed by their ids.

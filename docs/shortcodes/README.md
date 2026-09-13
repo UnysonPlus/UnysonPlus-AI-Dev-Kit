@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Page-builder shortcodes — node model + index
 
 > 📖 **Human manual (live, always current):** [Shortcodes on the UnysonPlus docs](https://unysonplus.github.io/docs/shortcodes/overview) — prose, screenshots of each element's option panels, and live playgrounds. These kit files are the AI-optimized reference; the live manual is the human companion.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `calendar` — Calendar
 
 A month-grid calendar with placed events and an optional upcoming-events list. Leaf node: `{ type:'simple', shortcode:'calendar', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

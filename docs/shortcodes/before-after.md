@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `before_after` — Before / After
 
 A two-image comparison: either the classic draggable before/after slider or a cursor-following circular "spotlight" reveal. Leaf node: `{ type:'simple', shortcode:'before_after', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

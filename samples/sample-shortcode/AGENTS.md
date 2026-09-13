@@ -3,6 +3,7 @@ type: shortcode
 name: sample_shortcode
 provides: leaf
 ---
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 
 # Sample Shortcode
 

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # addable-popup
 
 A repeater like addable-box, but each entry is edited in a **modal popup** (bigger forms). Stored as an **array of entry objects**. The canonical use is Header/Footer builder columns, where each entry is an "element" (`element_type` picker + per-type fields). Also `addable-popup-full` = same, full-width backend.

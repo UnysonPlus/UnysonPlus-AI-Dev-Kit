@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # code-editor
 A syntax-highlighted code field wrapping WordPress core's bundled CodeMirror (HTML/CSS/JS/PHP/JSON/XML). Used for Custom CSS fields (button/border presets), the Code Block shortcode, and any raw-code option.
 

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # measure.mjs — the parity harness (for AI agents)
 
 Run after EVERY change **on a from-scratch build**. It loads the mockup + dev at the same

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # START HERE → see [`README.md`](README.md)
 
 The kit now has a **single front door**: **[`README.md`](README.md)**.

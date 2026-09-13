@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings — Colors (Color Presets)
 
 The Colors tab defines the site's **Color Presets** palette — the swatches every shortcode's Styling tab (Text Color / Background Color) and the Button / Border / Table preset color fields choose from. Each preset emits a `.text-{slug}` class, a `.bg-{slug}` class, and a `--color-{slug}` CSS variable (slug = lowercased name, non-alphanumerics collapsed to `-`, trimmed).

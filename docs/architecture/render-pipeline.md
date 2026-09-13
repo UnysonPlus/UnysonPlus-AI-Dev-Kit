@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # render-pipeline — From Saved Options to Rendered HTML
 
 How a page-builder shortcode/element becomes HTML, and the **two distinct value-flow paths** a saved

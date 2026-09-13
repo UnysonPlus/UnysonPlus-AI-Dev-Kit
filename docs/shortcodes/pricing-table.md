@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `pricing_table` — Pricing Table
 
 Comparable pricing plans as cards in a responsive grid — each with an icon, name, subtitle, price (currency + amount + period), a feature list, an optional "featured" highlight, a ribbon/badge and a CTA button. Leaf node: `{ type:'simple', shortcode:'pricing_table', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `social_share` — Social Share
 
 Share-to buttons (Facebook, X/Twitter, LinkedIn, Pinterest, WhatsApp, Telegram, Reddit, Email, Copy link) in five styles × three shapes × three sizes. (Distinct from `social_icons`, which are profile links.) Leaf node: `{ type:'simple', shortcode:'social_share', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

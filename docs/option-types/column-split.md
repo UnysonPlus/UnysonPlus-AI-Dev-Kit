@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # column-split
 
 A visual two-pane split control: a rounded bar with a draggable divider that sets how a row is shared between a LEFT and RIGHT pane (e.g. "Image | Content").

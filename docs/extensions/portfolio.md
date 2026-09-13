@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # portfolio extension
 
 A full portfolio module: a `fw-portfolio` custom post type (with Categories, optional Tags) plus per-project galleries, rich details meta, archive templates, single-view blocks (details / results / testimonial / prev-next / related) and seven builder elements. **Active by default:** no (enable it under Extensions). Version: 1.0.23.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # box-shadow
 A structured CSS box-shadow builder (offset X/Y, blur, spread, color, inset) with a live preview. Reusable anywhere an option needs a box-shadow value; used in `border-presets`/`button-presets` state skins.
 

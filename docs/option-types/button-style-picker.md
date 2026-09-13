@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # button-style-picker
 A `<select>` replacement that previews each choice as a real button. Used by the button element to pick a button preset (`.btn-<id>`) or a size (`.btn-lg`). Drop-in for a plain select.
 

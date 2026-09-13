@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `modal_popup` — Modal / Popup
 
 A trigger (button, text link, icon or image) that opens a modal / drawer / fullscreen popup with HTML content. Leaf node: `{ type:'simple', shortcode:'modal_popup', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

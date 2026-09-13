@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // shot.mjs — one general screenshot tool. Replaces the finalshot/heroshot/footshot one-offs an agent keeps
 // writing. Full page, viewport, or a single region (by CSS selector or text) — playwright-core + system
 // Chrome so it runs anywhere.

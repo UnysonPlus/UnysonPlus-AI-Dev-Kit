@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # predefined-colors-color-picker
 
 A hybrid control: a `predefined-colors` swatch grid alongside a color picker (`color-picker` / `rgba-color-picker`). Selecting one side clears the other. Stores a two-key `{ predefined, custom }` object.

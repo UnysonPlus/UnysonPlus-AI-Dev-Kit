@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Declaring options — the authoring side
 
 The rest of this folder answers **"what JSON does this option store?"** — the question you have

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # motion-sequence — Motion Sequence (Animation Engine)
 
 Choreography **without code**. Turn a Section into a Motion Sequence and its child elements' Scroll

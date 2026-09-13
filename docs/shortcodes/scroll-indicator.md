@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `scroll_indicator` — Scroll Indicator
 
 A hero "scroll to descend" cue — a small label plus an animated chevron that smooth-scrolls to the next section on click. Leaf node: `{ type:'simple', shortcode:'scroll_indicator', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

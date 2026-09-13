@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `model_viewer` — 3D Model Viewer
 
 An interactive 3D model element (glTF / GLB) built on Google's `<model-viewer>` — orbit, zoom, auto-rotate, IBL lighting, ground shadow, embedded-clip playback, AR and pinned hotspots. **Requires the `animation-engine` extension active** (without it the tag is unregistered and saved instances render empty). Leaf node: `{ type:'simple', shortcode:'model_viewer', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

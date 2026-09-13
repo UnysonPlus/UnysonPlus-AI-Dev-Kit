@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `progress` — Progress / Skills
 
 Labelled progress indicators that fill (and optionally count their % up) when scrolled into view — as horizontal bars, circular rings, semi-circle gauges, pies, vertical bars, or segmented blocks. Leaf node: `{ type:'simple', shortcode:'progress', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

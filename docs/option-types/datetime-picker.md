@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # datetime-picker
 
 A single date-and-time field (xdsoft datetimepicker + moment.js). The value is a formatted datetime string.

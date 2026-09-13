@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # UnysonPlus AI Dev Kit
 
 A duplicatable workspace for building **WordPress sites/demos** on **UnysonPlus** +
@@ -135,5 +136,15 @@ placeholder and be swapped for shortcodes later.
 
 ## License
 
-**GPL-2.0-or-later** — see [`LICENSE`](LICENSE). This matches WordPress and the UnysonPlus framework the
-kit builds on. Copyright © UnysonPlus contributors.
+**Free for non-commercial use, source-available.** The kit's documentation, skills and playbooks are
+**CC BY-NC-SA 4.0**; the kit's code and the **Capture Service** are **PolyForm Noncommercial 1.0.0**. The full
+terms and a plain-English summary are in [`LICENSE`](LICENSE).
+
+- **You may** read, run and modify the kit and use it to build WordPress sites — for yourself **or for clients**.
+  A site you *build* with the kit is yours to use commercially; the restriction is on the kit and the service
+  themselves, not on their output.
+- **You may not** sell the kit or the capture service, bundle them into a paid product / theme / plugin, or offer
+  them as a hosted service, without a commercial license (jonmlas@gmail.com).
+
+The **UnysonPlus plugin, its extensions (including the Site Converter) and the UnysonPlus theme are
+GPL-2.0-or-later** open source in their own repositories — nothing here changes that.

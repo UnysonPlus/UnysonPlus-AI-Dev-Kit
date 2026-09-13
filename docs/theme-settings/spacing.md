@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings → Components → Spacing
 
 Defines the spacing scale, gap scale, and site-wide default gaps that back UnysonPlus's Bootstrap-style utility classes — this is how an agent sets section padding, column gaps, and element margins (pick a slug like `pt-10`).

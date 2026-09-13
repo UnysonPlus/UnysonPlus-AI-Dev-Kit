@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `social_icons` — Social Icons
 
 A row of social **profile** links. `theme_settings` delegates to the theme's own social-profile renderer (so it matches the site); `manual` renders the list defined in the shortcode. A header/footer element. (Distinct from `social_share`, which are share-to buttons.) Leaf node: `{ type:'simple', shortcode:'social_icons', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

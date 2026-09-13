@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `nav_menu` — Navigation Menu
 
 Renders a WordPress menu (by theme location or a specific menu) inside a `<nav>` — built for the Header/Footer builder but usable in any content. Leaf node: `{ type:'simple', shortcode:'nav_menu', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

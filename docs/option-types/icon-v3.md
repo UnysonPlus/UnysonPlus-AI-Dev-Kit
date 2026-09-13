@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # icon-v3
 
 > **RETIRED as an id — use [`icon`](./icon.md).** `icon-v3` is no longer a registered option type

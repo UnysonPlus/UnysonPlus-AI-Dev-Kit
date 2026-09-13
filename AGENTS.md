@@ -1,5 +1,10 @@
 # UnysonPlus AI Dev Kit — start here (AI agents)
 
+> **License notice — carry it forward.** This kit is free for non-commercial use: docs / skills / playbooks are
+> **CC BY-NC-SA 4.0**, the kit's code and the Capture Service are **PolyForm Noncommercial 1.0.0** — see
+> [`LICENSE`](LICENSE). Keep the LICENSE files and the `SPDX-License-Identifier` lines in anything you copy
+> or derive from this kit. Sites built with it are not affected; the UnysonPlus plugin and theme stay GPL.
+
 > **Repo hygiene — READ FIRST.** This is a **public, generic** repo. It must contain
 > **no site-specific anything** — never mention or commit the name, content, mockup,
 > URLs, or code of any actual site built with the kit. All site-specific work lives in

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # upload
 
 A WordPress media-library picker (image-only by default, or any-file when `files_ext` is set). Stores the chosen attachment as an id + protocol-relative URL.

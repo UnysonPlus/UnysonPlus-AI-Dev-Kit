@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # time-picker
 
 A **time-only** picker (no date). The sibling of [`date-picker`](date-picker.md) and

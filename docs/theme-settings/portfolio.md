@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings → Portfolio
 
 Display settings for the Portfolio extension's archive, cards and single-project view. **The tab exists only while the `portfolio` extension is active.** Values are stored in two multis — `portfolio_archive` and `portfolio_single` — and bridged into the extension through the `fw:ext:portfolio:setting` filter (`inc/includes/portfolio.php`): a saved value **overrides the extension's own Settings page**; `inherit` / empty defers to it. Read theme-side with `unysonplus_portfolio_get( $key, $default )` (both multis merged; returns `$default` for unset/empty/`inherit`).

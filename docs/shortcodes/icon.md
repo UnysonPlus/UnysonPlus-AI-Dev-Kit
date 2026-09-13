@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `icon` — Icon
 
 A single standalone icon (font icon, Lucide SVG, emoji or custom SVG) with an optional tooltip/label. Leaf node: `{ type:'simple', shortcode:'icon', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

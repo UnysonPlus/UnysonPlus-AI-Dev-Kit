@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `post_title` — Post Title
 
 A **dynamic post-data element** (used in post / archive templates) that outputs the title of the post or page being viewed, in the heading tag you choose. Leaf node: `{ type:'simple', shortcode:'post_title', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

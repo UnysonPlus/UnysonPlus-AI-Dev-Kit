@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `map` — Map
 
 An embedded interactive map (OpenStreetMap/Leaflet or Google Maps) with manually placed or event-driven pins. Leaf node: `{ type:'simple', shortcode:'map', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

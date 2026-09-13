@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Design parity checklist + measurement algorithm
 
 How to verify the dev site matches the mockup **numerically**, not by eye.

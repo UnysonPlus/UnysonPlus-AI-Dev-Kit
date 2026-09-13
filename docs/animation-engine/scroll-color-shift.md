@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # scroll-color-shift — Scroll Color Shift (Animation Engine)
 
 As each marked **Section** crosses the middle of the viewport, the page (`body`) background — and

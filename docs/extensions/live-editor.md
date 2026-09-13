@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # live-editor extension
 
 Front-end inline editing of page-builder pages — an Avada/Elementor-style visual editor layered over the existing Page Builder: hover sections/columns/elements to select them, edit their options in place, add/move/delete items, and save back to the same builder JSON. **Active by default:** yes. Version: 0.2.83.

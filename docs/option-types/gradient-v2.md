@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # gradient-v2
 
 Advanced gradient picker: unlimited color stops, linear/radial mode, angle control, HEX + RGBA colors, live preview. Blank by default (zero stops = "no gradient", so no separate enable switch is needed).

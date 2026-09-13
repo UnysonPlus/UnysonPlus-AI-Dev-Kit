@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `image_hotspots` — Image Hotspots
 
 A base image with positioned interactive pins that reveal a tooltip (title, text, link) on hover or click. Leaf node: `{ type:'simple', shortcode:'image_hotspots', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `related_projects` — Related Projects
 
 A row of project cards related to the current one (sharing a portfolio category, topped up with recent projects). Single-project **template part** — renders **only on single-project pages**. Requires the **`portfolio`** extension. Leaf node: `{ type:'simple', shortcode:'related_projects', _items:[], atts:{…} }` (+ shared wrapper blocks → `README.md`).

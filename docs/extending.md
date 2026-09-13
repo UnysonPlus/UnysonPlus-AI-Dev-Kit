@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Extending UnysonPlus — shortcodes, option types, extensions
 
 When a build needs something the framework doesn't ship, the right move is usually to **add it

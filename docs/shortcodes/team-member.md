@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `team_member` — Team Member
 
 A single team-member card: photo + name + job title + short description. Leaf node: `{ type:'simple', shortcode:'team_member', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

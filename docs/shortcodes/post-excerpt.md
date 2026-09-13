@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `post_excerpt` — Post Excerpt
 
 A **dynamic post-data element** (used in post / archive templates) that outputs the excerpt of the post being viewed. Leaf node: `{ type:'simple', shortcode:'post_excerpt', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

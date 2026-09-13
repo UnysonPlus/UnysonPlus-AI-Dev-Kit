@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # map
 
 A geographic location picker — search an address or drop a pin, storing the resolved address parts plus lat/lng coordinates. Uses Google Maps when an API key is set, otherwise a free Leaflet/OpenStreetMap fallback.

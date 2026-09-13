@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `widget_area` — Widget Area
 
 Renders a registered WordPress sidebar (widget area) inline inside a page-builder layout. Leaf node: `{ type:'simple', shortcode:'widget_area', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

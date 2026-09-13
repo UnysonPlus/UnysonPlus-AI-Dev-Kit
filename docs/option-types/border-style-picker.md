@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # border-style-picker
 A `<select>` replacement that previews each border preset as a real bordered box. Used by columns to pick a `border_preset` (a `.boxp-<slug>` class). Drop-in for a plain select.
 

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # PLAYBOOK — building a UnysonPlus site/demo from a mockup
 
 The process gets a mockup **right on the first pass** by **converting first, then refining** —

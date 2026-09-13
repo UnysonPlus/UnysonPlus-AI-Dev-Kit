@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `docs/` — map: which doc for which task
 
 The kit's reference + workflow docs. The agent entry point is the repo-root

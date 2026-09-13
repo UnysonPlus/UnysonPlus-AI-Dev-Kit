@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # parallax — Parallax Depth Layers (Animation Engine)
 
 Pointer/scroll-driven multi-layer depth parallax (vanilla JS, one shared RAF loop, no library).

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # responsive
 
 A generic per-device WRAPPER around a single inner control (image-picker, select, unit-input, …). It renders that inner control once per device layer — Phone (base) / Tablet (md) / Desktop (lg) — and stores one value per layer. Mobile-first / Bootstrap-native. Used for content alignment, container width per device, and any option that varies by breakpoint.

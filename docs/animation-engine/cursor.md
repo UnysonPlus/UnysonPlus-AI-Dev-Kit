@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # cursor — Custom Cursor (Animation Engine)
 
 Replaces the pointer with a custom cursor **site-wide**. It is **not** an `fx`-block slot — it is a Theme Settings control (Site-wide UX → **Cursor** sub-tab), saved under the `animation_cursor` option. Requires the `animation-engine` extension ACTIVE (ships inactive). Auto-disabled on touch screens.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # wp-editor
 
 The WordPress TinyMCE / Quicktags rich-text editor as an option. Stores an HTML string — nothing more.

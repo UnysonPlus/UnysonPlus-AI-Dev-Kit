@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # asset-optimizer extension
 
 Combines enqueued frontend CSS and JavaScript into single minified, cached files to cut HTTP requests and payload. **Active by default:** yes.

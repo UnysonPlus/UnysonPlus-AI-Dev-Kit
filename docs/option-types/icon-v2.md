@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # icon-v2
 
 > **RETIRED — use [`icon`](./icon.md).** The `icon-v2` id is no longer registered (it resolves to the

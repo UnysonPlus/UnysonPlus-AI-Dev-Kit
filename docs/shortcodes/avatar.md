@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `avatar` — Avatar
 
 A single user avatar (image or auto-initials, with an optional presence dot and label) or a stacked avatar group with a "+N" counter. Leaf node: `{ type:'simple', shortcode:'avatar', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

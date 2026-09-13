@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # background-image
 Picks a background image as EITHER a predefined preset (from `choices`) OR a custom uploaded image. Used for section/hero/box background image fields.
 

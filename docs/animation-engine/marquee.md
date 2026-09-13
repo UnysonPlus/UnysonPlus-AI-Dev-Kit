@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # marquee — Marquee (Animation Engine)
 
 Scrolls a node's content in a seamless, never-ending loop (a ticker / running-text banner). Rides the shared `fx` block on the **`marquee`** slot (added to the element's Animations tab). Picker key **`mode`** = the scroll direction, off = `none`. Requires the `animation-engine` extension ACTIVE (ships inactive). Content is cloned so the loop has no jump; pure CSS animation, no library; loads only on pages that use it.

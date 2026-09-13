@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # theme-internals — Parent Theme Architecture
 
 How the `unysonplus-theme` **parent theme** is structured and the systems a builder must understand

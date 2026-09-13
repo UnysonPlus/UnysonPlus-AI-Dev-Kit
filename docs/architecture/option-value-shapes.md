@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # option-value-shapes — Non-Scalar Option Values & the Editor-Load Migration Gotcha
 
 Most framework options store a scalar (a string, a number). Several store a **structured value** —

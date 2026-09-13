@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `container` — Container
 
 A lighter, nested band you drop inside a section (the items-corrector lifts it out to render as a sibling of the section's own container). It inherits the useful section styling — background, spacing, min-height and column alignment — but NOT section-identity controls (variant, shape dividers, per-section container width). Node: `{ type:'column', shortcode:'container', _items:[ /* columns */ ], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # color-picker
 
 A single colour field (powered by Coloris). The value is a plain colour string — a hex, or an `#rrggbbaa` / `rgba()` when opacity is enabled.

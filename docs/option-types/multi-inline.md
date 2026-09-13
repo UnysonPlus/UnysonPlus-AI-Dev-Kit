@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # multi-inline
 
 **Container option.** Renders N small child controls side-by-side on ONE row (e.g. a border's Width · Style · Color, spacing T/R/B/L, or a pair of icon pickers Open · Close). Stores a hash of its children's values keyed by sub-option id.

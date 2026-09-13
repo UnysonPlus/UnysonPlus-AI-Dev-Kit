@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `divider` — Divider
 
 A visual separator — a styled horizontal line (optionally with inline text or an icon), a decorative SVG shape, or pure whitespace. Leaf node: `{ type:'simple', shortcode:'divider', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

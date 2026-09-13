@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `sample-shortcode` — the shortcode template
 
 A complete, installable skeleton of a UnysonPlus page-builder element. Copy this folder,

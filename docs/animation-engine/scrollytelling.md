@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # scrollytelling — Scrollytelling (Animation Engine)
 
 Two layouts, one module. **Media Panel + Steps** (classic): pins one column as a **media panel**

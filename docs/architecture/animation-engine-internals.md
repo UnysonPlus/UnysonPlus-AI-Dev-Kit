@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # animation-engine-internals — How the Animation Engine Is Wired
 
 Architecture reference for the **Animation Engine** extension — the internals a builder needs when

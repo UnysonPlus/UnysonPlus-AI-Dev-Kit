@@ -1,0 +1,59 @@
+{
+ "at": "2026-09-08T12:26:40.771Z",
+ "viewport": 1920,
+ "n": 3,
+ "avg": {
+  "overall": 88,
+  "container": 100,
+  "spacing": 100,
+  "logo": 100,
+  "iconbox_pad": 100,
+  "contrast": 85,
+  "bg_media": 100,
+  "verbatim": 100,
+  "structure": 55,
+  "media_retention": 42,
+  "height_sanity": 100
+ },
+ "sites": {
+  "cms_plat_2qkh5h6b_wegic_top": {
+   "container": 100,
+   "spacing": 100,
+   "logo": 100,
+   "iconbox_pad": 100,
+   "contrast": 94,
+   "bg_media": 100,
+   "verbatim": 100,
+   "structure": 55,
+   "media_retention": 13,
+   "height_sanity": 100,
+   "overall": 86
+  },
+  "saasship_wegic_top": {
+   "container": 100,
+   "spacing": 100,
+   "logo": 100,
+   "iconbox_pad": 100,
+   "contrast": 100,
+   "bg_media": 100,
+   "verbatim": 100,
+   "structure": 55,
+   "media_retention": 27,
+   "height_sanity": 100,
+   "overall": 88
+  },
+  "portfolio_web_template_wegic_net": {
+   "container": 100,
+   "spacing": 100,
+   "logo": 100,
+   "iconbox_pad": 100,
+   "contrast": 60,
+   "bg_media": 100,
+   "verbatim": 100,
+   "structure": 55,
+   "media_retention": 86,
+   "height_sanity": 100,
+   "overall": 89
+  }
+ }
+}

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `posts` — Posts
 
 A data-driven query grid: pulls content from the WordPress post DB (`WP_Query`) and renders each result through one of many registry card designs inside a `grid` / `list` / `masonry` / `slider` layout. Leaf node: `{ type:'simple', shortcode:'posts', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts. The picker option ids resolve to the flat keys below via the view's `normalize_atts()`, so generators may emit these flat keys directly.

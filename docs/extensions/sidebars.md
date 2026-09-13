@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # sidebars extension
 
 Multiple, dynamically-assignable sidebars — create more than one sidebar and show different sidebars on different pages/contexts. **Active by default:** no (enable it under Extensions). Version: 1.0.26.

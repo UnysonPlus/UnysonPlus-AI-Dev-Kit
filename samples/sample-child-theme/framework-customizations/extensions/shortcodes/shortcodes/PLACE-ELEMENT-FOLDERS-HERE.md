@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Drop shortcode folders HERE
 
 This is the exact directory a child theme's bundled shortcodes live in:

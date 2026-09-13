@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # hover — Hover Interactions (Animation Engine)
 
 Pointer/hover effects on a page-builder node. Rides the shared `fx` block on the **`interaction`** slot — plus **`interaction__2` / `interaction__3` / `interaction__4`**, so up to **four** hover effects stack on one node (same shape in each slot). Picker key **`effect`**, off = `none`. Requires the `animation-engine` extension ACTIVE (ships inactive). Rendered wrapper carries `sc-hover sc-hover--<effect>` (one modifier class per applied slot).

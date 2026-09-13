@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # horizontal-scroll — Horizontal Scroll Section (Animation Engine)
 
 Pins a **Section** while the page scrolls and translates its columns (panels) sideways — a gallery / timeline / feature-strip. It is **not** a node `fx` slot — it is injected into the **Section's Animations tab** (inside the animation-stack organizer) as the `horizontal_scroll` att; Section only. Requires the `animation-engine` extension ACTIVE (ships inactive). Pure `position:sticky` + one passive scroll listener, no library. Honours "reduce motion" (panels flow normally). Global on/off: Theme Settings → Animations → Effects.

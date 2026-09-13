@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # post-types extension
 
 A no-code creator for **custom post types** and **taxonomies** from the WordPress admin (Unyson+ → Post Types). Each row is registered with plain WordPress `register_post_type()` / `register_taxonomy()` on `init`. **Active by default:** no — the extension ships **inactive**; activate it under Unyson+ → Extensions.

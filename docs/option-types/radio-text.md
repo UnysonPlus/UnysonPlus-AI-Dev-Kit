@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # radio-text
 
 A radio-button row of preset choices plus a free "custom" text input. Whichever is active, the field stores a **single plain string** — either the selected choice key or the typed custom text.

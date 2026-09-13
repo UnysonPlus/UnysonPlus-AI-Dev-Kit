@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `tag_list` — Tag List
 
 A row of short items rendered as pills / chips, or an inline dot-separated list. Leaf node: `{ type:'simple', shortcode:'tag_list', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

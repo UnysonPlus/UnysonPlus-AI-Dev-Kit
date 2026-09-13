@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `gallery` — Gallery
 
 A multi-image gallery with 20+ layout designs (grid, masonry, carousel, coverflow, …), lightbox, captions and per-card box styling. Leaf node: `{ type:'simple', shortcode:'gallery', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # custom-fields extension
 
 An ACF-style, no-code **custom-field builder** built on Unyson's existing meta-box + option-type

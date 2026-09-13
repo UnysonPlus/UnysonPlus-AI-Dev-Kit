@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings — Components (Boxes, Icon Badges, Section Styles, Patterns, Tables)
 
 Reusable, palette-linked presets defined in Theme Settings → Components; each emits a CSS class that page-builder elements consume by slug.
@@ -7,7 +8,7 @@ Reusable, palette-linked presets defined in Theme Settings → Components; each 
 ### Box Presets — `border_presets`
 
 - **Type**: `border-presets` (custom option type; an addable list of card/border preset rows).
-- **Default**: the four seeded presets from `unysonplus_default_border_presets()` (below).
+- **Default**: the five seeded presets from `unysonplus_default_border_presets()` (below) — Card, Outline, Soft Shadow, Hover Lift, and **Hover Grow** (`b000000005`, radius 12, hairline border, soft shadow; `hover_animation: "btnfx-grow"` — the shared Hover Animations library's Grow effect on a box; hover border → primary).
 - **Choices**: not a fixed choice list — a repeatable list of preset rows. Each row's sub-fields:
 
 | sub-field | type | choices / values | default |
@@ -18,7 +19,8 @@ Reusable, palette-linked presets defined in Theme Settings → Components; each 
 | `border_radius` | unit-input | units `px` / `em` / `rem` / `%` | `{value:'',unit:'px'}` |
 | `padding` | spacing (mode `padding`) | Spacing-scale class in `padding.all` (e.g. `p-4`) | empty |
 | `transition` | ms | e.g. `200`, `250` | — |
-| `hover_fx` | multi | `lift`, `glow` | — |
+| `hover_animation` | button-hover-animation | ONE effect from the shared Hover Animations library — the built-in `.btnfx-*` effects plus the entries in Theme Settings → Components → Hover Animations (`btnfx-c-{slug}`), the same list the Button shortcode offers. Emitted onto `.boxp-{slug}` by the presets stylesheet (no extra class on the element); see [`hover-animations.md`](hover-animations.md). | `''` |
+| `hover_fx` | multi | extra box-specific composites layered on top: `lift`, `zoom`, `tilt`, `glow`, `shine` | — |
 | `custom_css` | textarea | free CSS | `''` |
 | `states.default` | map | `border_style`, `border_width` (unit), `border_color` (compact-picker `{predefined,custom}`), `box_shadow` `{x,y,blur,spread,color,inset}` | per preset |
 | `states.hover` | map | same leaves as `default` (empty leaves inherit default) | per preset |
@@ -57,7 +59,7 @@ Reusable, palette-linked presets defined in Theme Settings → Components; each 
 ]
 ```
 
-Seeded presets → slugs: `Card` → `.boxp-card`, `Outline` → `.boxp-outline`, `Soft Shadow` → `.boxp-soft-shadow`, `Hover Lift` → `.boxp-hover-lift`.
+Seeded presets → slugs: `Card` → `.boxp-card`, `Outline` → `.boxp-outline`, `Soft Shadow` → `.boxp-soft-shadow`, `Hover Lift` → `.boxp-hover-lift`, `Hover Grow` → `.boxp-hover-grow` (the fifth row, `b000000005`: `"hover_animation":"btnfx-grow"`, radius 12, hairline `light-gray` border, `box_shadow` y 2 / blur 8 / 0.06, hover `border_color` → `primary`; its Grow motion is emitted onto `.boxp-hover-grow` by the presets stylesheet). A site that saved its Box Presets before a default shipped does not receive it automatically (saved lists win); the demos importer appends missing defaults.
 
 - **Notes**: each preset emits a `.boxp-{slug}` class (slug from `preset_name`; collisions get `-2`/`-3`; empty name falls back to the id). Consumed on a **Column** (Styling → Box Preset / `border_preset`), a **Table** (Table Options → Frame), or a **Countdown**. Set per Default / Hover state.
 
@@ -65,7 +67,7 @@ Seeded presets → slugs: `Card` → `.boxp-card`, `Outline` → `.boxp-outline`
 
 ### Icon Badges — `icon_badge_presets`
 
-Theme Settings → Components → **Icon Badges** (the tab sits between Buttons and Box Presets). A reusable icon *badge*: a fixed-size shaped tile (circle / rounded / square / hexagon) with a tile fill, a centered glyph (its own colour + size), border and box-shadow — each emitting a `.iconb-{slug}` class. Full value shape: [`option-types/icon-badge-presets.md`](../option-types/icon-badge-presets.md).
+Theme Settings → Components → **Icon Badges** (the tab sits right after Buttons, before Image Styles — the Components tabs run in design-system order: Color Presets, Text Styles, Spacing, Section Styles, Box Presets, Buttons, Icon Badges, Image Styles, Tables, Background Patterns, Shape Dividers, Element Designs). A reusable icon *badge*: a fixed-size shaped tile (circle / rounded / square / hexagon) with a tile fill, a centered glyph (its own colour + size), border and box-shadow — each emitting a `.iconb-{slug}` class. Full value shape: [`option-types/icon-badge-presets.md`](../option-types/icon-badge-presets.md).
 
 - **Type**: `icon-badge-presets` (custom option type; addable list with Default/Hover state tabs + a live badge preview).
 - **Default**: the four seeded presets from `unysonplus_default_icon_badge_presets()` (below).

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # split-slider
 
 A visual N-pane width control (1–5+ segments obeying the 100%-rule): a full-width bar split into panes by draggable dividers, with +/− to add/remove panes and an optional editable name per pane. Generalises `column-split` (the fixed 2-pane case) to any number of named percentage-width columns.

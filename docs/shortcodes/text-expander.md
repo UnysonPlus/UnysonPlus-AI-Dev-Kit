@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `text_expander` — Text Expander
 
 An inline "read more / read less" toggle that hides part of a paragraph behind a button. Leaf node: `{ type:'simple', shortcode:'text_expander', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

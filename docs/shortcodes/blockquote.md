@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `blockquote` — Blockquote
 
 A styled pull-quote with optional author, role/source, source link, and a decorative quote mark. Leaf node: `{ type:'simple', shortcode:'blockquote', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

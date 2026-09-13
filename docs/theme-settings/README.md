@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings — reference index
 
 > 📖 **Human manual (live, always current):** [Theme Settings on the UnysonPlus docs](https://unysonplus.github.io/theme). These kit files are the AI-optimized reference; the live manual is the human companion.

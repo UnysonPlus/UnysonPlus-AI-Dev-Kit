@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `tabs` — Tabs
 
 A horizontal or vertical tabbed-content widget; each tab has a title and a body panel. A **Media panel** layout turns it into a list-of-tabs + switching-image showcase (each tab has its own image, the content becomes the caption), with **Click / Hover** activation and optional **Auto-rotate**. Leaf node: `{ type:'simple', shortcode:'tabs', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

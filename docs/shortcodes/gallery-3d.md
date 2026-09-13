@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `gallery_3d` — Motion Gallery
 
 An animated 3D image showcase — a set of images arranged into a rotating/scrolling/scattered 3D scene (Carousel Ring, Panorama Wall, Card Sphere, Orbit Globe, Sphere Cascade, Totem Wall, Parallax Totem, Card Tunnel, Spiral Stream, Depth Stack, Card Reel, Film Strip, Wheel Carousel, Cover Flow, Carousel Flow, Hero Reel, Focus Slider, Mosaic Marquee, Photo Scatter, Card Stack, Device Cycler). **Requires the `animation-engine` extension active** (without it the tag is unregistered and saved instances render empty). Leaf node: `{ type:'simple', shortcode:'gallery_3d', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

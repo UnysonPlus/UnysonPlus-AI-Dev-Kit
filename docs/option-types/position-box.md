@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # position-box
 
 A compact, Elementor-style inline row of four unit inputs — Top / Right / Bottom / Left — for CSS position offsets. Each side is a nested `unit-input` sub-control (number field + unit dropdown).

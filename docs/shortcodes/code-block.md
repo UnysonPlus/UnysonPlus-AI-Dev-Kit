@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `code_block` — Code Block
 
 Raw HTML/CSS/JS that either **runs** on the page (embeds/widgets) or is **shown** as syntax-highlighted code. Leaf node: `{ type:'simple', shortcode:'code_block', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

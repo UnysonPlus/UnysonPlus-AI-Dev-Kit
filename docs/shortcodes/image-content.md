@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `image_content` — Image + Content
 
 An image and a WYSIWYG content block side by side (or stacked) — the classic zig-zag "media + copy" row. Leaf node: `{ type:'simple', shortcode:'image_content', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Theme Settings — General
 
 The **General** tab holds site-wide layout, base polish, sidebar, and (in their own docs) color/typography/font options. Every option below is enumerated with all valid values.

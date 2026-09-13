@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `tooltip` — Tooltip
 
 An inline trigger (text, button, or icon) that reveals a positioned tooltip on hover/focus or click. Leaf node: `{ type:'simple', shortcode:'tooltip', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Cloning gotchas — the recurring fixes (quick reference)
 
 The concrete fixes that keep coming up when cloning a source into UnysonPlus, each generalized from

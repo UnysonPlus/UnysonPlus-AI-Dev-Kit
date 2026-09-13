@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Programmatic Theme Settings setup (build-script reference)
 
 Exact `fw_set_db_settings_option()` value shapes for standing up a site's **design system + chrome
