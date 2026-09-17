@@ -61,6 +61,7 @@ keep their values.
 | `align_content` | responsive image-picker | `{base:'',…}` | `''` `start` `center` `end` `between` `around` | Pack wrapped lines on the cross axis. |
 | `full_width` | switch | `no` (new **sections** are created with `yes`) | `yes` \| `no` | **Section-only.** Full-Width Band: background edge-to-edge (`fw-full-bleed`) with content inset to Content Width. `no` = a contained band (`fw-contained`). |
 | `content_width` | multi-picker | `{preset:'inherit'}` | `{preset:'inherit'\|<slug>\|'custom', custom?:{custom_width:{value,unit}}}` | Content max-width. Named presets come from the **Container Width** library (Narrow/Medium/Wide/…); `custom` reveals a unit-input (`px rem % vw`); `inherit` = no cap. A **legacy flat `{value,unit}`** still resolves as a custom width. |
+| `content_align` | select | `center` | `center` \| `left` \| `right` | Where a capped box sits when its Content Width is narrower than the parent (`margin-left/right` auto / 0). The Site Converter sets `left` for a hero's bare `max-w-*` text column. |
 | `responsive_collapse` | switch | `yes` | `yes` \| `no` | Auto-stack a multi-column Grid/Flex down on smaller screens (shared collapse classes). Flex/grid only. |
 
 ## atts — Placement (how it sits inside a parent Flexbox/Grid)

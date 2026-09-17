@@ -110,11 +110,23 @@ decomposes to nested `column`s (PHP) or a `code_block` (JS). Those specific shap
 - **Admin page:** Unyson+ → **Convert**. Tools: Media scanner/importer, Styling Presets importer, Theme-settings importer, Pages importer, Menu importer, one-shot **Convert bundle** (`.zip`), a **header/footer Theme Generator** (child or standalone), and **"Duplicate as landing page"** (a verbatim, non-decomposed mirror import — see engines below). Two conversion methods (URL / file) with auto-detected source adapters + an optional **"Use AI"** fidelity pass and a human-in-the-loop "Review mapping first" editor.
 - **Reusable engines (`includes/`, all static):** `FW_Site_Converter_Media`, `_Presets`, `_Theme_Settings`, `_Pages`, `_Menus`, `_Bundle`, `_Theme_Generator`, `_Stitch` (deterministic no-AI section decompose + block recognizers), **`_Mapper`** (block → shortcode / Theme-Settings-preset mapping — the counterpart of the JS `to-pages`), **`_Tailwind`** (Tailwind class → CSS compiler **and** class → design-token translation: arbitrary `[…]` values, the full default colour palette, `shadow-*`), **`_Blocks`** (emits WordPress **core-block** markup from the section/block intermediate — the PHP twin of the capture service's `to-blocks.mjs` — so a conversion can output a portable **block-theme** page body; unmapped blocks degrade to a scoped `core/html` block), **`_Landing`** (the **"Duplicate as landing page"** action: imports a verbatim site mirror — capture service `GET /mirror` → `mirror.mjs` — into `uploads/unysonplus/landing/<slug>/` as a single `section → column → code_block` on the no-chrome **Landing Page** template; a frozen, deliberately non-decomposed WebGL-friendly copy), `_Sources` (source adapter registry).
 - **Public hooks/filters:** `fw_site_converter_sources` (register a builder adapter). The AI backend + capture service live **outside WordPress** (local `unysonplus-site-capture` service — `/capture`, `/capture-file` (renders an uploaded Stitch `.zip` / HTML through the same engine as a URL), `/ai-convert`).
-- **Training harness (`tools/converter-trainer/`):** a token-cheap loop for improving the converter against a corpus of demo sites (openhero/wegic/any URL list). `bash train.sh` batch-captures a `sites/*.txt` list (per-slug dirs so the shared capture slug doesn't collide), then runs each capture through `Stitch::html_to_mapping` + `Mapper::build_pages` headlessly and prints a **ranked list of fidelity flags** (`LIGHT_OVERLAY_WASH`, `LOW_CONTRAST_TEXT`, `NO_HERO_BG`, `EMPTY_SEC`, `VERBATIM`, `FEW_SECTIONS`) → `batch/_audit.csv`. After a converter edit, `train.sh <list> --audit-only` re-scores the existing captures in seconds (no browser) so you see whether flags cleared. Content signals read the MAPPING (heading text lives in a block's `text`), background/overlay signals read the BUILT tree. See its `README.md`.
-- **Training harness (`tools/converter-trainer/`):** a token-cheap loop for improving the converter against a corpus of demo sites (openhero/wegic/URL list). `capture.mjs` batch-captures a `sites/*.txt` list into per-slug dirs (no slug collision); `audit.php` runs each capture through Stitch+Mapper **headlessly** (no browser) and prints a ranked list of fidelity flags (`LIGHT_OVERLAY_WASH`, `LOW_CONTRAST_TEXT`, `NO_HERO_BG`, `EMPTY_SEC`, `VERBATIM`, …) + a CSV; `train.sh` orchestrates capture+audit, with `--audit-only` for a fast re-score after a converter edit. See its `README.md`. Use it to find WHICH sites regressed/drift before spending time looking at any — content signals come from the mapping, background/overlay from the built tree.
+- **Training harness (`tools/converter-trainer/`):** a token-cheap loop for improving the converter against a corpus of demo sites (AI-generated demo sites / any URL list). `bash train.sh` batch-captures a `sites/*.txt` list (per-slug dirs so the shared capture slug doesn't collide), then runs each capture through `Stitch::html_to_mapping` + `Mapper::build_pages` headlessly and prints a **ranked list of fidelity flags** (`LIGHT_OVERLAY_WASH`, `LOW_CONTRAST_TEXT`, `NO_HERO_BG`, `EMPTY_SEC`, `VERBATIM`, `FEW_SECTIONS`) → `batch/_audit.csv`. After a converter edit, `train.sh <list> --audit-only` re-scores the existing captures in seconds (no browser) so you see whether flags cleared. Content signals read the MAPPING (heading text lives in a block's `text`), background/overlay signals read the BUILT tree. See its `README.md`.
+- **Training harness (`tools/converter-trainer/`):** a token-cheap loop for improving the converter against a corpus of demo sites (AI-generated demo sites / any URL list). `capture.mjs` batch-captures a `sites/*.txt` list into per-slug dirs (no slug collision); `audit.php` runs each capture through Stitch+Mapper **headlessly** (no browser) and prints a ranked list of fidelity flags (`LIGHT_OVERLAY_WASH`, `LOW_CONTRAST_TEXT`, `NO_HERO_BG`, `EMPTY_SEC`, `VERBATIM`, …) + a CSV; `train.sh` orchestrates capture+audit, with `--audit-only` for a fast re-score after a converter edit. See its `README.md`. Use it to find WHICH sites regressed/drift before spending time looking at any — content signals come from the mapping, background/overlay from the built tree.
 
 ## Notes / gotchas
 
+- **⛔ Button and box STYLES live on their PRESET, never on the shortcode (REQUIRED, both engines).** A converted
+  button's / card's look — the resting fill, border, radius, shadow, type, the hover fill / transform / shadow / filter,
+  its `::before` / `::after` layers, their hover states and the `@keyframes` they animate with — belongs in the
+  **Theme Settings preset's Custom CSS** (`button_colors[].custom_css` / the Box Preset's `custom_css`, `{{SELECTOR}}`-
+  scoped), so **every element wearing that preset renders identically on every section and page**, and a later edit of
+  the preset changes them all. The shortcode's own Advanced → Custom CSS carries ONLY what is per-instance by nature
+  (this button's alignment / width / spacing; a card's own inset), never a copy of the preset's skin. A per-element
+  copy is a duplicate in the wrong place, and its `!important` would outrank any later preset edit. Concretely:
+  `n_button` / `buttonBlockNode` emit hover CSS on the element only for a button **no colour preset owns** (the
+  safety-net path); a preset-owned button takes neither the verbatim hover nor a substituted library fx — the preset
+  is the whole hover. The same holds for icon-box / panel skins → Box Presets (`register_box_preset` ↔
+  `buildBorderPresets`). Golden `[R]` + `nocturnal-parity.test.mjs` guard it.
 - **Who edits the converter (important).** A **site build must never fork the shared converter to fix one page** — close that site's delta with native options / `misc_custom_css` instead. Improving the converter *algorithm* (so a whole class of misses goes away for everyone) is a **contributor** task: it needs the converter repos and the change must be **upstreamed** (and mirrored across the JS URL path + the PHP file path). As a site builder, **record the miss in the conversion report** and, with the site owner's consent, **run `node capture.mjs <url> --share`** — it POSTs the anonymized report to the maintainer's Google Form (already wired in `share-config.json`; inspect first with `--share-preview`) — the report is the intended feedback artifact, not a code fork. **Flag only a *systematic* miss** (one that would recur on other sites — a `code_block` fallback with a clear shortcode fit, an `opportunity`/`styling-drop` row, a wrong mapping); do NOT flag a bespoke widget that's correctly verbatim or a one-off site delta. Send **anonymized structural data only** (source type, `element → got vs. expected`, the report row, `systematic? y/n`) — no raw third-party content. (Same consent-gated artifact as the opt-in `--share` upstream flow. Full criteria: `site-build-protocol.md` → "What a SITE-BUILDER flags".)
 - The deterministic no-AI algorithm exists **twice** (PHP here for the file path; JS in the capture-service repo for the URL path) — keep both in sync (see the workspace CLAUDE.md rule).
 - **Full detail lives in the extension's own `AGENTS.md`** + `docs/site-conversion-playbook.md` (Theme-Settings-first demo conversion) + `docs/stitch-to-unysonplus.md`. Read those before working on conversion logic.
@@ -394,6 +406,950 @@ measured rule in both engines (golden `[M]` ↔ `header-audit-parity.test.mjs`),
 Verified through the real admin Convert: source A → B → A again each gets its own header (1440px screenshots); the
 corpus's genuine two-row header still converts as two rows. `masthead.test.mjs` no longer names any site — its sample
 list lives in a gitignored `masthead-sample.local.txt`.
+
+### The nocturnal audit: bento grids, toolbar rows, plain-CSS mirrors, the whole button (2026-09-16)
+
+A plain-CSS (non-utility) dark source converted through the admin Convert; every gap is a general measured rule in both
+engines (golden `[R]` ↔ `nocturnal-parity.test.mjs`; 764 / 0 and 67 / 0), verified on the live reconvert:
+
+- **bento grids** — the capture stamps every grid child's desktop `track-frac` + `track-y`; a 12-track grid whose tiles
+  span 8 / 4 tracks through a stylesheet class across several visual rows (no per-item class or computed grid-column to
+  read) was one row of six 1/12 slivers. `bento_split` ↔ `bentoRowsOf` group the cells by y into rows, each cell keeping
+  its measured span on the 12-grid and the tile's measured height as its min-height;
+- **toolbar rows** — a flex row of short labels / empty painted dots spread by `justify-content` (a code window's title bar:
+  dots · label · LIVE) was flattened into stacked kickers; `is_toolbar_row` keeps it whole and the structural mirror now
+  carries a flex container's `justify-content` / `align-items`, a single-side hairline, its computed padding (a plain-CSS
+  source has no utility class to compile), a faint tint (alpha ≥ .02 is a fill on a dark page), and empty painted
+  dots as inline dots;
+- **mirrored leaves** — a `<pre>` / `white-space: pre*` keeps its line breaks while a plain label's source line break is
+  collapsed (wpautop rendered it as `<br>`); a short inline label never wraps; a flex-row item drops the theme's paragraph
+  margin (the key / value rows sat off their vertical centre); a leaf's own font family rides when it differs from its
+  parent's;
+- **the intro's padding** — a hero paragraph's `padding-bottom:240px` (the gap before the CTAs) adds to the folded
+  subtitle's below gap, in both engines;
+- **a header-less source** — the theme reads the per-page `page_header = d-none` select, not the legacy `hide_site_header`
+  switch; the page importer maps one onto the other (and resets it on re-import);
+- **a flat footer link row** — a `flex gap-14 justify-end` row of pill links stacked vertically in the theme's list; the
+  flat-link fallback now records the container's layout + the link's pill skin and emits the list as a horizontal,
+  end-justified row of pills (PHP path);
+- **styles live on the preset, never the shortcode** — a preset-owned button no longer receives a per-element copy of its hover / pseudo CSS (the Notes / gotchas rule above); the element keeps only what is per-instance (alignment, width, spacing);
+- **the whole button** — the capture's hover harvest walks NESTED rules (a utility framework's `@media (hover: hover)`
+  inside `@layer`; a headless browser reports no hover-capable pointer, so pointer media queries count as matching)
+  and collects the `@keyframes` a pseudo layer animates with; the button presets carry the source's `::before` /
+  `::after` layers, the hover state of each, the hover shadow / filter / tracking and the keyframes verbatim (positioned +
+  clipped), and a preset-owned button with a captured hover transform takes NO library fx on top (a Lift substitute
+  doubled the lift and painted its own shadow over the source's glow).
+
+Not a converter rule: a source that TYPES its copy with JavaScript is captured mid-animation, so the typed text is
+whatever had appeared when the capture ran.
+
+### The feed after the tuple + fixture contract: 89 findings, 24 fixtures, first batch (2026-09-17)
+
+The reporting contract works: every one of the 89 findings since the sheet was cleared carries the tuple, 24 arrived with
+a sandbox fixture + a general-rule `solution` ("SANDBOX REPRO"). `pull-findings.mjs --fixtures=<dir>` + a harness that runs
+each fixture through `build_from_html` (`fx-run.php` in the maintainer scratch) gives a fixed / open table in minutes.
+Fixed as rules this pass: the container gutter measured without a stamp and only from container-sized boxes, subtracted
+from a measured OUTER width (a fixture-sized page: 1280 → 1232); a folded subtitle keeps its measured case / tracking /
+weight / family on `.heading-subtitle` (`subtitle_case_css`); a standalone measured PILL text (`text_is_pill`: pill radius +
+side padding + a content-sized placement) hugs its text instead of stretching the pill skin across the band; the fixture
+sanitiser keeps the `<html>` site stamps (content width / gutter). Confirmed fixed by earlier rules: the outline button's
+translucent fill, the marquee, the `hidden lg:flex` column (the tier fix; the agent's fixture cut the column without its
+band, so it cannot prove it). Open, in priority: card grids that fall to `code_block` (feature cards with a rotated icon tile,
+program cards, a review card = testimonial with name / role lines, a masonry `columns-3` gallery, creator cards with an
+overlay), a 3-up "how it works" grid with 96 px ghost numerals, a bento with `grid-rows-[…]`, product / article grids on a
+site without WooCommerce / posts, the body font when the source stack is `ui-sans-serif`.
+
+### The feed's first batch, second pass: content cards, ghost numerals, walls, the system body (2026-09-17)
+
+Six more of the 24 fixtures became rules, each locked in golden `[W]` (944/0), all general:
+
+- **A lone content card decomposes as a panel** (`is_content_card` ignores a transparent ring / an all-zero shadow;
+  the content-card branch tries `panel_build` first and takes it when the blocks carry text and no code): an icon
+  tile + h3 + p card wearing `border-4 border-transparent` fell to a `code_block`. The card's title keeps its measured
+  weight / ink (the theme heading default was reported on three sites).
+- **A ghost numeral survives** (`salvage_dropped`: a bare 1–3 digit run set ≥ 40 px is a design element): the 96 px
+  `01` of a "how it works" step was dropped as an index.
+- **A system body stack never takes the heading's Google face** (`detect_typography` → `body.system`; the design
+  config's `$body_system`): with `ui-sans-serif, system-ui` on the body the converter used to hand the body the ONE
+  Google face it found (the heading's).
+- **A `columns-N` wall is an image grid → the gallery's Masonry design** (`is_image_grid` accepts `columns-[2-6]` /
+  a computed `column-count`; `wall_columns` reads the LARGEST breakpoint of `columns-1 md:columns-2 lg:columns-3`, or
+  the stamped `column-count` — the first match was the phone tier, a 1-column masonry).
+- **Fixtures keep their repeats** (`make-fixture.mjs`): over the cap it prunes every run of same-class siblings to
+  its first 3 (innermost first, tightening until the SCRUBBED fixture fits) instead of cutting mid-tag — a one-tile
+  fixture reproduces a different construct (the lone image), so its rule can't be locked. The cap is 32 KB (was 8:
+  the stamps ARE the fixture — a band with a 3-tile grid runs ~25 KB; a Sheets cell holds 50 KB).
+- **The dashboard tab opens once** (`ensure-open.mjs`): a restart on code-version drift (a package bump between two
+  CLI captures) re-opened `localhost:4600` on EVERY capture; now only a forced launch or a restart with no tab in the
+  last 30 min opens one. Agents scripting the converter run `DASHBOARD_AUTO_OPEN=0 node capture.mjs …` +
+  `FW_Site_Converter_Bundle::import_dir()` (AGENTS.md).
+
+Still open from the batch (fixtures on file): the bento with `grid-rows-[…]` + an absolute cover image, creator cards
+(image + overlay pills → `code_block`), product / article grids on a site without WooCommerce / posts, the testimonial
+name / role lines, the 3-column steps grid on the real page, `image_box` price + button, a widget kept verbatim, the
+gradient CTA card, the announcement bar, the floating cart button — and the JS twin's parity for these PHP-only rules.
+
+### The feed, rows 101–167: ten more sites, the recurring misses (2026-09-17)
+
+Sixty-seven new rows (44 with fixtures) from ten sites; the misses that recurred across them became rules, locked in golden
+`[X]` (958/0). All general:
+
+- **The outer container wins** (`outer_container_wins`, capture.mjs twin): the stamp is the heaviest centred width by area,
+  so a `.container max-w-7xl px-6` (1280) whose bands centre a `max-w-6xl` (1152) block inside it stamped 1152 and the
+  Container Width came out 128 px UNDER (the feed's "regression"). When every element measuring the stamp sits inside a
+  centred box of a wider width (≤ 1.25×) spanning as many bands, the wider box is the site container.
+- **A mobile-first button row** (`group_buttons`): `flex flex-col sm:flex-row` + `w-full sm:w-auto` buttons — the stamp
+  (desktop) says row — is a column on phones and a row from md up (`content_direction_resp`); its buttons are not
+  full-width. Five sites reported "hero buttons stacked full-width".
+- **Image-led product tiles are cards, not a gallery** (`is_image_grid`): a tile whose cell has ≥ 2 in-flow text leaves
+  (category, name, price — none of them headings) or a priced leaf is a card; half the tiles → card_grid. Three shops lost
+  every name and price to a gallery.
+- **A rating is ≥ 3 stars** (`testimonial_rating`): a lone `lucide-star` in a 64 px icon tile made a 3-up service grid a
+  testimonials block.
+- **The image box carries the card** (`n_image_box`, parity with `n_icon_box`): the body's colour → Content Colour when it
+  differs from the card's ink (a `text-muted-foreground` p rendered in the section accent — six sites), the title / body
+  measured sizes, the card's lucide icon (`detect_lucide_in` now reads `<svg class="lucide lucide-x">`, the lucide-react
+  shape), the link's own skin, a trailing lucide arrow → the arrow style, the body inset (`div.p-8` → `.imgbox__body`), a
+  fixed media height (`h-64` → `.imgbox__media{height}`), a filled block anchor → the Button style.
+- **Every heading part derives its metrics + ink from its stamp** (`n_heading`): a heading built by `heading_cta` (an h2 +
+  p beside a link) lost its subtitle's muted colour and 16 px to the theme defaults (RECURS x5); `heading_of` now also
+  takes the kicker span before the h-tag as the overline.
+- **A text link is not a padded button** (`n_button` btn-link): no padding in the stamp means none (the capture stamps
+  only non-defaults) — padding 0, no border, no underline.
+- **`×` and `°` are counter suffixes** (`3.2×` leaked into the label); **an h3+ with its tagged subtitle folds as one
+  heading** (both fold loops); **a row marker survives** (`is_row_marker`: a short ordinal leading a flex row beside a
+  heading) and **a marker row is a 2-column row** (`is_layout_row`: `span.01 + div(h3 + p)`, `svg + div(h4 + p)`).
+- **Never a column**: a `<style>` / `<script>` / `<template>` child (`el_children` skips them — an inline media rule
+  rendered as a CSS text block) and an empty absolutely-positioned glow layer (`is_empty_positioned_layer`).
+- **A split band's half-width cover image is an image column** (`section_bg_image` path 3: the layer must span ≥ 70 % of
+  the band), never the section backdrop.
+- **A container holding a `<form>` is not the form** (`is_newsletter_form`): a name / email / message form is a
+  `contact_form`, the grid around it keeps its details column, and a form makes a panel (`is_panel` content tags) so the
+  white rounded card keeps its skin.
+- **The measured pill ink wins** (`overline_pill_skin_css`): `border-primary/20 bg-primary/10 text-primary` compiled the
+  label to the ring's 20 % alpha token.
+
+Still open from these rows: the event card's two-line date badge, category tiles with an overlay caption, a card's coloured
+96 px header band, the footer split into three bars + `import_dir` not resetting chrome keys absent from a new bundle,
+process rows losing their skin, the pricing plan names / thousands, testimonial `card_rows`, the header cart-count badge
+read as a CTA, bare testimonial columns given the card skin, the newsletter button width, the hero 45/55 split band, tab
+chips' size, the gradient-text sibling span, the stale menu on a slug collision — and the JS twin's parity for the
+PHP-only rules above. The faint radial glow layer a hero carried as its first child is no longer a column but is not yet
+lifted to the section background either.
+
+### The feed, rows 168–284: twenty sites, the second batch of recurring misses (2026-09-17)
+
+Eighty-four findings (82 fixtures) from twenty sites; the rules, locked in golden `[Y]` (974/0):
+
+- **A black band keeps its fill.** The alpha-0 test `/,\s*0\s*\)$/` also matched `rgb(0, 0, 0)`, so every BLACK section
+  (and every black table cell / header fill) rendered transparent — eight sites of the same regex, now rgba-only.
+- **Titles assert their case** (`heading_weight_css`): a title whose stamp says text-transform none emits
+  `text-transform:none` — a site-wide heading style sampled from an all-caps wordmark re-cased every h2 (three sites).
+- **Every form item carries `info`** (`n_contact_form`): the form-builder views read it unguarded and the built page
+  printed `Undefined array key "info"` as visible text (three sites); a label ending in `*` is required.
+- **The conversion's identity is the FULL source URL** (`purge_previous_conversion`): the manifest `source` (path +
+  query), not theme-design's origin — every page of a preview host shared the origin, so the previous page's menu
+  stayed on the primary location (16 sightings); the boxed-footer keys joined OWNED_KEYS so they reset too.
+- **A count badge is never the header CTA** (`header_actions` + the single-CTA reader): a bag icon's absolute "0"
+  became a 'Get Started' button labelled 0 (three sites); cart / bag / account controls are skipped by class.
+- **Pill CTAs are buttons** (`is_badge`): an anchor ≥ 40px tall with ≥ 14px text and a real inset, or one in a flex row
+  of anchors, is a button whatever its radius — two hero pills became badge ×2.
+- **`items-center` on a row at desktop is vertical** (`section_center`): `flex-col lg:flex-row items-center` no longer
+  centres a left-aligned hero (the stamp's flex-direction decides).
+- **A React FAQ of toggle-only cards is an accordion** (`plain_toggle_items`): ≥ 2 buttons with a chevron / plus svg,
+  their closed panels unmounted (no aria) — six Q/A rows fell to code blocks; the answers come from the FAQ JSON-LD when
+  the page carries it. The fixture sanitiser now keeps `aria-expanded` / `aria-controls` / `open` / `required`.
+- **`animate-scroll-fade-up` is a reveal, not a marquee** (three regexes): `` after `animate-scroll` matched the
+  reveal utility and a section's centred heading block became a full-bleed marquee code block (three sites); the
+  heading block is a special_heading at its desktop 48px.
+- **Testimonial authors** (`author_candidates`, both the grid and the single card): a quote glyph is never the name, an
+  initials disc (2–3 uppercase letters in a ≤ 72px rounded box) is the avatar, the heavier / uppercase line is the name
+  and the small one the role, `div` lines count — three author defects in a row.
+- **`24/7` keeps its `/7`** (a counter suffix, like `×` / `°`); **a stat card** (`card_from_cell`: a display-size number
+  leaf ≥ 2× the small heading) takes the number as its title, the heading as its overline, the description as content.
+- **A floating card's three lines** (`floating_card_block`): the heaviest / largest line is the title, a small first line
+  the overline, the rest content — "15+Years of Excellence" was one concatenated title, a label was the title.
+- **The icon box carries its title's measured weight** (`font-weight … !important` — the theme's 700 won on nine sites),
+  **its body ink WITH its alpha** (`ink_value`: rgba stays rgba — flattened to the card ink it was never carried, eleven
+  sites) and **no icon when the card has none** (a placeholder glyph, five sites). The image box shares the alpha rule.
+- **The body font never comes from a display-size `<p>`** (`detect_typography`: paragraphs > 28px are skipped; the
+  `<body>` stamp's face wins) — a 48px serif hero line had set the whole site's body.
+- **Pricing** (`pricing_table_block`): the plan name from the card's first short line (never "Plan" or the "Most
+  Popular" badge), the price with its thousands separator, the period verbatim ("/ per program") or NONE (a ticket
+  price was rendered "$15 /mo"), the paragraph between price and features as the subtitle.
+- **A container's own padding wins over a stamped gutter that disagrees** (`declared_container_gutter`): a 1400
+  `.container px-6` stamped gutter 48 rendered a 1304 rail; measured 24 inside → 1352.
+- **A sticky / fixed header, or one holding a nav of ≥ 3 links, is never a hero** (`is_hero_header`): a sticky masthead
+  with a serif h1 wordmark under a `min-h-screen` wrapper became page section 1 with its nav duplicated.
+
+Still open: the full-bleed image sibling of the container (80vh band), the bento gallery with `auto-rows` + spans, image
+cards whose hover overlay icons were promoted over the photo (page-context), overlay captions over images (image_box
+overlay design — four sightings now), the trust strip's intrinsic-width card, the social-proof row, a band after a grid
+folded into it, accordion rows' hairlines, the header mobile overlay, stat cards' skin in a 2×2, the product scroller,
+the hero's double vertical padding (page-context), the mobile-first card padding — and the JS twin's parity.
+
+### Open items closed: the strip, the rows, the process, the event card, the split band (2026-09-17)
+
+Golden `[AA]` (994/0, JS twin tests 71/0), each render-verified on localhost (Playwright measurements). Site Converter
+1.9.51, capture service 1.11.28.
+
+- **The trust strip.** A skinned `inline-flex` strip of ≥ 3 children is a layout row, not an avatar group (the whole
+  card had been claimed as one); an avatar stack that is a MEDIA-only, non-decomposable cell gets its native block before
+  the verbatim mirror (`layout_cols` → `avatar_group_build`; it had come out as four code blocks). An UNSTAMPED `<svg
+  class="lucide lucide-star">` — the capture keeps only its class and an empty `<path>` — is a LIBRARY icon
+  (`lone_icon_block` / the mirror's svg path carry `lucide`; `n_lone_icon` prefers `lucide/<name>` when the inline svg has
+  no geometry), sized by its `w-N h-N` / `size-N` utility, inked by the nearest stamped ancestor's colour. Five 20px amber
+  stars measured — they drew nothing at the default size.
+- **Accordion-style rows.** The row marker may TRAIL the text (`h3 + svg.chevron` in a `justify-between` row); a cell
+  that IS an h1–h6 is substantial; the parent wrapper's hairline (`read_edge_skin` / `read_card_skin` of a single-child
+  parent) rides the row as its `rowBox`; the lone icon takes the svg's own `w-7 h-7` over the inherited font-size. Five
+  125px rows, hairline each, a 28px arrow at the right.
+- **Process rows** (`grid [80px_1fr_auto]`, fixture-056): the bento X-split needs ≥ 2 real rows — a CENTRED single
+  row (every cell's vertical centre on one line) has staggered tops but no spanner (it had folded the third cell under the
+  second). `cells_track_list`: a NARROW track (≤ 120px, beside a track > 240) is a fixed px measure, the wide tracks
+  split the rest as fr (`80px 1fr 73.4px` — as an fr the pill shrank and wrapped). A FIXED SMALL BOX cell (`layout_cols`
+  `fixedBox`: 20–96px both ways; a `rounded-full` box with no stamped width is as wide as it is tall) → the column's
+  inner wrapper takes the box's size and centres the glyph (`carry_cell_geometry` → `.sc-fixbox`); the cell that IS the
+  text leaf strips its copy of the skin (two nested pills had wrapped the label) and a one-line leaf (`height` fits one
+  leading) is `nowrapText`. The Box Preset's PER-CORNER radius (`20px 20px 0px 0px`) rides the preset CSS in both
+  registrars (PHP `reg_rad`, JS `buildBorderPresets`). Measured: disc 52×52, row 1152×127 with the radius, pill 73×33.
+- **The event card** (fixture-048, recurring on two sites): a card whose photo carries a floating badge
+  (`card_photo_badge`) is not a card grid's image box — the cell decomposes in `grid_cols`: the photo composite
+  (`image_composite_decompose`) in a RELATIVE frame stack at the frame's height (`rel` / `frameH`, the media image covering
+  it), then the body's leaves through `body_stack_blocks` (a flex ROW child of ≥ 2 blocks stays a content-sized row with
+  its justify — the `time | link` line) in a padded stack (`pad`, `grow` = `flex-grow justify-between`).
+  `floating_card_block`: a `flex-col` chip is the `top-title` layout, centred when `items-center`; `floating_card_pos_css`
+  carries `min-width` and the stack's own gap (none → `.icon-box__inner{gap:0}`). `n_icon_box` reads the title's size,
+  a `leading-none` line-height and margin from its stamp when the card carries none, and an overline with NO stamped
+  margin takes the title's `mt-*` as its gap (not the theme's 8px). `is_heading_cta_row` never claims a flex COLUMN
+  (a `flex-col justify-between` body had built null and vanished). A salvaged `<a>` text leaf keeps its link
+  (`leaf_text_html`) and its own ink / decoration (`linkCs` = its stamp → `selector a{color !important}`; no stamped
+  underline = none). An ACCENT EDGE (`border-2 border-t-[accent]`): the sides whose colour differs from the top's ride
+  the preset CSS with `!important` (`box_extra_css` / JS `boxExtraOf`; the extra whitelist admits `!`). Measured: badge
+  64×50 pinned bottom-left over a 391×224 photo, month over day, the body's chip / title / copy / time / indigo link,
+  the red top edge only.
+- **The split band** (fixture-011): a CSS-painted photo cell (`bg_photo_url`: `bg-cover` + a url, no `<img>`, ≥ 120px)
+  is a substantial cell and a cover media image at its box (`bg_photo_block`; it had vanished as empty). A section that
+  IS the grid with tracks spanning the viewport and no padding is full-bleed (`is_fullbleed_split_hero` edge branch; the
+  mapper's full-bleed flexbox drops the site gutter). A modern stamp (it carries `display:`) with NO padding declaration
+  is a ZERO section padding (the theme's 64px had grown a 600px band to 728). A bottom-only border (`bottom_only_border`)
+  is a CTA link's underline, never an outline button (`cs_is_button` / `button_kind`); `button_block` reads
+  `justify-center` as centring only in a flex ROW (a column centres vertically — the link had been centred). Measured:
+  section 1440×600, photo 720×600 at x 720, the link left at x 96 with its 1px white underline.
+- **The hero's double padding** (fixture-024): the overlay-header clearance now reads the hero's INNER container
+  padding (the first flexbox child's largest `padding-top` tier) — the nav height is added only when the source's own
+  clearance is smaller.
+
+JS twin parity for the pass: `lucide` on lone icons, the fixed px tracks, the per-corner radius, the accent-edge sides.
+
+**The JS twin's structural parity (capture service 1.11.29, `badge-card-parity.test.mjs`, 72/0):** `rowCols` carries
+`fixedBox` / `nowrapText` (the leaf's copy of the skin cleared), a CSS-painted photo cell as `cell.image` (`bgPhotoOf` — the
+cell filter keeps image / paint cells, so a section that IS the grid with a photo half is a row, not verbatim), and
+`cardPhotoBadgeOf` → the relative frame stack (`rel` / `frameH`, `t:'floating_card'` items) + `bodyStackBlocks` (`padPx`,
+`grow`); `floatingCardOf` reads its lines like the PHP (heaviest = title, small first = overline with the title's margin as
+its gap, `titleExtra` for the title's size / leading, a `flex-col` chip = `top-title` centred, `minWidth`, `innerGap`);
+`stepMarker` / `collectCards` never read a number inside an absolute chip as a step (a date badge had made an event grid a
+`steps` block). `to-pages`: `stackNode` pad / grow / rel, the fixed-box inner wrapper, `mediaImageNode` bgPhoto, a
+`floating_card` block, an image / block-only cell is never dropped as empty. Verified on a live styled page
+(`http://localhost/fx/aa-live.html`) — the JS pages.json now holds the same tree the PHP path builds from its capture.
+
+**The mobile drawer header** (feed row 80 of the second pull; golden `[AB]`): a `fixed inset-0 … md:hidden` drawer holding
+the same links at 32px is never a header bar — one 84px row of logo | menu | CTA, an empty bottom bar (it had become a
+900px bottom bar). Closed by `header_row_hidden` (`*:hidden` classes, `fixed inset-0` / ≥ 500px overlays).
+
+Nothing from the feed is open.
+
+### Open items closed: caption tiles, the bleed picture, the bento, the social-proof row (2026-09-17)
+
+Golden `[Z]` (978/0), each render-verified on localhost (Playwright measurements):
+
+- **A caption tile is the image box's OVERLAY family** (`caption_tile_block` in the image_overlay recognizer and in
+  `grid_cols` for a grid of tiles; the mapper's `image_box` builder): one photo + an absolute caption layer (a heading /
+  a line / a link) + an optional empty scrim layer → title / text / link over the photo, the SOURCE scrim exactly on the
+  design's `.imgbox__scrim` layer (a `bg-black/10` tint, a gradient — the design's own gradient paints at full opacity
+  whatever the option says, so it is replaced or hidden), the caption's placement (bottom / centre / top), alignment,
+  inset and ink; a hover-only caption (`opacity-0 group-hover`) → the Fade reveal. Four sightings had dropped the
+  caption leaves; a grid of tiles is no longer a card grid (the caption landed under the photo).
+- **A bleed picture** (`image_wrapper`): a `w-full h-[80vh] overflow-hidden` cover frame carries its height (the vh the
+  source wrote, else the px) and cover; a frame that is a direct child of the band beside the container breaks out of
+  the content width in its own column (the marquee's full-bleed rule). Measured 1440×720 at x 0, no horizontal
+  overflow — it rendered 1024×544 inside the container.
+- **A bento keeps its geometry** (`image_grid_build` → `gridGeo` + per-tile `rspan`; the mapper's metro branch): the
+  `auto-rows-[300px]` row height (the design's square-row pseudo off), gap 0, each tile's col/row span as scoped
+  `nth-child` rules over a reset of the design's pattern. Measured 1280×1200 with 853×600 / 427×300 / 427×600 /
+  853×300 tiles — seven equal tiles at natural aspect had made a 3436px band.
+- **An avatar stack beside its rating is one row** (`avatar_group_build`): a nowrap row with the source gap and vertical
+  centring instead of two stacked block rows.
+- Fixture-sanitiser: `aria-expanded` / `aria-controls` / `open` / `required` / `disabled` are kept (a React accordion
+  fixture had arrived as toggle-only cards).
+
+Still open: the trust strip's intrinsic-width card, a band after a grid folded into it, accordion rows' hairlines, the
+header mobile overlay, stat cards' skin in a 2×2, the product scroller, the hero's double vertical padding and the
+mobile-first card padding (both page-context), a full-bleed gallery (the bento sat in the content width) — and the JS
+twin's parity for the PHP-only rules.
+
+### A second random corpus page, and the first page's open items (2026-09-17)
+
+The first page's open items closed: the **floating dock** (`detect_floating_dock` — a page-level `position:fixed`,
+edge-anchored, ≤ 120 px pill of ≥ 2 icon-only links → ONE fixed-positioned row of icon tiles with the native Position
+option, left 50 % + the centring translate, the pill's measured skin; appended to the first section), and the **JS
+gutter stamp** (the extraction ran before the stamps existed — `capture.mjs` re-reads `data-sc-content-width` /
+`-gutter` / `-gutter-inside` into the data; the gutter fallback read the declared cap's empty bucket). A second page
+(a SaaS landing: video hero with a `hidden lg:block` dashboard panel, a 4-up stats strip, a dark CTA card) measured
+hero 1187 → 900, features 717, CTA 661 (source 900 / 720 / 643). Its rules, golden `[V]` (934/0):
+
+- **Responsive-hide tiers** (measured, both twins): hide-xs = the 390 pass, hide-sm = the 820 pass, hide-md = the 1440
+  stamp — the keys sat one tier off, so a `hidden lg:block` desktop panel vanished on desktop.
+- **A pill is never a layout row** (`is_layout_row` yields to `is_badge`): a hero badge split into an icon cell + a
+  text cell.
+- **A hero over a bg video is left-flushed only when its copy is NOT in a centred cap** (`band_has_centred_cap` →
+  `contentCentred` on the bg block): a `max-w-7xl mx-auto` grid was pinned to the viewport edge.
+- **Feature-list columns** read the LARGEST breakpoint (`grid-cols-2 md:grid-cols-4` → 4) or the measured tracks; the
+  shortcode's Columns option now goes 1–6 (was 1–3) — a 4-up stats strip laid out 2-up.
+- **A top-level card row wears its rowBox**: the band path dropped the row's own Box Preset (the dark CTA card
+  vanished); a cell that is ONLY skinned links decomposes into native buttons; a `flex-col` button group keeps its
+  column direction with full-width buttons.
+- **Stat rows** (closed): an icon-text row whose text holder is a VALUE leaf over a LABEL leaf (≥ 1.3× the size) makes
+  the value the feature-list item text and the label its sub-line, the sub-line's measured size / colour on
+  `.fw-fl__sub`; a compound counter unit ("20k+") keeps its sign (it leaked into the label as "+Teams worldwide").
+
+### A random corpus page audited to the pixel: twelve discrepancies, twelve general rules (2026-09-17)
+
+A dark gallery landing (a hero over a masked video, an editorial two-column, a telemetry panel, a marquee, a quote + orb
+band) converted through the admin path and measured band by band (`verify.mjs` + a per-section geometry probe: top,
+height, container width, gutter, headings, buttons). Before: page height +23 %, hero centred, stats stacked, marquee a
+column of giant lines, an orb button split into two text lines. After: all five bands identical in top / height /
+container (0 / 900 / 1485 / 2365 / 2829; 1376 px at a 32 px gutter), `height_delta 0 %`. Golden `[V]` (930/0) locks each:
+
+- **A bare `max-w-*` column is not the centred band** (`cap_is_centred`): only `mx-auto` / `container` / a computed
+  auto margin / a centring parent makes a cap the band; the hero's `max-w-3xl` text column stays LEFT.
+- **`display:block` spans in a heading are lines**: the split-word collapser skips them, the scrub keeps `display:block`.
+- **A measured pill** (a `.glass` sheet class: fill + hairline + blur in the stamp, no `bg-*`/`border` class) is a badge
+  when it precedes a heading or carries a dot / svg; its measured skin rides the overline pill (bg, border, backdrop);
+  the dot may be a text-node label's sibling. A pill container only when the pill has a skin.
+- **A faint watermark by ink alpha** (`text-white/[0.06]`) is pinned like one by opacity.
+- **A measured grid's cells are its columns** (`is_layout_row`): with ≥ 2 px tracks, any cell with text / a control /
+  media counts — the label + value stat cell and the lone-orb cell used to fail "substantial".
+- **Unequal tracks** (`[1.2fr_.8fr]` → 796 / 531): shares by largest remainder (`track_shares`, shared by
+  `layout_cols` / `grid_cols` / `bento_split`), the exact px kept so the mapper renders a native `fr` grid.
+- **A designed panel height**: a sheet-declared height, or a sole `h-full flex-col justify-between` wrapper → the
+  measured height as `min-height` + `justify_content: between`.
+- **A measured marquee**: a nowrap flex row whose running `data-sc-anim` translates on X is a marquee whatever its
+  class; `marquee_strip` claims ahead of `chip_row`; the loop's duration is read from the stamp.
+- **A stacked button label** (an eyebrow over a serif word in a 224 px orb): the lines as block spans with their own
+  type, the square box as the node's CSS; a cell that IS one wrapped button decomposes; a button's own skin never
+  paints its cell (`skin_below`).
+- **Unitless class leading** (`leading-none`) resolves through the measured px in the mirror.
+- **Lossless native margins / paddings**: `spacing_px_to_slug` keeps an exact step's slug and turns anything else into
+  the arbitrary `[Npx]` token (a 40 px `mt-10` snapped to 48 on every block).
+- **Two outline presets with the same border** are told apart by their ink (`match_button_color`).
+- **The container gutter is measured** from the bands' equal side padding when no `calc()` rule declares it (JS
+  `capture.mjs` + PHP `declared_container_gutter`), and a gutter that is the container's own PADDING is subtracted from
+  the Container Width (the theme's is a content width — the feed's RECURS ×3 "+48 px per band").
+- Flexbox gained a native **Content Width Alignment** (`content_align`: center / left / right).
+- Left open on this page: the fixed bottom icon dock (page-level chrome, not a section) and the hero video's crop.
+
+### The open feed items, reproduced on a real capture (2026-09-17)
+
+The four items the notes could not reproduce were run against a fresh capture of a real source (a dark gallery
+landing: pill buttons, a tracked sans footer label under a serif heading font). Two reproduced and are fixed as
+general rules, proven live (computed values on the built page) and by golden `[U]` (916/0):
+
+- **Button presets "ignore" weight / case / tracking** — the preset DID carry them; the shortcodes' static `.btn`
+  skin (`font-weight:400`, a grey hairline) loads after the generated tokens and, at equal specificity, its order won.
+  Core `css-tokens.php` now emits the preset rule DOUBLED (`.btn-x.btn-x`, 0,2,0) for the base, the states and the
+  preset's Custom CSS. Live: 400 → 700 on both hero actions.
+- **A ghost action fell to the grey outline fallback** — a padded, rounded `<button>` with no fill and no border was
+  skipped by the preset builder ("nothing to match by colour"). It registers a **Ghost** role now (its ink, no border,
+  its type + hover ink); the mapper matches a fill-less, border-less button to it by ink. Live: `btn-ghost`, 0px border.
+- **Footer column titles in the theme heading font** — `footer_heading_css` wrote `.footer-links-title{font-family…}`
+  but the theme generator's site-wide `:is(h1,…,h6){font-family:… !important}` outranked it. The measured footer type
+  is `!important` now and the generator's rule excludes `.hf-heading`. Live: serif → the source's 10px tracked sans.
+- **`import-summary.json`** on the same run: media `imported 0 / reused 3 / available 3` — the "0" the feed reported.
+- Still open (no capture reproduces them): watermark opacity, a duplicate footer list, a marquee strip between
+  sections, a hero video at 0×0. They need the tuple — which `send-finding.mjs` now REFUSES to send without.
+
+### The findings feed, second batch: the sheet is pulled, not downloaded (2026-09-17)
+
+The shared sheet is a **published CSV** now (`share-config.json` → `feed.publishedCsv`), so nobody downloads it by hand:
+`node pull-findings.mjs [--since <ISO date>] [--json | --csv]` fetches it and prints the findings grouped by ref, with
+the tuple fields when a row carries them. (598 rows at this pass; **0 rows in the tuple format** — the agents run
+1.11.17 but file free-text notes; the contract in `site-build-protocol.md` stands, the wire format accepts both.) The
+recurring items, fixed as general rules — each proven by golden `[U]` (913/0) and a synthetic probe:
+
+- **A status lockup (bare dot + label, no pill skin) before a heading** was a "toolbar row" (a code_block dot + a
+  text cell; the pulse and glow dropped, three conversions). `is_badge` accepts a flex row of exactly one painted dot
+  (≤ 12 px, rounded, filled, LEADING the label — a `justify-between` row is still a toolbar) + one short label whose
+  next sibling is an h1–h6 → the heading's overline, the dot its svg mark; `pill_parts` carries the dot's running
+  animation (`loop_anim_of`) and box-shadow, the mapper writes them on `.heading-overline__icon` (`overline_dot_css`).
+- **Body size over-measured / inflated on the built page** (11 findings): two causes — `detect_typography` read the
+  paragraph mode where the `<body>` stamp is the root size (now the root size, 12–22 px, wins) and the theme's fluid
+  `clamp()` grew a 16 px body to ~18.4 px on a wide screen. Theme 2.6.2: **Typography → Type Scale → Fluid Sizes**
+  (`type_fluid_enable`, default on); the converter sets it `no` so a measured size renders as measured. Body
+  letter-spacing is carried only when the mode covers ≥ 60 % of the paragraph text (one tracked paragraph no longer
+  tracks the whole site).
+- **Footer 12-col spans / nested grids** (13): `footer_measured_split` derives the column segments from the cells'
+  `col-span-N` / `track-frac` when the px track count ≠ the column count (a nested grid splits evenly), and returns
+  only when the count matches.
+- **Logo ring frame** (6): `detect_logo` reads a bordered tile (`frame_border`, `frame_size`); the header logo maps
+  `logo_icon_frame` on a border as well as a fill, with `.site-logo__mark--framed{border…;background:transparent}`.
+- **Header gradient ground** (6): `bg_gradient` from the header's background-image →
+  `.site-header:not(.is-stuck){background-image:…}`; a translucent resting glass keeps its alpha as `scroll_bg_color`.
+- **Menu item style "pill" by default** (4): `item_style = 'none'` is set explicitly when no fill / border /
+  underline signal exists.
+- **Pill nav → menu items AND three CTA buttons** (RECURS ×6): `nav_pill_sibling` — a skinned nav link whose
+  siblings are skinned ALIKE (same fill / border) is a menu item; only the link skinned unlike every sibling is the
+  CTA. Shared by `header_actions`, the single-CTA fallback, `detect_menu_styles` (which now reads the pill skin from
+  those links) and `nav_links`. A home link (`/`, the origin) never doubles as a text link beside the logo.
+- **A floating centred pill bar read as a vertical-left rail** (2): a rail is taller than wide with a column nav; a
+  wide + short header with a row nav (≥ 3 links) is `top`.
+- **A 1 px accent line lost its width** (RECURS): a painted hairline (≤ 4 px tall, measured width) is a paint block
+  that keeps `width:<measured>` (+ `margin:auto` centring) unless it spans its parent.
+- **`data-sc-anim` / keyframes stored in a heading title** (2): `scrub` removes EVERY `data-sc-*` stamp at the DOM
+  level; an `<i>` / `<em>` the source reset to roman keeps `font-style:normal` inline.
+- **A tinted circle icon tile dropped from icon boxes** (3): `el_is_icon_tile` — the icon's wrapper is a tile when
+  its MEASURED style paints it (fill / gradient / border / shadow) at ≤ 120 px, whatever its classes.
+- **"media.imported 0"** (3): a reconvert REUSES the library copies. The import writes **`import-summary.json`**
+  beside the capture (media imported / reused / failed / available, presets, theme-settings, pages created / updated,
+  the sections run) — the once-per-site summary reads that, not the JS-side stats.
+- Not reproducible from the notes (no capture attached): button presets "ignoring" weight / case / tracking (both
+  twins and the theme carry all three — see golden `[U]`'s probe), footer headings on the theme font
+  (`.footer-links-title{font-family…}` outranks the theme's `h3` rule), watermark opacity, a marquee strip between
+  sections. A finding that names the construct + a capture path gets fixed; one that names a symptom gets a probe.
+
+### The shared findings feed, triaged: the recurring items other agents filed (2026-09-17)
+
+The agents converting with the kit stream findings to the shared sheet (`send-finding.mjs`). 133 findings over nine
+conversions; the ones marked RECURS / systematic were fixed as general rules — each traced to its cause, not its symptom:
+
+- **Every converted page 16–24 px taller per section** ("theme section gap", 5 sites): builder sections are direct children
+  of `.entry-content`, so the theme's prose flow gap (`.entry-content > * + *`) landed between them. Theme:
+  `.entry-content.fw-page-builder-content > * + * { margin-top: 0 }` — sections own their rhythm.
+- **"Tried to sideload the page URL itself"** (4 sites): the JS `videoBlockOf` absolutized an EMPTY `webm` / `poster`
+  attribute to the page URL, and the media harvest took every `url` key in the builder tree (a link's too). Fixed at the
+  root (an empty attribute stays empty), the harvest takes media keys only and never the page / a bare origin / an
+  `/api/` route; the PHP media scanner and `import_urls` skip the same.
+- **Scroll-reveal FROM-states as resting style** (opacity 0 + translate, 3 sites, both twins): a GSAP / observer reveal
+  writes its from-state INLINE, which the stamp recorded as the look. The capture now treats a hidden content element that
+  is inline-hidden or below the fold as a from-state: no opacity / transform / filter stamped, a `data-sc-reveal` instead.
+- **Two-line lockup reversed / blogname from a logo glyph / stale tagline** (3 findings): the document `<title>` orders
+  the identity — a lockup whose two lines are the `<title>`'s segments reversed follows the title; a glyph lockup (no
+  letters) yields to the first segment; `blogdescription` is reset before every conversion.
+- **A contact form mapped to the newsletter** (textarea dropped, the copy column swallowed): a form with a message
+  `<textarea>` (or ≥ 3 text-like fields) is a `contact_form` (forms extension) — `is_contact_form` / `contact_form_build`
+  → `n_contact_form`: the fields in source order as form-builder items (label / placeholder / required / half-width from
+  the measured widths / select choices), the submit label, the form's measure, the underline-input and submit skins as
+  scoped CSS; the importer activates `forms`. A non-form container that also holds a heading is never a newsletter.
+- **A framed video hoisted to the section background**: a bleed layer must COVER the section (≥ 70 % of its height, not
+  inside a `data-sc-col` cell) to be its Background video.
+- **The absolute-bottom scroll cue lost / an icon-only link dropped** (2 sites): an icon-only `<a>` tile is a lone icon;
+  a pin on the tile or a sole-child wrapper (`absolute bottom-12 left-1/2 -translate-x-1/2`) → the native Position
+  option (fraction utilities `left-1/2` → 50 %) + the centring transform; `anchor_abs_overlays` hoists it to the band.
+- **Copyright family truncated to its first token / uppercase dropped**: the H/F typography carries the whole family
+  stack (each family quoted) and a `text-transform`; the converter passes both.
+- **`oklch(… / 0.4)` colours stripped**: the shortcodes colour sanitiser keeps the alpha `/`.
+- **Menu Letter Spacing option out-specified** by `.site-header--uppercase-nav … { letter-spacing: .04em }`: the fixed
+  value is now that rule's default (`var(--menu-link-letter-spacing, .04em)`).
+- **Two previews on one host + path overwrote each other**: the capture out-dir slug carries a query signature (a
+  `?slug=` selects the page); one `site-slug.mjs` shared by capture.mjs and serve.mjs.
+- **`full.png` blank below the fold**: the screenshot follows a scroll-through.
+- **"The report describes a build the import didn't execute"**: the bundle import writes the PHP engine's own
+  `conversion-report-php.csv` (+ `conversion-drops.json`, `class-coverage.json`) beside the service's JS report.
+- **The finding wire format** carries the reporting contract tuple (`region` · `property` · `got` · `expected` ·
+  `construct` · `path` · `twin` · `loss` · `recurs`; 120-char values), and every capture writes `share-stats.json` for the
+  once-per-site `--summary` (the documented `design-config.json` had no stats, so the aggregate arrived empty).
+- Fixtures: golden `[T]` grew a scroll cue + a contact form (904/0); fixture 2 20/0; JS 70/0.
+- Still open from the feed (need a repro): a stats grid / 3-card grid emitted without its row wrapper (cells stack); an
+  overline's mono typography leaking into an icon_box title / body; responsive utility variants flattened to the desktop
+  value; `@supports` wrappers stripped; a two-row masthead merged; equal-height grid cards collapsing in a flex column.
+
+### The outpost page: a data table becomes its own Table Preset, content-sized rows, one-sided rules, a status pill, a ring emblem, a dot-grid overlay (2026-09-17)
+
+A dark "telemetry" page whose centrepiece is a data `<table>` (a tracked-uppercase header row, `divide-y` hairlines
+between body rows, a bold first column, mono value columns, coloured status words, translucent badge chips, a
+right-aligned last column, a row hover), beside a status pill over the h1 with an outlined word, a two-stat row with a
+1px divider, three columns ruled on top only, a CTA with a ring emblem over a dot-grid overlay and a 3-track grid signup,
+and a footer whose "social" slot holds terminal / cpu / activity glyph tiles.
+
+- **A table wears its MEASURED skin as a real Table Preset** (`table_style_evidence` → `register_table_preset` →
+  `build_table_presets` · JS `tableEvidence` / `tableSkinOf` / `buildTablePresets`): the mode of the body cells (the
+  `<tbody>` stamp is the text base the cells inherit) and the header cells → cell padding, grid lines (a second row's
+  top rule = a `divide-y` source), the header's rule / colour / weight / case, the body's size / colour, the row hover
+  (`data-sc-hover`), zebra fills, the frame (the table's own or a sole-child wrapper's border / radius / shadow), the
+  caption. What the fields can't hold (the header's face / 11px / tracking / own padding, the body's 300 weight, no rule
+  under the last row) rides the preset's own Custom CSS (`{{SELECTOR}}` descendant selectors — the field strips `>`).
+  Named `Table <hash>` on top of the built-in library; the node's `table_preset` = `tbl-table-<hash>`.
+  Before, the converter only PICKED a built-in by name — and wrote the bare slug, which never matched the emitted
+  `.tbl-<slug>` rule, so no converted table ever wore a preset at all.
+- **Each cell carries only its diff** (`table_cell_html` · JS `tableCellHtml`): the cell's colour / face / weight /
+  size / tracking / case that differ from the table base wrap the content in a `<span style>`; a badge inside a cell
+  keeps its own fill / padding / type inline and stays `inline` (its padding paints without growing the row). Colours
+  are HEX — `#rrggbb` / 8-digit `#rrggbbaa` — because `wp_kses`'s style filter drops `rgb()` / `rgba()` values.
+  A column's measured `text-align` → the native column alignment. The shortcode's own zebra / hover / frame toggles
+  go OFF when a preset applies (they painted light-grey stripes over the dark table), and css-tokens zeroes the base
+  cell borders under any preset (a "none" preset showed the theme's `#ddd` rules before).
+- **The capture's animation stamp split `cubic-bezier(0.4, 0, 0.6, 1)` at its commas** → `cubic-bezier(0.4` with an
+  unclosed paren swallowed EVERY page rule after it in the combined stylesheet (the stat sizes, the h2 measure, the
+  whole page's scoped CSS looked "lost" — they were parsed away). Fixed at the source (a top-level comma split) and
+  guarded in `loop_anim_of` (an unbalanced function falls back to `ease`).
+- **Content-sized flex rows** (`row_is_content_sized` / `divider_cell_size` · capture stamps desktop `track-frac` on
+  flex-row children and `width` on empty painted leaves): no cell declares a width and the measured tracks fill ≤ .75
+  → the cells are AUTO (`flex:0 0 auto`, no 12-grid span) and a `w-px h-10` hairline is a 1×40 painted cell; the even
+  split had a nowrap label overflowing a 4-span cell.
+- **A full-width lone cell carries no `fw-span-12`** — a span child turns a block parent into an auto flex row
+  (frontend-grid's `:has(> [class*=fw-span-])`), which set a hero's pill beside its heading; it fills through
+  `width:100%` instead (a flex-column section would shrink a span-less child).
+- **`cs_decls` synthesises `border` only when every edge matches** (an older top-only stamp keeps the legacy read): a
+  `border-t` hairline on a column was compiled into a four-sided `.box` frame. A card's eyebrow `<span>` is the
+  Overline once, not also the first body line.
+- **A status pill is a badge, never a toolbar row** (`is_toolbar_row` yields to `is_badge`): the dot + label
+  inline-flex pill was mirrored as a full-width oval beside the h1 instead of folding into its overline.
+- **An outlined word** (`-webkit-text-stroke` + transparent fill) keeps a `sc-outline` span; the stroke is hoisted
+  into the heading's scoped CSS (`extract_outline_css` — kses would strip it inline). Mirrors the gradient-text path.
+- **A lone glyph in a painted tile** (`lone_icon_block` tile → `chip_skin_from` → an Icon Badge Preset): a 64px ring
+  over a CTA is the icon's own badge preset, the same one an icon_box chip gets; `mx-auto` centres it.
+- **A covering child layer with a TILE pattern** (capture `data-sc-pattern` now reads an `absolute inset-0` child
+  whose gradient is tiled by a small `background-size`, with the wrapper chain's opacity and blend as
+  `data-sc-pattern-extra`) → the section's Background Pattern preset with `background-size` / `mix-blend-mode`.
+- **A 3-track grid signup is INLINE** (the field spanning two beside a `w-full` button in the third — the button
+  fills its TRACK, not the form); the form's own `max-w-md` caps the element (`width:100%` so a centred column
+  doesn't shrink it).
+- **A label-only heading group** (`n_head_node`: an overline with no title / subtitle) is a text block wearing the
+  label's measured type — not an empty-titled `<h2>`. Fixture 2's stat values ("100%" over a caption) follow.
+- **Footer**: an icon-only link row with NO named network (terminal / cpu / activity glyphs) becomes the social
+  profiles with their own inline glyphs — never the theme's default Facebook / X / Instagram set; the row's chip
+  skin (36px outlined square) → `social_style`; the brand tagline is no longer doubled into the copyright bar as a
+  "disclaimer"; a status dot before the bottom-bar label rides inline (`status_dot_html`).
+- Fixtures: golden `[T]` (17 checks; suite 900/0) · fixture 2 20/0 · JS suite 70/0. Verified live through the admin
+  Convert: the table 329.5px tall with 72px rows, header / badge / rules identical to the source; the pill overline,
+  the outlined word, the stat pair with its divider, the top-ruled stages, the ring emblem, the dot grid, the inline
+  form, the glyph tiles and the status dot.
+- **Follow-up (the reports, 2026-09-17).** Reading the service's own reports after the audit: the JS twin still kept the
+  hero VERBATIM (its root row counted the absolute bg-video wrapper and the scroll arrow as cells; the twin had no
+  section-background-video path at all), the dot-grid wrapper fell to `code_block`, the emblem's shadow was a
+  "styling drop", and `animation-report.csv` listed the pulse as a low-confidence *suggestion* beside two bogus
+  "pinned for ~3600px" traces (the fixed nav). Closed: `rootRow` ignores absolute children (a single in-flow child →
+  the lone-column path); `sec.bgVideo` (a covering `<video>` + its scrim) → the section's Background-Pro video +
+  Overlay (`blocksSectionNode`); `isPatternLayer` skips a tiled covering layer (or its opacity / blend wrapper) and
+  `findPattern` reads it — `blend` rides the preset css; `loneIconOf` reads the glyph's tile (`_badge` for the
+  presets pass + the tile drawn as scoped CSS on `.sc-icon-glyph`); a band's own edge rules / shadow / radius ride
+  the section css and leave the drop diag; a fixed / sticky element is never a trace target; a stamped infinite
+  loop reports as "CARRIED as-is". Result on the page: 21 elements, 0 fallbacks, 0 styling drops, 100 % coverage.
+- Known gaps: the hero's scroll-arrow (an absolute centred link with a glyph) is dropped; the inline signup renders
+  narrower than its 448px cap on the admin path; the JS twin still lacks badge-vs-toolbar, one-sided border
+  synthesis, the outline span, the label-only head and content-sized rows (the capture stamps are shared).
+
+### The biome page: body-tag shell rules, running class animations, a card masthead's inset, root-grid heroes, utility-fill progress bars (2026-09-17)
+
+A dark glass page (layered radial gradients and a fixed grid pattern painted on the `<body>` by tag, a floating glass card
+masthead inset by the bar's padding, a hero `<section>` that is itself a `.46fr .54fr` grid with an absolute hairline as a
+third child, a pill overline with a pulsing dot, stat cards captioned above the number, a masked organic video shell with
+a scroll-driven grow, a second band whose overline + h2 wrapper reveals as one, a `flex-1` card beside a `w-[32rem]` card
+of progress bars built from `w-[96%]` fills).
+
+- **Bare element rules are shell rules too** (`bare_element_css` in `page_shell_css` · JS `pageShellCss` bareRe): a source that
+  styles `body{background: radial-gradient(…), #05070b}` / `body::before{position:fixed;…grid…}` by TAG (no class) carried
+  nothing — only class-keyed rules were looked up. Now `body` / `body::before` / `main` rules ride Misc Custom CSS with the
+  same drops (the body's type → Typography; the wrapper's layout dropped) — except a **pseudo layer keeps its placement**
+  (`position:fixed; inset:0; z-index:-1` IS the design of a `::before` grid).
+- **Running class animations** (capture `data-sc-anim` + `data-sc-keyframes` · `loop_anim_of` / `apply_loop_anim` / the mirror
+  wrapper `mirror_loop_anim` · JS `loopAnimOf` / `applyLoopAnim`): the capture stamps any element whose computed animation is
+  INFINITE or scroll-driven (`animation-timeline: view()`, with its `animation-range`) with the resolved shorthand + its
+  `@keyframes` (a one-shot run is an entrance = the reveal stamp's job). Every block, cell and mirrored node carries it on its
+  own Custom CSS; a video shell's runs ride the `media_video` shape rule (`media_shape_css`). `strip_capture_attrs` keeps
+  these two stamps for the mirror. A pulsing dot pulses, a scroll-grown shell grows.
+- **A card masthead keeps its placement** (`header_design_sub` card): the bar's top padding → the native Top Offset, its side
+  padding → a residual side inset on the card (`margin-left/right`, `flex:1 1 auto`, the source cap as `max-width`, auto
+  margins once the viewport exceeds cap + insets). The card sat flush before.
+- **A section that IS the grid** (`section_content_max_width` / `grid_px_tracks`): the in-column guard now checks the section
+  ROOT too (an arbitrary `grid-cols-[…]` counts), so a video shell's `max-w-[880px]` inside a track never caps the band; the
+  px track list is matched against the IN-FLOW children (an absolute hairline takes no track) → the native two-track grid.
+- **Progress bars from utility fills** (`bar_percent` · JS `barPercent`): a `w-[96%]` / `w-3/4` fill inside a short (≤ 16px)
+  clipped / rounded track is a bar (the inline `width:%` was the only form). A **skinned panel cell with no heading** is
+  decomposable (`cell_is_decomposable`), so the panel recognizer builds it (its bars → the progress widget) instead of a
+  verbatim mirror of raw markup.
+- **Captions keep their side of the number** (`counter_cell_parse` → `labelFirst` · JS `labelFirst`): "ENERGY STATE" over "98%"
+  emits the caption block BEFORE the counter.
+- **Stacked heading parts fold** (the `stack` builder): a flattened `overline + h2` wrapper that became two stacked items
+  builds as one run → ONE special_heading (each part once, overline → title → subtitle order).
+- **Pill overlines from the stamp** (`overline_pill_skin_css` + `transform_badge_overlines` → `overline_pill_cs`, `pillDot`): the
+  translucent `bg-white/[0.03]` fill and `tracking-[0.3em]` the class compile misses come from the pill's computed stamp; a pill
+  without a fill of its own says `background:transparent`; the rule targets `.heading-overline--pill .heading-overline__label`
+  (it lost to the theme's pill tint at equal specificity); a painted dot beside the label becomes the overline's svg mark.
+- **Measured fractions for flex rows** (`layout_px_fractions`): every cell's `track-frac` decides the 12-grid spans (a `flex-1`
+  card at .62 beside a `w-[32rem]` card = 7 / 5); `w-[Nrem]` counts as an arbitrary width.
+- **`section_center` ignores a `<button>`'s UA centre** (it centred the hero). `col_span` reads the widest breakpoint variant.
+- **Follow-up (same day):** the body shell rules are scoped to the FRONT END (`body:not(.wp-admin)` — Misc Custom CSS also loads
+  in the builder's admin page, where the page ground and the fixed pattern bled over the editor); a card / pill masthead's
+  min-height is the floating surface's CONTENT height (the theme adds the card's padding + offsets — the whole bar's height
+  stacked the gaps twice, a 122px bar became 181px) and the card keeps its own padding; a video shell's `aspect-[.95]` +
+  `max-w-[880px]` ride the media_video as `--vid-aspect` on the ratio box (`[data-ratio]` selector, outranking the box's own)
+  + a `!important` cap (a 700×733 shell had shrunk to 578×325 in the shortcode's 600px 16:9 box).
+- **Decor layers** (recognizer `decor_layer` (71) → the `paint` builder · `layout_cols` stash + `rootDecor`): the capture's
+  coverage report flagged a section's `background-image` lost — an absolute, blurred radial GLOW blob (`left-[20%] top-0 h-72
+  w-72 blur-3xl`) and the hero grid's 1px `light-river` gradient hairline (an absolute grid CELL, dropped as empty). Both are
+  native empty Divs now: the paint + blur + radius, the measured size (a `w-N` utility / a round blob's height when the stamp has
+  no width), the declared sides (`bottom-0` → `bottom:0`, a horizontal stretch → `left:0;right:0`), `pointer-events:none`; an
+  absolute cell takes no grid track and rides beside the row; the section holding one becomes `position:relative`.
+- Housekeeping: a `\b` in three patch-written regexes had become a raw backspace byte (the body-face read from the body
+  stamp, the pseudo-layer gate) — fixed; the container-width cluster loop nulled a cluster through a reference — fixed.
+- Fixtures: golden `[Z]` (14 checks; suite 884/0) · `[W]` accepts the token ink as hex (the editor cell now decomposes as a
+  panel) · JS suite 70/0. Verified live: the body gradients + grid pattern, the card 40px in / 20px down, the pill at 0.03
+  alpha with 3.3px tracking and its dot pulsing, captions above the stats, three native bars at 96 / 82 / 91, the hero grid
+  at its .46 / .54 tracks with the shell's scroll-driven grow.
+
+- **Follow-up (JS twin parity + the reports told the truth, 2026-09-17).** The service's own conversion report for
+  the biome page showed what the PHP fix loop had not: the JS twin kept the hero VERBATIM (its video half was an
+  `html` cell) and the second band's cells sat unmapped. Closed in the twin: `videoBlockOf` carries `shapeCss`
+  (radius / mask / filter / clip / a shaped aspect as the `--vid-aspect` rule + cap / the running animation) and
+  `videoNode` wears it as Custom CSS; `rowCols` decomposes a CONTENT cell (a heading, ≥ 20-char prose, or a skinned
+  panel) and a LONE-VIDEO cell into blocks (PHP `cell_is_decomposable` / `cell_is_lone_video`); the counter caption may
+  be a short leaf `div` / `span`; `stackNode` folds an overline → heading → subtitle run into ONE heading. PHP gained
+  `decor_layer` (recognizer 71): an absolute, empty, painted child of a band (a glow blob, a hairline) becomes a
+  `paint` block with `decorLayer` + `position:relative` on the band, stashed through `layout_cols` → `layout_row_build`
+  → `section_root_row` `rootDecor` — the coverage report had flagged that `background-image` as lost.
+  Report tooling: `to-style-report` counts a property the BUILT output carries natively (`BUILT_KEYS`: a fill, a
+  radius, a shadow, a padding on an option) as covered, with a `how` column (`css` / `option` / `preset`); a
+  native flexbox / decor `div` no longer reads "unmapped" in `why`; `coverage-verification.csv` is rewritten on every
+  run (header-only when nothing is missing — a stale file used to survive a clean run). After the patch the service
+  reports 9 elements, 0 fallbacks, style coverage 100 % for the page. JS suite 70/0; golden 885/0.
+
+### The canvas page: a site-background video anchor, grid-row bands, a label-only blended masthead, paint frames, price rows (2026-09-17)
+
+A section-less page whose `<main>` is a 12-track grid canvas (the hero copy on tracks 1–7 beside a sculpted product card on
+8–11, a square card on 2–6 beside a small tile on 9–11), a fixed right-anchored 60vw video the whole page scrolls over, a
+fixed link-less masthead of three labels blended with `mix-blend-mode:difference`.
+
+- **A page-backdrop video that is NOT full-bleed is still the site background's fixed video** (`page_backdrop_layer_of` /
+  `page_backdrop_css` · JS `pageFixedVideo` backdrop branch): a `position:fixed`, viewport-tall, UNFRAMED (no radius — a
+  framed one is a floating portal) layer behind the content (z-index ≤ 1 / pointer-events none), anchored to one side at a
+  partial width, outside any section. It was the first section's Background-Pro video before (scrolling away with the
+  hero, full width, no mask). Now it rides General → Layout → Site Background (fixed), and its own geometry (`width:60vw;
+  left:auto;right:0`), its mask, the video's filter and a decor glow sibling (`::after`, blend mode) ride Misc Custom CSS on
+  `.site-bg-video` with `!important` (the theme prints the layer `inset:0` inline). A measured px width becomes its
+  viewport share (60vw). The section-bg path skips such a layer.
+- **Grid-canvas bands keep their columns** (`stamp_band_placement` / `group_canvas_rows` / `band_placement_of` /
+  `apply_section_placement`): a segmented `<main>` that is a GRID stamps each band's placement (`data-sc-band-place`:
+  frac / x / content width); bands whose track-y spans overlap (each read from ABOVE its own top margin) become ONE
+  synthetic flex-row band (the grid gap, `align-items:flex-start`, a phone stamp of one track and a tablet stamp of N), each
+  cell keeping its own top margin (`mt-40` sits lower than the copy beside it) and a `margin-left` for a col-start offset
+  beyond its neighbour (a percent of the canvas width; `cell_geometry` → `ml`, carried from the tablet tier up). A band
+  alone on its row keeps a percent width + offset on the section's top-level items. `col_span` reads the WIDEST breakpoint
+  variant (`col-span-12 md:col-span-7` = 7). The container's vertical padding, handed to its first / last band, is zeroed on
+  the container (`band_padding_handed_over`) so `main_style` does not pad `#main` a second time.
+- **A boxed tile with any text is a content band** (`is_content_band`): a sculpted card holding two short labels and no
+  heading was dropped from the canvas (< 120 chars, no heading, no media).
+- **A card skin read one wrapper down is painted once** (`layout_cols`): the grid item's column no longer wears the skin
+  its single panel / mirrored block already carries (double fills + doubled inset shadows).
+- **A link-less `<header>` inside `<main>` is the hero copy** (`header_root` · JS `_linklessHeroHeader`): a heading with no
+  link / nav at all is never the masthead (its h1 became the site title, its CTA the header button); the fixed `<nav>` beside
+  it is. A `<button>`'s own UA `text-align:center` never centres a band (`section_center`).
+- **A label-only masthead** (`header_label_zones` / `title_matched_brand_leaf`): a fixed bar of plain labels and no link →
+  no `menu_area` (the theme would print the WP primary menu where the source had none); the label that starts with the
+  `<title>`'s brand segment is the wordmark (wherever it sits — the leftmost slot is a status label), the others ride as
+  chips (`list_item` + `header_chip_css`) in the zone their DOM position gives them; a `mix-blend-mode` on the bar rides
+  `.site-header` (the labels' legibility over light and dark). JS: a label-only fixed `<nav>` is accepted as the masthead.
+- **Empty painted blocks in flow** (recognizer `paint_block` (72) → builder `paint` · JS `paintBlockOf` / `paintNode`): a
+  card's gradient frame (`w-full h-full my-6`, no text / media, a fill / gradient / border, ≥ 40px) is a native empty Div
+  wearing the paint, its radius / border / shadow, a child's backdrop blur, and its height — or `flex:1 1 auto` + the
+  measured minimum when it grew (`h-full` / `flex-1`).
+- **A label + button row** (recognizer `label_cta_row` (78) · JS `labelCtaRowOf`): a flex row of ≤ 2 short text leaves and
+  a button ("$2,450 | Acquire") is one `row` of content-sized cells on the row's raw justify; walked flat it stacked the
+  price over the button — and the price was DROPPED: `salvage_dropped` now keeps a priced / unit-bearing value (`$`, `%`,
+  `°`, `+`, a 1–3 letter unit), never a bare number / index.
+- **An empty painted CONTAINER in the mirror** (`mirror_paint_box` / `mirror_paint_decls`): a 64px ring holding a blurred
+  32px dot (a tile's emblem) rendered as raw utility-class markup (nothing); now one self-scoped `<span class="sc-paint">`
+  with the ring's fill / radius / inset shadow / size + flex centring, each empty child a nested painted span.
+- Fixtures: golden `[Y]` (16 checks; suite 871/0) · fixture 2 updated (a "100%" stat value is now kept: 20/0) · JS suite
+  70/0. Verified live: the video pinned right at 60vw under the whole page with its mask and glow, the hero copy at 7/12 with
+  the card beside it at 4/12 (h1 at 208px like the source), the square card + tile on the second row at their tracks, the
+  masthead reading label · wordmark · label blended over the ground, the card's gradient frame, "$2,450" beside "Acquire",
+  the ring emblem with its blurred dot.
+
+### The telemetry page: the header lockup is the identity, row-spanning bento tiles, panel header rows, mono stats, scrubbed mirror leaves (2026-09-16)
+
+A heritage-survey page (a compass glyph beside an eyebrow-over-title lockup, an oklch-filled pill CTA, a filtered bg video,
+a 4-track bento whose scan panel spans two rows beside two small cards over a wide one, a footer whose © line is a `<div>`)
+exposed rules across the importer, the bento, the counter and the mirror.
+
+- **The header lockup IS the site identity** (bundle importer + `apply_converted_site_title`): the parent theme keeps
+  `blogname` ⇄ the header's `site_title` and `blogdescription` ⇄ its `tagline_text` identical (identity-sync pulls a
+  diverging core value INTO the header field). The importer used to set blogname from the design name and blogdescription
+  from the `<title>` suffix AFTER the theme-settings import — which pulled the design name over the converted wordmark and
+  the `<title>` tail over its eyebrow (the design name over an eyebrow-titled wordmark). Now the measured custom
+  wordmark owns both core options (title stripped of accent markup; the `<title>` suffix only when the header carried no
+  tagline), and the theme-name pass runs only when the importer set nothing.
+- **Row-spanning bento tiles** (`bento_split` / `bentoRowsOf`): a `row-span-2` panel overlaps cells that start on
+  DIFFERENT rows, so the vertical-overlap grouping folded the whole grid into one row of slivers. When the capture stamps
+  `track-x` (+ `track-h`) on every cell, a cell that other cells start INSIDE splits the grid by X: the spanner's column |
+  the rest as its own stack of rows (widths re-measured inside that column, 6/6 or a uniform grow). Capture stamps
+  `track-x` / `track-h` beside `track-frac` / `track-y`.
+- **The counter panel's header row**: rows before the panel's heading (a lone glyph | a boxed chip, `justify-between`)
+  are walked as blocks; a flex row becomes a `row` block carrying the RAW `justify-content` (the row builder maps it —
+  native Justify + content-sized cells); a text item of that row is `contentSized`.
+- **A boxed short label stays content-sized**: a chip that sat as a flex item / inline-block / `fit-content` wears its
+  Box Preset at `display:inline-block;width:max-content` on the block — a block-level text block stretched the fill
+  across the cell.
+- **A nested block's own face** (`set_body_face` / `nested_face_decl` / `ownFaceOf`): the page's body face (the body
+  stamp, else `detect_computed_fonts`) is handed to the mapper; a nested / boxed text block whose first family differs
+  (a mono chip or caption inside a sans card) carries `font-family` on the block, since no section styler reaches it.
+- **Lone glyphs** (recognizer `lone_icon` (70) + `n_lone_icon` / `loneIconBlockOf`): an `<iconify-icon>` (with its
+  inlined svg), a bare `<svg>` or an icon-font `<i>` standing alone as a block — never inside a link / button / heading /
+  label lockup — is the native icon shortcode (inline svg or font class, measured size, ink, centring).
+- **Counters keep the digits' treatment** (`counter_number_treatment` / `counter_label_node`): Stitch carries the number
+  leaf's and the caption's whole stamps (`numberCs` / `labelCs`); the number / prefix / suffix fonts take the measured
+  weight (400, not the 700 default) and the digits' own family; the caption is a text block through the same treatment
+  as any leaf (a tracked uppercase 9px → the Eyebrow Text Style, the mono face on the block) — never an inline style.
+- **Scrubbed markup reaching the mirror**: a cell the scrub already folded into inline `style` (classes + stamps gone)
+  lifts each element's `style` into `data-sc-cs` before mirroring, and a leaf face is compared against the BODY face when
+  the parent carries none — a card's mono 3xl value mirrored as a bare default paragraph before.
+- **A filtered bg video paints nothing of its own** (`videoBg`): on the effect path (a `media_video` in section-background
+  mode) a source `<video>` stamped transparent adds `background:transparent` to the `.video-el` rule, so the media_video's
+  default black under-paint never turns a hero black while the clip loads.
+- **oklch / oklab / hsl colours match button presets** (`rgba_quad` / `rgbaQuad`): a CTA filled `oklch(0.94 0.04 70 / 0.6)`
+  resolves to `btn-fill` (it fell to no style before).
+- Fixtures: golden `[X]` (13 checks; suite 855/0) · JS suite 70/0. Verified live: the lockup reads the eyebrow over the
+  wordmark, the CTA filled, the hero video plays (a branded Chrome — headless Chromium cannot decode H.264, which
+  read as a black / transparent hero during measurement), the scan panel at 6 columns beside the small-card rows, the chip
+  content-sized in mono, the stats in mono 400 with tracked mono captions, the © bar with its status tail.
+
+### The haven page: page-shell rules, chip rows, code listings, watermarks, glyph stats, label-titled footer columns (2026-09-16)
+
+An editorial-dark page (a scroll-driven background shift declared on `<main>`, numbered chip rows, a mock editor of
+`<code>` lines, a faint absolute watermark heading, a serif quote with an accent span, a 4-stat band with a glyph value,
+a footer whose link columns are titled by label divs) exposed rules that had only seen section-level content.
+
+- **The page shell's own rules** (`page_shell_css` / `pageShellCss`): the source `<body>` / `<main>` can wear stylesheet
+  rules of their OWN (not resolvable utilities): a scroll-driven background shift (`view-timeline-name` +
+  `animation-timeline` + its `@keyframes`), a page-wide blend or filter. They belong to no section, so they ride
+  **Misc Custom CSS** re-targeted at the theme's `body` / `main.site-main` — the rule + its keyframes verbatim, the
+  wrapper's own layout (display / position / size / spacing / overflow) dropped, the body's type (Typography owns it)
+  dropped. A class is never dropped: `main.site-main{view-timeline-name:--section-scroll;animation:bg-shift linear
+  both;animation-timeline:--section-scroll} @keyframes bg-shift{…}` plays live (the main's background darkens as the page
+  scrolls, exactly as on the source; a browser without scroll-driven animations resolves it as the source did).
+- **Body face = the measured paragraph face**, never the Google URL's second font: `detect_computed_fonts` keeps a body
+  face that equals the heading face (one family for both is a design, not a mislabel — blanking it handed the body to the
+  site's mono), and the Typography pass reads the measured families before the URL order.
+- **Chip rows** (`mirror_label_row`): a numbered chip ("01" in a 48px ring) | a `flex-1` hairline | a tracked label is
+  ONE label row: the chip keeps its ring box + measure (`mirror_box_css` on the label), the hairline is a GROWING separator
+  (the following label flexes, its `::before` takes the slack), a zero-padded 1–2 digit value is a marker, never a counter.
+  `mirror_dot_of` accepts a 1px-tall, growing separator.
+- **Code listings** (recognizer `code_listing` (87) + the mirror's `mirror_code_listing`): a container of ≥ 2 `<code>` /
+  `<pre>` children → ONE code block holding a `<pre class="sc-code">` — lines joined by `<br>` (a newline is doubled by
+  the editor's autop), `white-space:pre` keeps the indents, `&nbsp;` → spaces, each token span keeps its measured ink,
+  the container's mono family / size / leading / inset scoped, left-aligned; non-code children (a footer row of chips)
+  follow. **A code_block prints its code BARE** (no wrapper carries the unique class) — `code_self_scoped` puts `u<uid8>`
+  on the element and writes `selector{…}` so the rule lands (the terminal-window dots' skins never applied before).
+- **Watermark headings** (`watermark_of` / `n_watermark_heading`): an out-of-flow heading at opacity ≤ .25 (a 10vw
+  "ARCHIPELAGO" at 5%) never joins a heading group — its own special_heading on the native Position option (the declared
+  `top-40` = 10rem), its opacity, no pointer, behind, one line, `aria-hidden`.
+- **Any inline run whose ink differs from its parent's** (`scrub`): an accent "mirror" inside a heading, a keyword in a
+  line — measured, not only the token vocabulary; alpha kept (`color_keep_alpha`).
+- **Stat bands with a glyph value** (`stat_word_cell`): "∞" over "Creativity" counts as a stat cell (a big short leaf
+  without digits over a caption) → the 4-column counter row survives, the glyph as a heading over its caption.
+- **Footer columns titled by label divs** (`footer_label_heads`): a short uppercase / tracked leaf `<div>` that OPENS a
+  column of ≥ 2 links is a column title (the source never used a heading tag); `footer_heading_css` reads THOSE titles
+  (10px tracked lantern), not the lead h2. A newsletter "column" titled by the footer's LEAD heading is the lead column
+  itself (the form joins it, title / description blank). The © bar's status lockup (a dot + one label) is its right
+  column. The footer newsletter element now writes the theme's keys (`newsletter_title` / `newsletter_desc` /
+  `newsletter_email_ph` / `newsletter_button`) — the old keys were ignored, so every converted footer form said "Subscribe".
+- Fixtures: golden `[W]` (11 checks) · JS suite (34/0). Verified live: the shell rule plays (main background L .17 → .06
+  down the page), the chip rows, the listing in mono and left-aligned, the watermark at 5% behind the title, "mirror" in
+  lantern, four stats in a row, footer 3 columns with the form under the lead and "Connect" on the button.
+
+### The console page: items-center bento, square cards, glued units, terminal bars, lean steps, spec rows, social columns (2026-09-16)
+
+A sharp-cornered console design (a 12-track `items-center` grid, radius-0 bordered cards, a terminal window, key / value
+rows, a titled icon column in the footer) converted 1,350px too tall with its cards stacked, its stats and terminal
+bar read as counters, its node cards flattened to a steps flow, and its Telemetry column dropped. Each was a rule that
+had only ever seen rounded, top-aligned, class-named sources.
+
+- **Bento rows by vertical OVERLAP** (`bento_split` / `bentoRowsOf`): an `items-center` grid offsets a shorter cell's top
+  (a 348px copy column beside a 487px card grid sits 69px down) — grouping by top made two rows (cards first). Cells
+  whose vertical spans overlap by ≥ half the shorter one are one row.
+- **A square card is a card** (`read_card_skin` / `cardSkinOf` / `boxSkinOf`): radius 0 with a padded fill, a FULL
+  border (top + bottom — a one-sided hairline stays an edge skin) or a shadow qualifies. `is_panel` yields to
+  `is_toolbar_row` (a filled, padded title bar of dots + labels is a toolbar, not a panel).
+- **A cell that IS a card grid** (`claim_element`): a grid of icon / title / copy cards nested in a layout cell is
+  claimed as the card grid (it was decomposed to heading + text per card, icons and skins lost). `cell_card_skin`
+  descends into a child only when that child holds ≥ 80% of the text (a wrapper) — never one card of a grid of siblings.
+- **Counters** (`counter_cell_parse`): `<`, `>`, `≈`, `≤`, `≥` read as a prefix ("< 1.2ms"); a unit written onto the digits
+  inside the number's own leaf is the suffix ("1.2ms", "24h"); a number glued into a word (`kernel_v4.sh`) or mixed with
+  words in a SMALL leaf ("TTY // 1") is never a stat. A stat cell's one-sided accent rule + inset (`border-l-2 pl-4`)
+  rides the cell (`cell_geometry` edge rule; a card skin owns its own border, so the rule never fires beside one).
+- **The steps gate** (`step_card_is_lean`): a card carrying text leaves beyond marker / title / copy (a "01 / NODE"
+  label, a "Status: …" footer line) is not a steps flow — the steps shortcode would drop them. The card grid keeps them:
+  the label as the Overline, a leaf `<div>` line as its own paragraph in the copy with its treatment vs the card's.
+- **Toolbar rows** (`is_toolbar_row`): a mixed cluster (empty painted dots + ONE leaf label — the three window dots
+  beside a filename) counts as a label. The mapper takes a toolbar block BEFORE the rule-bar probe, and `n_rule_bar`
+  never reads a dot (round, or no wider than twice its height) as an accent rule.
+- **Spec rows** (`mirror_label_row`): the row's OWN box (its hairline + inset via `mirror_box_css`), a label whose ink /
+  weight / family differs from the first (`selector p>.sc-label:nth-child(N){…}`), and the row's vertical margin on
+  Spacing (exact token ladder). A verbatim cell now keeps its `data-sc-*` stamps for the mirror (`n_code` strips them
+  from anything stored), so the rows read the measured hairline and ink rather than an unresolvable class.
+- **The footer SOCIAL column** (`detect_footer_columns` kind `social`): a heading over ≥ 2 icon-only links is its own
+  column (heading + social icons), the brand column carries none; `detect_footer_social` keeps the whole icon row in
+  DOM order — a glyph no network names (a terminal / cpu mark) becomes a profile with its inline svg.
+- **The page-wide FIXED pattern layer** (`detect_page_fixed_pattern` / `pageFixedPattern`): a body-level fixed inset-0
+  decorative wrapper painting a gradient grid / a data-URI tile → Theme Settings → General → Layout → Site Background
+  Pattern, backed by a registered Background Pattern preset carrying the tile's `background-size`. A blurred glow blob is a
+  fill, not a tile.
+- Also: a `w-full sm:w-auto` signup button (full width on phones only) keeps the newsletter INLINE; a span's own font
+  FAMILY survives the scrub (a mono gradient run inside a grotesk h1); `cell_has_display_heading` is measured too (a 36px+
+  h1 / h2 is a display heading whatever its classes); the instagram handle regex used `#` inside its own delimiter.
+- Fixtures: golden `[V]` (14 checks) · the JS suite (bento / card skin / newsletter / pattern parity). Verified live: page
+  height 4703 vs the source's 4628 (was 5980); the Enclave row at 1161 / 1052 vs 1137 / 1114, the terminal at 1960 vs
+  1912, the nodes at 2611 vs 2567, the matrix at 3310 vs 3248, the footer at 4425 vs 4316; the grid pattern prints fixed
+  behind the page; all three Telemetry icons render.
+
+### Measured type → the Text Style preset; an inline label row → one text block of spans (2026-09-16)
+
+A mirrored leaf label (the structural mirror's toolbar rows, key / value cells) shipped its whole treatment as an inline
+`style=""` on the `<p>` — 12px · uppercase · 1.2px tracking · 16px leading · an 0.8-alpha ink — repeated per label,
+uneditable from the Styling tab, and outranking any later preset edit. A separator dot was a code block with its skin
+inline and an unused `.sc-dot` class. Three elements in a flexbox for one line of text.
+
+- **The full-treatment Text Style match** (`text_style_for` / `textStyleFor`, both twins): a text's measured size +
+  transform + tracking + weight → the Text Style whose declared properties ALL agree (size ±1.5px, transform equal,
+  tracking within 0.2px with an em preset scaled by its size, weight equal when both set). A tracked uppercase 12px label
+  matches the **Eyebrow** (a class-less style is picked by its name slug, `font-eyebrow` — the class the Text Style
+  dropdown offers), never the 11px Caption the size-only match (`text_preset_for`) would pick; that size-only match stays
+  the fallback for body roles. `n_text` / `textBlock` try the full treatment first. What the matched style OWNS (its size,
+  and the weight / tracking / transform / leading it declares) is not repeated on the block.
+- **The mirror leaf on native options**: `mirror_text_decls` (the facts `mirror_text_style` read, as prop ⇒ value) feeds
+  `n_text` → native Text Style / Text Color / alignment; the leftovers (a margin, `white-space`, a family, an unowned
+  leading) ride the block's own Custom CSS `selector p{…}`. No inline style on the paragraph.
+- **The inline label row** (`mirror_label_row`): a horizontal flex row of nothing but short leaf labels (≤ 4 words) and
+  painted dots → ONE text block `<p><span class="sc-label">A</span><span class="sc-label">B</span></p>` (a text block
+  may hold spans — but the editor (TinyMCE) unwraps an attribute-less span and deletes an empty one, so every label wears a
+  class and the separator dot is NOT an element: it is a `::before` on each label after the first, `selector
+  p>.sc-label+.sc-label::before{…}`, with the gap as its margin; the row must be label (dot label)* or labels only): the first label's type on the native Text Style + Text Color, the row's margin on Spacing, and on the block's
+  Custom CSS the flex line (`gap`, `justify-content` from the row's own justify or its inherited text-align), no wrapping
+  mid-label, the unowned leading, the dot's skin (per instance, since each dot has its own size / tint; not Misc Custom
+  CSS, which is site-wide). A row holding a link / button / image / icon is not this shape.
+- **The painted dot** (`mirror_dot_css`) as a lone leaf: a bare `<span class="sc-dot">` in the code block, its skin on the
+  block's Custom CSS.
+- JS `lsPx` keeps the `px` unit on a captured letter-spacing (a bare number reads as EM by the Text Style consumer — the
+  Eyebrow's 1.2 rendered as 1.2em); PHP `$ls_px` already did.
+- Fixtures: golden `[U]` (the label row: 3 checks) + `[R]` pre-wrap on the block CSS · JS `sectionless-page-parity.test.mjs`
+  (+3). Verified live: the wrapper wears `font-eyebrow` + the native colour, computed 12px / uppercase / 1.2px / 16px,
+  the line centred (514–926 around 720), the dot 4×4.
+
+### CSS-class entrance reveals → Scroll Motion; the sequence (stagger) rides the delay (2026-09-16)
+
+A source animates its entrances with a CLASS PAIR — a hidden rule (`.reveal-up{opacity:0;transform:translateY(30px);
+transition:opacity 1.2s cubic-bezier(…), transform 1.2s …}`) and a shown rule (`.reveal-up.active` / `.active .reveal-up`
+/ `.is-visible`), plus per-element `transition-delay` helpers (`.delay-100/200/300`) that SEQUENCE a title → paragraph →
+form, or the three cards of a grid. Nothing in that is a framework hook (`anim_intent` reads AOS / animate.css / WOW /
+`data-animate`), so the motion was dropped and every element landed at rest.
+
+- **Capture** (`capture.mjs`, the `data-sc-reveal` stamp): every stylesheet rule that sets `opacity:0` + a `transition`
+  is paired with its shown rule (`.cls.state`, `.state .cls`) and stamped on each matching element as measured facts,
+  never names — `dir` (from the rest transform's sign: up / down / left / right / none), `distance` (px), `scale` (a
+  scaled-in entrance), `duration` + `delay` (the COMPUTED transition, so a `.delay-200` helper reads as `delay:0.2`) and
+  the `ease` (the timing function verbatim). Iconify shadow SVGs are inlined into the light DOM first (`data-sc-iconify`).
+- **Stitch / capture-extract** (`reveal_of` / `revealOf`): the stamp → a block's `reveal` (on the recogniser's output),
+  a heading GROUP keeps the FIRST part's (the title's stamp rides the `special_heading`), a grid CELL's own stamp → the
+  cell's `reveal` (`cell_geometry` / rowCols) — a staggered card animates as a whole, so the reveal belongs on the COLUMN,
+  not the icon_box inside it.
+- **Mapper / to-pages** (`apply_reveal` / `applyReveal`): → the node's Scroll Motion **`gsap_motion` REVEAL**:
+  `direction` = dir, `distance` = the exact px, `delay` = the measured delay (the whole sequence survives: 0 / 0.1 / 0.2),
+  `style` by the rest scale (no scale → Subtle, ≥ .95 → Standard, smaller → Dramatic; the duration snaps to the preset's
+  — the Style owns it), the CSS timing function → the nearest GSAP ease (`gsap_ease_of`: the expo-like
+  `cubic-bezier(0.16,1,0.3,1)` → `expo.out`, `ease-out` → `power2.out`, …) under Advanced → Custom, `once` + run-on-mobile
+  on. A reveal already on the node is never overridden. `column_to_flexbox_cell` carries `gsap_motion` through the
+  flexbox-cell rebuild (the columns lost it). The build records `require_extension('animation-engine')`, so the importer
+  activates the engine when the source needs it — the key exists on the defaults only while it's active, hence the
+  mapper writes it regardless.
+- **The pill wrapper's OWN :hover** (`field_hover` / `fieldHover`): a glass newsletter row that brightens under the
+  pointer (`hover-self{background / border-color / box-shadow}` on the wrapper stamp — the JS twin reads the stylesheet
+  rules itself, `hoverDeclsOf`, since extraction runs before the stamp) → `selector .fw-nl__fields:hover{…}` (Capsule) /
+  `.fw-nl__input:hover` + a 0.3s transition. Only the paint properties; colours as captured.
+- Not carried (no measurable rule): a scroll-linked hero parallax driven by JS, a nav caret glyph, an arrow glyph inside
+  a button label.
+- Fixtures: golden `[U]` (+4 checks) · JS `sectionless-page-parity.test.mjs` (+4). Verified live: the six reveals stamp
+  `data-upw-g="reveal" … data-upw-g-delay … data-upw-g-ease="expo.out"`, the heading is at opacity 1 by ~400ms, the
+  three cards enter 0 / 0.1 / 0.2 apart as they scroll in, and the pill's hover paints `oklch(1 0 0 / 0.7)`.
+
+### The section-less video page: nav-masthead, site-background video, capsule signup, card-grid roots (2026-09-16)
+
+Site Converter 1.9.25 · Capture Service 1.11.5 · Shortcodes 1.15.12. An AI page with a `<nav>` masthead, a body-level
+fixed video, a `<main>` with no `<section>` and a brand-only footer converted with the first menu item as the site
+title, no header CTA, a black hero, an equal-split single-column card list, a fabricated © line and a signup form whose
+input and button sat apart. Every gap is a general rule, both twins:
+
+- **Masthead = the `<nav>`.** Every `href="#"` menu link is "in nav", so the first one became the brand. When the
+  only home-anchor candidates sit in a link cluster (a parent with ≥ 2 anchors), the link-less brand block that PRECEDES
+  the cluster (icon + wordmark span) is the brand (`detect_logo` / JS logoDetail). A `<button>` directly in a
+  nav-masthead counts as a CTA when it is a skinned button (`header_actions` — nested `<nav>`s still exclude it).
+- **Iconify glyphs.** `<iconify-icon>` renders in shadow DOM, so rendered.html carried empty hosts and every card /
+  step icon vanished (only the logo had a shadow read). The capture now copies each rendered `<svg>` into the light DOM
+  (`data-sc-iconify`) BEFORE extraction and stamping; both engines read it as an inline svg. A glyph's ink comes from the
+  nearest STAMPED ancestor (an `<svg>` is never stamped) — but only when the svg carries no `text-*` class of its own
+  (the class path resolves that token). The chip detection steps over the host to the real tile.
+- **Page-wide fixed video → Site Background video (FIXED).** The theme already renders
+  `general_layout.site_background.video{position:fixed}` once behind every transparent section
+  (`unysonplus_render_site_bg_video`); `el_is_page_fixed_layer` now also recognises a stylesheet `inset:0` (all four
+  stamped offsets 0, no utility class), and the same layer is no longer ALSO attached to the first section (it painted
+  twice and forced a 100vh hero). JS: `home.pageFixedVideo` → to-theme-settings.
+- **Section-less `<main>`: band padding + heights.** `segment_bands` hands the container's own vertical padding to
+  the first / last band (`band_inherit_padding` → the band's data-sc-cs; JS `_scPadTopAdd`) and marks them
+  `data-sc-band-of`; a segmented band under a page backdrop is content-tall (`min_height: auto`), never 100vh. The
+  JS twin now segments too (it used to emit ZERO sections for this shape).
+- **The root IS the row.** A band whose root is the card grid itself is built as the card_grid recognizer would
+  (`section_root_row` → cells → icon_boxes wearing Box Presets + Icon Badge presets), not as generic layout columns
+  that fell to the panel path. Its own margin rides ONCE — Pass #5 folds a section's margin into its native padding, so
+  the class-compiled margin is dropped from the section rule and the root row's mt/mb are zero (a `mt-40` grid
+  rendered 160px three times). `section_content_max_width` also reads the ROOT's own cap (a `max-w-4xl mx-auto`
+  hero wrapper → Container Width Medium, so the 88px title wraps where the source wraps).
+- **track-frac = width / the parent's CONTENT box.** A padded grid (`px-6`) made a full-width phone cell 0.877 of the
+  border box → an 11/12 phone column. Both capture passes now subtract the parent's padding.
+- **Capsule signup.** The newsletter shortcode gained the `capsule` design (Shortcodes 1.15.12). The converter picks it
+  when the skinned field wrapper HOLDS the button (`is_ancestor($wrap, $btn)`): the wrapper's skin rides
+  `.fw-nl__fields`, the input keeps only its type + inset, the wrapper's max-width + margin-top ride the element, a
+  Tailwind `placeholder-white/90` becomes the rgba placeholder tint. Newsletter + toolbar blocks now carry their own
+  mt/mb (`apply_block_margins`) — the hero's `mt-10` form and `mt-8` label row had lost their gaps.
+- **Toolbar rows.** A leaf dot (`w-1 h-1 rounded-full`, no children) counts as a separator; `is_layout_row` yields to
+  `is_toolbar_row` (a 24-char label counted as a "substantial cell" and split the row into 4/4 columns); a toolbar
+  label must be a LEAF (a cell of tag spans is a chip row).
+- **Brand-only footer.** A footer with a wordmark / logo + ONE disclaimer paragraph and no links shipped with no bar and a
+  fabricated ©. Now: the brand column (+ the paragraph in its own column when the band lays them side by side), the ©
+  bar OFF when the source has no © line (`chrome_mapping_faithful` accepts that), and the footer's OWN lockup measured
+  over the reused header logo (`footer_brand_css`: an unframed 20px mark + 14px wordmark).
+- Fixtures: golden `[U]` (18 checks) · JS `sectionless-page-parity.test.mjs`. Verified on the live reconvert: hero
+  rhythm identical (h1 at 240, form at 521, labels at 621, cards at 790), page height 1327 vs 1337.
+
+### The boxed footer: a panel around the rows, the eyebrow, the label bar (2026-09-16)
+
+Site Converter 1.9.24, theme 2.5.97. A footer whose rows sit in ONE inset panel (a
+  hairline-bordered, tinted, padded shell with a width cap and a decor strip) used to flatten to plain bars: the
+  panel, the eyebrow over the lead heading, the paragraph under it (the 14-word subtitle cap), the bottom-aligned
+  grid, the bottom label bar (dropped, then a fabricated "© year Site" line) and the multi-layer footer gradient
+  all went missing. Now, all measured, both twins: (1) `detect_footer_shell` — a single-child chain from
+  `<footer>` reaching an element with ≥ 2 content rows that paints a skin (border / fill / gradient / shadow)
+  AND carries padding → the theme's NEW **Footer → Layout → Boxed Body** (`footer_body_box`: max width from the
+  WIDE pass = 1920 − 2 × xl-margin, gutter from the base margin, padding y/x, one linear gradient natively or a
+  multi-layer stack verbatim, a uniform four-edge border WITH its alpha (`color_keep_alpha` — a hairline
+  rgba(255,255,255,.08) no longer flattens to solid white; the same fix covers every band border / fill / ©
+  typography colour), the first shadow layer, radius, "copyright inside" when the © / label bar is one of the
+  shell's rows). Every bar inside goes Full Width; the theme's 1rem bar padding is replaced by the rows' own measured
+  box (main 0, bottom bar margin-top 34 + padding-top 22) in `misc_custom_css`; an empty absolutely-positioned
+  decor child (a gradient "roofline") rides as `.footer--boxed .footer__body::before`. (2) The main row's
+  `align-items:end` → the NEW per-bar **Column Alignment** (`main_footer_valign`). (3) A **measured split**
+  from the row's grid tracks (747.5 / 552.5 → 57 / 43) when the track count matches, before the equal / wide-brand
+  heuristic. (4) A **label bar** — the footer's LAST row, a flex/grid of ≥ 2 short (≤ 8 words) small (≤ 14px) text
+  cells and nothing else — is the copyright band (`band_is_label_bar`): its cells become the Copyright bar's
+  columns as-is (a flex space-between row → Auto Width + Between), its hairline / 12px translucent tracked type →
+  `copyright_custom_styling`, case / tracking / line-height as a scoped rule; NO fabricated © line. A computed top
+  hairline on a later row is now a band-split signal like the `border-t` class. (5) The lead lockup carries the
+  EYEBROW (`footer_lead_eyebrow_el`: the previous sibling, ≤ 40 chars, ≤ 13px or uppercase → `<span class="footer-lead-eyebrow">`
+  + its type), the subtitle cap is 40 words, the title's font-family is joined with ';' (it was glued to the next
+  declaration, voiding the rule), and the lockup's ZERO margins are asserted so no theme h3 margin opens under the
+  display heading. (6) A gradient footer background: one linear layer → the native `footer_background.gradient`,
+  a stack → verbatim on `.footer` (the theme now paints a gradient-only `footer_background` — `footer--has-bg-image`
+  used to require an image). Theme fix on the way: auto-width footer columns inherited the grid's 24px
+  `--fw-gutter-y` top margin (the bottom bar measured 65px, not 41). Fixtures: golden [S] (boxed footer) + [T]
+  (card states / eyebrow / inner inset / measure); JS `footer-box-parity.test.mjs` + `card-states-parity.test.mjs`.
 
 ### Reconverting a second source on a reused install: stacked zones, menu assignment (2026-09-12)
 
@@ -1257,7 +2213,7 @@ timeline → Scroll Motion / Scrollytelling atts, and wire the tool into the cap
 - **Segmented masthead (2-3 bordered "cards" instead of one bar)** — the zone boxes carry the design, and
   the theme has per-ROW Custom Styling but **no per-COLUMN styling**, so there is no native target. Carried
   as scoped CSS on `.header-col--*` from a `data-sc-zone` capture stamp. **MEASURED: 1 of 138 corpus sites
-  (0.7%)** — wegic 0/81, openhero 1/57. So it stays a scoped-CSS fallback and does **NOT** graduate to a
+  (0.7%)** — corpus A 0/81, corpus B 1/57. So it stays a scoped-CSS fallback and does **NOT** graduate to a
   per-column option; a theme capability for one site in 138 is not worth the option surface. (This entry is
   kept as the worked example of the rule in `AGENTS.md` -> "fix the CLASS, then PROVE it generalises": the
   fix was proposed as the top candidate to graduate on the strength of ONE site, and the corpus count
@@ -1302,9 +2258,9 @@ converter-fix opportunity (not a hand-tune), and each should land with a `tailwi
 - **Image `max-width` / intrinsic sizing** (`max-w-lg`, `w-[420px]` on an `<img>`) as a general rule, not
   only in the WooCommerce card context.
 
-### Fidelity fixes landed 2026-08-02 (FreshPaws / Wegic pass — JS capture path)
+### Fidelity fixes landed 2026-08-02 (FreshPaws / a second AI-page generator pass — JS capture path)
 
-A real conversion (a Wegic pet-boarding SPA) drove these converter-algorithm fixes. Each was diagnosed
+A real conversion (a a second AI-page generator pet-boarding SPA) drove these converter-algorithm fixes. Each was diagnosed
 by **measuring source vs. output** (never eyeballing) and fixed in the deterministic pass — listed here
 so the *why* is preserved and so the **PHP `Stitch`/`Mapper` path stays in sync** (see "Keep the no-AI
 algorithm in sync" below — these all still need PHP parity where the PHP path diverges).
@@ -1322,7 +2278,7 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   before extract so its rules are readable.
 - **Dark `oklch()`/`oklab()`/`hsl()` section backgrounds now apply — the "cream hero" fix (site-converter 1.8.17).**
   The mapper's `rgb_triplet()` (which decides a section's band fill → its native Background colour) parsed only
-  `rgb()`/`#hex`, returning null for the `oklch()` palettes AI builders (openhero, v0, …) emit. So a hero whose
+  `rgb()`/`#hex`, returning null for the `oklch()` palettes AI builders (AI page builders) emit. So a hero whose
   computed `background-color` is `oklch(0.12 …)` (a near-black band) was dropped, the band fell back to the theme's
   LIGHT default, and its white heading went invisible (the burger hero rendered cream-on-cream). `rgb_triplet()` now
   falls back to `Stitch::color_to_hex()` (made public) for oklch/oklab/hsl → hex → triplet, keeping the "solid fill
@@ -1646,7 +2602,7 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   SEC 0→3 (hero + product cards + copy render); payment-operations (2) and crystal (3, section-based) unchanged.
   This generalizes the full-viewport-hero segmentation below to any section-less `<main>` content wrapper.
 - **Section-less full-viewport `<main>` is SEGMENTED into bands (content-drop fix, site-converter 1.8.11).** An
-  openhero `<main class="min-h-[120vh]">` that holds the hero PLUS a feature grid / gallery / CTA as sibling
+  AI-page `<main class="min-h-[120vh]">` that holds the hero PLUS a feature grid / gallery / CTA as sibling
   `<div>`s (no `<section>` tags) was claimed as ONE band by `walk_section_roots`, dropping everything after the
   first screen (payment-operations lost its 3-card feature grid; anime-environment-engine collapsed to 1
   section). New `segment_bands()` detector: when such a container splits into ≥2 content bands, each is claimed
@@ -1655,7 +2611,7 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   no heading and <30 chars rides as background, not a band). Verified via builder JSON: payment-operations
   1→2 sections with all feature cards; anime 1→4; crystal (section-based) unchanged (the detector's trigger —
   section-less + full-viewport + ≥2 bands — never fires on a normal `<section>` page, so no regression).
-- **Consolidated openhero audit (66-site list, 35 captured/analysed 2026-09-06).** The dominant remaining
+- **Consolidated AI-page audit (66-site list, 35 captured/analysed 2026-09-06).** The dominant remaining
   decomposition gap is the **verbatim `code_block` fallback**: ~2-3 sections/site fall back, dominated by
   `detected=html`/`section-html` — whole sections (`py-NN relative overflow-hidden bg-*`) that match no
   section recognizer (52 cases / 22 sites) — and `image-composite` cards (an image + text-overlay card kept
@@ -1674,7 +2630,7 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   tabs widget TOGGLES content (clicking renders a different panel), a CTA/nav button row toggles nothing. The
   detection markers are stripped on rejection so nothing downstream sees tabs. Verified: red-planet/crystal
   heroes decompose to `special_heading` + real buttons (0 tab markers); a genuinely-toggling tab set (distinct
-  panels) still normalizes to sc-tabs. This was the biggest single hero-fidelity bug in the openhero corpus —
+  panels) still normalizes to sc-tabs. This was the biggest single hero-fidelity bug in the AI-page corpus —
   most "tabs" detections there were CTA/nav button rows, not real tabs.
 - **2-col media hero decomposes instead of falling back verbatim.** A hero's content column (heading + CTA
   buttons + a rating/social-proof row) collapsed to one `text` block (dropping the buttons) and its image+
@@ -1689,7 +2645,7 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   `absolute inset-0 bg-primary` (section's own bg transparent) lost its background; `sectionComputed` now
   reads a full-bleed absolute layer's colour as the section `bg_color`.
 - **Dark site canvas → Site Background (capture-service 1.10.54 + site-converter 1.8.10).** A dark AI page
-  (openhero: apple-vision-pro / orbital-horizon / the-art-of-the-burger / red-planet) converted with a WHITE
+  (AI-page: apple-vision-pro / orbital-horizon / the-art-of-the-burger / red-planet) converted with a WHITE
   body below the hero — its light body text then invisible in every uncovered gap. Root causes, all fixed:
   (1) the capture stamped computed styles on `body *` but **never on `<body>`/`<html>`**, so the page canvas
   (a `class="dark"` theme, an `oklch()` body rule, a CSS var, or a dark full-bleed wrapper div) was never
@@ -1701,10 +2657,10 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   back to the palette `bg`/`canvas` token (which the builder sometimes mis-defaults to white); (4) a
   **light-text ⟹ dark-canvas safety net** — when no canvas is detectable (a fixed/WebGL/full-page-video
   backdrop) but the resolved body ink reads light, infer a neutral near-black Site Background so light text
-  stays legible. Result on the 10-site openhero audit: 9/10 now get a correct canvas (was ~2/10). A residual
+  stays legible. Result on the 10-site AI-page audit: 9/10 now get a correct canvas (was ~2/10). A residual
   theme CSS-delivery quirk can still leave one dark site white even though the correct `site_background` is
   written — the conversion output is correct; the cascade/asset-optimizer delivery is the follow-up.
-- **Full-viewport `<main>` / `<div>` hero with NO `<section>` → claimed as a band (capture reliability, site-converter 1.8.7).** An AI-page shape `body > (bg layers) > nav > main.min-h-[120vh] (the hero, holding the h1, zero nested `<section>`s) > footer` captured **0 elements**: `walk_section_roots` only claimed `<section>` / hero-`<header>` and dived through `<main>`, reaching no sections (the openhero `payment-operations` hero — heading came out empty). Now `walk_section_roots` also claims a `<main>`/`<div>` child that is `is_hero_header()` (full-viewport-tall AND leads with a heading) **AND contains no nested `<section>`** (else it's a page-wrapper `<main>` — dive in for those). The hero heading then decomposes onto a real band instead of vanishing. NB: a page-LEVEL full-bleed `bg-video-container` that is a *sibling* of the hero (not inside it) IS now hoisted onto the first hero section's background video (`detect_page_bg_video`, site-converter 1.8.16 — see the page-level-fixed-backdrop note above); before that fix the dark band rendered on its solid fallback colour.
+- **Full-viewport `<main>` / `<div>` hero with NO `<section>` → claimed as a band (capture reliability, site-converter 1.8.7).** An AI-page shape `body > (bg layers) > nav > main.min-h-[120vh] (the hero, holding the h1, zero nested `<section>`s) > footer` captured **0 elements**: `walk_section_roots` only claimed `<section>` / hero-`<header>` and dived through `<main>`, reaching no sections (the AI-page `payment-operations` hero — heading came out empty). Now `walk_section_roots` also claims a `<main>`/`<div>` child that is `is_hero_header()` (full-viewport-tall AND leads with a heading) **AND contains no nested `<section>`** (else it's a page-wrapper `<main>` — dive in for those). The hero heading then decomposes onto a real band instead of vanishing. NB: a page-LEVEL full-bleed `bg-video-container` that is a *sibling* of the hero (not inside it) IS now hoisted onto the first hero section's background video (`detect_page_bg_video`, site-converter 1.8.16 — see the page-level-fixed-backdrop note above); before that fix the dark band rendered on its solid fallback colour.
 - **Heading FONT from a real heading, not the logo.** The heading-font picker sampled the logo's `<a>`
   wrapper (which computes to the BODY font) first → mis-detected Inter when every `<h1>/<h2>` is Nunito.
   Priority is now section heading → brand sample → logo.
@@ -2223,6 +3179,77 @@ code_blocked in JS). For new shortcode atoms, use the **live plugin defaults** (
 script writing to a FILE — stdout gets eaten — then store the full default-att shape in
 `atom-templates.json` so generated nodes carry no missing nested atts). **Delete each analyzed site
 folder from `capture-out/` when done** (captures regenerate; deleting prevents re-analysis).
+
+### How to report a discrepancy so the converter can be fixed (the reporting contract for agents)
+
+The reports are only useful when they name what the RULE needs, not what the eye saw. A report that says "the hero
+looks different" fixes nothing; one that says "hero video shell 578×325 vs. source 692×728, the shell's `aspect-[.95]`
++ `max-w-[880px]` were not carried, the cell was an `html` fallback" is a one-rule fix. Every report an agent writes
+about a conversion — the service's CSVs, a chat summary, a .docx audit — follows this contract:
+
+1. **Measure against the BUILT page, never against the data.** The page-builder JSON being right proves nothing (a
+   dropped padding falls back to the theme's default silently; a stale combined CSS hides a new rule). Reconvert
+   through the real path (`FW_Site_Converter_Bundle::import_dir` / the admin Convert), purge the caches, and read
+   computed values with Playwright — the branded Chrome channel when the source has H.264 video (Chromium has no
+   codec, so a `<video>` measures as an empty box).
+2. **Every discrepancy = a measured pair + the source cause + the converter path.** `region · property · source
+   value · converted value · the source construct that produced it (the class / rule / tag) · the converter path
+   that lost it (verbatim fallback, dropped declaration, wrong recognizer, a theme default winning)`. The source
+   construct is what turns one page's bug into a GENERAL rule; the path is where the rule goes.
+3. **Separate the three kinds of loss.** *Not captured* (the capture never stamped it — fix `capture.mjs` PROPS or a
+   stamp), *captured but dropped* (the stitch / extract read it and threw it away — fix the carrier), *carried but
+   overridden* (the CSS reached the page and lost to the theme — fix the selector / `!important` / the native
+   option). The fix lives in a different file for each; a report that does not say which sends the next agent to
+   the wrong twin.
+4. **Name the twin.** State whether the PHP path (`Stitch` / `Mapper`, what the admin Convert runs) or the JS path
+   (`capture-extract` / `to-pages`, what the service's own report measures) produced the loss, and whether the
+   other twin has the rule. A JS-only report can pass while the admin import still fails, and vice versa.
+5. **Never trust silence.** A report file that did not change is not a clean result — check the run stamp; a
+   Playwright probe that returns nothing may be the login page (check `document.title`); a `0 fallbacks` line means
+   nothing fell to `code_block`, not that every value is right — the style-coverage and the measured diff are
+   what say that.
+6. **Say what was NOT verified.** A region skipped, a breakpoint not measured, an animation not observed: list it.
+   "Satisfactory" with a known-gaps list is a usable report; "done" without one is not.
+7. **Write the general rule, not the page.** The recommendation names the measured construct ("an absolute, empty,
+   painted child of a band" / "a `body::before` fixed layer"), never the site, and proposes where the rule lands
+   (recognizer number / builder / capture stamp) plus the golden check that would prove it. Site and brand names
+   never appear in kit artifacts.
+8. **The wire format is the tuple, and the sender enforces it.** `send-finding.mjs` refuses (exit 2) a finding
+   without `region` · `property` · `got` · `expected` · `construct` · `path` (the `capture-out/<site>` folder) ·
+   `twin` · `loss`; the refusal prints the shape. This exists because 528 findings arrived as free text and the ones
+   that stayed open were exactly the ones without a construct or a capture path. `pull-findings.mjs` reads the
+   published sheet back (`share-config.json` → `feed.publishedCsv`) and prints the tuple fields when present.
+9. **A repro fixture beats a description.** `make-fixture.mjs capture-out/<site> "<selector>"` cuts the failing construct
+   out of `rendered.html` with its stamps, rebuilds only its band + the ancestors on the path, and scrubs it to structure
+   (`fixture.mjs`: every text run → a neutral word of the same length, `src`/`href`/`poster` → `#`, other attributes
+   dropped, ≤ 32 KB — over that the tool keeps 3 of every run of same-class siblings instead of truncating). The finding carries it as `fixture` (`@file` inlined by the sender) with a `solution` that states the
+   general rule; `pull-findings.mjs --fixtures=<dir>` writes them out as `fixture-NNN.html` + `.json` for the harness. The
+   agent's own per-site fix lives in its child theme and is never the report — the sender refuses a `#id{…}` patch.
+10. **A fixture is proven, not guessed.** Run it through the PHP twin and put the output in `twin_shows` ("code_block ×4, 0
+    gallery"). When the twin's output is not the page's miss, the fixture reproduces a DIFFERENT construct — a one-tile cut of
+    a grid takes the lone-card path (a grid rule needs ≥ 3 repeats; `make-fixture.mjs` keeps 3 per run) — so re-cut it, and
+    check it kept its text and icons. The sender refuses a `fixture` without `twin_shows`.
+11. **"Fixed per-site" is not a report.** The patch the agent wrote in its child theme is the most valuable artefact: state
+    it as the general rule in `solution` (which construct → which converter path / selector / option). The sender refuses
+    a note that says "fixed per-site / in chrome.css / natively" without a `solution`.
+12. **Rank it.** `severity`: `layout` (a band / column lost or moved) · `content-loss` (text / image / link gone) · `style`
+    (a colour / size / weight / spacing off) · `cosmetic` (≤ 2 px, a hover state, a divider). The maintainer orders a batch
+    by it; without it a dropped image half and a 1 px divider arrive with the same weight.
+13. **`computed` settles the cascade.** For every `overridden` loss give what `getComputedStyle` returned on the BUILT page
+    and which rule won (selector + specificity, or "the emitted rule is absent from the combined CSS"). Twice a "theme rule
+    outranks the preset" turned out to be a stale combined-CSS cache.
+14. **No POSITIVE rows.** What the converter got right is one line in the once-per-site summary
+    (`--summary --positives="hero cover + 3 icon boxes + pricing 3 plans"`); a POSITIVE finding row carries nothing a rule
+    can use and the sender refuses it. Seven per site were padding the feed.
+
+What each service report is for — read them in this order: `conversion-report.csv` (per element: which shortcode,
+`fallback` / `why` — the structural verdict), `style-coverage.csv` + `coverage-verification.csv` (per section: which
+significant properties reached the built page and HOW — `css` / `option` / `preset`; the verification file lists
+the losses with the reason, header-only when clean), `animation-report.csv` (what the source animates, what the
+converter carried as a stamp vs. only suggested), `capture-residue.csv` (source constructs the capture saw but no
+rule claimed), `conversion-parity.csv` (JS twin vs. PHP twin per section — a drift here is a twin bug, not a page
+bug). Then the measured diff (`verify.mjs` `verifyUrls` bands, or a per-element computed-style probe) is the final
+word; the CSVs point at where to look, the measurement decides.
 
 ## Contrast review — detect + ask, never auto-adjust the brand
 

@@ -589,8 +589,8 @@ options can actually express:
 
 ```bash
 cd tools/chrome-survey
-node survey.mjs --urls ../converter-trainer/sites/wegic.txt --out out/wegic.json
-node digest.mjs out/wegic.json
+node survey.mjs --urls ../converter-trainer/sites/a second AI-page generator.txt --out out/a second AI-page generator.json
+node digest.mjs out/a second AI-page generator.json
 ```
 
 `digest.mjs` scores every construct it finds against
@@ -606,6 +606,6 @@ settings alone: a numeric **Scrolled Header Height** (`scroll_height`), a **Scro
 numeric **radius / side-inset overrides** on the Floating Pill and Elevated Card designs
 (`pill_offset` / `*_radius_custom` / `pill_inset_custom`), a **Fade** hover preset, and an inline
 **Light / Dark Toggle** header element. Measured effect across the 180-site corpus: sites needing any
-custom CSS went **21 to 0**, and construct-level fidelity from 88.5% to **100%** (Wegic) and 90.5% to
-**99.8%** (OpenHero). Only `G8` (a bottom-anchored dock chrome mode) is still open, and it needs no
+custom CSS went **21 to 0**, and construct-level fidelity from 88.5% to **100%** (a second AI-page generator) and 90.5% to
+**99.8%** (the AI-generated corpus). Only `G8` (a bottom-anchored dock chrome mode) is still open, and it needs no
 action — one site in 180, reachable with a Snippet element plus `position: fixed`.

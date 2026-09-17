@@ -24,9 +24,3 @@ Thumbs.db
 
 # Local-only training extractor (contains source-site brand content — never ship)
 /tools/training/
-
-# Local-only converter trainer (source-site brand fixtures — never ship)
-/tools/converter-trainer/
-
-# Local-only chrome survey tool (source-site brand fixtures — never ship)
-/tools/chrome-survey/

@@ -8,6 +8,7 @@ An icon (or emoji/SVG) paired with an optional title and body content — the st
 |---|---|---|---|---|
 | `icon` | icon-v2 | see Notes | icon-v2 object | The icon shown. Lucide SVG, font icon, emoji, or custom SVG. |
 | `custom_icon` | hidden | `''` | legacy string | Retired field; leave `''` (the picker above supersedes it). |
+| `overline` | text | `''` | string | A short eyebrow label rendered ABOVE the title inside the same head slot (`<div class="icon-box__overline">`; small / uppercase / tracked / muted by default via `.icon-box__overline`, restyle through Advanced CSS). Empty = no markup. The Site Converter fills it from a card's eyebrow — a short (≤ 40 chars) small (≤ 13px) or uppercase leaf before the heading (PHP `card_eyebrow`, JS `cardEyebrowOf`). Shortcodes 1.15.11. |
 | `title` | text | `''` | string | Headline next to/above the icon. Empty = icon-only box. |
 | `title_tag` | select | `'h3'` | `h3` `h4` `h5` `h6` `span` `p` | Semantic tag for the title. |
 | `content` | wp-editor | `''` | HTML string (WYSIWYG) | Optional body text. |
@@ -35,6 +36,7 @@ An icon (or emoji/SVG) paired with an optional title and body content — the st
 {
   "icon": { "type": "svg", "svg-source": "library", "svg-id": "lucide/zap" },
   "custom_icon": "",
+  "overline": "",
   "title": "Intelligent Automation",
   "title_tag": "h3",
   "content": "Automate repetitive tasks with AI-driven workflows that learn from your team.",

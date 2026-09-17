@@ -264,12 +264,47 @@ it locally (native options / `misc_custom_css`) and move on, don't flag.
     (`reported N converter improvements for this site`).
 
     ```
-    node send-finding.mjs --url=<src> --finding='{"ref":"s2:heading h2","got":"code_block",
-                          "expected":"special_heading","note":"faq accordion mapped to plain cols","systematic":true}'
-    node send-finding.mjs --url=<src> --summary --stats=capture-out/<site>/design-config.json   # once per site
+    node send-finding.mjs --url=<src> --finding='{"ref":"s2:heading h2","region":"s2","property":"font-size",
+                          "got":"48px","expected":"36px","construct":"h2.text-4xl","path":"capture-out/<site>","twin":"php",
+                          "loss":"overridden","note":"section h2 rule out-specifies the title size","systematic":true,"recurs":2}'
+    node send-finding.mjs --url=<src> --summary --stats=capture-out/<site>/share-stats.json --positives="hero cover + 3 icon boxes + pricing 3 plans"   # once per site (written by every capture)
     ```
+  - **A finding is the reporting contract tuple** (kit `docs/extensions/site-converter.md` → "How to report a
+    discrepancy"): `region` · `property` · `got` (the CONVERTED measured value) · `expected` (the SOURCE measured value) ·
+    `construct` (the source class / rule / tag that produced it — structural, never content) · `path` (the
+    `capture-out/<site>` folder — its `rendered.html` + `pages.json` are what a maintainer reproduces from; a converter
+    function name goes in `note`) · `twin` (`php` = the admin import, `js` = the service's own build, `both`) · `loss`
+    (`not-captured` / `dropped` / `overridden` / `wrong-mapping` / `wrong-value` / `wrong-order` / `missing-option`) ·
+    `systematic` + `recurs` (how many sites). **`send-finding.mjs` REFUSES a finding that lacks any of region ·
+    property · got · expected · construct · path · twin · loss (exit 2, printing the shape)** — a symptom without its
+    construct and capture path cannot be reproduced (528 free-text findings were filed before this; the four that
+    stayed open lacked exactly that). Measure against the BUILT page (the admin import = the PHP twin), not the JS
+    report. `got` / `expected` are MEASURED values (`getComputedStyle`, a bounding box), never impressions.
+  - **The sandbox repro (optional, but what gets a finding fixed first).** In a scratch folder OUTSIDE the kit, cut the
+    construct out of the capture — `node make-fixture.mjs capture-out/<site> "<selector>"` writes a stamped
+    `fixture.html` scrubbed to structure (text → neutral words, targets → `#`, only the `data-sc-*` stamps + classes
+    kept) — run it through the PHP twin, and attach it: `"fixture": "@capture-out/<site>/fixture.html"` (≤ 32 KB; a wall of repeats is pruned to 3 per run, never cut mid-tag) plus a
+    `solution` that names the GENERAL rule. Your own per-site fix stays in the child theme's `assets/chrome.css` and is
+    never sent: the sender refuses an unstamped fixture and a `#id{…}` patch. The maintainer pulls fixtures with
+    `node pull-findings.mjs --fixtures=<dir>` straight into the golden harness.
+  - **What the last 240 rows taught (the rules the sender now enforces).** About 60 % of the rows became converter
+    rules directly; the rest cost the maintainer more than the reporter. So: (a) **a fixture is proven, not guessed** —
+    run it through the PHP twin and put its output in `twin_shows` ("code_block ×4, 0 gallery"); if the twin's output
+    is not the page's miss, the fixture reproduces a DIFFERENT construct (a one-tile cut of a grid is the lone-card
+    path — a grid rule needs ≥ 3 repeats, which `make-fixture.mjs` keeps) — re-cut. Check the fixture kept its text and
+    icons (two arrived as a chip with only its dot). (b) **"fixed per-site in chrome.css" is not a report** — the patch
+    you wrote is the most valuable artefact; state it as the general rule in `solution` (the sender refuses the note
+    without it). (c) **`severity`** — `layout` (a band / column lost or moved) · `content-loss` (text / image / link
+    gone) · `style` (a colour / size / weight / spacing off) · `cosmetic` (≤ 2 px, a hover, a divider): the maintainer
+    orders a batch by it; a dropped image half and a 1 px footer divider must not arrive with the same weight.
+    (d) **`computed`** for every `overridden` loss — what `getComputedStyle` returned on the built page AND which rule
+    won (selector + specificity); twice a "theme rule outranks the preset" was a stale combined-CSS cache. (e) **No
+    POSITIVE rows** — what the converter got right is one line in the site summary (`--positives`); a POSITIVE
+    finding names nothing a rule can use and is refused. (f) **Blame the right layer**: `not-captured` (no stamp) ·
+    `dropped` (the stitch / extract threw it away) · `overridden` (it reached the page and lost the cascade) send the
+    fix to different files — `computed` is what tells them apart.
   - **Send the `--summary` (stats only) once per site** so the aggregate "what's commonly missed" signal
-    survives without repeating the full report per bug.
+    survives without repeating the full report per bug. Every capture writes `share-stats.json` for it.
   - **Consent is the SITE OWNER's** → it does **not** carry to a *different* site; a new site = ask once again.
   - **Batch alternative:** if you'd rather send everything at the end, collect findings into one
     `share-findings.json` and run `--share` (the one report merges + sanitizes them). Same consent rules.
@@ -409,7 +444,7 @@ Before extracting tokens/sections, capture the source with the established machi
 
 ## Rule 0.6 — Tailwind sources: DETECT first, then TRANSLATE the class list (don't eyeball computed styles)
 
-Many modern sources (Wegic, Framer exports, most React/Next landing pages) are **Tailwind**. Reproducing
+Many modern sources (a second AI-page generator, Framer exports, most React/Next landing pages) are **Tailwind**. Reproducing
 them by *glancing* at a button/card — or even by reading `getComputedStyle` **partially** — silently drops
 styles: the `pinky-bites` primary button was `rounded-full font-bold text-lg shadow-lg` and the **`shadow-lg`
 was missed** because the computed `box-shadow` was read truncated and the `class` attribute was never read.

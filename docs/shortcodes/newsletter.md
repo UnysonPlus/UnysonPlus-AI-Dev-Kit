@@ -16,7 +16,7 @@ An AJAX email-signup form wired to the site mailer and a hook for list integrati
 | `success_message` | text | `'Thanks for subscribing!'` | string | Shown after a successful submit. |
 | `error_message` | text | `'Something went wrong. Please try again.'` | string | Shown on failure. |
 | `list_id` | text | `''` | string | Passed to the `fw_newsletter_subscribe` hook for list integrations. |
-| `design` | image-picker | `'inline'` | `inline` `stacked` `boxed` | Form layout design. |
+| `design` | image-picker | `'inline'` | `inline` `stacked` `boxed` `capsule` | Form layout design. `capsule` (Shortcodes 1.15.12) = ONE pill: the field row (`.fw-nl__fields`) takes the Field Background, a hairline, a 6px inset and a 999px radius; the input rides transparent and borderless inside it and the submit button sits inside the pill at its right edge (the hero "email + Open account" form). Restyle the pill via `selector .fw-nl__fields{…}`. The Site Converter picks it when the source's skinned field wrapper holds the button too. |
 | `align` | alignment | `'left'` | `left` `center` `right` | Content alignment. |
 | `rounded` | select | `'rounded'` | `rounded-0` (square) `rounded` `pill` | Field / button corner roundness. |
 | `field_icon` | icon-v2 | `{type:'none'}` | icon-v2 value (a pack glyph, an SVG `{type:'svg','svg-source':'library','svg-id':'lucide/mail'}`, an upload, an emoji) | A glyph rendered INSIDE the email field before the placeholder; the input pads past it. |

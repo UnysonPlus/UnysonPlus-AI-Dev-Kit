@@ -147,6 +147,35 @@ the picker tile, assets enqueued automatically from the theme URI. The three dif
 - **Version/mirror**: a theme shortcode ships with the THEME (bump `style.css` `Version:`), not a
   plugin manifest.
 
+### Where a shortcode's own PHP goes — class file, not `options.php`, never `static.php`
+
+A shortcode that needs helper functions of its own (a data reader, option-group builders, markup
+renderers) must be **self-contained** — a folder you can copy into another theme with no shared
+`inc/` library behind it. Each of the three files that can hold PHP runs at a different moment, and
+only one of them is loaded early enough and exactly once:
+
+| File | When it runs | Loaded | Use it for |
+|---|---|---|---|
+| `class-fw-shortcode-<folder>.php` | when the loader **registers** the shortcode — before `options.php`, the view or `static.php`, in admin **and** front end | **once** | **the shortcode's own functions/classes** (prefix them per shortcode: `rt_*`, `cmp_*`, …) plus the `FW_Shortcode_<Folder>` class (an empty subclass is fine) |
+| `options.php` | every time the framework reads the option schema — builder popup, atts re-derivation on render, storage load | many times | **options only**; it may *call* the class-file helpers (`'options' => rt_source_options()`) |
+| `static.php` | at **enqueue time** on the front end — `enqueue_static()` on render, plus the `fw_ext_shortcodes_enqueue_static:<tag>` action when the extension scans post content | per render | enqueuing the folder's `static/css` + `static/js`; conditional assets; per-instance dynamic CSS from the atts (Unyson's classic pattern is a `function_exists()`-guarded `_action_theme_shortcode_<tag>_enqueue_dynamic_css( $data )` hooked to that action) |
+
+Why not the other two: functions in `options.php` need `function_exists()` guards and a
+"load `options.php` from the view" fallback for raw `[shortcode]`s — it works, but the schema file
+stops being a schema. Functions in `static.php` **fatal in wp-admin**: `static.php` is never
+executed when `options.php` is read, so `options.php` calling a `static.php` function is
+"undefined function" in the builder popup. Classic Unyson themes put enqueue logic in `static.php`
+but their *helpers* in the theme's `inc/` — the shared-library model this rule replaces.
+
+**Slug collision gotcha (this bit us):** if the theme folder has the **same slug as a plugin
+shortcode** (e.g. `comparison-table`), the loader treats the theme folder as an *override* — its
+`options.php` / `views` become rewrite paths of the plugin's shortcode — and **reads the class file
+only from the plugin's folder**, so the theme's `class-fw-shortcode-*.php` (and every helper in it)
+is silently never loaded. Symptom: the front end renders (the view's helpers happen to be available)
+but the admin builder 500s on `options.php`. Fix: give the theme shortcode its own slug
+(`casino-comparison-table` → `[casino_comparison_table]`). Check `fw_ext('shortcodes')->get_shortcode($tag)`
+returns *your* class, not plain `FW_Shortcode`.
+
 ### Deciding the home — reuse scope × distribution intent (ASK when unclear)
 
 Two independent axes decide where a new shortcode lives — and they are **not** the same question, so

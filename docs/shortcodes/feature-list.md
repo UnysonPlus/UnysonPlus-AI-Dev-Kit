@@ -11,7 +11,7 @@ An icon-led list (checklist / per-item icons / numbered / bullets / badge) with 
 | `orientation` | image-picker | `'vertical'` | `'vertical'` (stacked rows, uses `columns`) `'horizontal'` (wrapping inline strip) | List flow. |
 | `icon_position` | select | `'left'` | `'left'` (icon left of text) `'top'` (icon above text, centered) | Per-item icon placement. |
 | `icon_style` | select | `'plain'` | `'plain'` `'tint'` (soft tint chip) `'circle'` (solid circle) `'outline'` `'square'` (square badge) | Chip drawn around the checklist / per-item icon markers. |
-| `columns` | select | `'1'` | `'1'` `'2'` `'3'` | Number of columns (vertical orientation only). |
+| `columns` | select | `'1'` | `'1'` … `'6'` | Number of columns, 1–6 (vertical orientation only; 4–6 = a stats strip of icon + value cells). |
 | `dividers` | switch | `'no'` | `'yes'` \| `'no'` | Show a divider between rows. |
 | `zebra` | switch | `'no'` | `'yes'` \| `'no'` | Alternating (zebra) row background. |
 | `spacing_size` | select | `'md'` | `'sm'` (tight) `'md'` (normal) `'lg'` (roomy) | Row spacing. |

@@ -90,7 +90,21 @@ block, a link to a settings page.
 
 ### `hidden`
 
-An input the user never sees, for a value your code sets. **Stored:** a string.
+An input the user never sees, for a value your code sets. **Stored:** a string
+(a non-scalar is coerced to `''`).
+
+**Keeping a retired option's value alive.** The page builder re-derives an item's
+atts from its *declared* options on render, so a key you remove from `options.php`
+is dropped before the view runs — content saved under it silently vanishes. Keep
+the retired key declared as a `hidden` option (with `'label' => false`) so legacy
+saves survive. If the retired value was an **array** (e.g. a colour picker's
+`{predefined, custom}` pair), add `'keep_array' => true`: the array is then kept
+as-is from the builder JSON and rides through the hidden input as JSON on a
+re-save instead of being flattened to `''`.
+
+```php
+'icon_badge_color' => [ 'type' => 'hidden', 'label' => false, 'keep_array' => true ],
+```
 
 ---
 
@@ -258,7 +272,7 @@ every element that renders a map.
 | `text` `short-text` `medium-text` | string | `''` |
 | `textarea` | string | `''` |
 | `password` | string (plain) | `''` |
-| `hidden` | string | `''` |
+| `hidden` | string (array with `keep_array`) | `''` |
 | `html` `html-fixed` `html-full` | — (display only) | `''` |
 | `number` | number | `0` |
 | `select` `short-select` `medium-select` | choice key (string) | `''` |

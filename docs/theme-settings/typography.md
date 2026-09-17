@@ -72,6 +72,21 @@ The inner options:
 - **Saved value shape**: `"hover" | "always" | "never"`
 - **Notes**: Underline style for links inside post/page content.
 
+### Type Scale (fluid) — `type_fluid_enable`, `type_scale_enable`, `type_scale_ratio`, `type_scale_ratio_mobile`
+
+A `group` (`grp_typo_scale`) inside the `typography` container.
+
+| id | label | type | default | notes |
+|---|---|---|---|---|
+| `type_fluid_enable` | Fluid Sizes | switch (`no` / `yes`) | `yes` | Scales the Body and Heading sizes with the viewport (body ~+15 % on wide screens, headings shrink on phones). **`no` = every size renders exactly as authored** at every width — `css-tokens.php` skips the `clamp()` build (`$fluid_on`). The Site Converter sets it `no` on every conversion: a measured 16 px body must render 16 px, not 18.4 px (the inflation that read as "body size over-measured" on eleven conversions). |
+| `type_scale_enable` | Fluid Heading Scale | switch (`no` / `yes`) | `no` | Drive H1–H6 from one modular scale (Body size × ratio) instead of the per-heading sizes. |
+| `type_scale_ratio` | Scale Ratio (desktop) | select | `1.25` | Step multiplier on large screens. |
+| `type_scale_ratio_mobile` | Scale Ratio (mobile) | select | `1.2` | Step multiplier on phones. |
+
+- **Saved value shape**: `"type_fluid_enable": "yes"|"no"`, `"type_scale_enable": "yes"|"no"`, `"type_scale_ratio": "1.25"`, `"type_scale_ratio_mobile": "1.2"` (flat inside `typography`).
+
+---
+
 ### Per-Heading Overrides (Advanced) — `h1` … `h6`
 
 Six options (`h1`,`h2`,`h3`,`h4`,`h5`,`h6`), each built by the `$heading_override($label,$size,$lh,$ls)` helper. Kept flat inside the `multi` container so each h1–h6 value is stored individually.

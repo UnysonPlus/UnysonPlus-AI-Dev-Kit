@@ -129,6 +129,18 @@ Top-level leaves plus grouped sections (`group_footer_mode`, `group_footer_color
 - **Type**: `select`. **Default** `'1'`. **Choices**: `1` — stacked (default) / `2` — 2 columns
 - **Notes**: How many columns footer rows keep below 768px, via `--footer-mobile-cols` (the media query is `grid-template-columns: repeat(var(--footer-mobile-cols, 1), minmax(0, 1fr))`). The footer previously stacked unconditionally; 11% of measured footers deliberately keep a two-column pair on a phone. `1` reproduces the old behaviour exactly.
 
+### Boxed Body — `footer_body_box` (`group_footer_box`, theme 2.5.97)
+- **Type**: `multi-picker` (picker `enabled` = switch `no`/`yes`, default `no`). When `yes`:
+  - `footer_box_max_width` — `unit-input` (px/rem/%), empty = the site Container Width.
+  - `footer_box_gutter` — `unit-input`, default 16px: the panel is `width: min(Max Width, 100% - 2 × gutter)`.
+  - `footer_box_padding_y` / `footer_box_padding_x` — `unit-input`, default 32px each (the panel's inner inset).
+  - `footer_box_background` — `background-pro` (video disabled): the panel's own fill (colour / gradient / image) over the footer background.
+  - `footer_box_border` — the shared border row (`{ width:{value,unit}, style, color:{predefined,custom} }`) on all four edges.
+  - `footer_box_radius` — `unit-input`. `footer_box_shadow` — `box-shadow` (`{x,y,blur,spread,color,inset}`).
+  - `footer_box_copyright_inside` — switch, default `no`: `yes` renders the Copyright bar INSIDE the panel after the Post-Footer.
+- **What it does**: wraps the footer's content bars (Pre / Main / Post, optionally the © bar) in ONE inset panel — the "card footer" pattern (a bordered / tinted panel floating on the footer background). `footer.php` adds `footer--boxed` (+ `footer--boxed-copyright`); `theme-vars.php` emits `--footer-box-max/-gutter/-pad-y/-pad-x/-bg-*/-border/-radius/-shadow`; `style.css` styles `.footer--boxed .footer__body` (centred, capped, padded, `position:relative; overflow:hidden`). While boxed, the footer's Padding Top / Bottom moves onto the footer itself (the space AROUND the panel) and every bar inside drops its container gutter (a Full Width bar spans the panel exactly; a Fixed Width bar loses its max-width) — the panel padding is the gutter.
+- **Converter**: the Site Converter sets it when a footer's rows sit on a single-child chain inside a skinned, padded wrapper (PHP `detect_footer_shell` / `footer_box_values`, JS `footer.shell`): max width from the WIDE pass (a margin that grows with the viewport = a capped `width:min(…)`), the gutter from the base margin, one linear gradient natively (a multi-layer stack verbatim in `misc_custom_css`), translucent hairlines keep their rgba(), the first shadow layer, and an empty absolutely-positioned decor child (a gradient "roofline" strip) as `.footer--boxed .footer__body::before`.
+
 ### Custom CSS Class — `footer_css_class`
 - **Type**: `text`. **Default** `''`. Class(es) on the footer wrapper.
 
@@ -364,6 +376,7 @@ When `yes`, reveals 4 container-only groups:
 - `{prefix}_grp_layout`:
   - `{prefix}_container` — `image-picker`, default `container`. **Choices**: `container` Fixed Width, `container-fluid` Full Width.
   - `{prefix}_padding` — `spacing` (mode `padding`, responsive utility classes).
+  - `{prefix}_valign` — `select` (footer bars only; hidden for header bars), default `''` Top. **Choices**: `''` Top (default) / `center` Middle / `end` Bottom — the row's `align-items` (`footer-row--valign-center|end`, theme 2.5.97). A lead heading beside a link row usually sits on a shared BASELINE in a source (`align-items:end`); the converter reads it from the main row (PHP `footer_row_valign`).
 - `{prefix}_grp_appearance`:
   - `{prefix}_background` — `background-pro` (video disabled).
   - `{prefix}_typography` — `typography` (family/size/weight/line-height/letter-spacing/color).
@@ -395,6 +408,7 @@ When `yes`, reveals 4 container-only groups:
   'yes' => [
     '<prefix>_container'  => 'container',            // or 'container-fluid'
     '<prefix>_padding'    => [ /* spacing: 'top'/'right'/'bottom'/'left' => e.g. 'pt-9' (scale slug) */ ],
+    '<prefix>_valign'     => '',                     // footer bars: '' top | 'center' | 'end'
     '<prefix>_background'  => [ 'color' => [ 'value' => [ 'predefined' => '', 'custom' => '#fdf2f8' ] ],
                                'gradient' => [ 'data' => [ 'type'=>'linear','angle'=>90,'stops'=>[] ] ],
                                'image' => [ 'src'=>[], 'position'=>'center center', 'size'=>['selected'=>'cover','custom'=>''], 'repeat'=>'no-repeat', 'attachment'=>'scroll' ],
@@ -460,8 +474,8 @@ Before rebuilding a source site's footer, measure it rather than eyeballing it:
 
 ```bash
 cd tools/chrome-survey
-node survey.mjs --urls ../converter-trainer/sites/wegic.txt --out out/wegic.json
-node digest.mjs out/wegic.json --section anatomy
+node survey.mjs --urls ../converter-trainer/sites/a second AI-page generator.txt --out out/a second AI-page generator.json
+node digest.mjs out/a second AI-page generator.json --section anatomy
 ```
 
 The measurement that matters most here is the **column ratio**. The rows on this page are each driven

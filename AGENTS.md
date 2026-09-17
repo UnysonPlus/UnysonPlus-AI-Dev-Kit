@@ -222,7 +222,11 @@ screenshots. That never converges. Instead — **convert first, then refine:**
    SVGs — never ask the user for these), the **downloaded media**, AND **computed styles** — then maps
    structure → shortcodes and tokens → presets, so you refine a real page, not a blank one. Skipping
    this and hand-building from scratch is what forces asking for assets the capture already had. (Only
-   fall back to a manual bundle when there's no URL / no Node+Playwright.) Read its **conversion report**
+   fall back to a manual bundle when there's no URL / no Node+Playwright.) **Script it headless:** an agent
+   drives the converter from the CLI — `DASHBOARD_AUTO_OPEN=0 node capture.mjs "<url>" <out>` then a PHP
+   one-liner `FW_Site_Converter_Bundle::import_dir( '<out>/<site>' )` (WP bootstrapped via `wp-load.php`) —
+   never through the dashboard / admin Convert page (each launch pops a `localhost:4600` tab in the user's
+   browser; `DASHBOARD_AUTO_OPEN=0` keeps a scripted run silent). Read its **conversion report**
    to see what it mapped vs. fell back on. **Close *this site's* delta with native options /
    `misc_custom_css` — do NOT edit the shared Site Converter to fix one site.** A whole *class* of
    misses (a pattern it mis-maps everywhere) is a converter-*algorithm* change, which is a
@@ -275,7 +279,7 @@ The second guard is the one that gets skipped, and it is cheap: **`tools/chrome-
 
 ```bash
 cd tools/chrome-survey
-node digest.mjs out/wegic.json out/openhero.json --section coverage
+node digest.mjs out/a second AI-page generator.json out/AI-page.json --section coverage
 ```
 
 That number does three jobs: it says whether the fix was worth generalising, it sizes the blast radius
@@ -329,6 +333,33 @@ that option had shipped and never once worked. Neither was caught until fixtures
   site slug.
 - Keep this kit's docs and the two conversion repos **in sync** — a standard added
   here should be reflected there and vice-versa.
+- **A converter finding is a MEASURED TUPLE, never a free-text note (ENFORCED).** When the built page
+  differs from the source, report it with `send-finding.mjs` carrying `region` · `property` · `got` ·
+  `expected` · `construct` · `path` · `twin` · `loss` (+ `recurs`, `note`) — the sender refuses anything
+  less (exit 2, printing the shape). `got` / `expected` are `getComputedStyle` / bounding-box values read
+  on the BUILT page (the WordPress import = `twin: php`) and the SOURCE at the same viewport; `construct`
+  is the source class / rule / tag that carries the value; `path` is the `capture-out/<site>` folder. The
+  full contract: `docs/site-build-protocol.md` → "stream each one" and `docs/extensions/site-converter.md`
+  → "How to report a discrepancy". A symptom ("headings look wrong") without those cannot be reproduced
+  and is dropped at triage.
+- **Prove a converter miss in a SANDBOX, then report the repro — never the site patch.** When the built page
+  differs from the source: (1) fix the LOOK for the client in your site copy's child theme (`assets/chrome.css`)
+  — that is where a per-site fix belongs and it is never reported; (2) in a scratch folder OUTSIDE this kit
+  (the assembled folders are overwritten by `update.ps1`), cut the failing construct out of the capture with
+  `node make-fixture.mjs capture-out/<site> "<selector>"` (a stamped, brand-scrubbed `fixture.html`), run it
+  through the PHP twin (`FW_Site_Converter_Sources::build_from_html` on the WP install — the admin import's
+  engine) and measure what comes out; (3) send the finding with `"fixture": "@…/fixture.html"` and a
+  `solution` phrased as the GENERAL rule ("a `display:block` span inside a heading is a line, not a split
+  word") — the sender refuses an unstamped fixture and a `#id{…}` per-site patch. The fixture is what turns
+  one page's bug into a golden check; the patch would teach the converter nothing.
+- **The report must be RANKED, PROVEN and never a positive (ENFORCED).** `severity` = `layout` ·
+  `content-loss` · `style` · `cosmetic` (the maintainer orders the batch by it); a `fixture` carries
+  `twin_shows` = the PHP twin's output for it — if that is not the page's miss the fixture reproduces a
+  different construct (a one-tile cut of a grid is the lone-card path; a grid needs ≥ 3 repeats) and must be
+  re-cut; an `overridden` loss carries `computed` (what `getComputedStyle` returned on the built page and
+  which rule won); a note that says "fixed per-site / in chrome.css" must carry the general `solution` (the
+  patch you wrote IS the finding); what the converter got RIGHT is one line in the site summary
+  (`--summary --positives="…"`), never a POSITIVE finding row. The sender refuses each of these.
 
 ## Keeping the docs (and the published manual) current when options change
 
