@@ -360,6 +360,13 @@ that option had shipped and never once worked. Neither was caught until fixtures
   which rule won); a note that says "fixed per-site / in chrome.css" must carry the general `solution` (the
   patch you wrote IS the finding); what the converter got RIGHT is one line in the site summary
   (`--summary --positives="…"`), never a POSITIVE finding row. The sender refuses each of these.
+- **Before you call it dropped: resolve the presets, read the source's computed value, check the fixture carries the
+  property, check the converter version.** A skin on the column's Box Preset / a button's Button Preset is carried —
+  `twin_shows` must read the builder node's preset references, not only `custom_css`; `expected` is the source's
+  computed value at the same viewport, never an inference from a class; a fixture whose stamp lacks the property in
+  `expected` proves a *capture* gap, not a converter drop — say which; compare the service `/health` version with
+  `kit-manifest.json` before filing so a batch does not re-report the rules that shipped that morning; and a
+  `systematic` finding always ships a fixture. (Items 15–19 of the contract in `docs/extensions/site-converter.md`.)
 
 ## Keeping the docs (and the published manual) current when options change
 

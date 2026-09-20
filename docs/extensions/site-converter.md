@@ -588,6 +588,187 @@ overlay design — four sightings now), the trust strip's intrinsic-width card, 
 folded into it, accordion rows' hairlines, the header mobile overlay, stat cards' skin in a 2×2, the product scroller,
 the hero's double vertical padding (page-context), the mobile-first card padding — and the JS twin's parity.
 
+### A cinematic dark landing, audited end to end (2026-09-19)
+
+A real-site conversion on `http://localhost/` (a nature-themed preview page: a video hero with a diagonal edge, glass cards,
+a 12-track photo wall, a footer signup), captured with the CLI and imported with `import_dir`, then measured section by section
+against the source (Playwright + `verifyUrls`). After the pass: every band ≤ 4.3 % pixel drift except the two video-hero bands
+(the video frame differs by the second), section heights within a few px, content edge at x 128 everywhere the source has it.
+Site Converter 1.9.52, golden `[AC]` (1011/0). The rules, all general:
+
+- **Header.** The wordmark link (`<a href="#">BRAND</a>`, the row's first child ahead of a ≥ 3-link cluster) is the logo and
+  never a `list_item` beside the CTA (`header_text_links`). A blur class the page's script toggles (`backdrop-blur-xl` in the
+  markup, no `backdrop-filter` in the REST stamp, one in the SCROLLED stamp) is glass on scroll only — `header_glass: no`,
+  `scroll_glass: yes` (a 24px frost had sat over the hero's top).
+- **Containers.** `declared_container_gutter` reads the container's DESKTOP tier (`px-6 md:px-12` → 48, the base tier is the
+  phone's 24; the stamped shorthand wins), so the site container is the content width (1184 + 48), and `cap_content_px` makes
+  every measured cap a CONTENT measure (max-width less the box's own equal side padding — `max-w-4xl px-4` → 864); the
+  mapper's fallback cap (`set_site_container_width`) subtracts an inside gutter too. A row that IS the band's container
+  (`row_is_container_box`: a centred cap ≥ 1000 whose side padding equals the site gutter) keeps its top inset but drops its
+  side padding — the container provides it (the hero's copy had sat 48px off the source's edge).
+- **Hero band.** The section's own `clip-path` (polygon / inset / ellipse / circle) rides the section. A vertically centred
+  viewport band (`column_valign: center` = a flex column) keeps its direct flexboxes at `width:100%` (the centring had shrunk
+  the copy | stats row to its content, 1093px). A `<iconify-icon><svg>` hosted BEFORE the label is a leading icon
+  (`icon_is_leading` counts the host that holds the glyph). An absolutely positioned wrapper of ≥ 2 icon links
+  (`absolute bottom-8 left-12 flex gap-6`, a social strip) is ONE pinned row (`pinned_icon_row` recognizer → a row flexbox with
+  the native Position option); a side with a responsive variant (`left-6 md:left-12`) resolves to the computed px
+  (`element_position_from`), not the phone tier's class.
+- **Badge cards.** A card body's leaf no recognizer claims: a bare `<a>` text link (with a trailing glyph) is a btn-link CTA
+  (`body_stack_blocks` fallback → `button_block`), any other leaf its text (the "Secure Spot" links were dropped). A one-line
+  chip's title takes the chip's own stamp (9px tracked uppercase — it had drawn as the theme's 24px serif h4; `n_icon_box`
+  accepts ≥ 8px and a lone title carries no trailing margin); `floating_card_pos_css` carries the chip's hairline border and
+  blur. The composite photo carries its `img_extra_css` (`mix-blend-mode`, a filter).
+- **Grids.** The bento X-split needs a spanner markedly TALLER (≥ 1.4×) than the cell that starts inside it — a `mt-6`
+  staggered card of the same height is a plain 2×2 (it had become two lopsided stacks). A tile's `col-span` is read at the
+  DESKTOP tier (`tile_span`: `col-span-12 md:col-span-8` → 8, up to 12); a many-track mosaic whose spans change by row
+  (`grid-cols-12`: 8|4 then 4|8 at `auto-rows-[240px]`) is a METRO on the gcd-reduced tracks (12 / 4 = 3 columns, spans
+  2|1 / 1|2, `spanDiv` divides in the mapper) — four tiles had rendered in one row at 10/40/40/10.
+- **Footer.** The brand column's status chip (a skinned inline pill with a dot, no link) → a text element whose pill wears the
+  measured skin through the misc css (`detect_footer_brand_chip`). A signup column's label is a footer HEADING like its
+  siblings (the widget's own title had rendered in the display face); an icon-only submit keeps an arrow (`→`), never an
+  invented "Subscribe"; the field / button / description wear the source skin (`footer_newsletter_css` → `.footer .fw-nl__*`);
+  a small `<p>` in the column that holds the email field is the signup's copy, never a copyright disclaimer (it had doubled
+  into the © bar).
+
+JS twin: the header brand exclusion and icon position already matched; the gallery / footer chip / signup rules are PHP-only
+(the JS twin has no image-grid path).
+
+### A glass "liquid" landing, audited end to end (2026-09-19)
+
+A second real-site conversion on `http://localhost/` (an abstract preview page: a fixed round video portal the page scrolls
+over, a left-anchored hero intro under a fixed nav, a `grid-cols-12` bento of glass tiles), captured with the CLI, imported
+with `import_dir`, measured against the source with Playwright + `verifyUrls`. After the pass: page height 1706 = the
+source's; the bento's tiles on the source's exact tracks (920 / 448 / 566 / 802 at x 24 / 968 / 614); hero band 640 = 512 +
+128; band drift ≤ 1.4 % outside the video bands; the phone render no longer overflows (main 390 wide). Site Converter
+1.9.53, builder 1.3.6, capture service 1.11.30, kit 1.9.51, golden `[AD]` (1029/0), JS tests 72/0. The rules, all general:
+
+- **Bands + chrome.** A `<header>` INSIDE `<main>` that holds the h1 / h2 is the first content band, never the site chrome
+  (`is_hero_header` — the hero had been dropped). A FRAMED fixed layer behind the page (`position:fixed; border-radius:50%;
+  z-index:-1`, a round video portal) is the site background video (`page_backdrop_layer_of`) with its own geometry —
+  `page_backdrop_css` emits top / left, width = height for a 50% radius, the radius, `overflow:hidden`, the video covering
+  it — instead of a section video inside the first band.
+- **Clearance + gutter.** `<main class="pt-48">` under a 92px fixed nav: #main's own top padding (carried by `main_style`)
+  IS the clearance — `heroTopPad` stays 0 when it exceeds the overlay height (the band had gained the nav's 92px again). When
+  `main_style` makes #main the container (a max-width + horizontal padding), a band's flexbox with no cap of its own takes
+  the FULL width (`$main_is_container` → content_width 100% + `max-width:100% !important`) — the site cap had shaved a
+  second 24px gutter. `main_style` now runs BEFORE the bands map so `build_section` sees the flag. A left-anchored root cap
+  (`max-w-5xl`, no auto margins) rides as `sectionLeftCap` → a left-aligned content width (`wide`) on the band's flexbox.
+- **The 12-track bento.** A run of cells whose desktop spans TILE lines of exactly 12 (8|4 then 5|7) is a native 12-track
+  grid (`cells_span_lines` → `display:grid; grid_columns:12`, the cells keep their `fw-span-N` → `grid-column:span N`,
+  responsive tiers included, phones collapse to one column) — a wrapping flex row ran one gap short per line. Builder css
+  fix that this exposed: `.fw-grid > [class*="fw-span-"]{width:auto}` — a grid child kept its flex-row percentage width
+  (66.67% of an 8-track area) and drew a third short of its tracks. The grid's row minimum (`auto-rows-[minmax(320px,auto)]`,
+  stamped as `grid-auto-rows` by capture ≥ 1.11.30, read from the utility for older captures) is every cell's minimum
+  height when it declares none (`cell_geometry`) — a two-line quote tile sat 96px short of its row. JS twin: `cellsSpanLines`
+  (both row paths) + the cell `minH` from `gridAutoRows`.
+- **The card's inset, once.** A cell's `pad` and its `cardBox.padding` read the SAME element's padding: the box owns it. The
+  responsive tiers ride the card's box class (`pad_on_box` → `selector .sc-cb-x{…}` + its media tiers), the column carries
+  no bare padding, the box no `padding:` shorthand; a preset-owned box drops the column pad (`apply_cell_pad`). Golden [X]'s
+  form column check was pinning the double and is now the opposite. `split_col_css` is media-aware: a `selector .CLS{}` rule
+  inside an `@media{}` moves to the inner wrapper WITH its wrapper (base rules first, media tiers after), an emptied media
+  block is dropped — it had left `@media (min-width:768px){}` on the track and every tier painted the desktop inset. The
+  scoped-class box gets `height:100%` so it fills a stretched grid track.
+- **A distributed column.** A cell (or its ONE full-height in-flow flex-column child — `cell_flex_column_box`, the wrapper's
+  height ≥ 90 % of the cell's content box from the stamped `padding` shorthand) laid out `flex-col justify-between` carries
+  `vjustify`. Its leading label that is its own flex item ahead of the title's group is set APART (`mark_apart_label`,
+  leading `paint` blobs skipped): the mapper flushes it as an overline-only block, never the next title's overline (it had
+  sat on the title instead of at the card's top). A flattened `mt-auto` wrapper carries `mtAuto` (+ its own padding-top as
+  `mtAutoPad`) → `margin-top:auto !important` (+ the padding) on its first block, never the one-screen computed px; golden
+  [hero strip] now expects that. A ROW of decorative bars (`flex gap-4` of `h-1 rounded-full` fills) is ONE verbatim block
+  (`is_decorative_bar_row`, inter-tag whitespace stripped so wpautop seeds no `<br>`), and a `decorBar` block is exempt from
+  the code builder's content-less drop. A subtitle whose stamp omits its (zero) margin-bottom with no `mb-*` utility takes
+  mb-0 (the theme's 18px had leaked under a hero intro whose gap lives on the next block's `mt-14`).
+- **Phones.** The TITLE's phone size (`text-7xl md:text-9xl` → the `-sm` stamp's 72px) rides the heading as a
+  `max-width:767px` rule on `selector.heading .heading-title` (outranking the desktop size), and `registered_css` emits every
+  `@media (max-width:…)` rule LAST — the section styler had keyed the phone rule before its desktop twin, so at equal
+  specificity + `!important` the 128px desktop rule won and the one-word line pushed #main (a flex item) past the viewport.
+  A LABEL ROW in the structural mirror (≤ 3 short leaves — a kicker and a status dot) sets `responsive_collapse: no` — the
+  phone collapse had stretched the 8px dot into a full-width bar.
+
+Known gap, not a converter rule: the source's theme toggle is an EMPTY `<div>` skinned by a `::before` knob and driven by
+script (no markup, no stamped pseudo) — nothing to reproduce deterministically; it is absent from the header.
+
+### Two live reports: the site video behind a black body, a logo strip's marks after their names (2026-09-20)
+
+- **The site background video vanished** on a banking-style page (a body-level `position:fixed` video the converter
+  correctly makes the theme's site background video). It played (readyState 4) but was invisible: the source's inline
+  `html,body{background-color:black}` reached the root as `:root, .sc-tw{…}`, and once BOTH html and body carry a
+  background the body's paints on its own box — in the root stacking context that is ABOVE a `z-index:-1` fixed layer.
+  Two fixes, both general: `mirror_inline_css` keeps a `:root` / `html` rule at the root for its **custom properties
+  only** (a shell rule's `background` / `margin` never reaches the root — the body half still scopes to `.sc-tw`, and
+  body shell rules ride `page_shell_css` as `body:not(.wp-admin)`); and the theme (2.6.3) prints the layer at
+  `z-index:0` with `.site{position:relative;z-index:1}` lifted above it, so a child theme or custom CSS that sets both
+  backgrounds can no longer bury the video. Site Converter 1.9.56, kit 1.9.55, golden `[AE]` (1042/0).
+- **A logo strip's marks drew after their names**, the strip in full colour: the structural mirror emitted an element's
+  own text runs BEFORE its element children, so `<span class="flex items-center gap-2"><iconify-icon/> Name</span>`
+  became label + icon. `mirror_el` now walks child nodes in DOCUMENT order (text runs between elements flush as their
+  own text blocks). The row's own effect — `opacity-70 grayscale hover:grayscale-0` — rides as `row_fx_css` (`fx` on the
+  row block → the row flexbox's scoped CSS, with the hover restore and the transition) on both the section-row and the
+  nested-row paths. Two more misses on the same strip: an EQUAL side inset carried onto a capped flexbox (a flattened
+  `px-4` wrapper's `mxAdd` → `ms-[16px] me-[16px]`) is a gutter the cap's `100% − 2·gutter` already keeps — as margins
+  it beat the cap's auto centring, so the centred strip sat at the left edge (the content-width push now clears
+  symmetric side margins; golden [story] updated); and a text RUN that is a flex-row item (the label beside the icon)
+  now wears the element's own type (`mirror_text_decls` → `font-size` / `weight` / `line-height` / `color`) and
+  `margin:0` (the theme's `* + p` rhythm had dropped the label 8px under its icon at the body size).
+- **The pinned hero strip, exactly.** The `mt-auto pt-24 pb-12` strip of the same hero sat 96px under the CTA (the source:
+  152). Three carries: the `text` builder now runs `carry_wrap_margins` (mtAdd / mbAdd / the `mt-auto` push — only the
+  heading paths had it); an `mt-auto` block starts its OWN buffered column with `margin-top:auto` (`$mt_auto_col`) and
+  `flexify_items` never joins that column into a wrapping flex row (its auto margin had nothing to push against there);
+  the section-row builder runs `carry_wrap_margins` on the row too (the strip's `pb-12` → the logo row's `mb-5`). The
+  cell path marks a cell whose first block is `mtAuto` the same way. Measured: button bottom 624 / caption 776 on both.
+- **A flex-row footer → Auto Width + Distribution.** A footer whose main row is a content-sized flex row
+  (`flex justify-between items-center`: brand left, tagline right) maps to the footer builder's own Auto Width +
+  Distribution (`footer_flex_distribution`: `between` / `around` / `center` / `start` / `end` from the computed
+  `justify-content`; a start-packed row whose cells fill the width stays a fixed split) — a 50 / 50 split had left the
+  right-aligned tagline ending mid-row. The main section's inset is the row's measured margin + padding snapped to the
+  spacing scale (`main_footer_padding` through Custom Styling: `pt-0 / pb-0` here, `pb-7` under a `mb-16` link grid) —
+  the theme's default 1rem each had made a 133px footer 165; the container choice now MERGES into Custom Styling instead
+  of replacing it. A plain footer glyph (no tile) drops the header mark's frame entirely (`border:0; padding:0` too — the
+  framed mark's hairline drew a square). Site Converter 1.9.57, kit 1.9.56, golden `[AE]` (1046/0).
+
+### The feed, 2026-09-19: a glass "liquid" page's twelve findings (six fixtures) → rules (2026-09-19)
+
+One conversion reported 11 findings this morning (10 systematic, 6 with a sandbox fixture + a general solution). Three
+were already closed by the liquid audit above (the left-anchored `max-w-*` section, the doubled gutter inside `#main`'s
+container, the fixed video layer as the site backdrop). The rest became rules — all general, locked in golden `[AE]`
+(1040/0) on `tests/fixtures/golden-fixture-3-glass.html` (the six fixtures joined, neutral), each render-verified on
+localhost (Playwright measurements of the imported page). Site Converter 1.9.54, capture service 1.11.31, kit 1.9.52.
+
+- **The video anchor, refined.** An OFFSET unframed fixed layer (three or four stamped offsets, at least two non-zero, no
+  width) keeps ITS box: `page_backdrop_css` emits the offsets + `width/height:auto` (the theme's inline 100vw × 100vh
+  yields), the layer's `filter` (a drop-shadow glow), its running `animation` with the `@keyframes` verbatim (a `data-sc-anim`
+  without a scroll timeline), and the video's own resting transform. It had been normalised to `inset:0`.
+- **Page-level decor layers.** An empty, painted, absolutely / fixed positioned child of `<main>` / `<body>` (a 180vw blurred
+  radial glow, blend screen, z-index −1) → `page_decor_layers_css`: up to two, as `main.site-main::before` / `::after` with the
+  full `decor_layer_block` css (misc css), never a band. `is_decor_layer` now reads the computed position too (a plain-CSS
+  `.optical-flare{position:absolute}` has no `absolute` utility), and a `<main>` holding nothing but such layers claims no
+  band. A band whose blocks are ALL decor layers gets zero padding (`pt-[0px]` / `pb-[0px]`, no theme inset around a blur).
+- **`decor_layer_block` carries the whole box.** `mix-blend-mode`; the transform from the utility first (`-translate-x-1/2`
+  → `translateX(-50%)`, `rotate-N`), else a non-identity 2-D matrix; percent size utilities (`w-[200%]`, `h-full`) over the
+  stamp's one-screen px; a fraction offset (`left-1/2` → 50 %); both horizontal offsets when there is no width at all
+  (`left:-576px; right:-576px`). A `w-[200%] h-[200%] left-1/2 -translate-x-1/2` overlay had collapsed to 0 × auto.
+- **A translucent tint IS a fill.** `color_to_hex`'s alpha gate (and `rgba_quad`'s, and the JS `to-theme-settings` twin's) is
+  ZERO only — `oklch(… / 0.02)` on a frosted panel or button had rounded to "no colour", so the glass drew clear.
+- **The box's long tail, on both paths.** `box_extra_css` adds a resting 2-D `transform` (a `-skew-x-3` panel; the identity
+  and a mid-animation matrix3d are skipped) and a content-hugging width for `w-max` / `w-fit` / a bare `inline-block`
+  (`width:max-content; max-width:100%`). The scoped-class (glass) card box now appends `cardBox.extra` (clip-path, an accent
+  `border-left`, a mask) and `overflow:hidden` when the source clips — the preset path had them, this path dropped them
+  (the hex panel lost its clip and accent edge).
+- **Text effects.** `heading_text_fx_css`: a `text-shadow` glow and a resting skew on the title / subtitle / overline ride
+  as scoped rules; a glowing RUN inside a title gets the `sc-glow` class in the stitch scrub and the mapper's
+  `extract_glow_css` moves its `text-shadow` into `selector .sc-glow{…}` (kses strips text-shadow inline); `text_block`
+  already carried a `skew-x-2` transform.
+- **Button presets.** The skin records `clip` (clip-path) and `backdrop` (backdrop-filter); the preset's Custom CSS carries
+  them, and the layered-shadow rule accepts an oklch alpha (`/`). `button_preset_for` matches an **oklch / hsl hairline**
+  border (the colour regex only knew rgb / hex, so every such button fell to the `sc-btn-*` transplant).
+- **Auto-fit tracks.** A `0px` track in a stamped `grid-template-columns` (`584px 584px 0px` = a collapsed auto-fit slot) is
+  not a column — `grid_col_count` / `grid_px_tracks` skip it (two cards had a third each). JS twin: measured widths already.
+- **`:root` stays at the root.** `mirror_inline_css` never prefixes `:root` / `html` (a `:root{--x}` token block under
+  `.sc-tw` left every `var(--x)` consumer outside a wrapper invalid — the page rendered white); `body` still scopes.
+
+JS twin: the alpha gate. The decor-layer block, the page pseudo-layers, the button skin, the heading effects and the inline
+CSS scoping are PHP-only paths.
+
 ### Open items closed: the strip, the rows, the process, the event card, the split band (2026-09-17)
 
 Golden `[AA]` (994/0, JS twin tests 71/0), each render-verified on localhost (Playwright measurements). Site Converter
@@ -3241,6 +3422,25 @@ about a conversion — the service's CSVs, a chat summary, a .docx audit — fol
 14. **No POSITIVE rows.** What the converter got right is one line in the once-per-site summary
     (`--summary --positives="hero cover + 3 icon boxes + pricing 3 plans"`); a POSITIVE finding row carries nothing a rule
     can use and the sender refuses it. Seven per site were padding the feed.
+15. **Resolve the PRESETS before calling anything dropped.** A card's skin lives on the column's Box Preset
+    (`border_preset` → `theme-settings.json` → `border_presets[].custom_css` / `states`), a button's on its Button Preset
+    (`button_colors[].custom_css`), a heading's type on a Text Style preset — not on the element's `custom_css`. A
+    `twin_shows` that reads only `custom_css` reports a preset-carried skin as "dropped" (the glass hero panel of
+    2026-09-19: backdrop, clip and shadow were all on the preset; only the 2 % fill and the skew were missing). Read the
+    builder node's preset references and the preset's own fields, then name what is actually absent.
+16. **`expected` is the source's COMPUTED value, never an inference.** Read it off the stamp / `getComputedStyle` on the
+    source at the same viewport. "3 tracks of ~518" for a `repeat(auto-fit, minmax(350px,1fr))` grid was a guess; the
+    stamp said `584px 584px 0px` — two tracks. A wrong `expected` sends the fix the wrong way.
+17. **The fixture must CARRY the property the finding names.** Before sending, grep the fixture for the property in
+    `expected` (`mask-image`, a `::before` `background`); if the stamp lacks it, the loss is *not captured* (item 3) —
+    report it as a capture gap (`capture.mjs` PROPS / the hover stamper), not as a converter drop, and say so.
+18. **Report against the CURRENT converter.** Check `kit-manifest.json` (`bump_triggers`) / the service `/health`
+    against the feed's last close-out before filing; a batch filed on a stale converter re-reports rules that shipped
+    that morning (3 of 11 on 2026-09-19). If a re-run on the new version changes a finding, file a `CORRECTION
+    (refine)` row that names the original ref.
+19. **A systematic finding ships a fixture.** `systematic: true` without a `fixture` is a claim the maintainer cannot
+    prove or golden; cut one with `make-fixture.mjs` even when the construct is typography or CSS scoping (a heading with
+    its `text-shadow` stamp, a `<style>` with the `:root` block) — the fixture-less rows of a batch are the ones that wait.
 
 What each service report is for — read them in this order: `conversion-report.csv` (per element: which shortcode,
 `fallback` / `why` — the structural verdict), `style-coverage.csv` + `coverage-verification.csv` (per section: which

@@ -21,5 +21,16 @@ The base **Page Builder** option type — the drag-and-drop `builder` option tha
 - **Grid (classic) supports fifths:** widths 1/5, 2/5, 3/5, 4/5 (20/40/60/80%) in addition to twelfths — fifths use `fw-col-sm-{15,25,35,45}`. Twelfths can't express 40/60/80%.
 - `.fw-row` gutters (classic grid) read Bootstrap's native `--bs-gutter-x/y` (legacy `--fw-gutter-x/y` kept as fallback) so Theme Settings → Default Gap takes effect; `.row` and `.fw-row` are interchangeable for gap utilities. (Flexbox Divs have no row-gutter cascade — they space children with the `gap` option.)
 - **Smart placement:** click-to-add and drag-and-drop drop elements into a valid parent instead of stranding them at root. Loose top-level content is now wrapped into a **flexbox `<section>` Div** (`wrap_into_flexbox`); a dropped classic Column still force-synthesizes the `section → row → column` scaffold for back-compat.
+- **A Grid Div's child keeps its `fw-span-N` for the grid-column span ONLY** (builder 1.3.6, `frontend-grid.css`:
+  `.fw-grid > [class*="fw-span-"], .fw-grid > [class*="fw-fifth-"] { max-width:none; width:auto }`). The span classes also carry
+  the flex-row percentage width, which is void in a grid area — a `fw-span-lg-8` tile in a 12-track grid drew at 66.67 % of
+  its own 8-track area (a third short) until the width was cleared. So a 12-column Grid + `fw-span-N` children IS the exact
+  `grid-cols-12` bento model (the Site Converter emits it for mixed spans that tile lines of 12).
+- **A span cell in a gapped flex row shares the row's gaps in proportion to its span** (builder 1.3.7):
+  `.fw-flex > [class*="fw-span-"] { width: calc(pct - gap * (1 - frac)) }` with `--fw-span-frac` (the span as a number)
+  declared beside `--fw-span-pct` on every span / fifth class. Subtracting a whole gap from every cell had left each
+  row one gap short — a trailing strip after the last column of every 3-up card row, the grid never reaching the
+  container's edge. Cells whose spans sum to 12 now fill the row exactly with N−1 gaps between them (3 × 368 + 2 × 24
+  = 1152 in the default container).
 - Full-page template export uses an `_fw_template_export` envelope; export `format_version` is 2 (per-element Custom CSS now rides inside the builder `json`).
 - Much of the recent changelog is drag-helper-drift fixes — the reorder hierarchy guard constrains `simple` items to commit only inside a column.

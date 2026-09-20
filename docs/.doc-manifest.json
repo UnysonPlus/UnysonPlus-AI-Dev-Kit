@@ -1,8 +1,8 @@
 {
   "generated_against": {
     "unysonplus": "3.0.23",
-    "unysonplus-theme": "2.6.2",
-    "synced": "2026-09-17"
+    "unysonplus-theme": "2.6.3",
+    "synced": "2026-09-20"
   },
   "docs": {
     "animation-engine/backgrounds.md": {
@@ -11,7 +11,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/backgrounds/includes/backgrounds-settings.php"
       ],
       "hash": "ef05bf0ce8525f064f3b4f00cc5366a4",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/confetti.md": {
       "kind": "ae-module",
@@ -19,7 +19,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/confetti/confetti.php"
       ],
       "hash": "6d85a269574fb61cecf89887fb08e96d",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/cursor.md": {
       "kind": "ae-module",
@@ -27,7 +27,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/cursor/includes/cursor-settings.php"
       ],
       "hash": "19638a79bb2f3e03481c28cd9033cdbe",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/flip-card.md": {
       "kind": "ae-module",
@@ -35,7 +35,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/flip-card/includes/flip-card-settings.php"
       ],
       "hash": "1a063d42f14a2b5935eaf79ed77224d9",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/horizontal-scroll.md": {
       "kind": "ae-module",
@@ -43,7 +43,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/horizontal-scroll/horizontal-scroll.php"
       ],
       "hash": "c7aaf941ee6b51c979128c2f45ddff9c",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/hover.md": {
       "kind": "ae-module",
@@ -51,7 +51,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/hover/includes/hover-settings.php"
       ],
       "hash": "4daff6065439775942202cd37339d23d",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/marquee.md": {
       "kind": "ae-module",
@@ -59,7 +59,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/marquee/includes/marquee-settings.php"
       ],
       "hash": "a71bfe21f9d305592e1d1de0918a1fc1",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/motion-path.md": {
       "kind": "ae-module",
@@ -67,7 +67,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/motion-path/includes/motion-path-settings.php"
       ],
       "hash": "7db4c516db8f7a6acdd12a8c39bc674a",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/motion-sequence.md": {
       "kind": "ae-module",
@@ -75,7 +75,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/motion-sequence/motion-sequence.php"
       ],
       "hash": "d8229faf2bdb0e5b445c7a1327f42bfe",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/page-transitions.md": {
       "kind": "ae-module",
@@ -83,7 +83,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/page-transitions/includes/page-transitions-settings.php"
       ],
       "hash": "0694e151e08ab0c4bb55c7cd3e8a105c",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/parallax.md": {
       "kind": "ae-module",
@@ -91,7 +91,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/parallax/includes/parallax-settings.php"
       ],
       "hash": "01de6af79aa5ccb4abe19098faf34e03",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/physics.md": {
       "kind": "ae-module",
@@ -99,7 +99,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/physics/includes/physics-settings.php"
       ],
       "hash": "16e64462b9be3a417d580c20ef2bfba3",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/preloader.md": {
       "kind": "ae-module",
@@ -107,7 +107,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/preloader/includes/preloader-settings.php"
       ],
       "hash": "c9a073f7d61015d6334c55cc8dc4202d",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/scroll-color-shift.md": {
       "kind": "ae-module",
@@ -115,7 +115,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/scroll-color-shift/scroll-color-shift.php"
       ],
       "hash": "92879f6488cdd94acb069eacda2c6abd",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/scroll-keyframes.md": {
       "kind": "ae-module",
@@ -123,7 +123,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/scroll-keyframes/scroll-keyframes.php"
       ],
       "hash": "8659ba183ca0b901c0c9a1ea05b76fbc",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/scroll-loop.md": {
       "kind": "ae-module",
@@ -131,7 +131,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/scroll-loop/includes/scroll-loop-settings.php"
       ],
       "hash": "9797b0211d8aa7327f1697119a737aef",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/scroll-motion.md": {
       "kind": "ae-module",
@@ -139,7 +139,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/scroll-motion/includes/scroll-motion-settings.php"
       ],
       "hash": "068049f65ae58e1d5aeb42d86327aca4",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/scroll-progress.md": {
       "kind": "ae-module",
@@ -147,7 +147,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/scroll-progress/scroll-progress.php"
       ],
       "hash": "016bb7871b2c0686a2f556986b1a4fc5",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/scroll-reveal.md": {
       "kind": "ae-module",
@@ -155,7 +155,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/scroll-reveal/includes/scroll-reveal-settings.php"
       ],
       "hash": "2db2c570b08cdfccbb7f19597aea8ab1",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/scroll-text-highlight.md": {
       "kind": "ae-module",
@@ -163,7 +163,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/scroll-text-highlight/scroll-text-highlight.php"
       ],
       "hash": "7fed58da3198b7a4ae89adf552624bf4",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/scroll-var.md": {
       "kind": "ae-module",
@@ -171,7 +171,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/scroll-var/scroll-var.php"
       ],
       "hash": "02044118368252f9db9f2828e51f3f7c",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/scrollytelling.md": {
       "kind": "ae-module",
@@ -179,7 +179,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/scrollytelling/includes/scrollytelling-settings.php"
       ],
       "hash": "cb12f8a3fd495c6d756890850304de41",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/smooth-scroll.md": {
       "kind": "ae-module",
@@ -187,7 +187,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/smooth-scroll/smooth-scroll.php"
       ],
       "hash": "f7ea64309f9920db254bf5e024aea3e8",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/sticky-stack.md": {
       "kind": "ae-module",
@@ -195,7 +195,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/sticky-stack/sticky-stack.php"
       ],
       "hash": "b21ce2e075b8a08af80a46ef3aa4df2a",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/text-effects.md": {
       "kind": "ae-module",
@@ -203,7 +203,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/text-effects/includes/text-effects-settings.php"
       ],
       "hash": "3184ef091a731f77efc3ea825ed40bc0",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "animation-engine/viewport-units.md": {
       "kind": "ae-module",
@@ -211,48 +211,48 @@
         "{plugin}/framework/extensions/animation-engine/modules/viewport-units/viewport-units.php"
       ],
       "hash": "cb0cd91314e50ca9f67143284d67f8e9",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "build-a-site.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "building-pages.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "cloning-gotchas.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "conventions.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "design-parity-checklist.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "extending.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "extensions/animated-icons.md": {
@@ -261,7 +261,7 @@
         "{plugin}/framework/extensions/animated-icons/manifest.php"
       ],
       "hash": "af1a392e5ff5a6f44999b2ffa131455a",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/animation-engine.md": {
       "kind": "extension",
@@ -269,7 +269,7 @@
         "{plugin}/framework/extensions/animation-engine/manifest.php"
       ],
       "hash": "00be4b07a76812c553960c42a9225028",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/asset-optimizer.md": {
       "kind": "extension",
@@ -278,7 +278,7 @@
         "{plugin}/framework/extensions/asset-optimizer/settings-options.php"
       ],
       "hash": "ec836a632fcd5c8ff5a00f198802b0aa",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/blog.md": {
       "kind": "extension",
@@ -286,7 +286,7 @@
         "{plugin}/framework/extensions/blog/manifest.php"
       ],
       "hash": "9ec44fb53b054dc1dfebe7fb6f12276f",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/breadcrumbs.md": {
       "kind": "extension",
@@ -295,7 +295,7 @@
         "{plugin}/framework/extensions/breadcrumbs/settings-options.php"
       ],
       "hash": "04072bd3339bdf2f1c7c37e925c2f15b",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/builder.md": {
       "kind": "extension",
@@ -303,8 +303,8 @@
         "{plugin}/framework/extensions/builder/manifest.php",
         "{plugin}/framework/extensions/builder/config.php"
       ],
-      "hash": "865cc1aee41713a9267eb4fcb9b58592",
-      "synced": "2026-09-17"
+      "hash": "9a7131c63298a46e392e12055b0a1fcb",
+      "synced": "2026-09-20"
     },
     "extensions/chat.md": {
       "kind": "extension",
@@ -312,7 +312,7 @@
         "{plugin}/framework/extensions/chat/manifest.php"
       ],
       "hash": "91c267ce37a2235505987f7e51e5a343",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/custom-fields.md": {
       "kind": "extension",
@@ -320,7 +320,7 @@
         "{plugin}/framework/extensions/custom-fields/manifest.php"
       ],
       "hash": "a72132fbe26c4cf63a9b811ab469707b",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/forms.md": {
       "kind": "extension",
@@ -330,7 +330,7 @@
         "{plugin}/framework/extensions/forms/settings-options.php"
       ],
       "hash": "f4151746ad1389ff01c78d2d4137c132",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/live-editor.md": {
       "kind": "extension",
@@ -338,7 +338,7 @@
         "{plugin}/framework/extensions/live-editor/manifest.php"
       ],
       "hash": "8b53a17ad1ce8afa993027e2c63b6045",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/mailer.md": {
       "kind": "extension",
@@ -346,7 +346,7 @@
         "{plugin}/framework/extensions/mailer/manifest.php"
       ],
       "hash": "67af7ed0a2ab85e9520fe595c9fd1099",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/megamenu.md": {
       "kind": "extension",
@@ -359,7 +359,7 @@
         "{plugin}/framework/extensions/megamenu/options/row.php"
       ],
       "hash": "468a0f1cbc03fc6d9568292a16f127e7",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/newsletter-crm.md": {
       "kind": "extension",
@@ -368,7 +368,7 @@
         "{plugin}/framework/extensions/newsletter-crm/settings-options.php"
       ],
       "hash": "bc4e17aa7aad52d4d2d52cf40368264b",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/portfolio.md": {
       "kind": "extension",
@@ -378,7 +378,7 @@
         "{plugin}/framework/extensions/portfolio/settings-options.php"
       ],
       "hash": "fbf1e28965914aa9e2f9b088046fe3af",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/post-types.md": {
       "kind": "extension",
@@ -386,7 +386,7 @@
         "{plugin}/framework/extensions/post-types/manifest.php"
       ],
       "hash": "3bbd74ae8fd81ca014909321c5e944be",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/seo.md": {
       "kind": "extension",
@@ -395,7 +395,7 @@
         "{plugin}/framework/extensions/seo/settings-options.php"
       ],
       "hash": "2a58af86706450f0ecbe86654f14282e",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/shortcodes.md": {
       "kind": "extension",
@@ -404,7 +404,7 @@
         "{plugin}/framework/extensions/shortcodes/settings-options.php"
       ],
       "hash": "9a0cf7c561afa61d1cdc0df7f50746cb",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/sidebars.md": {
       "kind": "extension",
@@ -414,15 +414,15 @@
         "{plugin}/framework/extensions/sidebars/settings-options.php"
       ],
       "hash": "ec519ef3ec5c17edb12f3f270595b7f5",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/site-converter.md": {
       "kind": "extension",
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "23d05e22252e41347ec4288b29705a32",
-      "synced": "2026-09-17"
+      "hash": "9ce0fa2d0d0bd03d44c22a744d21f2cb",
+      "synced": "2026-09-20"
     },
     "extensions/site-migration.md": {
       "kind": "extension",
@@ -431,7 +431,7 @@
         "{plugin}/framework/extensions/site-migration/settings-options.php"
       ],
       "hash": "44f12ab905964a084b5d7658316e7c17",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/snippets.md": {
       "kind": "extension",
@@ -439,7 +439,7 @@
         "{plugin}/framework/extensions/snippets/manifest.php"
       ],
       "hash": "54c3188f3d6688c4d1b049caad1dc6d6",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/template-library.md": {
       "kind": "extension",
@@ -447,7 +447,7 @@
         "{plugin}/framework/extensions/template-library/manifest.php"
       ],
       "hash": "24d99848c22f6407e2688d480cd5c714",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/update.md": {
       "kind": "extension",
@@ -456,7 +456,7 @@
         "{plugin}/framework/extensions/update/config.php"
       ],
       "hash": "249d8295742cb4b4dc31d372e3403b31",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "extensions/woocommerce.md": {
       "kind": "extension",
@@ -465,13 +465,13 @@
         "{plugin}/framework/extensions/woocommerce/settings-options.php"
       ],
       "hash": "22efcb3a7b3b11b3e7ebe576c826b990",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "fidelity-verification.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "option-types/addable-box.md": {
@@ -480,7 +480,7 @@
         "{plugin}/framework/includes/option-types/addable-box/class-fw-option-type-addable-box.php"
       ],
       "hash": "bce4f745a0bd0a7ee709735874d08d45",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/addable-option.md": {
       "kind": "option-type",
@@ -488,7 +488,7 @@
         "{plugin}/framework/includes/option-types/addable-option/class-fw-option-type-addable-option.php"
       ],
       "hash": "18982ac464ee65f726ee01c7015434c7",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/addable-popup.md": {
       "kind": "option-type",
@@ -496,7 +496,7 @@
         "{plugin}/framework/includes/option-types/addable-popup/class-fw-option-type-addable-popup.php"
       ],
       "hash": "a523ec98569f669f2a88f85c0712fe0e",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/background-image.md": {
       "kind": "option-type",
@@ -504,7 +504,7 @@
         "{plugin}/framework/includes/option-types/background-image/class-fw-option-type-background-image.php"
       ],
       "hash": "0cb058bb6c088ced4fa95fa6181e4eae",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/background-pro.md": {
       "kind": "option-type",
@@ -512,7 +512,7 @@
         "{plugin}/framework/includes/option-types/background-pro/class-fw-option-type-background-pro.php"
       ],
       "hash": "922d28d7dec13ffa4b8c08e59090af71",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/border-presets.md": {
       "kind": "option-type",
@@ -520,7 +520,7 @@
         "{plugin}/framework/includes/option-types/border-presets/class-fw-option-type-border-presets.php"
       ],
       "hash": "894c689809bbf791fd3a55fa4e0ddb7a",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/border-style-picker.md": {
       "kind": "option-type",
@@ -528,7 +528,7 @@
         "{plugin}/framework/includes/option-types/border-style-picker/class-fw-option-type-border-style-picker.php"
       ],
       "hash": "7f38bc959efc7882c49204bbbeb31e7b",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/box-shadow.md": {
       "kind": "option-type",
@@ -536,7 +536,7 @@
         "{plugin}/framework/includes/option-types/box-shadow/class-fw-option-type-box-shadow.php"
       ],
       "hash": "05c15c72f1d69f8df6a9ea4b71bf512b",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/button-hover-animation.md": {
       "kind": "option-type",
@@ -544,7 +544,7 @@
         "{plugin}/framework/includes/option-types/button-hover-animation/class-fw-option-type-button-hover-animation.php"
       ],
       "hash": "c54dfd839476dbab79778f0e7751f0ae",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/button-presets.md": {
       "kind": "option-type",
@@ -552,7 +552,7 @@
         "{plugin}/framework/includes/option-types/button-presets/class-fw-option-type-button-presets.php"
       ],
       "hash": "78cb0fda28437e5fb15606488b2709ab",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/button-style-picker.md": {
       "kind": "option-type",
@@ -560,7 +560,7 @@
         "{plugin}/framework/includes/option-types/button-style-picker/class-fw-option-type-button-style-picker.php"
       ],
       "hash": "f47698af59fa38cac944c0b5d7ddee64",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/code-editor.md": {
       "kind": "option-type",
@@ -568,7 +568,7 @@
         "{plugin}/framework/includes/option-types/code-editor/class-fw-option-type-code-editor.php"
       ],
       "hash": "a549a4c5d3087502787e49e576f6e2d8",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/color-picker.md": {
       "kind": "option-type",
@@ -576,7 +576,7 @@
         "{plugin}/framework/includes/option-types/color-picker/class-fw-option-type-color-picker.php"
       ],
       "hash": "d589b8e61fbed2709740f11b8e93fe5e",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/column-split.md": {
       "kind": "option-type",
@@ -584,7 +584,7 @@
         "{plugin}/framework/includes/option-types/column-split/class-fw-option-type-column-split.php"
       ],
       "hash": "db7b42285465385a48dec9a6b168585e",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/compact-color.md": {
       "kind": "option-type",
@@ -592,13 +592,13 @@
         "{plugin}/framework/includes/option-types/predefined-colors-color-picker-compact/class-fw-option-type-predefined-colors-color-picker-compact.php"
       ],
       "hash": "92966ed72f7382ad364ebb851170a413",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/containers.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "option-types/date-picker.md": {
@@ -607,7 +607,7 @@
         "{plugin}/framework/includes/option-types/date-picker/class-fw-option-type-wp-date-picker.php"
       ],
       "hash": "f2105664b76386220157cbd76045b4db",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/datetime-picker.md": {
       "kind": "option-type",
@@ -615,7 +615,7 @@
         "{plugin}/framework/includes/option-types/datetime-picker/class-fw-option-type-datetime-picker.php"
       ],
       "hash": "c40804fce4e7742edeec0bbfeea83781",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/datetime-range.md": {
       "kind": "option-type",
@@ -623,13 +623,13 @@
         "{plugin}/framework/includes/option-types/datetime-range/class-fw-option-type-datetime-range.php"
       ],
       "hash": "e83456565a9fd4cf9536729a339bbdeb",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/declaring-options.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "option-types/fw-multi-inline.md": {
@@ -638,7 +638,7 @@
         "{plugin}/framework/includes/option-types/fw-multi-inline/class-fw-option-type-fw-multi-inline.php"
       ],
       "hash": "f3c168d77f6bd2f3d50a4404da644fc2",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/gradient-v2.md": {
       "kind": "option-type",
@@ -646,7 +646,7 @@
         "{plugin}/framework/includes/option-types/gradient-v2/class-fw-option-type-gradient-v2.php"
       ],
       "hash": "94ee5cbc960b2ae3d01b903daa694f50",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/gradient.md": {
       "kind": "option-type",
@@ -654,7 +654,7 @@
         "{plugin}/framework/includes/option-types/gradient/class-fw-option-type-gradient.php"
       ],
       "hash": "4556e064187d6b0eb78f28f9033703f9",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/icon-badge-presets.md": {
       "kind": "option-type",
@@ -662,20 +662,20 @@
         "{plugin}/framework/includes/option-types/icon-badge-presets/class-fw-option-type-icon-badge-presets.php"
       ],
       "hash": "ad579274fd1d3f1cfa8fe53dfbdd626f",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/icon-v2.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "option-types/icon-v3.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "option-types/icon.md": {
@@ -684,7 +684,7 @@
         "{plugin}/framework/includes/option-types/icon/class-fw-option-type-icon.php"
       ],
       "hash": "ad5ed97ee3f42d33b0ccd7497c212ea3",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/image-picker.md": {
       "kind": "option-type",
@@ -692,7 +692,7 @@
         "{plugin}/framework/includes/option-types/image-picker/class-fw-option-type-image-picker.php"
       ],
       "hash": "355306268bb19c7e81618cbcee778928",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/image-style-picker.md": {
       "kind": "option-type",
@@ -700,7 +700,7 @@
         "{plugin}/framework/includes/option-types/image-style-picker/class-fw-option-type-image-style-picker.php"
       ],
       "hash": "ef0a2d36c6b5c3d93f5d5b82e3e2d1f6",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/map.md": {
       "kind": "option-type",
@@ -708,7 +708,7 @@
         "{plugin}/framework/includes/option-types/map/class-fw-option-type-map.php"
       ],
       "hash": "baf238618e47921b49718e60da80c5ff",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/multi-inline.md": {
       "kind": "option-type",
@@ -716,7 +716,7 @@
         "{plugin}/framework/includes/option-types/multi-inline/class-fw-option-type-multi-inline.php"
       ],
       "hash": "f39901ae874ee7c3b57b94c9de246ab9",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/multi-picker.md": {
       "kind": "option-type",
@@ -724,7 +724,7 @@
         "{plugin}/framework/includes/option-types/multi-picker/class-fw-option-type-multi-picker.php"
       ],
       "hash": "a47f3ec8ab0b3fbda88ed56397caaeae",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/multi-select.md": {
       "kind": "option-type",
@@ -732,7 +732,7 @@
         "{plugin}/framework/includes/option-types/multi-select/class-fw-option-type-multi-select.php"
       ],
       "hash": "0d1b596dc1c5e74a86f363fa23b0d525",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/multi-upload.md": {
       "kind": "option-type",
@@ -740,7 +740,7 @@
         "{plugin}/framework/includes/option-types/multi-upload/class-fw-option-type-multi-upload.php"
       ],
       "hash": "e26337e4c67f13e0004075f73464273b",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/multi.md": {
       "kind": "option-type",
@@ -748,7 +748,7 @@
         "{plugin}/framework/includes/option-types/multi/class-fw-option-type-multi.php"
       ],
       "hash": "0517789f82d448dac4e8b8811fc9206c",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/oembed.md": {
       "kind": "option-type",
@@ -756,7 +756,7 @@
         "{plugin}/framework/includes/option-types/oembed/class-fw-option-type-oembed.php"
       ],
       "hash": "d38a4a3e1f6a202d199696a5a2d48fe4",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/popover.md": {
       "kind": "option-type",
@@ -764,7 +764,7 @@
         "{plugin}/framework/includes/option-types/popover/class-fw-option-type-popover.php"
       ],
       "hash": "8906253e106fcc4b3bc46dd1f7a93dfd",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/popup.md": {
       "kind": "option-type",
@@ -772,7 +772,7 @@
         "{plugin}/framework/includes/option-types/popup/class-fw-option-type-popup.php"
       ],
       "hash": "1cf6ebc7469680984609e71d3cd2067b",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/position-box.md": {
       "kind": "option-type",
@@ -780,7 +780,7 @@
         "{plugin}/framework/includes/option-types/position-box/class-fw-option-type-position-box.php"
       ],
       "hash": "b7edcb4100125efd80d3e1a8fe50d7b4",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/predefined-colors-color-picker.md": {
       "kind": "option-type",
@@ -788,7 +788,7 @@
         "{plugin}/framework/includes/option-types/predefined-colors-color-picker/class-fw-option-type-predefined-colors-color-picker.php"
       ],
       "hash": "89622c0c43de77db2eabe842279ebd61",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/predefined-colors.md": {
       "kind": "option-type",
@@ -796,13 +796,13 @@
         "{plugin}/framework/includes/option-types/predefined-colors/class-fw-option-type-predefined-colors.php"
       ],
       "hash": "d3008f6851916bd19d2054defaa37652",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/primitives.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "option-types/radio-text.md": {
@@ -811,7 +811,7 @@
         "{plugin}/framework/includes/option-types/radio-text/class-fw-option-type-radio-text.php"
       ],
       "hash": "5e1cbdd0e37279e1795c43b3eee8552e",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/range-slider.md": {
       "kind": "option-type",
@@ -819,7 +819,7 @@
         "{plugin}/framework/includes/option-types/range-slider/class-fw-option-type-range-slider.php"
       ],
       "hash": "f322e05bf5de27056832b583933141c8",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/responsive.md": {
       "kind": "option-type",
@@ -827,7 +827,7 @@
         "{plugin}/framework/includes/option-types/responsive/class-fw-option-type-responsive.php"
       ],
       "hash": "3308f63743195349c78d16476398baec",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/rgba-color-picker.md": {
       "kind": "option-type",
@@ -835,7 +835,7 @@
         "{plugin}/framework/includes/option-types/rgba-color-picker/class-fw-option-type-rgba-color-picker.php"
       ],
       "hash": "39bd6a507b19c47944ca2d74ebe95f59",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/slider.md": {
       "kind": "option-type",
@@ -844,7 +844,7 @@
         "{plugin}/framework/includes/option-types/slider/class-fw-option-type-slider.php"
       ],
       "hash": "677bbafa27e13507153df54d6bb6b2d7",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/spacing.md": {
       "kind": "option-type",
@@ -852,7 +852,7 @@
         "{plugin}/framework/includes/option-types/spacing/class-fw-option-type-spacing.php"
       ],
       "hash": "f92a4bd27eeab52a68fe8b1373694016",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/split-slider.md": {
       "kind": "option-type",
@@ -860,7 +860,7 @@
         "{plugin}/framework/includes/option-types/split-slider/class-fw-option-type-split-slider.php"
       ],
       "hash": "4afdd75ab2780c9fec38ebbd7281690a",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/switch.md": {
       "kind": "option-type",
@@ -868,7 +868,7 @@
         "{plugin}/framework/includes/option-types/switch/class-fw-option-type-switch.php"
       ],
       "hash": "5e04e3baf94d027fbf0e39bcb49940a0",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/table-presets.md": {
       "kind": "option-type",
@@ -876,7 +876,7 @@
         "{plugin}/framework/includes/option-types/table-presets/class-fw-option-type-table-presets.php"
       ],
       "hash": "5de2a1ec548b075018869e0264be0199",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/table-style-picker.md": {
       "kind": "option-type",
@@ -884,7 +884,7 @@
         "{plugin}/framework/includes/option-types/table-style-picker/class-fw-option-type-table-style-picker.php"
       ],
       "hash": "bd90cf485542bd1ae0c0579ddfde4e96",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/tabs.md": {
       "kind": "option-type",
@@ -892,7 +892,7 @@
         "{plugin}/framework/includes/option-types/tabs/class-fw-option-type-tabs.php"
       ],
       "hash": "5eb724bf978aef9efeea40bc816e1ba3",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/time-picker.md": {
       "kind": "option-type",
@@ -900,7 +900,7 @@
         "{plugin}/framework/includes/option-types/time-picker/class-fw-option-type-time-picker.php"
       ],
       "hash": "9be2d732e03e7bb4d2c6022bc60d3fed",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/typography-v2.md": {
       "kind": "option-type",
@@ -908,7 +908,7 @@
         "{plugin}/framework/includes/option-types/typography-v2/class-fw-option-type-typography-v2.php"
       ],
       "hash": "4fda5f0413d368f39a31d529bd7368c5",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/typography.md": {
       "kind": "option-type",
@@ -916,7 +916,7 @@
         "{plugin}/framework/includes/option-types/typography/class-fw-option-type-typography.php"
       ],
       "hash": "e54935710eae0337fed5442c0ed39739",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/unit-input.md": {
       "kind": "option-type",
@@ -924,7 +924,7 @@
         "{plugin}/framework/includes/option-types/unit-input/class-fw-option-type-unit-input.php"
       ],
       "hash": "597be9a59ec0d69db195eddc397bd970",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/upload.md": {
       "kind": "option-type",
@@ -932,7 +932,7 @@
         "{plugin}/framework/includes/option-types/upload/class-fw-option-type-upload.php"
       ],
       "hash": "a2a5c8e298d48df5e2b81b13a5095baa",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "option-types/wp-editor.md": {
       "kind": "option-type",
@@ -940,7 +940,7 @@
         "{plugin}/framework/includes/option-types/wp-editor/class-fw-option-type-wp-editor.php"
       ],
       "hash": "20a4ea98d6eec18245cb302f054a311a",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/accordion.md": {
       "kind": "shortcode",
@@ -949,7 +949,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/accordion/options.php"
       ],
       "hash": "894fbc1ab6e80d067cd93fa9c7c928b9",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/animated-heading.md": {
       "kind": "shortcode",
@@ -958,7 +958,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/animated-heading/options.php"
       ],
       "hash": "23ab0a80b3747362ec944eb7039c75aa",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/audio-player.md": {
       "kind": "shortcode",
@@ -967,7 +967,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/audio-player/options.php"
       ],
       "hash": "5af2d41b6535c8c2316054948e13287c",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/author-box.md": {
       "kind": "shortcode",
@@ -976,7 +976,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/author-box/options.php"
       ],
       "hash": "6269049ddc105644b0b88fd5d68e72d2",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/avatar.md": {
       "kind": "shortcode",
@@ -985,7 +985,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/avatar/options.php"
       ],
       "hash": "d4dae8500836812ca6bb5ee51bee660a",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/badge.md": {
       "kind": "shortcode",
@@ -994,7 +994,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/badge/options.php"
       ],
       "hash": "f1ce9f7414c0a89580f957c2bb8d4338",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/before-after.md": {
       "kind": "shortcode",
@@ -1003,7 +1003,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/before-after/options.php"
       ],
       "hash": "7fc930c58c0a98398725989ef2bf764d",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/bleed-section.md": {
       "kind": "shortcode",
@@ -1012,7 +1012,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/bleed-section/options.php"
       ],
       "hash": "7624f6e123f950ff7189ca64eff0d5a5",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/blockquote.md": {
       "kind": "shortcode",
@@ -1021,7 +1021,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/blockquote/options.php"
       ],
       "hash": "f8645798ef7a15139144afc880e0326e",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/business-info.md": {
       "kind": "shortcode",
@@ -1030,7 +1030,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/business-info/options.php"
       ],
       "hash": "ebb6e34d70fca26d221faba55aa93a5e",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/button.md": {
       "kind": "shortcode",
@@ -1039,7 +1039,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/button/options.php"
       ],
       "hash": "7131ef8e69eabb301f340e4de34341a5",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/calendar.md": {
       "kind": "shortcode",
@@ -1048,7 +1048,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/calendar/options.php"
       ],
       "hash": "712b8fc9566b541565dc35c7e730a09b",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/call-to-action.md": {
       "kind": "shortcode",
@@ -1057,7 +1057,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/call-to-action/options.php"
       ],
       "hash": "bbdb2dfbfc7b661bd7438c6b9aa84bb1",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/carousel.md": {
       "kind": "shortcode",
@@ -1066,7 +1066,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/carousel/options.php"
       ],
       "hash": "ba112e2a1cc190043891abf45eeb7c02",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/code-block.md": {
       "kind": "shortcode",
@@ -1075,7 +1075,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/code-block/options.php"
       ],
       "hash": "fe3cf77fb556b437951c226eaeaff54c",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/column.md": {
       "kind": "shortcode",
@@ -1084,7 +1084,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/column/options.php"
       ],
       "hash": "abd48c7fe60497cc9d77f63cb4172c3b",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/comparison-table.md": {
       "kind": "shortcode",
@@ -1093,7 +1093,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/comparison-table/options.php"
       ],
       "hash": "8d6bb536b5fd49e3b2badda5f44ba026",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/contact-form.md": {
       "kind": "shortcode",
@@ -1102,7 +1102,7 @@
         "{plugin}/framework/extensions/forms/extensions/contact-forms/shortcodes/contact-form/options.php"
       ],
       "hash": "6837dd29eae4fbffdbdfd22ffaf35861",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/container.md": {
       "kind": "shortcode",
@@ -1111,7 +1111,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/container/options.php"
       ],
       "hash": "ce9bcec2fd02c910931d5fe0b97c149b",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/countdown.md": {
       "kind": "shortcode",
@@ -1120,7 +1120,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/countdown/options.php"
       ],
       "hash": "7e12ea69ea61ff1e31663977d3c6707d",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/counter.md": {
       "kind": "shortcode",
@@ -1129,7 +1129,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/counter/options.php"
       ],
       "hash": "ee8b95baf62696a5548f08a6a4eeb882",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/divider.md": {
       "kind": "shortcode",
@@ -1138,7 +1138,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/divider/options.php"
       ],
       "hash": "f3aa4101fd28dc3f446fe95ee21a03e5",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/feature-list.md": {
       "kind": "shortcode",
@@ -1147,7 +1147,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/feature-list/options.php"
       ],
       "hash": "8f5335f6b0747a177d8cb99cf8595193",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/featured-image.md": {
       "kind": "shortcode",
@@ -1156,7 +1156,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/featured-image/options.php"
       ],
       "hash": "d5fda1b129112e7c611868fe913319e6",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/flexbox.md": {
       "kind": "shortcode",
@@ -1165,7 +1165,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/flexbox/options.php"
       ],
       "hash": "18f7cbdf6ec0eab62f6c31d1dfde528e",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/flip-box.md": {
       "kind": "shortcode",
@@ -1174,7 +1174,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/flip-box/options.php"
       ],
       "hash": "40921b30a1791b5eefe31ba65dc59d5d",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/gallery-3d.md": {
       "kind": "shortcode",
@@ -1183,7 +1183,7 @@
         "{plugin}/framework/extensions/animation-engine/shortcodes/gallery-3d/options.php"
       ],
       "hash": "7f8763a4aef177ad7f4aa68930fa38ea",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/gallery.md": {
       "kind": "shortcode",
@@ -1192,7 +1192,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/gallery/options.php"
       ],
       "hash": "7cf49a6a9c2d59dd5f2d7a85db42a848",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/highlight-text.md": {
       "kind": "shortcode",
@@ -1201,7 +1201,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/highlight-text/options.php"
       ],
       "hash": "bc35aa11a7638b41dca1ce0329fc2372",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/icon-box.md": {
       "kind": "shortcode",
@@ -1210,7 +1210,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/icon-box/options.php"
       ],
       "hash": "4069071cf21a823038b535a661e34ae1",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/icon.md": {
       "kind": "shortcode",
@@ -1219,7 +1219,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/icon/options.php"
       ],
       "hash": "e447d6ca93403aa0133e067c56a17d43",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/image-box.md": {
       "kind": "shortcode",
@@ -1228,7 +1228,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/image-box/options.php"
       ],
       "hash": "1b4b31dd2c9761f1f5959c403f309d14",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/image-content.md": {
       "kind": "shortcode",
@@ -1237,7 +1237,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/image-content/options.php"
       ],
       "hash": "52ee8c645251e894aa58f3bcdc70341d",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/image-hotspots.md": {
       "kind": "shortcode",
@@ -1246,7 +1246,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/image-hotspots/options.php"
       ],
       "hash": "da0c3d3bcff0135d3e334b01a1f92947",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/image-sequence.md": {
       "kind": "shortcode",
@@ -1255,7 +1255,7 @@
         "{plugin}/framework/extensions/animation-engine/shortcodes/image-sequence/options.php"
       ],
       "hash": "484a285f72f63c5aa368c10ba41ae7dc",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/image.md": {
       "kind": "shortcode",
@@ -1264,7 +1264,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/media-image/options.php"
       ],
       "hash": "c9b8cc7805331ca56f18555bf1e6dcab",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/logo-grid.md": {
       "kind": "shortcode",
@@ -1273,7 +1273,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/logo-grid/options.php"
       ],
       "hash": "631734e297f6fd2960d435d4fbdcf446",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/lottie.md": {
       "kind": "shortcode",
@@ -1282,7 +1282,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/lottie/options.php"
       ],
       "hash": "06ae328aeb39294ac1374d128e26689b",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/map.md": {
       "kind": "shortcode",
@@ -1291,7 +1291,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/map/options.php"
       ],
       "hash": "44978cabce5ad6c2e653f507149a1c25",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/masonry-section.md": {
       "kind": "shortcode",
@@ -1300,7 +1300,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/masonry-section/options.php"
       ],
       "hash": "c78006cf9739a74c875e7c6fcc515538",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/media-video.md": {
       "kind": "shortcode",
@@ -1309,7 +1309,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/media-video/options.php"
       ],
       "hash": "05a7a0f4f36068ba0369891c8407fc4a",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/menu-toggle.md": {
       "kind": "shortcode",
@@ -1318,7 +1318,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/menu-toggle/options.php"
       ],
       "hash": "94053c6627bdabf308831245f155ee4a",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/modal-popup.md": {
       "kind": "shortcode",
@@ -1327,7 +1327,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/modal-popup/options.php"
       ],
       "hash": "80453c080004d38f93dd2f39973064ac",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/model-viewer.md": {
       "kind": "shortcode",
@@ -1336,7 +1336,7 @@
         "{plugin}/framework/extensions/animation-engine/shortcodes/model-viewer/options.php"
       ],
       "hash": "4e29dc932cb21c85ab40352a96632b00",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/nav-menu.md": {
       "kind": "shortcode",
@@ -1345,7 +1345,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/nav-menu/options.php"
       ],
       "hash": "77139b104f92be2b7068d40d20d69b17",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/newsletter.md": {
       "kind": "shortcode",
@@ -1354,7 +1354,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/newsletter/options.php"
       ],
       "hash": "9501bd584a7754de5e9add0c4d029579",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/notification.md": {
       "kind": "shortcode",
@@ -1363,7 +1363,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/notification/options.php"
       ],
       "hash": "0bbf5dd887521eb688ddea7809edefec",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/portfolio.md": {
       "kind": "shortcode",
@@ -1372,7 +1372,7 @@
         "{plugin}/framework/extensions/portfolio/shortcodes/portfolio/options.php"
       ],
       "hash": "72653768c24684465c5f73f2440f36fd",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/post-author.md": {
       "kind": "shortcode",
@@ -1381,13 +1381,13 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/post-author/options.php"
       ],
       "hash": "52242dd378835330f563a5f5f596074c",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/post-carousel.md": {
       "kind": "shortcode",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "UNRESOLVED — no source found"
     },
     "shortcodes/post-content.md": {
@@ -1397,7 +1397,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/post-content/options.php"
       ],
       "hash": "3791ae4a3142e3e67be0762a8abdf54f",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/post-date.md": {
       "kind": "shortcode",
@@ -1406,7 +1406,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/post-date/options.php"
       ],
       "hash": "7fa69f262c3624e2d8b479765bcea907",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/post-excerpt.md": {
       "kind": "shortcode",
@@ -1415,7 +1415,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/post-excerpt/options.php"
       ],
       "hash": "c11f098b56c1580aad56c8220cf3cc05",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/post-meta.md": {
       "kind": "shortcode",
@@ -1424,7 +1424,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/post-meta/options.php"
       ],
       "hash": "e912b6ff8506ebadb479d831355d2904",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/post-terms.md": {
       "kind": "shortcode",
@@ -1433,7 +1433,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/post-terms/options.php"
       ],
       "hash": "3a37b9800093b7dc8c5d71eb870ae820",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/post-title.md": {
       "kind": "shortcode",
@@ -1442,7 +1442,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/post-title/options.php"
       ],
       "hash": "58a3f7b161273ea565038b65330c53c7",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/posts.md": {
       "kind": "shortcode",
@@ -1451,7 +1451,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/posts/options.php"
       ],
       "hash": "9291c549d4d11d7f6e651c7284be0e0d",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/pricing-table.md": {
       "kind": "shortcode",
@@ -1460,7 +1460,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/pricing-table/options.php"
       ],
       "hash": "4752cb448ac9c5562707f34bf7c8cd10",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/progress.md": {
       "kind": "shortcode",
@@ -1469,7 +1469,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/progress/options.php"
       ],
       "hash": "5f4c9389cf03f916a01ae012e8046da5",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/project-details.md": {
       "kind": "shortcode",
@@ -1478,7 +1478,7 @@
         "{plugin}/framework/extensions/portfolio/shortcodes/project-details/options.php"
       ],
       "hash": "80ecdffb2040e2629716d58ae8c18633",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/project-gallery.md": {
       "kind": "shortcode",
@@ -1487,7 +1487,7 @@
         "{plugin}/framework/extensions/portfolio/shortcodes/project-gallery/options.php"
       ],
       "hash": "3ecdb4ab02cbc338eeb2d1bfec2d4e23",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/project-nav.md": {
       "kind": "shortcode",
@@ -1496,7 +1496,7 @@
         "{plugin}/framework/extensions/portfolio/shortcodes/project-nav/options.php"
       ],
       "hash": "bb4d048c2bff941aec502d57173d05f2",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/project-results.md": {
       "kind": "shortcode",
@@ -1505,7 +1505,7 @@
         "{plugin}/framework/extensions/portfolio/shortcodes/project-results/options.php"
       ],
       "hash": "d9879731094b9cb72b0acafd33dc6ba3",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/project-testimonial.md": {
       "kind": "shortcode",
@@ -1514,7 +1514,7 @@
         "{plugin}/framework/extensions/portfolio/shortcodes/project-testimonial/options.php"
       ],
       "hash": "f6ae55a508e5103b378cd6201e645456",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/related-projects.md": {
       "kind": "shortcode",
@@ -1523,7 +1523,7 @@
         "{plugin}/framework/extensions/portfolio/shortcodes/related-projects/options.php"
       ],
       "hash": "2c7a5f216230c56ef0285ae46c27e9e9",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/row.md": {
       "kind": "shortcode",
@@ -1531,7 +1531,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/row/class-fw-shortcode-row.php"
       ],
       "hash": "93a6c151bc25bdccb43cdf928f0bd172",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/scroll-indicator.md": {
       "kind": "shortcode",
@@ -1540,7 +1540,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/scroll-indicator/options.php"
       ],
       "hash": "e0671b0d216e45df08cc802d44d5efe2",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/scroll-to-top.md": {
       "kind": "shortcode",
@@ -1549,7 +1549,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/scroll-to-top/options.php"
       ],
       "hash": "eb213f7f95f4193bea03dc0274b6bd0e",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/section.md": {
       "kind": "shortcode",
@@ -1558,7 +1558,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/section/options.php"
       ],
       "hash": "b480bb29edd222c1b9650e25c59327c0",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/site-logo.md": {
       "kind": "shortcode",
@@ -1567,7 +1567,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/site-logo/options.php"
       ],
       "hash": "821b095dcd7365cc4e0733868399394d",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/site-search.md": {
       "kind": "shortcode",
@@ -1576,7 +1576,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/site-search/options.php"
       ],
       "hash": "75cd96c3e0552aa40ae0307ca5fa76bf",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/social-icons.md": {
       "kind": "shortcode",
@@ -1585,7 +1585,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/social-icons/options.php"
       ],
       "hash": "310faef8bfe68c54d0f4f2ec4c15b5f4",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/social-share.md": {
       "kind": "shortcode",
@@ -1594,7 +1594,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/social-share/options.php"
       ],
       "hash": "6abce57240db3a595c5090afbfd689a4",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/special-heading.md": {
       "kind": "shortcode",
@@ -1603,7 +1603,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/special-heading/options.php"
       ],
       "hash": "671c3d55bcc3ee70ebc77be6411fb26c",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/star-rating.md": {
       "kind": "shortcode",
@@ -1612,7 +1612,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/star-rating/options.php"
       ],
       "hash": "d553356c99238a196580d5566984e9ed",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/steps.md": {
       "kind": "shortcode",
@@ -1621,7 +1621,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/steps/options.php"
       ],
       "hash": "5a04e29063efdb4fc5afd8f2861b387d",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/svg-draw.md": {
       "kind": "shortcode",
@@ -1630,7 +1630,7 @@
         "{plugin}/framework/extensions/animation-engine/shortcodes/svg-draw/options.php"
       ],
       "hash": "0c164d7c39be323947caea5fba363f13",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/svg-morph.md": {
       "kind": "shortcode",
@@ -1639,7 +1639,7 @@
         "{plugin}/framework/extensions/animation-engine/shortcodes/svg-morph/options.php"
       ],
       "hash": "a7274a910e2e39af25b525b1ad81df37",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/table.md": {
       "kind": "shortcode",
@@ -1648,7 +1648,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/table/options.php"
       ],
       "hash": "ad71d1dcf49ecc9a08a9a060ea148719",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/tabs.md": {
       "kind": "shortcode",
@@ -1657,7 +1657,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/tabs/options.php"
       ],
       "hash": "2dac6e33513eec63e6af3e64232e8204",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/tag-list.md": {
       "kind": "shortcode",
@@ -1666,7 +1666,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/tag-list/options.php"
       ],
       "hash": "2f7d50f1f56c28f1c3d5d46aaa50da46",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/team-member.md": {
       "kind": "shortcode",
@@ -1675,7 +1675,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/team-member/options.php"
       ],
       "hash": "c471188852d4654d1ffaa6264cb258a7",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/testimonials.md": {
       "kind": "shortcode",
@@ -1684,7 +1684,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/testimonials/options.php"
       ],
       "hash": "c746492f814cb03ad8d8a6861bebfa0f",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/text-block.md": {
       "kind": "shortcode",
@@ -1693,7 +1693,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/text-block/options.php"
       ],
       "hash": "9c81f17a684f9905b14912a9d72ea480",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/text-expander.md": {
       "kind": "shortcode",
@@ -1702,7 +1702,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/text-expander/options.php"
       ],
       "hash": "d461734e608921e1ae034cf851a4894d",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/timeline.md": {
       "kind": "shortcode",
@@ -1711,7 +1711,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/timeline/options.php"
       ],
       "hash": "c3286f294d400e24bb7b4b8dd0cbfc75",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/toc.md": {
       "kind": "shortcode",
@@ -1720,7 +1720,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/toc/options.php"
       ],
       "hash": "6fdc0925c4b9150401d7204a5269ee70",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/tooltip.md": {
       "kind": "shortcode",
@@ -1729,7 +1729,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/tooltip/options.php"
       ],
       "hash": "20d629f51439d218b6b7ec30a3d931f7",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/video-popup.md": {
       "kind": "shortcode",
@@ -1738,7 +1738,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/video-popup/options.php"
       ],
       "hash": "d696ced8bde5dff6d5d7bb9b0655d62c",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/webgl-object.md": {
       "kind": "shortcode",
@@ -1747,7 +1747,7 @@
         "{plugin}/framework/extensions/animation-engine/shortcodes/webgl-object/options.php"
       ],
       "hash": "3e3daa068c56c7693c3b0d839a454567",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "shortcodes/widget-area.md": {
       "kind": "shortcode",
@@ -1756,13 +1756,13 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/widget-area/options.php"
       ],
       "hash": "93e5b7b4a6f6e595fcd859f02289443b",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "site-build-protocol.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "theme-settings/blog.md": {
@@ -1777,7 +1777,7 @@
         "{plugin}-theme/framework-customizations/theme/options/blog-single.php"
       ],
       "hash": "59266e731d597ed02e98c5477d51ddec",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/boxes.md": {
       "kind": "theme-settings",
@@ -1788,7 +1788,7 @@
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/components-table.php"
       ],
       "hash": "6f6299332f3c4ac078fedba5132be704",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/buttons.md": {
       "kind": "theme-settings",
@@ -1797,7 +1797,7 @@
         "{plugin}/framework/includes/presets/button-presets.php"
       ],
       "hash": "1137c0f1b7360485053c8ad8e043c578",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/colors.md": {
       "kind": "theme-settings",
@@ -1806,7 +1806,7 @@
         "{plugin}/framework/includes/presets/color-presets.php"
       ],
       "hash": "a40894358156119fb142e7d6f7285529",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/footer.md": {
       "kind": "theme-settings",
@@ -1820,7 +1820,7 @@
         "{plugin}-theme/framework-customizations/theme/options/footer-widgets.php"
       ],
       "hash": "1294753a7b2f9a01db57959d066cf2a3",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/general.md": {
       "kind": "theme-settings",
@@ -1831,7 +1831,7 @@
         "{plugin}-theme/framework-customizations/theme/options/general-sidebar.php"
       ],
       "hash": "23434ca28af00cb7b4b3758fbba494d8",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/header.md": {
       "kind": "theme-settings",
@@ -1847,7 +1847,7 @@
         "{plugin}-theme/framework-customizations/theme/options/header-topbar.php"
       ],
       "hash": "f1829548e66603576e0c267eb573c7dd",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/hover-animations.md": {
       "kind": "theme-settings",
@@ -1856,7 +1856,7 @@
         "{plugin}/framework/includes/presets/button-presets.php"
       ],
       "hash": "516913009e11e9a1007b538c43e37ad8",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/misc.md": {
       "kind": "theme-settings",
@@ -1874,7 +1874,7 @@
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/miscellaneous-scripts.php"
       ],
       "hash": "3a58691261c544c0bf98ab3307113a69",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/pages.md": {
       "kind": "theme-settings",
@@ -1887,7 +1887,7 @@
         "{plugin}-theme/framework-customizations/theme/options/general-pages.php"
       ],
       "hash": "25869dc18239be7abda87e306cbeea41",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/portfolio.md": {
       "kind": "theme-settings",
@@ -1897,13 +1897,13 @@
         "{plugin}-theme/framework-customizations/theme/options/portfolio-single.php"
       ],
       "hash": "0821791228b945d8033d425edfb5887a",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/programmatic-setup.md": {
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-09-17",
+      "synced": "2026-09-20",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "theme-settings/site-ux.md": {
@@ -1916,7 +1916,7 @@
         "{plugin}-theme/framework-customizations/theme/options/site-wide-ux-settings.php"
       ],
       "hash": "ce1a30d0230866222a7c519c9815ea19",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/social.md": {
       "kind": "theme-settings",
@@ -1925,7 +1925,7 @@
         "{plugin}-theme/framework-customizations/theme/options/social-settings.php"
       ],
       "hash": "54b620fdd10c4b4c0a40b56f4230e020",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/spacing.md": {
       "kind": "theme-settings",
@@ -1934,7 +1934,7 @@
         "{plugin}/framework/includes/presets/spacing-presets.php"
       ],
       "hash": "830aaa0bfb10401a3e177d99b7ae06cf",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/typography.md": {
       "kind": "theme-settings",
@@ -1944,7 +1944,7 @@
         "{plugin}-theme/framework-customizations/theme/options/general-fonts.php"
       ],
       "hash": "0f2c957e29ed1fab7612582f617e9621",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     },
     "theme-settings/woocommerce.md": {
       "kind": "theme-settings",
@@ -1952,7 +1952,7 @@
         "{plugin}-theme/framework-customizations/theme/options/woocommerce-settings.php"
       ],
       "hash": "258948e0c1b130e2785770f6e7745e85",
-      "synced": "2026-09-17"
+      "synced": "2026-09-20"
     }
   }
 }
