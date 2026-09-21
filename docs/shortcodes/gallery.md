@@ -14,6 +14,7 @@ A multi-image gallery with 20+ layout designs (grid, masonry, carousel, coverflo
 | `caption_source` | select | `'caption'` | `caption` `title` `alt` `description` | Which Media field feeds the caption. |
 | `image_style` | image-style-picker | `''` | `''` (none) · `imgs-rounded` · `imgs-circle` · `imgs-portrait-card` · `imgs-monochrome` · `imgs-duotone` · `imgs-diagonal` · `imgs-hexagon` · `imgs-cinematic` | Preset visual treatment (shape / filter) applied to each image. Replaces the old `rounded` corner select. |
 | `hover_zoom` | switch | `'yes'` | `'yes'`\|`'no'` | Scale each image on hover. |
+| `rounded` | select | `'rounded-0'` | `'rounded-0'`\|`'rounded'`\|`'rounded-lg'` | Tile corners (Square / Rounded 6px / Rounded large 12px) when NO Image Style preset is set — the preset owns the corners. Square by default since shortcodes 1.15.19 (was an undeclared 6px `rounded`). |
 | `box_style` | box-style picker | see Notes | box-preset picker object | Reusable Box Preset on each card. |
 | `text_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Text color (`kind: text`). |
 | `bg_color` | color-preset | `{predefined:'',custom:''}` | compact color object | Background color (`kind: bg`). |

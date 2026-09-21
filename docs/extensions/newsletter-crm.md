@@ -27,7 +27,7 @@ Without it, a `[newsletter]` signup is only emailed to the site admin and is nev
   - **Settings** — plus an explicit, opt-in "Remove all data" action.
 - **Shortcodes:** none. It is the storage layer under the existing `newsletter` shortcode.
 - **Public endpoints** (query args on the home URL — no rewrite rules, nothing to flush):
-  `?fw-crm-confirm=<token>` and `?fw-crm-unsubscribe=<token>`. Both render a minimal,
+  `?fw-crm-confirm=<token>` and `?fw-crm-unsubscribe=<token>`. Since 1.0.33 also `?fw-crm-preferences=<token>` — a **preference centre** (per-list opt-in/out, keyed by the never-expiring unsubscribe token; placeholder `{{preferences_url}}`). Saving never unsubscribes: opting out of everything is the separate unsubscribe link. Both render a minimal,
   self-contained, `noindex` page (light/dark aware) that a site can replace via
   `unysonplus_newsletter_crm_endpoint_page`.
 - **Settings** (`fw_get_db_ext_settings_option('newsletter-crm')`): `default_list`,
@@ -179,6 +179,7 @@ list ID to the provider's audience/group ID — mapped, never guessed.
   links with an optional uploaded icon; **Video** links a poster image because no client plays
   video; **Hero** carries a VML background fallback for Outlook; **Raw HTML** is filtered by the
   saving user's `unfiltered_html` capability, which only works because compilation happens on save.
+- **Forms bridge:** a *Subscribe to the newsletter* action for the Forms extension (per-form list + tags + name field), gated strictly on a ticked Consent field with purpose `newsletter` — an email field alone never subscribes anyone; and a *Form entries* activity panel on the subscriber screen (read by email; the CRM never writes entries).
 - **The email template library is the framework's**, switched on with `'template_saving' => true`
   on the builder option — the Templates panel, save/load/delete and JSON export/import come from
   the builder extension, scoped by builder type so email and page templates never mix. Six

@@ -14,7 +14,7 @@ Composite background field with five stacking layers (bottom → top): **color �
   "overlay":  { "color": "", "gradient": { "type": "linear", "angle": 90, "stops": [] } },
   "video":    { "enabled": "no", "external_url": "", "source_mp4": [], "source_webm": [],
                 "poster": [], "fallback": [], "loop": "yes", "autoplay": "yes",
-                "mute": "yes", "playsinline": "yes", "allow_interaction": "no" },
+                "mute": "yes", "playsinline": "yes", "allow_interaction": "no", "position": "scroll" },
   "advanced": []
 }
 ```
@@ -36,9 +36,16 @@ Composite background field with five stacking layers (bottom → top): **color �
 | `overlay.gradient` | obj | gradient-v2 data (`{type,angle,stops}`) layered on top; `stops:[]` = off. |
 | `video.enabled` | string | `'yes'`/`'no'`. Other video keys are uploads/switches. |
 | `video.allow_interaction` | string | `'yes'`/`'no'`; lets pointer events reach the `<video>` (default off). |
+| `video.position` | string | `'scroll'` (contained, default) / `'fixed'` (viewport-pinned page backdrop). The **Position** select in the Video panel. The theme's Site Background renders the page-wide `<video>` layer ONLY when this is `'fixed'` (`unysonplus_render_site_bg_video`); the Site Converter stores `'fixed'` for a converted site backdrop. |
 | `advanced` | array | reserved; usually `[]`. |
 
 ## Notes / gotchas
+- **Every stored key needs a control, or a Save resets it.** `get_value_from_input()` rebuilds the value from the posted
+  fields and falls back to the default for anything not posted. `video.position` had no control until core 3.0.25, so
+  the converter's `'fixed'` became `'scroll'` on the first Theme Settings save and the site background video vanished
+  (a real-site report while recording a demo). Same family: the `switch` sub-controls (Loop / Allow pause) post their
+  choice JSON-encoded (`"yes"` with quotes) — the sanitizer decodes them now; a raw `=== 'yes'` had saved Loop as `no`
+  on every submit.
 - **No built-in `to_css()`** — consumers build CSS themselves. Enable logic: color when `predefined\|\|custom`; gradient when `count(stops) >= 2`; image when `image.src.url`; overlay when `overlay.color` set or `overlay.gradient.stops` has ≥2; video when `video.enabled === 'yes'`.
 - `disable` config drops layers (e.g. box presets use `disable:'video'` since a CSS class can't host a `<video>`); in header/footer contexts the video layer is disabled too.
 - Resolve the color layer via the theme's `unysonplus_get_option_color_picker(value.color.value)` (predefined-or-custom).

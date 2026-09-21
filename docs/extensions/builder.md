@@ -26,6 +26,11 @@ The base **Page Builder** option type — the drag-and-drop `builder` option tha
   the flex-row percentage width, which is void in a grid area — a `fw-span-lg-8` tile in a 12-track grid drew at 66.67 % of
   its own 8-track area (a third short) until the width was cleared. So a 12-column Grid + `fw-span-N` children IS the exact
   `grid-cols-12` bento model (the Site Converter emits it for mixed spans that tile lines of 12).
+- **The gap that calc reads is the ROW's, never the cell's own** (builder 1.3.8 + core `css-tokens.php`): a cell carrying
+  its own `fw-gap-*` (its column gap) redefined the inherited `--fw-flex-gap` on itself, so a 32px-gap row of 16px-gap
+  cells subtracted 16, overflowed by 16px and stacked to one column. Every `.fw-gap-N` (md / lg tiers too) now publishes
+  `--fw-parent-gap` on its DIRECT CHILDREN (`.fw-gap-N > *`), and the width calc reads
+  `var(--fw-parent-gap, var(--fw-flex-gap, 0px))` — a child-only var a cell's own gap class can never shadow.
 - **A span cell in a gapped flex row shares the row's gaps in proportion to its span** (builder 1.3.7):
   `.fw-flex > [class*="fw-span-"] { width: calc(pct - gap * (1 - frac)) }` with `--fw-span-frac` (the span as a number)
   declared beside `--fw-span-pct` on every span / fifth class. Subtracting a whole gap from every cell had left each

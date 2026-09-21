@@ -725,6 +725,144 @@ script (no markup, no stamped pseudo) — nothing to reproduce deterministically
   the theme's default 1rem each had made a 133px footer 165; the container choice now MERGES into Custom Styling instead
   of replacing it. A plain footer glyph (no tile) drops the header mark's frame entirely (`border:0; padding:0` too — the
   framed mark's hairline drew a square). Site Converter 1.9.57, kit 1.9.56, golden `[AE]` (1046/0).
+- **Footer link hover = the NATIVE option; a utility token never shadows it.** The capture measures the hover with a
+  real pointer (`data-sc-footer` → `link-hover:<colour>`) and it rides `footer_link_hover_color` (theme
+  `--footer-link-hover`). The old `hover:text-<token>` path ALSO emitted `.footer-column .footer-link:hover{color:
+  var(--color-<token>)}` — at (0,3,0) it out-ranked the native `.footer a:hover`, and for a token the palette lacks
+  (`brand`) the undefined var resolved to the resting colour, so a source's green hover never showed (a real-site
+  report). Now: a measured hover → native only, no scoped rule (`footer_stamp_has`); no stamp → the token rule only
+  for a token the theme defines, through `palette_var_for_token()` / JS `paletteVarForToken()` (aliases `brand`→
+  `primary`, `background`→`bg`, `foreground`→`text`; `emerald-400` → nothing). The logo title hover token takes the
+  same resolver. Site Converter 1.9.58, capture 1.11.33, kit 1.9.57, golden footer-link checks (1049/0).
+
+### A lender landing page, 2026-09-21: nine rules from one real-site audit (golden `[AF]`, fixture 4)
+
+A full source-vs-converted audit of a lender landing page (the conversion test corpus; fixture
+`tests/fixtures/golden-fixture-4-lender.html`, brand-neutral) — every finding a GENERAL rule:
+
+- **A content-sized cap on a widget is the widget's.** `wrapper_maxw()` now stamps `capW` / `capCenter` onto every
+  widget block (a columns row, an accordion, a list, a table, tabs, steps, a timeline, pricing, a gallery,
+  testimonials, a logo strip, a panel) — both a claimed element's OWN cap (`grid … max-w-5xl mx-auto`) and a flattened
+  wrapper's (`<div class="max-w-3xl mx-auto">` around a FAQ). The mapper's `apply_block_cap()` (inside
+  `apply_block_anim` + on the columns band) scopes `max-width … !important` with auto side margins when centred —
+  `!important` because the section's content-width rule (`.section--cw-* > .fw-container > *`) and a widget's own base
+  margin out-rank a unique-class rule. The recurring "section container width" report: a 2-col grid and a FAQ list had
+  run the full 1368px container.
+- **Two-column flex rows stacked (builder 1.3.8 + core `css-tokens.php`).** The span-width calc subtracts the ROW's gap,
+  but a cell carrying its own `fw-gap-*` (its column gap) redefined the inherited `--fw-flex-gap` on itself, so a
+  32px-gap row of 16px-gap cells subtracted 16, overflowed by 16px and wrapped to one column. The row now publishes its
+  gap to direct children as **`--fw-parent-gap`** (`.fw-gap-N > *`, md / lg tiers too) and `frontend-grid.css` reads
+  `var(--fw-parent-gap, var(--fw-flex-gap, 0px))` — a child-only var a cell's own gap class can never shadow.
+- **A nav's dropdown-trigger `<button>` is a nav item.** `find_menu_group()` disqualified any container holding a
+  `<button>` (a CTA / the mobile toggle), so a `<nav>` with a "More ▾" trigger (`aria-haspopup`, unfilled, a chevron) lost
+  its `gap:32px` and the links rendered 4px apart. `is_menu_trigger_button()` exempts it.
+- **A glass card in a bare `relative` wrapper is framed once.** `cell_card_skin()` reads the skin one wrapper down; the
+  `skin_below` guard that keeps it off the column only counted `1 === count($cblocks)` — the absolute corner badge
+  (a `-top-4 -right-4` chip carried as a positioned code block) made it two, so the wrapper AND the panel wore the glass
+  (double frame, washed-out tiles). `block_is_floater()` excludes pinned blocks from that count, and
+  `anchor_abs_overlays()` now also marks a two-node FLEXBOX cell `position:relative` (native Position) when it holds
+  such a chip, so the badge pins to the card, not the band.
+- **A logo strip's caption and measured marks.** `logo_strip_build()` resolves the strip ROW (`logo_strip_row()`: the
+  marks' common ancestor) inside a matched wrapper; text siblings ("Trusted by buyers of leading manufacturers") ride as
+  their own text blocks (they were dropped); an `<img>` strip's `iconSize` is the image's measured height (`h-8` = 32px,
+  not the 48px default); a per-ITEM `opacity-80` dim counts when the strip carries none. JS twin: `logoStripTreatment`.
+- **Step cards.** `steps_block()` captures the numeral element's stamp + its DECLARED corner sides (`numCs` / `numPos`:
+  `top-4 right-4` → top/right only, never all four computed offsets), the title / body typography (`titleCs`, `titleMb`,
+  `textCs`); `detect_steps_design()` adds the badge's size (`markerSize`: width, else height — the stamp drops an
+  unremarkable width), the glyph's ink read from the `<svg>`'s first stamped child (`markerText`), and the card's inset +
+  shadow on the box skin. `n_steps()` scopes them: `.fw-steps__num-inline` (absolute, 60px, faded), `--st-size`,
+  `marker_text_color`, and `selector.fw-steps .fw-steps__item{padding}` at (0,3,0) because the Cards design sheet loads
+  after the page CSS. A 60px faded "01" had rendered as a 14px chip beside an invisible white-on-tint icon.
+- **Testimonial look.** `testimonial_look()` measures the avatar (`avatarPx`), quote / name / role / footer-stat
+  typography (`cs_text_decls`) and the footer row's rhythm; `n_testimonials()` picks the nearest native `avatar_size`
+  AND pins the exact px (the view inlines its own width/height), puts the role colour on `author_job_color`, scopes the
+  rest, and drops the theme blockquote inset. A `w-12` portrait had drawn 128px.
+- **Muted = muted TEXT ink.** The theme's `--color-muted` paints `.text-muted` (captions, meta, a testimonial's role);
+  a shadcn `muted` token is the muted SURFACE. The palette picker prefers `muted-foreground` / `on-surface-variant`, and
+  replaces a surface-light pick (`is_surface_light`, luminance ≥ .8) with `sample_muted_ink()` — the page's most common
+  `text-muted-foreground` / `text-muted` / mid-grey utility colour. The role line had been invisible.
+- **A ≥7-column footer keeps the source's tracks.** `footer_track_css()` pins each Auto-Width column to its measured
+  grid track (a `col-span-2` brand = 2 tracks + the gap: 318px beside 143px links) and the gap, desktop-only
+  (`@media (min-width:783px)`), so a ninth column wraps exactly where the source wraps; flushed into the misc CSS on
+  every main-bar path (`flush_footer_track_css`). The theme's even 1.7 : 1 split had drawn the brand 214px.
+- **A comparison column's eyebrow keeps its stamp** (`overlineCs` → `overline_cs` → native uppercase / letter-spacing).
+
+Site Converter 1.9.59, builder 1.3.8, capture 1.11.34, kit 1.9.58; golden `[AF]` (1066/0), JS 72/0; render-verified
+on `localhost/` (band verify overall drift 7.6%).
+
+### A diner landing page, 2026-09-21: the second real-site refinement of the day (golden `[AG]`, inline)
+
+- **Self-hosted `@font-face` reaches the child theme.** The PHP rebuild (`raw_chrome_split`) reads only inline `<style>`;
+  a licensed display face declared in an external stylesheet was invisible, so every heading fell back. `import_dir()`
+  now carries the JS capture's `chrome.base_css` @font-face rules (families the PHP design lacks, gstatic ones excluded)
+  into `theme_design.raw_chrome.base_css`, and `rehost_fonts()` downloads the file (`fonts/sc-font-N.otf`).
+- **The nav's own face → Header → Menu → Menu Font Family** (`detect_menu_styles` tallies `font-family`; set when it is
+  not the `<body>` face). **The masthead stamp** (`data-sc-header`) is read off a stamped DESCENDANT when the wrapper
+  `<header>` carries none (a ticker bar + a fixed `<nav>`), so `header_layout.min_height` lands. **A Simple image logo
+  carries its rendered width** (`image_width` → `simple.width`); the measured height beats the phone `h-16` class.
+- **A section-level heading rule never paints a card's heading.** `#sec h3{color … !important}` (an id beats every
+  class) had painted a card's red h3 white on its white card: the profile selector is now `h3:not([class*="boxp-"] *)`.
+- **Times and ranges are not statistics** (`counter_cell_parse`: `4–10 PM`, `11:30 AM–10 PM`, `9:00 - 17:00`).
+  **A panel of ≥2 short text lines decomposes** (`cell_is_decomposable`: an 11-character tile had fallen to the verbatim
+  mirror and drew its box twice). **A cell's own `text-center` rides the cell record** (`cell_geometry` → `align`; the
+  mapper read only the cell's classes, empty on that path).
+- **A feature list's orientation is the MEASURED flex direction** (`flex flex-col sm:flex-row` is a row at 1440), and a
+  horizontal list carries its `justify-content` + `column-gap` (`selector.fw-fl--orient-horizontal{…}`).
+- **Wrapper margins reach buttons, panels and painted rule bars** (`carry_wrap_margins` in the button / panel / paint
+  builders): a card's `p-12` bottom inset (mbAdd on the last block), a `max-w-3xl mx-auto mb-16` card wrapper, a heading
+  wrapper's `mb-14` under its rule bar.
+- **A full-width banner crop** (`img_own_box`: `w-full h-64 object-cover` → `selector img{width:100%;height:256px;
+  object-fit:cover}`) instead of the natural size inset in the card.
+- **Gallery captions keep their typography + inset** (`captionCs` / `captionPad` → `.fw-gallery__overlay-text`).
+
+Site Converter 1.9.60, kit 1.9.59; golden `[AG]` (1077/0). JS twins for this batch are still pending (the PHP engine is
+what a bundle import runs).
+
+### A home-goods storefront, 2026-09-21: the third real-site audit of the day (golden `[AH]`, inline)
+
+- **The mega-menu extension activation is self-verifying.** `import_dir()` activated `megamenu` through the manager, but
+  on the reported install it never persisted, so the imported mega panel rendered as a plain dropdown of blank column
+  rows ("the megamenu not working"). After activating, the bundle now checks `fw()->extensions->_get_db_active_extensions(
+  'megamenu')` and writes the extension straight into the framework's active-extensions option when it did not land
+  (`mega_activation` in the result). A reconvert of the SAME site keeps its existing WP menu — delete the
+  `<Site> Header` menu to rebuild it from the new nav tree.
+- **A display-size text wordmark is the brand, not a menu item** (`links_in`: a ≥22px, ≤2-word home link is skipped —
+  it had become the first item of both the header and footer menus).
+- **Image tiles.** A non-native photo aspect (`aspect-[4/5]`) → the NEAREST `image_ratio` choice + the exact
+  `aspect-ratio` scoped on `.imgbox__media` ("the WooCommerce images not tall enough"). A corner CHIP pinned on the frame
+  ("Featured" / "New": absolute, short, filled) → an `.imgbox__media::before` pseudo-element carrying its fill / ink /
+  type / inset (`image.badge`); a hover-revealed pill (`opacity-0`) is never a badge. An `<svg>` inside a `<button>` or an
+  absolute overlay is a CONTROL (`is_control_glyph`) — the wishlist heart had become the card's icon. The card's
+  eyebrow (category line) → the image_box `subtitle` with its type, and the body size is read from the description,
+  not the 11px kicker; a hover-revealed line (`opacity-0`) is neither eyebrow nor body.
+- **Photo cards in NESTED rows are image boxes** (the nested-row cell path always built `n_icon_box` — a bento of six
+  collection tiles lost every photo). A tile whose title sits INSIDE the frame on an absolute layer (`textOverlay`) →
+  the image_box OVERLAY family (reveal `scrim`) with the source gradient on `.imgbox__scrim` and the overlay inset.
+- **The hero aspect-box hoist needs a band-wide, single box** (`section_bg_image` 3b): a collection tile's
+  `aspect-[16/9]` photo with an overlaid h3 (one of six, 774 of 1440px) had been hoisted as the whole section's
+  background.
+- **A page container's width is never a content cap** (`stamp_cap`: ≥ 1400px is the section's content width) — the
+  `max-w-[1600px]` cap had overridden the theme gutters and a 4-up product row ran edge to edge.
+- **An intro row's kicker is the overline ONCE** (`heading_cta_row_build`: the first `<p>` is a subtitle only when it is
+  not the kicker and follows the heading), and the row keeps its own `mb-14` (`apply_block_margins`).
+
+Site Converter 1.9.61, kit 1.9.60; golden `[AH]` (1090/0), JS 72/0; render-verified on `localhost/` (mega panel opens
+on hover; 4:5 tiles with badges; six overlay tiles; square 6-up gallery).
+
+#### Follow-up (Site Converter 1.9.62, shortcodes 1.15.18–19): image corners come from the SOURCE, never a shortcode default
+
+Two shortcode defaults were drawing 6px corners over a sharp-edged source and could not be removed:
+
+- **Image Box** — `.imgbox__media{border-radius:var(--imgbox-radius)}` defaulted to 6px, and because the Image Style
+  preset renders INSIDE that frame a square-cornered preset could never override it. The base is now `--imgbox-radius:0`
+  (the preset owns corners; the `card`/`badge` designs still read the variable). No converter change: the mapper carries
+  no radius onto image boxes (only onto their badge).
+- **Gallery** — the mapper hard-coded `rounded`, and since `rounded` was an UNDECLARED att the builder dropped it on
+  render, so every converted grid drew the 6px default. The gallery now declares a **Corners** option (Square / Rounded
+  6px / Rounded large 12px, square by default, ignored when an Image Style is set), and Stitch stamps **`tileRadius`**
+  (the first tile's measured `border-radius` — the tile, its clipping wrapper, or the img) which `n_gallery` maps to
+  `rounded-0` (0) / `rounded` (≤8px) / `rounded-lg` (>8px). Golden `[AI]` (three checks; 1093/0). JS twin: the JS path
+  builds no galleries yet (pending with the [AG]/[AH] twins).
 
 ### The feed, 2026-09-19: a glass "liquid" page's twelve findings (six fixtures) → rules (2026-09-19)
 
