@@ -255,6 +255,15 @@
       "synced": "2026-09-21",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
+    "extensions/admin-skin.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/admin-skin/manifest.php",
+        "{plugin}/framework/extensions/admin-skin/settings-options.php"
+      ],
+      "hash": "4b66ebccd32ac2b7ff2782affb9b9c2f",
+      "synced": "2026-09-22"
+    },
     "extensions/animated-icons.md": {
       "kind": "extension",
       "src": [
@@ -303,8 +312,8 @@
         "{plugin}/framework/extensions/builder/manifest.php",
         "{plugin}/framework/extensions/builder/config.php"
       ],
-      "hash": "be7f74f010487877f2c026486d96bde9",
-      "synced": "2026-09-21"
+      "hash": "e1299f9214057e069c5af6ed0888e12b",
+      "synced": "2026-09-22"
     },
     "extensions/chat.md": {
       "kind": "extension",
@@ -403,8 +412,8 @@
         "{plugin}/framework/extensions/shortcodes/manifest.php",
         "{plugin}/framework/extensions/shortcodes/settings-options.php"
       ],
-      "hash": "fd32452d55ef0eae9950253529f598c4",
-      "synced": "2026-09-21"
+      "hash": "ed1d5cdbe44fd34ec73b5ef6d0c0bf4e",
+      "synced": "2026-09-22"
     },
     "extensions/sidebars.md": {
       "kind": "extension",
@@ -421,8 +430,8 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "33e1f4998f8e5fb1fbc3af298b9024ef",
-      "synced": "2026-09-21"
+      "hash": "6f3c566061d83e07c4128f8a6fe44e3e",
+      "synced": "2026-09-22"
     },
     "extensions/site-migration.md": {
       "kind": "extension",
