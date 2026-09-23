@@ -150,7 +150,7 @@ atts. Filenames are the shortcode folder name (kebab); the tag is dashes→under
 **Data / display:** `counter` · `countdown` · `progress` · `star-rating` · `calendar` · `map` · `business-info` · `tag-list`
 **Interactive:** `accordion` · `tabs` · `tooltip` · `modal-popup` · `scroll-indicator` · `scroll-to-top` · `menu-toggle`
 **Icons / social:** `icon` · `social-icons` · `social-share` · `notification`
-**Site / dynamic:** `site-logo` · `nav-menu` · `site-search` · `widget-area` · `code-block` · `posts` · `post-carousel` · `post-title` · `post-content` · `post-excerpt` · `post-meta` · `post-author` · `post-date` · `post-terms` · `author-box`
+**Site / dynamic:** `site-logo` · `nav-menu` · `site-search` · `widget-area` · `code-block` · `posts` · `post-title` · `post-content` · `post-excerpt` · `post-meta` · `post-author` · `post-date` · `post-terms` · `author-box`
 **Extension-sourced (portfolio / forms / animation-engine):** `contact-form` · `portfolio` · `project-details` · `project-gallery` · `project-nav` · `project-results` · `project-testimonial` · `related-projects` · `gallery-3d` · `model-viewer` · `webgl-object` · `image-sequence` · `svg-draw` · `svg-morph`  *(WooCommerce elements — `wc_products`, `wc_mini_cart`, `wc_cart_link`, … — are in [`../extensions/woocommerce.md`](../extensions/woocommerce.md).)*
 
 **Colors on elements:** use the compact color-preset field (`{predefined:'text-<slug>'|'bg-<slug>',custom}`),

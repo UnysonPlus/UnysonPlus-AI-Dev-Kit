@@ -430,8 +430,8 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "6f3c566061d83e07c4128f8a6fe44e3e",
-      "synced": "2026-09-22"
+      "hash": "250807d58e49af03c8b1a9083ca30699",
+      "synced": "2026-09-23"
     },
     "extensions/site-migration.md": {
       "kind": "extension",
@@ -1392,13 +1392,6 @@
       "hash": "52242dd378835330f563a5f5f596074c",
       "synced": "2026-09-21"
     },
-    "shortcodes/post-carousel.md": {
-      "kind": "shortcode",
-      "src": [],
-      "hash": null,
-      "synced": "2026-09-21",
-      "note": "UNRESOLVED — no source found"
-    },
     "shortcodes/post-content.md": {
       "kind": "shortcode",
       "src": [
@@ -1882,8 +1875,8 @@
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/miscellaneous-reset.php",
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/miscellaneous-scripts.php"
       ],
-      "hash": "3a58691261c544c0bf98ab3307113a69",
-      "synced": "2026-09-21"
+      "hash": "049f06d4f50eacbb0e508ce8a51db005",
+      "synced": "2026-09-23"
     },
     "theme-settings/pages.md": {
       "kind": "theme-settings",

@@ -864,6 +864,65 @@ Two shortcode defaults were drawing 6px corners over a sharp-edged source and co
   `rounded-0` (0) / `rounded` (≤8px) / `rounded-lg` (>8px). Golden `[AI]` (three checks; 1093/0). JS twin: the JS path
   builds no galleries yet (pending with the [AG]/[AH] twins).
 
+#### Follow-up (Site Converter 1.9.63): a hero SCROLL CUE is the native `scroll_indicator`, pinned — and a wrapper's bottom inset lands on the last IN-FLOW block
+
+- **`scroll_cue_of()`** (Stitch recognizer, priority 99): an out-of-flow element anchored to the bottom (`bottom-*` or the
+  nearer computed edge) whose content is at most a three-word label plus ONE glyph (svg / icon-font), cue-ish by label
+  (scroll / descend / explore / down / more) or by glyph (`chevron-down`, `arrow-down`, `mouse`, `animate-bounce`) → block
+  `scroll_cue` (`abs:true`) with the label + its `cs_text_decls`, the glyph markup / lucide id / measured size, the glyph's
+  ink (its own `text-white/50` utility first — svgs are never stamped — then the nearest stamped ancestor), the layout
+  (label above / glyph above / inline / icon-only), an anchor `#target`, `pinCls`/`pinCs`, the transform and the gap.
+- **`n_scroll_cue()`** (mapper builder): `finalize_widget('scroll_indicator', …)` with text / icon / layout / target /
+  `icon_size` / `icon_color` / `text_color`; the label's measured type on `selector .sc-scroll-cue__label{…}`, the gap on
+  `.sc-scroll-cue`, the native Position option from the pin (`anchor_abs_overlays` makes the section its containing block)
+  and `transform:translateX(-50%)` for `-translate-x-1/2`.
+- **Flattened wrapper insets skip floaters:** the `mbAdd` a flattened wrapper carries (its `pb-28`) now lands on the last
+  in-flow block (`block_is_floater` walk-back), not on a pinned cue at the end of the wrapper — the hero content had sat
+  ~70px lower than the source because the 112px inset rode the cue instead of the CTA row.
+- Golden `[AJ]` (four checks; 1097/0). JS twin: pending (`scrollCueOf`).
+
+### The shared-report feed's ranked themes, 2026-09-23 (golden `[AK]`, inline)
+
+`aggregate-reports.mjs` over the published feed returned **155 reports · 39 sites · 115 agent findings** (0 fallbacks,
+0 opportunities — every failure was a confident-but-wrong map). Re-tested against the build of the day, four themes were
+already fixed (the container rail/gutter and the body font-size, an invented icon_box glyph and its body size, sibling
+inline leaves running together); the rest became rules:
+
+- **This import owns `primary`** (`FW_Site_Converter_Menus::claim_primary`). A menu's location was inferred from its NAME,
+  so a nav called "<Brand> Menu" — or just "<Brand>" — was created and left unassigned while `primary` still carried the
+  PREVIOUS conversion's menu. 35 sites in the feed, hand-fixed every time. Naming can't be exhaustive, so the rule is
+  structural: when no menu in the import claimed `primary`, the first imported menu that has items and is not a footer menu
+  takes it. (`infer_location` also knows "menu" now.)
+- **A kicker HEADING over the headline is one heading** (`transform_kicker_headings`): when the first of two adjacent
+  headings is ≤ 60 % of the second's computed size — or uppercase / tracked / a different family and smaller — it is the
+  overline and the larger one the title, whatever the tag order (`h2` then `h3`). The section loop also learned
+  build_cell_items' "a heading following a pending eyebrow is its title" rule, which is what folds the pair.
+- **A chip/kicker keeps its gap** (`block_gap_below` → `overline_gap_css`): the measured `margin-bottom` it held below
+  itself rides the folded overline as `selector .heading-overline{margin-bottom:…}` (the pill had sat 8px above an h1 the
+  source spaced 24–32px away).
+- **A third face loads** (`extra_faces`): the named families the page really uses beyond heading/body — ranked by how much
+  text wears them, ≥ 2 leaves each, at most two — are appended to the generated Google-Fonts URL (de-duplicated). The
+  converter already carried the family onto those nodes; without the stylesheet they fell back to Courier.
+- **An `<img>` that pins its own box keeps it** (`media_box_css_el` fallback): `w-full h-[740px] object-cover rounded-2xl`
+  with no wrapper class → `height:740px;object-fit:cover` + the measured radius / shadow, instead of `height:auto`.
+- **An author block makes a testimonial** (`has_author_block`): a flex ROW holding a round ≤ 80px avatar (an image or a
+  1–3 letter monogram disc) beside two short stacked lines whose first is heavier/larger. Requiring the row is what keeps
+  service cards and product tiles out. `author_candidates` now also skips a ONE-letter monogram — but only inside the disc,
+  so an all-caps role like "CTO" stays a role.
+- **A button's preset follows its COMPUTED fill:** an alpha-tinted background (< 0.9) skips the semantic-class shortcut, so
+  `bg-primary` and `bg-primary/10` resolve to two presets instead of both taking the solid one.
+
+Site Converter 1.9.65, kit 1.9.64; goldens 1105/0 + 20/0 + chrome parity, JS 73/0; render-verified on `localhost/`
+(the reconverted storefront keeps its own nav on `primary`).
+
+**JS twins (capture service 1.11.35)** — `feed-themes-parity.test.mjs` guards them:
+`coalesceHeadingGroups` folds a kicker heading into the next heading's overline (size / uppercase / tracking / family
+test) and carries its `marginBottom`; `imgSkin` stamps `pinnedH` for an `<img>` that pins its own cropping box and
+`mediaImageNode` emits it; `button-match`'s `presetFor` drops the semantic-class shortcut for an alpha-tinted fill;
+`testimonialsOf` accepts a card that ends in an author ROW (round ≤ 80px avatar + a heavier line over a lighter one)
+and `testimonialItem` never seats a disc monogram as the name. Still PHP-only: the scroll cue and gallery corners —
+the JS path has no gallery or scroll_indicator builder yet.
+
 ### The feed, 2026-09-19: a glass "liquid" page's twelve findings (six fixtures) → rules (2026-09-19)
 
 One conversion reported 11 findings this morning (10 systematic, 6 with a sandbox fixture + a general solution). Three
