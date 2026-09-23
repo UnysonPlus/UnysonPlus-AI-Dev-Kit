@@ -10,7 +10,7 @@ The Button shortcode composes these three: `class="btn btn-primary btn-lg btnfx-
 ### Button Presets — `button_colors`
 
 - **Type**: `button-presets` (custom option type; a repeatable list of color/skin presets with per-state options and a live preview).
-- **Default**: the 13 seeded presets from `unysonplus_default_button_color_presets()` (enumerated below).
+- **Default**: the 14 seeded presets from `unysonplus_default_button_color_presets()` (enumerated below).
 - **Choices**: not a fixed choice list — each preset row is user-defined. Color fields are compact-picker values whose `predefined` references a **Color Preset slug** (always-present slugs: `white`, `gray`, `light-gray`, `blue`, `green`, `cyan`, `amber`, `red`, `black`; the seeds also use `primary`, `secondary`, `indigo`, `teal`, `light-blue`, `orange`, `pink`).
 - **Saved value shape** — array of preset rows, each:
 
@@ -45,7 +45,7 @@ Empty states (`active`/`focus`/`disabled` when `{}`) inherit the `default` look 
 
 The option type also supports **typography**, **box**, **shadow**, and **custom CSS** per preset (per the option's `desc`: "Default / Hover / Active / Focus / Disabled states, typography, box, shadow and custom CSS are all supported"); the seeded defaults populate only the color/border/gradient fields above and leave typography/box/shadow/custom-CSS empty (inherited from `.btn` / the chosen size).
 
-#### Seeded default presets (13)
+#### Seeded default presets (14)
 
 | id | color_name | slug (`.btn-`) | kind | default text / bg / border | hover |
 | --- | --- | --- | --- | --- | --- |
@@ -63,6 +63,19 @@ The option type also supports **typography**, **box**, **shadow**, and **custom 
 | 0000000016 | Danger Outline | `danger-outline` | outline | red text+border | fill: bg→red, text→white |
 | 0000000031 | Gradient | `gradient` | gradient (white text, no border) | linear 135° #667EEA→#764BA2 | reversed: #764BA2→#667EEA |
 | 0000000021 | Link | `link` | link (text only, no bg/border) | primary text | text → indigo |
+| 0000000041 | Editorial | `editorial` | list-row (all of it in `custom_css`) | hairline top+bottom rule, transparent, uppercase tracked | dark invert (bg #121212, white text) |
+
+**Editorial is the one seed whose look lives entirely in `custom_css`.** It is a full-width "list row" CTA — a
+hairline rule above and below, uppercase tracked type, the label at the left and a `::after` `+` glyph at the right,
+inverting to dark on hover. None of that is expressible through the per-state colour fields (border-top/bottom only,
+a pseudo-element, and the flex split), so the whole skin rides on `custom_css` with `{{SELECTOR}}` — which resolves to
+the DOUBLED `.btn-editorial` selector, so it out-ranks the base `.btn` rules. It suits a product grid's Add-to-Cart
+slot (Products element → Card → Add to Cart Button = "Button Style preset").
+
+**Backfill for existing sites.** A site that has SAVED its button set does not pick up a new seed, so
+`unysonplus_maybe_add_editorial_button_preset()` appends Editorial to a saved set once, on `admin_init`, guarded by
+the `unysonplus_button_editorial_added` option. A site still on the defaults already has it and the function exits
+immediately. It is non-destructive: it only ever appends, and it never runs twice.
 
 ## button_sizes box
 

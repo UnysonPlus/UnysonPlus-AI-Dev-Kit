@@ -26,6 +26,10 @@ build type*, and conflating the two is itself a bug.
 > to the measured spec" instruction as *the converter's* job (translate the class), with these tools as the
 > assembly check only.
 
+> **Auditing a finished conversion?** Use the ready-made prompt in
+> [converter-training-prompt.md](converter-training-prompt.md) — it forces the tools to be RUN, every
+> section to be LOOKED AT, and every gap between the two to be fixed in the tool as well as the converter.
+
 ## Rule 1 — Capture-first: build to a measured SPEC, never a screenshot
 
 Before building a region, **capture the source's real values** and build to them. A screenshot has no

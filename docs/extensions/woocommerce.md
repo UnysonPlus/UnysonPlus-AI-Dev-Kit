@@ -104,13 +104,30 @@ Modal tabs (UI grouping only; atts are flat):
 - **Card** — *what each card shows*, in three groups (**rows-only since 2026-08-01** — see below):
   - **Card Layout:** `card_rows` (the single card model), `box_style` (Box Preset skin), `image_ratio`, `image_size`.
   - **Badges:** `show_ribbon` (from `_upwc_ribbon` product meta), `show_sale_badge` (+ `badge_style` text/percent), `show_featured_badge`, `show_new_badge` (+ `new_days`). These pick **which** badges appear in the `badges` slot.
-  - **Add to Cart:** `add_to_cart_text` (the `cart` slot's button label).
+  - **Add to Cart:** `add_to_cart_text` (the `cart` slot's button label), `cart_style`, `cart_btn_style`, `cart_btn_size`.
+  - **Quick View:** `quick_view_placement`.
 
 **Card Layout = the row designer (the ONE card model).** The old `card_layout` Classic/Slot toggle and the per-element **presence switches** (`show_price`/`show_rating`/`show_excerpt`/`show_wishlist`/`show_quick_view`/`show_add_to_cart`/`show_rating_count`/`show_stock`) were **removed 2026-08-01** — they were never used and double-controlled what the rows already own. **Presence is now "is the slot in a row"** (a slot renders when it's in a row AND the product has that data; remove the slot to hide it).
 
 - `card_rows` = an addable, drag-sortable list of ROWS. Each row = `{ slots:[…], direction:'inline'|'stack', justify:'start'|'center'|'between'|'end', align:'start'|'center'|'end'|'stretch' }`. Known slots: `badges, wishlist, media, title, excerpt, rating, rating_count, price, cart, quickview`. Empty slots (and empty rows) collapse, so a card with no rating/ribbon degrades cleanly. Seeded default (mirrors the Site Converter's emission): `[badges,wishlist] between` · `[media,title,excerpt] stack/center` · `[rating,rating_count] center` · `[price,cart] between`.
 - Cards render `.upwc-product--slotted` with `.upwc-product__row` (flex, `.upwc-row--{inline|stack}` + `.upwc-j-*` + `.upwc-a-*`). `rating` renders our own star markup (no WooCommerce "Rated X out of 5" screen-reader leak); `rating_count` shows the **average score** (e.g. 4.9), not the review count. The `badges` slot is a static row element (badge types chosen by the toggles above).
 - **Structure vs skin.** The rows set STRUCTURE. The card **skin** (border / corners / shadow / fill + hover) comes from **`box_style`** — a **Box Preset** picker (`sc_card_box_style_field()`; saved as a `boxp-{slug}` class applied to each `.upwc-product`, managed in Theme Settings → Components → Box Presets) — the native, on-brand way to skin the card. Scoped Custom CSS (`.upwc-products .upwc-product{…}`) is the fallback when a build needs a one-off skin (what the Site Converter emits from a captured card).
+
+**Add to Cart can wear a Button Style preset.** `cart_style` (`default` | `preset`) chooses between WooCommerce's
+own loop button and a themed `<a>`: on `preset`, `cart_btn_style` (the Button Style preset) + `cart_btn_size` (its Size)
+come from **Theme Settings → General → Buttons** — the same presets the `[button]` element and the single
+`[wc_product]` use, so a grid's cart button can match any look a build defines (an "Editorial" outline preset, say).
+The themed anchor **keeps Woo's AJAX add-to-cart** (it carries `add_to_cart_button` / `ajax_add_to_cart` and the data
+attributes), while variable / grouped / external products link to the product page instead, as they must. One shared
+helper renders it for the grid and the single product — `upwc_wc_products_preset_atc()` over `sc_button_style_atts()`
+— so the two cannot drift.
+
+**Quick View can float over the image.** `quick_view_placement` (`slot` | `image`) decides where the Quick View
+button lives. `slot` (the default) keeps it a Card Rows slot, placed wherever you add it. `image` floats it
+**centred over the product image, revealed on hover**: the media slot becomes `.upwc-product__media--qv`, holding the
+product link **and** a sibling `.upwc-product__quickview--overlay` button — a sibling, never nested inside the `<a>`,
+so the two click targets stay separate. The `quickview` row slot is skipped in `image` mode so the button cannot
+render twice; the Quick View modal itself (full product info, no page load) is unchanged either way.
 
 **Image Ratio + Image Size.** `image_ratio` (auto/square/portrait/landscape) owns the image **shape**; `image_size` (unit-input width, empty = auto/fill) owns the **scale**, emitted as the `--upwc-img-size` custom property on the grid wrapper. Together they replace the old "cap the product `img` height from the child theme" workaround.
 

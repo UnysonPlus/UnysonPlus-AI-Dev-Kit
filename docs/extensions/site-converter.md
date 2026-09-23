@@ -920,8 +920,169 @@ Site Converter 1.9.65, kit 1.9.64; goldens 1105/0 + 20/0 + chrome parity, JS 73/
 test) and carries its `marginBottom`; `imgSkin` stamps `pinnedH` for an `<img>` that pins its own cropping box and
 `mediaImageNode` emits it; `button-match`'s `presetFor` drops the semantic-class shortcut for an alpha-tinted fill;
 `testimonialsOf` accepts a card that ends in an author ROW (round ≤ 80px avatar + a heavier line over a lighter one)
-and `testimonialItem` never seats a disc monogram as the name. Still PHP-only: the scroll cue and gallery corners —
-the JS path has no gallery or scroll_indicator builder yet.
+and `testimonialItem` never seats a disc monogram as the name.
+
+**The JS path's two missing elements (capture service 1.11.36)** — it now has them:
+
+- **`galleryBlockOf()`** (extractor): ≥ 3 sibling tiles that each hold one image and no real text, on a grid / flex row
+  → a `gallery` block with the images, the tiles' measured corner radius, the column count, gap and tile aspect. A tile
+  carrying more than a 40-character label is a CARD, not a gallery tile, and keeps its old path.
+- **`galleryNode()`** (mapper): the native `gallery` — media source, `design_settings.grid` (columns / gap snapped to the
+  shortcode's scale / nearest ratio) and **Corners** from the measured radius (0 → `rounded-0`, ≤ 8px → `rounded`,
+  larger → `rounded-lg`), the same thresholds as the PHP `n_gallery`.
+- **`scrollCueOf()` / `scrollCueNode()`**: the twin of the PHP scroll cue — label + glyph (library id when the svg is a
+  lucide), the label's measured type on `.sc-scroll-cue__label`, the native Position option from the source's placement
+  and the `-translate-x-1/2` half-width centring.
+- **The fidelity guard learned about galleries.** A media-bearing section with no `row`/`testimonials` block is kept
+  VERBATIM so decomposition can't drop its images; a `gallery` block now counts as a clean decomposition too, because the
+  photos ARE the block. Without that the native Gallery could never appear on a real page. A hero whose photo is a
+  background (the scroll-cue case) still stays verbatim by design — the cue survives inside the mirrored markup.
+- End-to-end on a real capture: the JS path now emits `gallery×1` (6 images, `rounded-0`, 6 columns, 1:1) where it used
+  to emit one `code_block` for the whole band; fallbacks 4 → 3. Guarded by `feed-themes-parity.test.mjs` (23 checks).
+
+### A boutique storefront, 2026-09-23: the fifth real-site audit (golden `[AL]`, inline)
+
+Source vs converted on `localhost/`: the converted page ran **19 % taller** than the source (5033px against 4245).
+Six general rules later it is **within 0.7 %** (4273px), and every band matches structurally:
+
+- **A band header is a ROW** (`is_heading_cta_row` / `heading_cta_row_build`): the heading-side test used
+  `getElementsByTagName`, which excludes the element ITSELF, so `<div class="flex justify-between"><h2>…</h2><a>View
+  all</a></div>` — the commonest band-header shape there is — counted zero headings, was rejected, and the link folded
+  under the heading as its subtitle. Both the gate and the builder now count a child that IS the heading.
+- **A photo TILE belongs to its photo** (`image_tile_of`, priority 87, above `panel`): a filled / framed box whose only
+  real content is one image (hover overlays ignored) → one `image` block carrying the fill, inset, radius and measured
+  height, with the photo contained at its own cap. Claimed as a panel, the tile shipped as an empty coloured box with
+  the photo floating beside it.
+- **A price is not a statistic** (`counter_cell_parse`): a currency figure written to the cent with no caption and no
+  unit ("$11.00") is a price — a product card's `370ml | $11.00` meta row had turned the grid into animated counters.
+- **A hover-revealed label is never resting content** (`is_hover_revealed`, shared): the hidden layer is usually the
+  WRAPPER (`<div class="absolute inset-0 opacity-0 group-hover:opacity-100"><span>Quick View</span></div>`), so checking
+  the leaf alone let it through as the card's permanent eyebrow. The helper walks ancestors.
+- **A card's CTA can be a `<button>`** (or a `cursor-pointer` row): generated sources rarely use `<a>` for "Add to cart",
+  and the whole row was dropped. A short-labelled button element is the card's button, its trailing glyph its icon.
+- **A card's META ROW is body copy**: a `justify-between` row of short leaves after the title becomes the card's text
+  (joined with a separator) when it has no other description — the card used to ship with an empty body.
+- **A block-flow numbered list is VERTICAL** (`detect_steps_design`): `<div class="mt-8 space-y-6">` has no `flex-col`
+  and no grid, so three stacked steps fell through to the horizontal/cards branch — and `step_card_of` took the
+  NUMERAL's own round chip as the step card's box, so they rendered as a row of circles. The card must now hold the
+  step's content, and a numeral the source sets inline at the item's start (`numInline`) is left-aligned instead of
+  pinned to the item's right edge by the element's "big faded number" convention.
+
+Site Converter 1.9.68, kit 1.9.67; goldens 1118/0 + 20/0 + chrome parity, JS 73/0; render-verified on `localhost/`.
+
+#### The header is a ROW MODEL, not a class hunt (golden `[AM]`)
+
+The header detectors asked their questions of Tailwind class NAMES — `text-xs` for "is this a utility bar?",
+`flex-col` for "is this the centered design?" — and generated sources answer in arbitrary values (`text-[11px]`) and
+block flow. `header_row_model()` now reads the header's **visible desktop rows** and measures each one: its height,
+its computed type size, whether it holds the nav (a `<nav>`, or ≥3 links that are not the brand) and whether its brand
+sits at the header's horizontal centre (from the capture's `data-sc-zone` box). Everything else derives from it:
+
+- **Top bar:** a first row that is short — smaller MEASURED type than the main row, or its own fill / hairline —
+  above the row holding the nav. `text-[11px]` with no fill used to fail the gate and the whole bar was dropped.
+- **Centered design:** the brand centred in one row with the nav in another IS `centered`, whatever the rows are laid
+  out with (a block-flow header has no `flex-col` to find).
+- **Ownership:** `header_topbar_row()` is shared, so a control that rides the bar (ship-to, search, cart) is never ALSO
+  a header CTA — each of them used to render a second time as a bordered button beside the nav. A control in a row the
+  source hides at desktop (`md:hidden`, or a row whose stamp computes `display:none`) is not a desktop action either.
+- **The bar's own groups** are its direct children when the bar itself is the flex row (descending blindly into the
+  first child made the LEFT group the container and dropped the rest), it inherits the header's fill and ink when it
+  paints none of its own, its brand cell is dropped (the theme's logo renders it), and several controls in one cell are
+  kept apart instead of running together ("SearchCart (0)").
+
+#### Footer + list items (same batch)
+
+- A footer `<h3>` that is the BRAND wordmark is not a "lead CTA heading" (`brand_text_of()` + a home-link ancestor
+  test): the brand column had taken the lead branch and dropped its logo, its description paragraph and its newsletter.
+- A newsletter's title can be a styled `<span>` / `<label>` — small and uppercase or tracked — not only an h-tag or a
+  `<p>`; and the BRAND is never the form's title or description.
+- A two-leaf item splits by **weight** as well as by size: `font-semibold uppercase` 12px over an 11px line is a title
+  over its description (it had run together as "WORLDWIDE SHIPPINGDelivered cold…").
+- A testimonial's rating takes the source's measured star ink and size, on the rendered `.ts-card__rating
+  .sc-rating__fill` markup — the element's default amber repainted stars a source draws in its page ink.
+
+#### Verify with the TOOLS, not with your eyes (the discipline this batch was missing)
+
+Three artefacts already exist for every capture and answer "how close is it?" without guessing. Use them before
+reading any PHP:
+
+- **`verify.mjs` → `verifySections({ sourceUrl, convertedUrl })`** — START HERE (capture 1.11.38). It aligns the two
+  pages by SECTION (`<section>` / `<header>` / `<footer>` / `.fw-section`, matched by id then by order) and, inside
+  each matched pair, diffs the ELEMENTS: text leaves matched by text, images matched by file name → alt → order
+  (the importer sideloads media under its own name). Positions are measured RELATIVE to the section's own top, so a
+  section that starts 50px lower does not report every child as moved. Output is a per-section bug list: `missing`,
+  `img-missing`, `img-box` (with both boxes), `joined`, `moved` (dx/dy/dw/dh), `img-fit`, `type`, `extra`, plus each
+  section's height delta. Hover-only content (a wrapper at `opacity:0`) is skipped on both sides, so a source's
+  "Quick View" overlay is not reported as dropped.
+- **`verifyChrome({ sourceUrl, convertedUrl, scope })`** — the same element diff for one region (header / footer).
+  It matches leaves between the two pages by their TEXT and compares boxes, reporting `missing` / `joined` / `moved` /
+  `type` / `extra` with the pixel deltas. This is the one that sees what the eye sees: a band score of 8.4 % said the
+  header was fine while its utility links sat on the wrong row, 639px off — `verifyChrome` printed exactly that.
+  Run it on `header` and `footer` after every chrome change; a finding IS the bug report.
+- **`verifyUrls({ sourceUrl, convertedUrl, bands })`** — per-band pixel drift plus the height delta. It says WHICH
+  bands are wrong, so the work is ordered by measured damage — but it can only ever point at a band, never at an
+  element: a few small controls in the wrong place are a rounding error in a 1440×425 band.
+- **`conversion-parity.json`** (written by the capture) — a scored checklist: container width, border colour,
+  roundness, section count, header/footer presence, never-drop classes. A failing row is a converter bug with a number.
+- **`conversion-drops.json` / `capture-residue.csv` / `class-coverage.json`** — what the converter itself knows it
+  dropped, and which source properties never made it across.
+
+Then measure the specific elements in the browser (Playwright: box, font-size, letter-spacing, x-centre) rather than
+comparing screenshots by eye. Every header rule below came from a measurement that contradicted what the screenshots
+seemed to say.
+
+#### The header, continued (golden `[AM]`, Site Converter 1.9.69)
+
+- **A row that carries the BRAND is the masthead, never the top bar.** Mapped as a top bar it split one source row
+  (utility · wordmark · utility) into two converted rows. The masthead's own groups now ride `header_main`'s three
+  zones — left group, centred logo, right group — rendered through the same cell builder the top bar uses.
+- **A two-row masthead is recognised when the brand is a TEXT link.** `header_rows()`'s brand test wanted an `<img>`,
+  a logo class or a stamped svg; a styled `<a href="/">Brand</a>` matched none, so the nav row never reached the
+  theme's Bottom Bar and was pushed into the main row's end column.
+- **A menu row is not a row of buttons.** `cs_is_button()` is satisfied by the mere presence of `background-color:` in
+  the stamp (the capture writes it on nearly everything), so every plain nav link read as a button and the row failed
+  the links-only test. A link counts as a button only when it PAINTS: a non-transparent fill, a real border width, or
+  a radius. The same test now separates header CTAs from plain text controls.
+- **A two-line wordmark is split by measurement.** `detect_logo()` matched a leaf whose text equals the glued lockup
+  text — which no leaf does — so the whole lockup took the `<a>` wrapper's type (11px sans instead of the source's
+  24px tracked serif) and the sub-line ran into the title. The largest text leaf is the wordmark, the smaller one the
+  tagline, and the tagline's own size / tracking / family / colour ride `.site-logo__sub`.
+
+Measured after: the converted header is two rows like the source (masthead + bottom-bar nav), the wordmark renders
+24px Cormorant at 5.28px tracking and the sub-line 9px at 2.7px — both exactly the source's values.
+
+#### …and what the band score still could not see (Site Converter 1.9.70)
+
+`verifyChrome` on the same header returned eleven findings the band score had hidden:
+
+- **A three-zone masthead keeps CLASSIC**, not `centered`. The centered design lays the main row out as a COLUMN, so
+  a `utility · wordmark · utility` row had its side groups stacked above and below the wordmark (measured: left group
+  27px above the brand, right group 47px below). `centered` is for a logo ABOVE a nav with no side zones.
+- **Each control in a masthead group is its own element** (a `list_item` carrying its link), not one flattened HTML
+  string: "Search" and "Cart (0)" had become a single run-on node that could neither align nor space like the source.
+  A control's own leaves are joined with a single space, so "Ship to:" + "USA" reads "Ship to: USA".
+- **The menu links' own horizontal padding is carried.** The theme insets every link; a source spacing its nav with
+  `gap-10` sets none, so every converted item measured 32px wider and the menu ran 160px wide.
+
+Measured after: findings 11 → 6, every nav item and both utility groups within tolerance on the correct row.
+
+#### A photo TILE on a card (Site Converter 1.9.71 — found by `verifySections`)
+
+`verifySections` compared the product grid element by element and printed the defect as numbers: the source's jar
+renders **199×290** (portrait, contained in its cream tile), the conversion **302×227** (landscape, cropped). The
+band score had called that band "17.1 % drift" and the eye called it "the jar looks a bit zoomed".
+
+The card's photo frame was only recognised when the source declared an `h-*` class or the image was `h-full`. A
+PAINTED frame (`bg-[#F2EDE6] p-8 flex items-center justify-center`) whose height simply measures 354px is a media
+frame too, and an `object-contain` / `max-h-[…]` photo sits INSIDE it at its own size. `card_from_cell` now carries
+`frameHeight` / `frameBg` / `framePad` / `imgMaxH` for that case and `n_image_box` emits the frame (fill, inset,
+height, centred) plus a contained image capped at its measured height. Measured after: the four product images fall
+within tolerance and the section's height delta goes −100px → +28px.
+Known remaining on this source: the two-row header (a utility top bar over a centred wordmark) collapses to one row and
+its utility links render as bordered buttons; the hero's round seal badge and vertical SCROLL rail are dropped; the video's
+play overlay renders beside the frame rather than centred on it and its caption is dropped; testimonial stars take the
+theme's amber rather than the source's ink; a CTA band's icon + title + description items run together; the footer's brand
+description and newsletter label are dropped and its social links move into the brand column. JS twins pending.
 
 ### The feed, 2026-09-19: a glass "liquid" page's twelve findings (six fixtures) → rules (2026-09-19)
 
@@ -3763,3 +3924,380 @@ wavy underline or bounce — not the place a value is derived.
   **hero / media-bearing** sections still fall to verbatim `code_block` for non-video heroes (fidelity-
   preserving; background-video heroes now map to a section bg video, see 2026-08-02 above); broaden
   token→option mapping beyond buttons (typography, spacing, boxes).
+
+### 2026-09-23 — pinned overlays, glyph fidelity, the product tile and the five-column footer
+
+A section-by-section audit of a converted source (see
+[converter-training-prompt.md](../converter-training-prompt.md)) took the page from **138 → 107**
+element-level findings. Each fix is a general rule with a golden ([AN]–[AP], now 1142 assertions):
+
+- **A pinned LABEL over a photo** (`absolute top-6 left-6`, no fill, no radius) is a third overlay class
+  beside the floating card and the decorative blob. `img_pinned_labels_css()` folds it onto the media
+  node as `::after`, anchored to whichever computed edge is **nearer** (so it holds for a source with no
+  utility classes) and wearing the innermost leaf's own face. It must be ONE leaf — a stacked lockup
+  would glue into `"MAISON1923FRANCE"`, since a pseudo-element's `content` is a single string.
+- **A grid CELL that IS a photo frame is claimed whole.** The cell path only ran `claim_element()`, which
+  applies the claim rules but never the recognizers, so the frame was split into a bare image plus a
+  stray paragraph.
+- **A control's inline glyph survives a shortcode with no icon slot.** `Mapper::svg_mask_css()` paints it
+  as a `currentColor` **mask** pseudo-element, at the glyph's *rendered* size (its `w-3.5` class, not the
+  svg's own 24px attribute), so it follows the control's colour and hover colour. `iconSvg` previously
+  held only an arrow MARKER string, so every other glyph was discarded.
+- **A control whose source border is not uniform on four edges keeps those edges** (and its
+  `justify-content`) instead of taking a Button Preset's full box.
+- **A card's meta row keeps two cells**, each with its own measured type — and a colour is written as
+  **hex**, because WordPress's `safecss_filter_attr` drops an inline `rgb()` colour outright and keeps a
+  hex one. (The data was right and the render was wrong: only the rendered check caught it.)
+- **A five-column footer carries its measured tracks as scoped CSS.** The theme's fifths picker can only
+  express compositions summing to five units, so five physical columns have no native choice but equal —
+  which drew the brand column 162px too narrow, wrapped its wordmark and shifted every link column.
+- **A social link that shows a TEXT label belongs to its column**, not the social icon row; only a
+  glyph-bearing one is a social chip. Both the detector and the column's link filter now agree.
+
+**Parity:** the pinned-label rule has its JS twin (`pinnedLabelOf` in `capture-extract.mjs` +
+`mediaImageNode` in `to-pages.mjs`, guarded by `feed-themes-parity.test.mjs`). The **product-tile rules
+are PHP-only** — the JS path has no `image_box` builder and no card meta-row reader at all, so there is
+nothing to keep in sync until one exists; the same is true of the footer column rules (chrome detection
+has always been PHP-only).
+
+**Lens work in the same pass** (capture service `verify.mjs`): `verifySections()` now models element
+**skin** (fill, border, radius, shadow, weight, tracking, case, alignment), **icons and painted boxes**,
+**cross-section relocation**, the **pinned-vs-flow** position model, **pseudo-element text and mask
+glyphs**, and ancestor visibility via `checkVisibility()`. Each was added because a real defect — or a
+real non-defect — was invisible to it.
+
+### 2026-09-23 (later) — responsive tiers, the card's default layout, and a second pinned-overlay class
+
+The same audit continued to **138 → 99** findings. New general rules, goldens `[AN]` extended (1146 assertions):
+
+- **A `text-*` utility is read at the DESKTOP tier.** `align_at_desktop()` takes an explicit `lg:`/`xl:`/`2xl:`
+  class first, then the MEASURED `text-align` (the capture stamps computed styles at desktop width), and only
+  then the base class. A CTA written `text-center lg:text-left` is centred on a phone alone; reading the base
+  class centred a headline and its button the source left-aligns. The button's own ancestor climb uses the
+  same resolver, and an ancestor that states an explicit LEFT now ENDS the climb — that is an answer, not a
+  miss.
+- **A play control pinned over a picture.** A round painted button holding one glyph, centred by a full-bleed
+  layer, matched no overlay class — so the frame stopped being a composite and the button rendered in the
+  flow, landing at the top of the NEXT section. It now rides `::before` on the media node: the circle is the
+  pseudo's fill, the glyph a background image over it (one slot carries both, leaving `::after` for a caption
+  label), and `currentColor` is resolved to the control's measured ink, since a data URI has no cascade.
+- **A row already consumed as the ATTRIBUTION is not also an "extra" fact.** The attribution row is itself
+  `border-t`, so the footer scan claimed it and every testimonial printed its author twice.
+- **The testimonial card rows are pinned whenever the source is not centred.** The pin used to ride on the
+  presence of a footer stat, so removing a spurious stat silently handed the card back to the shortcode's
+  centred default — a fix in one place became a regression in another.
+- **A preset is only used at its own size.** Within tolerance but not equal (a 12px label against an 11px
+  Caption), the preset is kept for theme-wide editability and the measured size is pinned on top.
+- **The signup's TITLE keeps its measured type**, like its description already did; an **icon-only submit
+  keeps its glyph** (via the same current-colour mask) instead of inventing the word "Subscribe".
+- **The copyright bar follows the source's distribution.** Its bottom row is a `space-between` flex; content-
+  sized columns packed the legal links against the © line and wrapped them onto a second row.
+
+**Lens work:** `verifySections()` learned that a `text-transform` difference only matters when it CHANGES the
+rendered text (a source writing literal capitals with `transform:none` reads identically to a converter that
+uppercases — five findings about nothing), and that a pseudo-element glyph can be painted as a background
+image as well as a mask.
+
+### 2026-09-23 (cont.) — the step badge, the spine, and a gutter that was not one
+
+Continuing the same audit, **99 → 98** findings, goldens 1147:
+
+- **A numeral drawn as a painted BADGE in its own leading cell is the native step MARKER**, which every design
+  lays beside the body — the source's two-column step. Emitted as a body ROW it stacked above the title and
+  lost its circle entirely. Its measured shape, size and outlined skin ride with it, because the shortcode's
+  marker paints a solid accent fill with white text, which is rarely what the source drew. Detection needed
+  one extra fact: the capture drops an *unremarkable* width, so a `w-8 h-8` chip stamps only its height — the
+  badge is square by construction, so the height is its width.
+- **The spine is only drawn when the source draws one** (a thin, tall painted element between the badges).
+  This exposed a genuine **shortcode bug**: `connector: none` was offered by the option but the per-design
+  sheets turned the spine back on, so choosing None still drew the line. Fixed in the steps stylesheet with a
+  rule that out-ranks them (shortcodes 1.15.27).
+- The `[AL]` golden's numeral assertion was **rewritten, not kept**: it encoded the older, less faithful
+  "numeral in a left-aligned body row" mapping, which is exactly the rendering this fix replaces.
+
+**A negative result worth recording.** Four images render 30–52px narrower than the source, and the obvious
+reading — "the container gutter is wrong" — is false. The source caps its container at `max-w-[1400px]
+mx-auto`; the 20px side margin that shows at a 1440px viewport is *centring*, not a gutter. Its bands then
+differ: text bands carry `lg:px-16` (the 64px the converter reads), while the media bands carry **no padding
+at all**, so their pictures reach the container edge. The fix therefore belongs at the BAND level (a section
+whose container has no side padding must render edge-to-edge inside the cap), not in the site-wide gutter.
+Two attempts to fix it globally — preferring the container's margin in the capture stamp, and again in
+`declared_container_gutter()` — were **reverted**: both broke four goldens that correctly encode the
+padding-is-the-gutter case, because an `mx-auto` margin and a real gutter are indistinguishable by value
+alone.
+
+### 2026-09-23 (cont.) — the spacing assessment: why a gap can vanish while every position test passes
+
+A reader spotted that the hero's buttons had no air beneath them. Measuring the two pages side by side
+explained why no lens had reported it:
+
+| | source | converted |
+|---|---|---|
+| button row height | 46px | **78px** (+32) |
+| gap after it | **73px** | **25px** (−48) |
+| next block's top | 742 | 746 |
+
+**Two errors that cancel.** The row was 32px too tall and the gap 48px too short, so the next block landed
+within 4px of where the source puts it and every position comparison passed. This is the structural blind
+spot of a position-based lens, and the kit has always specified a "Lens 4 — vertical-spacing diff" that
+`verifySections()` never implemented.
+
+**The lens** now compares the GAP between consecutive matched elements (`kind: 'gap'`, tolerance `dgap`),
+which is nesting-independent and sees each error on its own. A per-leaf BOX-HEIGHT comparison was tried
+beside it and **removed**: a source `<span>` inside a button matches a converted `<a>` that IS the button,
+so all 7 of its findings measured nesting rather than spacing.
+
+**Two converter causes, both general:**
+
+- **A wrapper's margin was folded onto each CHILD.** Folding a lone button's wrapper margin onto the button
+  is right; inside a flex ROW it inflates the row instead of moving it. The margin now rides the button
+  GROUP and the children carry none.
+- **A row rebuilt by the bento splitter lost its margins.** Each rebuilt row is zeroed because a MULTI-row
+  split hands the margins to the wrapping stack — but the SINGLE-row return has no wrapper, so the margin
+  was dropped in silence. The hero's benefit row lost the 48px above it, which is why the hairline rule rode
+  up under the buttons. Its own padding absorbed the difference, hiding it from every position check.
+
+Result: row 46px and gap 73px, **exactly** matching the source. Goldens `[AQ]` guard both.
+
+**Band gutters (the deferred item, now fixed).** A source rarely uses one gutter throughout: the same
+`max-w-[1400px] mx-auto` container takes `lg:px-16` on the TEXT bands and nothing on the MEDIA bands, whose
+pictures run to the cap's edge. The theme applies one site gutter everywhere, so those bands came out ~88px
+narrow with the picture 44px off the edge. `section_container_flush()` measures the band's own container and
+`sectionNoGutter` re-states the cap without the gutter for that band alone. `img-box` findings 4 → 1; the
+flavors picture is now pixel-identical (x20 / 700×672 on both sides). This supersedes the earlier note that
+the fix "belongs at the band level" — it now is there.
+
+**`verifyPixels()` — the catch-all lens.** Every other lens reports only what it models; a gradient that
+lost its angle, a shadow or a font fallback is invisible to all of them. This aligns by section, crops each
+pair to their common height, diffs on a cell grid and flood-fills adjacent hot cells into CLUSTERS, so it
+names distinct places rather than one place six times. Two calibrations were needed and are worth recording:
+`diffMask: true` (pixelmatch otherwise draws the diff over a dimmed copy, so every pixel reads as different
+and every cell as 100 % hot), and a deliberately HIGH `minPct` of 45 (at a low bar every cell qualifies from
+sub-pixel text shifts, the clusters merge into one section-sized blob, and the lens points at everything).
+
+**Parity:** the steps rules now have their JS twin — `detectStepsDesign` emits `numInline` / `numBadge` /
+`numShape` / `numBadgeCs` / `connector`, and `stepsNode` maps the badge to the native marker with its skin,
+guarded by `feed-themes-parity.test.mjs`.
+
+### 2026-09-23 (cont.) — a self-capped image, and margins that had nowhere to go
+
+Continuing from the spacing assessment, **97 → 90** findings. Three more rules, goldens `[AR]` (1155):
+
+- **A self-capped image keeps its cap.** `max-h-[620px] w-auto object-contain` is a picture whose HEIGHT is
+  the fixed dimension. With the cap dropped it filled its cell — 515×673 against the source's 474×620 — and
+  because the copy column beside it is vertically centred, the hero grew 53px AND every line in that column
+  sat 26px low. **One defect, three symptoms**, which is why it read as three unrelated findings. The cap is
+  read MEASURED first (the capture stamps `max-height` from 1.11.46) with the utility class as the fallback
+  at the DESKTOP tier, and only applied when the rendered height really is at the cap. `img_self_cap_css()`
+  is shared by `img_own_box()` and the composite path — the hero jar has a blur blob and a pinned label, so
+  it is a composite and never reached the former.
+- **A native widget built into a CELL keeps its own measured margin.** `apply_block_margins()` ran on the
+  section-level path only, so the same steps list kept its `mt-8` in one place and lost it in the other.
+- **The source's own step RHYTHM overrides the design's defaults** — item gap, title-to-copy gap and the
+  body's marker inset, all measured. Each needs `!important`, because the per-design stylesheet loads AFTER
+  the page CSS; without it the rules were emitted correctly and simply lost the cascade, which looks exactly
+  like a converter that never emitted them.
+- The footer signup's own top margin is carried the same way (`blockMt` → `.footer .fw-nl`), taking the
+  footer from 31px short to 7px.
+
+Result: the hero is **exactly** 781px (was +53) with the jar at 474×620; flavors is exact (673px, 11 → 5
+findings); every step gap matches. The gap lens found all of it — no position test could, because each error
+is absorbed by a neighbour's padding.
+
+### 2026-09-23 (cont.) — the marks a masthead and a lockup carry
+
+Three more rules, goldens `[AS]` (1160 assertions):
+
+- **A masthead utility keeps its own glyph.** These are drawn as `[glyph] Label` ("magnifier Search",
+  "bag Cart (0)"); only the label survived, so the header lost both marks. The native list item has an icon
+  slot — the same one the header chips use for their dot — and a recognised Lucide id rides as a library
+  reference, anything else as inline markup.
+- **The footer lockup's own second line is restated.** The theme reuses the HEADER's logo in the footer, so a
+  source whose footer carries a longer sub-line ("· 1923 · France" against the masthead's "· 1923 ·") simply
+  lost the difference. One native tagline serves both, so the footer's own text is carried on its sub-line.
+  Written with `JSON_UNESCAPED_UNICODE`, because CSS `content` takes the literal character — a JSON
+  `\u00b7` escape is not a CSS escape and prints as the escape text itself.
+- **…and a footer wordmark written as an `<h2>` is now found at all.** `footer_brand_css()` scanned only
+  span/div/a/p/strong/b, so a heading wordmark made it bail on the first pass — the footer's own brand
+  typography was never carried either, on any source that writes it as a heading.
+- The product tile's cart row also carries its own top margin (`mt-4`).
+
+Measured: the header renders both utility glyphs, the footer lockup reads "· 1923 · FRANCE", and the page is
+at 91 findings — of which 22 are `icon-swapped` (a glyph drawn by a different library at the right place,
+benign) and 2 are gaps.
+
+### 2026-09-23 (cont.) — the wordmark's face, and an icon that was mistaken for weather
+
+Two defects reported on a second conversion, both with a general cause. Goldens `[AT]` (1165).
+
+**A brand wordmark set in its own face rendered in the theme's.** The converter measured the family all
+along, but Header → Identity had Site Title *Size*, *Weight* and *Colour* and **no Font Family**, so the face
+could only ride the residual `logo_custom_css` — which deliberately carried a DISTINCTIVE stack only (serif /
+mono / a quoted name) to avoid needlessly overriding the theme. A display sans such as `Syncopate,
+sans-serif` fails that test, so it was skipped and the wordmark inherited the body face. The right fix was
+the missing option, not a looser residual: **`title_font`** (a `typography` field, family only) now sits with
+the other Site Title controls, emits `--site-title-font`, and `.site-title / .navbar-brand` consume it
+falling back to `--font-heading`. The converter sets it from the measured face every time, and the residual
+no longer restates it — one owner, and the user's later edit is not outranked by `!important` CSS. The
+`dropped_chrome` parity gate accepts the native option as carrying the family.
+
+**A card icon rained on a whole section.** Ambient-effect detection reads a layer's class/id for an effect
+keyword, gated by "does this read as decorative?". Icon libraries name their glyphs exactly like the effects
+— `lucide-droplets`, `-snowflake`, `-sparkles`, `-leaf`, `-star` — and ship `aria-hidden="true"`, which on
+its own cleared that gate. A barbershop's "Hot Towel Shave" icon therefore matched `droplets` and put a Rain
+background behind its services section. **An icon is content, never an ambient layer**: glyph tags
+(`svg`/`i`/`use`/`path`/…) and icon-library class prefixes are now excluded outright, while `<canvas>` — the
+genuine layer shape — stays. A real named layer (`fg-rain`, empty, `inset-0`) is still detected, which the
+golden asserts as a negative so the fix cannot over-correct. JS twin patched identically in
+`capture-extract.mjs`.
+
+Theme 2.6.11 carries the new option; the earlier conversion re-measures unchanged at 91 findings.
+
+### 2026-09-23 (cont.) — glass at rest vs glass on scroll  *(SUPERSEDED — see 2026-09-24 below)*
+
+A scrolled header came out opaque, and its white CTA turned near-white on white. Two causes, one in each
+codebase. Goldens `[AU]` (1170).
+
+**The glass detector could not tell two headers apart.** Both declare `backdrop-blur-*` in their class list,
+neither records `backdrop-filter` in the REST stamp (the utility resolves through a CSS var the capture
+often misses), and both record one in the SCROLLED stamp. The old guard read the blur alone and called both
+"glass on scroll only", which is right for one and wrong for the other. **The fill separates them:**
+
+| | scrolled `background-color` | correct verdict |
+|---|---|---|
+| clear at top, frosted on scroll | `rgba(7,17,30,0.8)` — a fill **appears** | glass OFF at rest (else a 24px frost sits over the hero) |
+| permanently glass | `rgba(0,0,0,0)` — **unchanged** | glass ON at rest (else the header loses its translucency) |
+
+Both cases are now goldens, each the other's negative, so a future "simplification" back to the blur-only
+test fails immediately.
+
+**A blur-only scrolled state was given an OPAQUE substitute.** That branch hands the frost something to tint
+when the source's own scrolled fill is transparent — but an opaque colour turns a glass bar solid on scroll.
+It is now translucent, at the alpha the source's own utility states (`bg-background/80` → `0.8`), which the
+computed stamp misses for the same var-resolution reason.
+
+**Theme (2.6.12): a button keeps its own text colour on scroll.** The scrolled-link rule recoloured every
+`a` in the header, including a CTA that carries its own fill — and with `--header-scroll-link` unset the
+declaration resolves to `inherit`, painting a white-filled button in the header's near-white text. Buttons
+are excluded (`:not(.btn):not(.header-cta-btn)`). This one is not converter-specific: any site using the
+On-Scroll group with a header CTA had it.
+
+### 2026-09-24 — the captured class list is the SCROLLED state (correcting the entry above)
+
+The glass rule written yesterday was **wrong**, and the way it was wrong is the lesson. A converted header
+frosted at the top when the source leaves it bare there; the reader reported it as "the instance is wrong".
+
+Yesterday's reasoning assumed that a `backdrop-blur-*` in the captured class list describes the RESTING
+header. It does not. A framework header computes its own className from scroll state —
+
+```jsx
+className={`fixed … ${scrolled ? 'border-b bg-background/80 backdrop-blur-md py-4' : 'border-transparent py-6'}`}
+```
+
+— and the capture serialises the DOM **after** its scroll pass, so the classes in `rendered.html` are the
+**scrolled** ones while `data-sc-cs` holds the **rest** computed style. The padding proves it beyond doubt:
+
+| | padding |
+|---|---|
+| class list (`py-4`) | 16px |
+| REST stamp | **24px** (`py-6`) |
+| SCROLLED stamp | **16px** ← matches the class list |
+
+So the ORIGINAL guard — blur in the scrolled stamp and none in the rest stamp means glass on scroll only —
+was right all along, and both of yesterday's replacements were wrong: the first read the class list as the
+rest state, the second replaced that with a fill test that reached the same wrong verdict by another route.
+Reverted, with the reasoning recorded in the code so it is not "fixed" a third time.
+
+**The same mistake had a twin.** The class-list fallback for the header BORDER read `border-b` from that same
+scrolled class list and drew a hairline under a header the source leaves clean. It now yields whenever the
+REST stamp measured a transparent border: **a measurement beats a class**.
+
+Kept from yesterday (these were right): the scrolled fill substituted for a blur-only state is TRANSLUCENT
+at the source's own alpha, not opaque.
+
+**Theme 2.6.13 — a legacy stuck shadow.** `style.css` carried an unconditional
+`.site-header.header-sticky.is-stuck { box-shadow: var(--header-shadow) }` that predates the two-state chrome
+in `header-footer-builder.css`. It painted a shadow on headers whose Header Shadow AND Shadow-on-scroll are
+both off, and — because box-shadow does not stack across rules — it overwrote the Border hairline, which is
+an inset shadow, so the scrolled rule vanished. It now yields whenever the explicit chrome options own the
+stuck look. Like the CTA-colour fix, this affects any site using the On-Scroll group, not just conversions.
+
+Result, measured against the source: rest = transparent, no blur, no rule; scrolled = `blur(12px)` + hairline
++ a translucent fill. One honest remaining delta — the source's scrolled bar is blur-ONLY with no fill at
+all, while the converted one carries `rgba(20,20,20,0.8)`; that substitute exists so the frost has something
+to tint, and over a dark page the two read the same.
+
+### A converted colour is stored as HEX when it is opaque (2026-09-24)
+
+A converted `h1` carried an inline `color: rgb(245, 245, 245)` while every entry in the generated palette
+beside it was hex. Three things made that more than cosmetic: the Theme Settings colour **picker**
+round-trips hex (a value it cannot parse is a value the user cannot edit in the UI that owns it); the palette
+**de-dupe compares strings**, so `rgb(245, 245, 245)` and `#f5f5f5` survive as two separate colours; and it
+was already inconsistent *within one value* — a golden compared an overline colour of `rgb(255, 45, 85)`
+against a subtitle colour of `#737373` from the same heading.
+
+**Rule: an OPAQUE colour is normalised to hex; a TRANSLUCENT one keeps its `rgba()` / `hsla()` form.**
+`#rrggbbaa` is valid CSS but the picker does not round-trip it, so normalising alpha would trade one
+uneditable format for another. Implemented in `clean_color_value()` (which every colour writer routes
+through) and `ink_value()` on the PHP side, and in `toHex()` in `to-presets.mjs` on the JS side — the two
+paths agree, and the goldens assert hex.
+
+**A literal is NOT rebound to a Color Preset.** The tempting version — "if the measured colour equals a
+palette entry, emit `predefined: '<slug>'`" — binds on a *coincidence of value*, not on intent. The palette
+roles (Ink, Primary, Muted) are **inferred** from the source, so a wrong inference would propagate to every
+element sharing that colour, and a later palette edit would move headings the user never linked to it. The
+honest signal for a preset reference is that the **source itself** said the colour was semantic (it wrote
+`text-primary` / `var(--foreground)` rather than a literal) — that lives in the capture and is future work.
+
+**The bug this uncovered.** The JS preset builder mapped the palette entry named **Black** to the site's ink
+when no `--dark` token existed (`'Black': vars['--dark'] || colors.ink`). On a dark source the ink is
+near-white, so `Black` held `rgb(245, 245, 245)` and every `var(--color-black)` reference — in the theme or
+in a user's own CSS — resolved to near-white. The PHP path never did this: it gives the ink its own `Ink`
+role and leaves `Black` literal. The JS path now matches it.
+
+### A converted colour BINDS to the palette the conversion generated (2026-09-24, supersedes the note above)
+
+The hex note above concluded that a literal should *not* be rebound to a Color Preset, on the reasoning that
+matching a palette entry binds on a "coincidence of value". **That reasoning was wrong and is superseded.**
+It is not a coincidence: the palette is *derived from the source* — `Ink` IS the source's body ink, `Primary`
+IS its brand colour — so binding re-attaches a value to the role the converter itself assigned moments
+earlier. Leaving the literal made the generated palette decorative: editing Ink in Theme Settings moved
+nothing.
+
+**Rule: an emitted colour that exactly matches a palette entry is stored as a preset reference.** A colour
+with no entry stays a literal — that is the deliberately-unique colour, and inventing a preset for it would
+bloat the palette with one-offs. Implemented as ONE post-pass over the finished bundle
+(`Stitch::bind_palette_colors`, JS twin `bindPaletteColors` in `to-pages.mjs`) rather than at each of the ~65
+colour writers: it is guaranteed to run after the palette exists and cannot miss a writer.
+
+Four guards, each load-bearing:
+
+- **The `predefined` half is a PREFIXED CLASS** (`text-ink` on an ink, `bg-ink` on a fill), emitted verbatim
+  by the consumer — so the wrong prefix paints the wrong CSS property. Only keys whose kind is unambiguous
+  bind; `border_color` and friends keep their literal until their option's own `kind` is verified.
+- **The halves are MUTUALLY EXCLUSIVE** (the preset wins in `sc_normalize_color_value`), so binding CLEARS
+  `custom` rather than leaving a stale literal behind it.
+- **Only an OPAQUE exact match binds.** A translucent value has no preset form.
+- **The palette itself is never rewritten** to reference itself.
+
+**The binding was inert until a second, deeper bug was fixed.** Measured in the browser: with the heading
+bound to `Ink`, changing Ink to `#ff8800` left the heading at `#f5f5f5`. The section styler was emitting
+
+```
+#hero h1:not([class*="boxp-"] *) { color: rgb(245,245,245) !important }
+```
+
+from the **same stamp** the heading node reads for its native Title Colour — one property written from two
+places, and this one (an ID selector, `!important`) outranks both the option's own output and the palette
+class. So the section rule no longer carries `color` for a heading whose stamp declares one; it keeps the
+type (face, size, weight, tracking, case) that has no per-heading field. This also fixes a bug that predates
+presets entirely: **the builder's Title Colour field was inert on every converted heading** — the user
+changed it and the page did not move. Re-measured after the fix: Ink → `#ff8800` moves the heading to
+`rgb(255, 136, 0)`; restored, it returns to `rgb(245, 245, 245)`.
+
+Guarded by goldens `[AV]` (binding + its four negatives) and `[AW]` (the section rule keeps the type, drops
+the colour, and the heading owns it), plus `palette-binding-parity.test.mjs` on the JS side.
+
+**Known gap:** the JS `to-presets.mjs` palette is materially poorer than the PHP one on the same source — no
+`Ink`, no `Light`, an `Accent` that duplicates `Primary`, and a stock `Muted` instead of the page's own. The
+PHP palette is the one that lands through `import_dir`, so this is latent, but the two should agree.

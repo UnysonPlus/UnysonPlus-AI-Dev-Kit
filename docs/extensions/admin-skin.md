@@ -7,7 +7,13 @@ A token-driven skin over the **real** wp-admin: grouped sidebar, slim top bar, c
 
 - **Settings/options:** its own settings page (Unyson+ → Extensions → Admin Skin → Settings), two boxes:
   - **Skin** — `skin` (select, from the registry), `default_mode` (`light` / `dark` / `system`), `accent` (colour-picker; empty = the skin's own), `allow_user_prefs` (switch).
-  - **Layout** — `group_menu`, `sidebar_search`, `notice_tray`, `apply_to_editor`, `skin_customizer`, `dark_canvas`, `show_wp_logo` (switches) and `hide_design` / `hide_fonts` (selects: `auto` / `yes` / `no`).
+  - **Layout** — `group_menu`, `sidebar_search`, `notice_tray`, `apply_to_editor`, `skin_customizer`, `dark_canvas`, `show_wp_logo` (switches), `hide_design` / `hide_fonts` (selects: `auto` / `yes` / `no`) and `account_placement`.
+
+**`account_placement`** (select, default `sidebar`) decides where the account avatar and its menu — profile,
+visit site, log out — sit: `sidebar` (bottom left, the app-style position), `bar` (top right, where WordPress
+puts it) or `both`. Whichever is chosen, items other plugins add to the account menu come along: they are
+**mirrored into the chosen position, not dropped**, so a plugin that hangs its own entry off the account menu
+keeps working in either placement.
 - **Intro notice:** when the seed activates the extension it sets `unysonplus_admin_skin_intro_notice`, and `_action_intro_notice()` shows a one-time dismissible notice naming both ways back — the profile checkbox (just this user) and Unyson+ → Extensions (the whole site) — plus a link to the skin's own settings. Dismissal is per user (`fw_admin_skin_intro_dismissed` user meta) via AJAX `fw_admin_skin_dismiss_intro` (nonce `fw_admin_skin_intro`).
 
 ### The Customizer runs its own path

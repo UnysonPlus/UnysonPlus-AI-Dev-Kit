@@ -61,6 +61,12 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
   | `square` | Square |
   | `hexagon` | Hexagon |
 
+- `title_font` — **Type** `typography` (family only). **Default** `{family:''}`. The text wordmark's own
+  face. Emits `--site-title-font`, which `.site-title` / `.navbar-brand` consume, falling back to
+  `--font-heading`. A brand wordmark is very often set in a face of its own, which is why this sits here
+  rather than with the site typography — and why the Site Converter always writes the measured face into
+  it instead of the residual `logo_custom_css` (that path carried only serif/mono/quoted stacks, so a
+  display sans was silently skipped).
 - `title_size` — **Type** `unit-input` (`px`,`rem`,`em`). **Default** `{value:'',unit:'rem'}`.
 - `title_weight` — **Type** `select`. **Default** `''`. **Choices**:
 

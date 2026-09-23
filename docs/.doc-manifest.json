@@ -261,7 +261,7 @@
         "{plugin}/framework/extensions/admin-skin/manifest.php",
         "{plugin}/framework/extensions/admin-skin/settings-options.php"
       ],
-      "hash": "922a2e8eb7cb9d6db70bad53d1f83c62",
+      "hash": "c3d65ef64c49e0847f066064474485b1",
       "synced": "2026-09-23"
     },
     "extensions/animated-icons.md": {
@@ -412,7 +412,7 @@
         "{plugin}/framework/extensions/shortcodes/manifest.php",
         "{plugin}/framework/extensions/shortcodes/settings-options.php"
       ],
-      "hash": "988e5ac9f82165c772669d2a791c09ac",
+      "hash": "9e6e9c0abc37588ca401a99b1383025d",
       "synced": "2026-09-23"
     },
     "extensions/sidebars.md": {
@@ -430,7 +430,7 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "e674492b7b62c648aef73b62d718cd5e",
+      "hash": "92ab3fdecdb35bb638dfa6e532f4c405",
       "synced": "2026-09-23"
     },
     "extensions/site-migration.md": {
@@ -473,8 +473,8 @@
         "{plugin}/framework/extensions/woocommerce/manifest.php",
         "{plugin}/framework/extensions/woocommerce/settings-options.php"
       ],
-      "hash": "22efcb3a7b3b11b3e7ebe576c826b990",
-      "synced": "2026-09-21"
+      "hash": "aa17059db254d3a233c089755c7edb43",
+      "synced": "2026-09-23"
     },
     "fidelity-verification.md": {
       "kind": "narrative",
@@ -1798,8 +1798,8 @@
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/components-buttons.php",
         "{plugin}/framework/includes/presets/button-presets.php"
       ],
-      "hash": "1137c0f1b7360485053c8ad8e043c578",
-      "synced": "2026-09-21"
+      "hash": "8592873d5c589fad6156cea7e99ac418",
+      "synced": "2026-09-23"
     },
     "theme-settings/colors.md": {
       "kind": "theme-settings",
@@ -1848,8 +1848,8 @@
         "{plugin}-theme/framework-customizations/theme/options/header-settings.php",
         "{plugin}-theme/framework-customizations/theme/options/header-topbar.php"
       ],
-      "hash": "f1829548e66603576e0c267eb573c7dd",
-      "synced": "2026-09-21"
+      "hash": "8ec8e78a8552ebb92a113c1dff4b77e2",
+      "synced": "2026-09-23"
     },
     "theme-settings/hover-animations.md": {
       "kind": "theme-settings",
@@ -1857,8 +1857,8 @@
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/components-hover-animations.php",
         "{plugin}/framework/includes/presets/button-presets.php"
       ],
-      "hash": "516913009e11e9a1007b538c43e37ad8",
-      "synced": "2026-09-21"
+      "hash": "099a7f21e74ed5bc64a1ed31df0c7f3c",
+      "synced": "2026-09-23"
     },
     "theme-settings/misc.md": {
       "kind": "theme-settings",

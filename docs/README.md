@@ -16,6 +16,7 @@ already know a filename.
 | Compose builder pages programmatically (fresh/demo/test — **not** conversions) | [`building-pages.md`](building-pages.md) + [`../tools/upw-build-pages.php`](../tools/upw-build-pages.php) |
 | The generalized conventions every build follows | [`conventions.md`](conventions.md) |
 | Verify a region — **conversion:** the browser-free class-string fixture is the proof; **fresh build:** the 4-lens rendered PASS gate | [`fidelity-verification.md`](fidelity-verification.md) + [`../tools/README.md`](../tools/README.md) |
+| Audit a finished conversion and improve the converter AND the lenses | [`converter-training-prompt.md`](converter-training-prompt.md) |
 | Cloning gotchas (Tailwind, spacing, emoji vs SVG, wp-emoji…) | [`cloning-gotchas.md`](cloning-gotchas.md) |
 | The deterministic converter (capture service + Site Converter) | [`extensions/site-converter.md`](extensions/site-converter.md) |
 
