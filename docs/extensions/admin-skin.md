@@ -7,8 +7,18 @@ A token-driven skin over the **real** wp-admin: grouped sidebar, slim top bar, c
 
 - **Settings/options:** its own settings page (Unyson+ → Extensions → Admin Skin → Settings), two boxes:
   - **Skin** — `skin` (select, from the registry), `default_mode` (`light` / `dark` / `system`), `accent` (colour-picker; empty = the skin's own), `allow_user_prefs` (switch).
-  - **Layout** — `group_menu`, `sidebar_search`, `notice_tray`, `apply_to_editor`, `dark_canvas`, `show_wp_logo` (switches) and `hide_design` / `hide_fonts` (selects: `auto` / `yes` / `no`).
+  - **Layout** — `group_menu`, `sidebar_search`, `notice_tray`, `apply_to_editor`, `skin_customizer`, `dark_canvas`, `show_wp_logo` (switches) and `hide_design` / `hide_fonts` (selects: `auto` / `yes` / `no`).
 - **Intro notice:** when the seed activates the extension it sets `unysonplus_admin_skin_intro_notice`, and `_action_intro_notice()` shows a one-time dismissible notice naming both ways back — the profile checkbox (just this user) and Unyson+ → Extensions (the whole site) — plus a link to the skin's own settings. Dismissal is per user (`fw_admin_skin_intro_dismissed` user meta) via AJAX `fw_admin_skin_dismiss_intro` (nonce `fw_admin_skin_intro`).
+
+### The Customizer runs its own path
+
+`is_enabled()` stays **false** on `customize.php`, and the Customizer is skinned by a separate path instead: `is_customizer_enabled()` + `_action_enqueue_customizer()` + `_action_customizer_mode_script()`, hung on `customize_controls_enqueue_scripts` / `customize_controls_print_scripts`. Three things make that separation necessary rather than fussy:
+
+- **The structure layer cannot run there.** `structure.css` rebuilds `#adminmenu` and `#wpadminbar` into a sidebar and top bar; the Customizer has neither, so loading it would restyle nothing and risk breaking the pane's fixed layout. Only the tokens plus `static/css/customizer.css` load.
+- **The preview iframe must stay untouched.** `customize_controls_*` hooks fire for the controls document only, and there is deliberately **no `customize_preview_init` counterpart**. The preview renders the front end, so it keeps the visitor's colours — same rule as below.
+- **Scope to `body.wp-customizer`, not a class of our own.** `customize_controls_print_scripts` prints in `<head>`, where `document.body` is still null, so a JS-added class arrives too late to style first paint. The stylesheet is only *enqueued* when the skin applies, so its presence is already the condition; `upa-customizer` is still added on `DOMContentLoaded`, but only as a hook for extenders.
+
+`_filter_admin_color` also returns the skin's colour scheme under `is_customize_preview()`, so core's scheme-aware chrome in there matches instead of staying stock blue. The one surface left light on purpose is `.site-icon-preview`, which mocks a browser tab and an app icon — a preview, by the rule below.
 
 ### Previews stay light — on purpose
 
