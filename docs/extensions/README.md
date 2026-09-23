@@ -27,6 +27,7 @@ shapes live in `../shortcodes/`, `../option-types/`, `../theme-settings/README.m
 | `template-library` | no | Importable page/section templates |
 | `blog` | hidden (core) | Blog rendering (settings in Theme Settings → Blog) |
 | `mailer` | hidden (dependency) | Mail transport (`fw_ext_mailer_send_mail()`) |
+| `admin-skin` | **yes** (seeded once on install; deactivating sticks) | Token-driven skin over the real wp-admin: grouped sidebar, top bar, light/dark/system + per-user accent, skin packages → `admin-skin.md` |
 | `asset-optimizer` | no | CSS/JS combine + optimization (own settings page) |
 | `site-migration` | no | Whole-site push to another install via a connection key; signed transport, staging-and-swap → `site-migration.md` |
 | `sidebars` | no | Custom widget areas |
