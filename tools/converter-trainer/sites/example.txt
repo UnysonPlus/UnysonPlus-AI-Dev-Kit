@@ -1,0 +1,15 @@
+# Corpus list format — one source per line, blank lines and #comments ignored.
+#
+# Two line shapes:
+#   https://full/url          captured as-is
+#   category|slug             expanded against the BASE endpoint below
+#
+# A corpus whose sites are served from ONE preview endpoint sets that endpoint here, so the
+# harness never has to know about any particular corpus. {category} and {slug} are substituted;
+# without them the two are appended as query parameters.
+#
+#base=https://example.com/api/preview?category={category}&slug={slug}
+
+https://example.com/
+https://shop.example.com/
+architecture|example-slug

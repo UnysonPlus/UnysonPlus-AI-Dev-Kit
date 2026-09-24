@@ -3935,7 +3935,7 @@ element-level findings. Each fix is a general rule with a golden ([AN]–[AP], n
   beside the floating card and the decorative blob. `img_pinned_labels_css()` folds it onto the media
   node as `::after`, anchored to whichever computed edge is **nearer** (so it holds for a source with no
   utility classes) and wearing the innermost leaf's own face. It must be ONE leaf — a stacked lockup
-  would glue into `"MAISON1923FRANCE"`, since a pseudo-element's `content` is a single string.
+  would glue into `"BRAND1923COUNTRY"`, since a pseudo-element's `content` is a single string.
 - **A grid CELL that IS a photo frame is claimed whole.** The cell path only ran `claim_element()`, which
   applies the claim rules but never the recognizers, so the frame was split into a bare image plus a
   stray paragraph.
@@ -4301,3 +4301,174 @@ the colour, and the heading owns it), plus `palette-binding-parity.test.mjs` on 
 **Known gap:** the JS `to-presets.mjs` palette is materially poorer than the PHP one on the same source — no
 `Ink`, no `Light`, an `Accent` that duplicates `Primary`, and a stock `Muted` instead of the page's own. The
 PHP palette is the one that lands through `import_dir`, so this is latent, but the two should agree.
+
+### Three defects a one-page source exposed (2026-09-24)
+
+A converted one-page source measured 20–40% band drift with the layout looking broadly right. Three
+general rules were wrong, each reachable only by measuring.
+
+**1. A `<br>` is a word boundary.** DOM `textContent` concatenates text nodes and drops element nodes, so
+`HIGH IN<br>PROTEIN` read back as `HIGH INPROTEIN`. The converter reads `textContent` in dozens of places,
+so one source using `<br>` for a two-line lockup corrupted four card titles, the site `<title>`, the header
+logo and the footer logo at once. Fixed **once**, in `load_dom()`: every `<br>` is replaced with a newline
+text node as the tree is built, so every present and future reader is correct by construction rather than
+each call site having to remember. Golden `[AX]`.
+
+**2. A one-page site links its brand to a section, not to "/".** The brand-anchor test accepted only `''`,
+`'#'`, `'/'` or a bare origin. A single-page source has no "/" to link home to — its wordmark points at
+`#hero` — so no brand anchor was found at all and detection fell through to the header's leftmost block,
+harvesting the utility cluster. The site title, header logo and footer logo all shipped as the glued label
+`AccountCART (1)`, and the wordmark's FACE came out as the body font because the face was read off the
+wrong element. Any `#fragment` is now a brand candidate; the menu links beside it are fragments too, but
+they sit inside `<nav>` and the existing non-nav ranking already prefers the brand. Skip-links are excluded.
+Golden `[AY]`.
+
+**3. Whose padding the gutter is decides whether it is INSIDE the content width.** The capture tallied the
+container's own padding and, when it had none, the ancestor SECTION's — then stamped
+`data-sc-content-gutter-inside` for both. But a container's own padding is inside its border box (so the
+measured width includes it), while a section's padding is outside the content box (the measured width is
+already inset by it). A full-width `section` with `80px` side padding at a 1440 viewport leaves content
+measuring 1280; subtracting the 80 again gave **1120**, so every converted container was 160px narrow and
+headings rewrapped onto an extra line in two sections. The two are now tallied separately, plus an
+arithmetic cross-check that needs no DOM opinion: when `width + 2×gutter ≈ viewport`, the gutter is outside.
+`container-gutter-stamp.test.mjs` exercises it in a real browser, since it is browser-side layout logic.
+
+**Measured:** every container 1120 → **1280** (exact parity with the source); `blogname` `AccountCART (1)`
+→ the source’s own wordmark; wordmark face body-font → the source's display face; `nutrition` section height
+delta 7 → **0**; `collections` −84 → **−30**.
+
+### The lenses gained a container-level view (2026-09-24)
+
+Three tool defects surfaced in the same audit:
+
+- **A column count is a property of the container, so only the container can report it.** When a 3-up card
+  row collapsed to a 1-up stack, the element lens reported only leaves that moved — and 45 of that section's
+  57 findings were star glyphs, burying the cause entirely. `verifySections` now measures each section's
+  repeated group and emits **`grid-cols`** (`a 3-up group renders 1-up`) ahead of the leaf findings, because
+  it explains them. It fires only when both sides found a group with the SAME item count; otherwise the two
+  sides are describing different groups and the comparison is meaningless (a hero reported "1-up renders
+  2-up" from `items:3` vs `items:2` — a false positive, now suppressed).
+- **Repeated identical icon findings roll up** to one carrying a `count`, so a section's list describes its
+  distinct defects rather than its element count (a page went 130 → 78 findings with nothing real lost).
+- **Every lens now answers `.findings`.** `verifyUrls` returned `bands`, `verifyChrome` returned `findings`
+  and `verifySections` returned `sections[].findings` — reading the wrong key reported a clean run on a page
+  carrying 130 real findings. A flat `findings` array now sits beside the per-section one.
+
+### Three more general rules from the same one-page source (2026-09-24)
+
+**1. A block's design is read from its OWN section, never from a neighbour's.** The testimonial design scan
+walks up to two ancestors, because slider machinery often lives on a wrapper — and an ancestor's
+`saveHTML()` carries all of its descendants. On a flat one-page DOM two levels clear the section entirely
+and read its siblings, so a `divide-y` belonging to a **different** section's four-column feature row (its
+vertical rules) matched the STACKED test: a three-up testimonial grid rendered as a one-up editorial list,
+**200px taller** than the source. Any marquee, snap track or slider lib that belongs to the block is inside
+its section too, so clamping the walk at the section boundary costs nothing and removes a whole class of
+cross-section false positives. Measured: reviews Δh **+200 → −36**, `grid-cols` finding gone. Golden `[AZ]`.
+
+**2. The media frame keeps its own fill and its own inset.** The image box paints a placeholder fill
+(`.imgbox__media{background:#f1f3f5}`) so an unloaded photo is not a hole — invisible behind an image that
+covers its frame, and plainly wrong behind a transparent cut-out shown with `object-contain`, where the
+source's own band should show through. Four product cut-outs the source sits directly on its orange band
+rendered on pale grey tiles. The frame's **padding** was dropped in the same place, so each picture filled
+its frame edge-to-edge and every tile read larger than the source's. The converter measures the frame, so it
+now carries what the frame declares — a real fill when there is one, `transparent` when there is none, and
+the inset either way. Measured: `img-box` findings **10 → 3**. Golden `[BA]`.
+
+**3. A one-page brand link is an in-page fragment** — see the 2026-09-24 entry above; the same source proved
+it on the site title, header logo and footer logo at once.
+
+**A tool regression the corpus step caught.** Scrubbing corpus names out of the trainer replaced the literal
+capture-directory name with a placeholder in three files where it was a real **filesystem path**, not prose
+(`score/import-site.php`, `class-coverage.mjs`, `audit.php`). Every site then scored `no-rendered` and the
+corpus diff read as a clean 99 → 0 collapse on every dimension. No real change degrades eleven independent
+dimensions to zero at once, so that shape is always a broken harness — the prompt now says so explicitly.
+All three now RESOLVE the capture dir at either depth instead of naming it.
+
+### Chrome and footer rules from the same one-page source (2026-09-24, cont.)
+
+**A bar that paints nothing still has a colour behind it.** A header nested inside a coloured band
+(`<section class="bg-[#f5c344]"><header class="w-full …">`) is transparent in its own right, so the emitted
+fill fell back to the theme's default WHITE and a yellow masthead converted to a white one — the most
+visible defect on that conversion. What a reader sees is the nearest painted ANCESTOR, so the converter
+reads that instead of guessing. Guarded to bars in NORMAL FLOW: a fixed/absolute/sticky header floats over
+the page, where the transparency IS the design (the overlay/glass path owns it) and inheriting the hero's
+fill would paint a solid bar across a photo the source deliberately shows through. Golden `[BB]`.
+
+**A footer's trust row survives, and the brand lockup is not a legal link.** Both bottom-bar readers are
+anchored on the copyright element — legal links and the bottom tagline are found among ITS siblings. A
+footer whose copyright sits up in the brand column and whose bottom row holds two plain LABEL groups matched
+neither, so the whole row was dropped. Worse, the brand lockup sharing that copyright column was collected
+AS a legal link, which both rendered a stray wordmark in the copyright bar and made the legal branch match,
+hiding the real bottom bar. Now: a link in the copyright band whose label is the brand and which points home
+or at the top of the page is the footer logo, not a legal link; and a trailing two-group `space-between` row
+of text-only groups is read as the bottom bar. It outranks the TAGLINE branch deliberately — the tagline
+reader takes any short text sibling of the copyright, which on a brand column is the brand BLURB. Golden
+`[BC]`.
+
+**Measured across both rounds on that source:** mean band drift **≈29.3% → ≈20.6%** (band 1 34.9 → 16.5,
+band 8 42.4 → 14.4, band 9 31.2 → 7); container width 1120 → **1280** (exact); parity score **70 → 80**;
+reviews Δh **+200 → −36**; `img-box` findings **10 → 3**; nutrition Δh **7 → 0**.
+
+**A false positive worth recording.** A floating "English" language switcher on the converted page was filed
+as "a third-party overlay baked in as content". It was **TranslatePress**, active on the test install, and
+absent from the source capture entirely. The install's own plugins render on every page; confirm a visible
+defect exists in the SOURCE capture before blaming the converter for it.
+
+### OPEN: a reproducible corpus regression in `contrast` and `media_retention` (2026-09-24)
+
+Running `score.mjs` over the corpus after this session's rules reports, **reproducibly** (identical numbers
+on a repeat run, so not the known flaky-contrast mode):
+
+```
+contrast         100 → 9    (crafter-station 18 · red-planet-architecture 0)
+media_retention  100 → 50   (crafter-station 0)
+overall          100 → 84
+```
+
+**What was established.** On `red-planet-architecture` every element renders light type
+(`rgb(255,255,255)` and `rgba(255,255,255,.4-.7)`) while `body` AND every `section` compute
+`background-color: rgba(0,0,0,0)` — light text on nothing, hence contrast 0. The theme settings are
+correct (`site_background = #0a0a0f`, no colour bound to a preset), and the generated CSS does define
+`--site-bg-color:#0a0a0f` with `body{background-color:var(--site-bg-color,#ffffff)}`.
+
+**The hypothesis, unconfirmed.** The source's ambient backdrop is carried verbatim as
+`body:not(.wp-admin){background:radial-gradient(…),radial-gradient(…)}`. A `background` SHORTHAND with no
+colour resets `background-color` to transparent, and that carried rule lands after the converter's own.
+Painting the canvas on `html` (which the browser uses whenever `body` is transparent) was tried and did
+**not** move `crafter-station`'s score, so it was reverted rather than left in as speculative code.
+
+**It is NOT caused by any of this session's work — established by A/B against a PRE-BINDING tree.**
+The first attempt compared against the pushed **1.9.84**, which was the wrong baseline: the colour binding
+shipped IN 1.9.83/84, so that comparison measured the bug against itself and proved nothing. Checking out
+**1.9.65** (`bind_palette_colors` absent) and rescoring `crafter-station` gives the IDENTICAL result —
+`contr 18`, `media 0`, overall 80, −19 — so the regression predates the binding and everything after it.
+Swapping the two changed includes plus the manifest is enough for the A/B; the lesson is to pick a
+baseline that predates ALL of the work in question, and to verify the suspect code is actually absent
+from it (`grep` for the function) rather than trusting the version number.
+
+**Next step:** import one affected site, diff its generated child-theme CSS against the baseline's, and
+find which rule zeroes the canvas. Run the scorer in a terminal **unredirected** — stdout to a file is
+block-buffered, which makes a working run look stalled and has already caused healthy runs to be killed.
+
+### A preset DEFINITION holds a literal (2026-09-24)
+
+The colour binding attaches an emitted colour to the palette entry it matches. Inside a **preset
+definition** that is circular — the preset is the thing other values point AT — and worse: a preset's
+consumer generates CSS **from the literal**, so a class name in `predefined` produces no declaration at
+all. The palette (`theme_colors`) was exempt from the start; every other preset COLLECTION needed the same
+exemption and did not have it.
+
+Reported as: *editing the header CTA's text makes the button small and all white*. The edit was a red
+herring — `cta_style` and `cta_size` were unchanged from what the converter emitted. The Primary BUTTON
+preset's `bg_color` had been bound to `bg-primary`, so the generated preset CSS carried **no background**,
+and the button fell back to unstyled: no fill, no padding, its black label invisible on white. It only
+surfaced after an edit because until then nothing had re-read the preset.
+
+Exempt collections: `theme_colors`, `button_colors`, `box_presets`, `table_presets`,
+`section_style_presets`, `container_width_presets`, `badge_presets`, `card_presets`. Values that POINT at
+these presets still bind — only the definitions are skipped. Golden `[BD]`, JS twin in
+`palette-binding-parity.test.mjs`.
+
+**Measured:** `button_colors[Primary].bg_color` `{predefined:"bg-primary",custom:""}` → `rgb(255,255,255)`;
+the rendered CTA `bg rgb(255,255,255)` / `color rgb(0,0,0)` / padding `10px 24px`, with the user's own
+edited label in place. Not the cause of the corpus `contrast` regression — tested, unchanged at 18.

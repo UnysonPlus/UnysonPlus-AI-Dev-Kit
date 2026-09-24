@@ -1,0 +1,16 @@
+# Corpus LISTS and everything derived from them hold real source-site URLs, which must never
+# appear in this repo. They are local input/output for the training loop, not shippable content.
+# `sites/README.md` documents the format; `sites/example.txt` shows it with placeholder hosts.
+sites/*.txt
+!sites/example.txt
+
+# Generated per-corpus scoring artifacts (regenerate with `node score.mjs --baseline`).
+score/_baseline*.json
+score/_scores*.json
+score/_class-coverage*.json
+score/_sample*.txt
+
+# Capture output — large, regenerable, and keyed by source URL.
+capture-out/
+batch/
+node_modules/
