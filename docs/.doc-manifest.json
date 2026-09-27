@@ -1,7 +1,7 @@
 {
   "generated_against": {
     "unysonplus": "3.0.32",
-    "unysonplus-theme": "2.6.23",
+    "unysonplus-theme": "2.6.24",
     "synced": "2026-09-27"
   },
   "docs": {
@@ -275,7 +275,7 @@
         "{plugin}/framework/extensions/admin-skin/manifest.php",
         "{plugin}/framework/extensions/admin-skin/settings-options.php"
       ],
-      "hash": "5104219e9f9ce68055737163e2f233e6",
+      "hash": "fe6465a040813bbe89a8f0661b4ce074",
       "synced": "2026-09-27"
     },
     "extensions/ai-assistant.md": {
@@ -283,7 +283,7 @@
       "src": [
         "{plugin}/framework/extensions/ai-assistant/manifest.php"
       ],
-      "hash": "90f378d56618b2db2c287c2c1659f562",
+      "hash": "df9416291462008949044a93c414ba05",
       "synced": "2026-09-27"
     },
     "extensions/animated-icons.md": {
@@ -291,7 +291,7 @@
       "src": [
         "{plugin}/framework/extensions/animated-icons/manifest.php"
       ],
-      "hash": "af1a392e5ff5a6f44999b2ffa131455a",
+      "hash": "4abe65589e6fb39864788fdda9aab926",
       "synced": "2026-09-27"
     },
     "extensions/animation-engine.md": {
@@ -299,7 +299,7 @@
       "src": [
         "{plugin}/framework/extensions/animation-engine/manifest.php"
       ],
-      "hash": "941a8451c3307522c2db4b5f6df222a9",
+      "hash": "943dfb58b1ca28c78a509a59008d63f9",
       "synced": "2026-09-27"
     },
     "extensions/asset-optimizer.md": {
@@ -434,7 +434,7 @@
         "{plugin}/framework/extensions/shortcodes/manifest.php",
         "{plugin}/framework/extensions/shortcodes/settings-options.php"
       ],
-      "hash": "c5d9557ae34ced9d91a56fdb25d00ac0",
+      "hash": "4569a1577476bd35137b09bad2b4d60c",
       "synced": "2026-09-27"
     },
     "extensions/sidebars.md": {
@@ -452,7 +452,7 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "55fe977e320fbfbd1b4570fce17fe814",
+      "hash": "345b9bfceaa62f2a95eb16232b8d69ac",
       "synced": "2026-09-27"
     },
     "extensions/site-migration.md": {
@@ -495,7 +495,7 @@
         "{plugin}/framework/extensions/woocommerce/manifest.php",
         "{plugin}/framework/extensions/woocommerce/settings-options.php"
       ],
-      "hash": "aa17059db254d3a233c089755c7edb43",
+      "hash": "5c5dbe58394a5338b61a3e890f5c87a7",
       "synced": "2026-09-27"
     },
     "fidelity-verification.md": {
@@ -1483,7 +1483,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/pricing-table/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/pricing-table/options.php"
       ],
-      "hash": "c2679f29b0d99723f201135dae1e20b4",
+      "hash": "ec88730ac7c271005743390c9e4bd181",
       "synced": "2026-09-27"
     },
     "shortcodes/progress.md": {

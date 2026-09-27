@@ -5,7 +5,7 @@ Registers UnysonPlus **abilities** with the WordPress Abilities API so an AI mod
 the (planned) builder panel, or anything calling the REST abilities endpoints — can read the site and
 build / edit page-builder pages through **validated, undoable** actions. **Active by default:** no
 (ships inactive). Requires WordPress **6.9+** (on older WP it loads but registers nothing) and the
-`shortcodes` + `page-builder` extensions. Version: 1.0.7. Human manual:
+`shortcodes` + `page-builder` extensions. Version: 1.0.9. Human manual:
 [AI Assistant](https://unysonplus.github.io/docs/extensions/ai-assistant/).
 
 ## Provides
@@ -171,6 +171,29 @@ A path may also be `id:<unique_id>`.
   switched with `update-theme-settings`), **animated-icons** 1.0.6 (`animated-icons-describe`: enabled
   types from `animated_lottie|rive|svg|raster`, icon value `{type:'lottie'|'rive', src, trigger, speed}`,
   uploaded files from `fw_icon_lottie_dir()` / `fw_icon_rive_dir()`).
+- **Browser backend — free local AI (1.0.9)** — `backend()` returns `browser` when chosen (or as Automatic's
+  last resort). The server CANNOT reach the editor's localhost, so panel.js runs the loop: probe
+  `upw_ai_browser_url` (default `http://localhost:8787`) — kit `GET /local-ai` (`{up, selected, pulled}`),
+  else Ollama `GET /api/tags` — then `POST panel/local/start` (session `kind: 'browser'`, own `tools` list:
+  `BROWSER_PAGE_TOOLS` / `BROWSER_SITE_TOOLS`; FW_AI_MCP::abilities() honours a session `tools` list), MCP
+  `tools/list` + `tools/call` with cookie auth (X-WP-Nonce) + `X-UPW-AI-Session`, model turns via kit
+  `POST /local-ai/tool-chat` (or Ollama `/api/chat`), then `POST panel/local/finish` → the usual
+  `{check, tree, steps}` (partial changes survive an error). NO native tool calls: each turn is ONE JSON
+  action `{tool, arguments}` | `{reply}` constrained by Ollama `format` (tool enum from tools/list), tool
+  results go back as a user message — Qwen3 8B's native tool calls were silently dropped by Ollama's
+  parser whenever a long nested argument had one stray token (it appended `"parent_path"` inside
+  `items`); `tidyArgs()` strips non-object entries from `items` / `_items`. What made an 8B model succeed: the
+  instructions carry `browser_recipes()` — FAQ / feature cards / CTA / text sections that pass render_check
+  as written (emoji icons `{type:'emoji', char}`), `/no_think` for Qwen3, `num_predict` 3072, and JS nudges
+  (empty reply → "call the next tool"; a write since the last render_check → "finish, then render_check";
+  check issues → "fix them"; max 3). Without recipes Qwen3 8B explored schemas, invented atts and passed
+  path "/". render_check's empty-icon test now counts `char`.
+- **Panel position (1.0.8)** — option `upw_ai_panel_position` (`bottom-right` default | `bottom-left` |
+  `beside-sidebar`), passed to panel.js as `cfg.position` → class `.upw-aip--<pos>`. Bottom-left measures
+  `#adminmenuwrap` (fixed-position, so test its rect, not `offsetParent`) and re-places on `wp-collapse-menu`;
+  beside-sidebar anchors left of `#postbox-container-1` in the backend builder only. The input needs a
+  two-class selector: the admin skin's `body.upa textarea` (white) beats a single class. `esc()` must also
+  escape quotes — it feeds attribute values.
 - **Site-build order in the instructions** — the site-wide assistant and MCP `instructions` follow this
   kit's protocol (colours → typography → container width → presets → header / footer + menus → pages →
   ship check) in condensed form, since sites don't have the kit.

@@ -115,6 +115,15 @@ decomposes to nested `column`s (PHP) or a `code_block` (JS). Those specific shap
 
 ## Notes / gotchas
 
+- **Hosted sites: the BROWSER talks to the capture service, never PHP (1.10.15).** A hosted server's
+  `localhost` is itself, so any `wp_remote_*` to the service only works when WordPress runs on the same
+  machine. Block-theme output now fetches `GET /capture?target=block-theme` in the browser and uploads it
+  as `fw_sc_block_bundle` (PHP `bundle_file` opt, before the Node / HTTP fallbacks); **Duplicate as landing
+  page** fetches `GET /mirror?zip=1` (capture service 1.11.60 — a `minimal-zip` of the mirror folder) and
+  uploads `mirror_zip` → `FW_Site_Converter_Landing::from_zip()`. The landing script's `svcUrl()` now reads
+  the `#fw-sc-ai-svcurl` field / `fw_sc_capture_service` localStorage (it silently used 8787 before). Still
+  server-side (optional, degrade silently on a host): the Mapper's `/ai-animations` and `/ai-preloader-js`.
+
 - **⛔ Button and box STYLES live on their PRESET, never on the shortcode (REQUIRED, both engines).** A converted
   button's / card's look — the resting fill, border, radius, shadow, type, the hover fill / transform / shadow / filter,
   its `::before` / `::after` layers, their hover states and the `@keyframes` they animate with — belongs in the
@@ -4018,6 +4027,37 @@ against a real install is what caught it, and the suite now asserts the version 
 **`glob( '*' )` does not match dotfiles.** The sandbox test's own cleanup left `.htaccess` behind, `rmdir()`
 failed silently, and the run leaked a temp directory while reporting success — caught only because the last
 assertion checks that the directory is gone. Use `scandir()` when a directory must actually be empty.
+
+## Telling the user what a long build is doing
+
+"Build the site from this mapping" takes a few seconds on a small page and close to a minute on a large
+one. For all of that time the only thing that changed was a disabled button reading "Building…", several
+screens below the indicator that was supposed to report progress — so the page read as hung. The indicator
+existed; nobody could see it.
+
+**`FW_Site_Converter_Progress`** reports the pipeline's real phases: pages, media, presets, Theme Settings,
+theme generation, content, finish. `start()` declares the whole ordered list, `step()` marks the one now
+running, `finish()` / `fail()` close the run. Guarded by `tests/progress-test.php` (16 assertions).
+
+**Why a transient and not a property.** The reader is a *different HTTP request* — the browser polls
+`wp_ajax_fw_sc_progress` while the build POST is still in flight, so the two processes share nothing but
+the database. Verified across two real wp-cli processes: a writer stepping every two seconds and a reader
+polling once a second, with the reader observing each transition live.
+
+**Why named steps and not a percentage.** The existing `loading()` bar eases asymptotically toward 99% over
+a 7-second estimate, so on a 60-second build it reaches ~99% in about fifteen seconds and then sits there
+for forty-five more — which reads as frozen rather than slow, and is worse than showing nothing. A step
+list cannot lie that way: each step has either finished or not.
+
+**`done` is derived from the declared ORDER, not from a matching finish() call.** A phase that returns
+early, throws, or is skipped by an option therefore cannot leave a spinner attached to work nothing is
+doing. The test asserts exactly this case.
+
+**The panel renders next to the button that started the build**, not at the top of the panel, and scrolls
+itself into view. The elapsed counter appears only after five seconds, so a quick build stays quiet and a
+slow one says "23s — large pages can take about a minute" instead of looking stuck. A failed run keeps its
+step list (it says how far it got), stops every animation, and names the step it stopped on. Motion is the
+signal, so `prefers-reduced-motion` gets a static equivalent rather than nothing.
 
 ## The result panel — the conversion tells the user what it already knows
 
