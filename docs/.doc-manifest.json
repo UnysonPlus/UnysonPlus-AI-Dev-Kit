@@ -1,6 +1,6 @@
 {
   "generated_against": {
-    "unysonplus": "3.0.31",
+    "unysonplus": "3.0.32",
     "unysonplus-theme": "2.6.23",
     "synced": "2026-09-27"
   },
@@ -283,7 +283,7 @@
       "src": [
         "{plugin}/framework/extensions/ai-assistant/manifest.php"
       ],
-      "hash": "b6a5d7a8aa12bbee30d9d8025ebf8837",
+      "hash": "90f378d56618b2db2c287c2c1659f562",
       "synced": "2026-09-27"
     },
     "extensions/animated-icons.md": {
@@ -350,7 +350,7 @@
       "src": [
         "{plugin}/framework/extensions/custom-fields/manifest.php"
       ],
-      "hash": "a72132fbe26c4cf63a9b811ab469707b",
+      "hash": "ad1cd0d9e7c89314efe2c45a9af1ccef",
       "synced": "2026-09-27"
     },
     "extensions/forms.md": {
@@ -360,7 +360,7 @@
         "{plugin}/framework/extensions/forms/config.php",
         "{plugin}/framework/extensions/forms/settings-options.php"
       ],
-      "hash": "be123fc23a99bd6d7b6ec9080c2b9039",
+      "hash": "9cfeb0b4a808807a4e281e6afb55fd19",
       "synced": "2026-09-27"
     },
     "extensions/live-editor.md": {
@@ -389,7 +389,7 @@
         "{plugin}/framework/extensions/megamenu/options/item.php",
         "{plugin}/framework/extensions/megamenu/options/row.php"
       ],
-      "hash": "571261dd53767f0cb43424ec87ce1446",
+      "hash": "74872de96268513ac70a9d05106ca467",
       "synced": "2026-09-27"
     },
     "extensions/newsletter-crm.md": {
@@ -408,7 +408,7 @@
         "{plugin}/framework/extensions/portfolio/config.php",
         "{plugin}/framework/extensions/portfolio/settings-options.php"
       ],
-      "hash": "fbf1e28965914aa9e2f9b088046fe3af",
+      "hash": "c1dd952c7cbac16bac50427a1525982f",
       "synced": "2026-09-27"
     },
     "extensions/post-types.md": {
@@ -416,7 +416,7 @@
       "src": [
         "{plugin}/framework/extensions/post-types/manifest.php"
       ],
-      "hash": "3bbd74ae8fd81ca014909321c5e944be",
+      "hash": "b929a3ca2f5bddc75944889432342f5d",
       "synced": "2026-09-27"
     },
     "extensions/seo.md": {
@@ -452,7 +452,7 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "b317d339d3f01dcb41629fb4d510ee28",
+      "hash": "55fe977e320fbfbd1b4570fce17fe814",
       "synced": "2026-09-27"
     },
     "extensions/site-migration.md": {
@@ -469,7 +469,7 @@
       "src": [
         "{plugin}/framework/extensions/snippets/manifest.php"
       ],
-      "hash": "54c3188f3d6688c4d1b049caad1dc6d6",
+      "hash": "44f52311af1c51bd22ac8ca2a9acc5db",
       "synced": "2026-09-27"
     },
     "extensions/template-library.md": {

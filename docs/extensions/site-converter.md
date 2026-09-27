@@ -3931,6 +3931,44 @@ mistakes were made writing that suite, and each looked like a dead hook.
 correction made through them applies on WordPress import, which is the authoritative path — but it will NOT
 show up in a capture-service-side conversion, so don't reach for them to fix a discrepancy between the twins.
 
+## Is the kit beside this install actually current? (`FW_UPW_KIT_PATH`)
+
+`kit-manifest.json`'s `bump_triggers` record which Site Converter and Capture Service versions the kit's
+docs were written against. Nothing verified that pairing, so a kit could sit several converter versions
+behind while its pages described behaviour that had since changed — and the only symptom was an agent
+confidently following stale guidance. `FW_Site_Converter_Kit` checks it and reports in the converter's
+**Diagnostics** tab. Guarded by `tests/kit-check-test.php` (18 assertions).
+
+It is opt-in through a **constant**, in `wp-config.php`:
+
+```php
+define( 'FW_UPW_KIT_PATH', 'D:/Web Dev/UnysonPlus-AI-Dev-Kit' );
+```
+
+**Why a constant and not a setting.** The kit is a developer's local download; on a normal host it is not on
+the WordPress filesystem at all, so a settings field would be blank or wrong nearly everywhere and would
+invite an admin to point the plugin at an arbitrary directory. A constant lives in `wp-config.php`, is out of
+reach of a compromised admin account, and says "developer machine only" without needing documentation. With
+the constant undefined — every normal install — the class does nothing and prints nothing.
+
+Three verdicts: `current`, `kit_behind` (the kit's docs predate this converter — pull the kit), and
+`plugin_behind` (the kit documents a converter this install does not have yet — update the plugin). The
+agreeing case still prints one quiet line, because a check that only ever speaks up to complain leaves the
+reader unable to tell "verified current" from "never ran".
+
+It reads exactly one known filename, resolved with `realpath()` and required to sit inside the configured
+root, size-capped, and every failure — missing file, unparseable JSON, no `bump_triggers`, no recorded
+converter version — degrades to silence rather than to a warning the reader cannot act on. The Capture
+Service version is reported as what the kit *expects*; the running version comes from the Diagnostics health
+check, since only the browser can reach the service.
+
+> **This check was written because the drift it detects had already happened, unnoticed.** The converter was
+> at 1.10.13 while the kit's recorded trigger still read 1.10.10 — because the script meant to update it
+> matched `'Site-Converter'` against a key actually spelled **`site_converter_extension`**, so the loop
+> matched nothing and updated nothing while printing the value it intended to write. Three consecutive
+> "trigger updated" reports were false. A string match against a key name is not a check; the bump helper now
+> asserts the key exists before writing it.
+
 ## The conversion sandbox — a site's own corrections, where nothing deletes them
 
 The extension points above are the seam; this is where a site's corrections LIVE.

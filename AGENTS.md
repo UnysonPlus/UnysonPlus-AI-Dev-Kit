@@ -351,6 +351,25 @@ verifier had already passed it:
    exist?" — the capture stamps `border-radius` on **99% of elements**, nearly always as `0px`. Test the
    VALUE. Measure the stamp density before trusting any presence test.
 
+### A write you did not read back did not happen
+
+Four separate times in one stretch of work, code reported success while doing nothing:
+
+- A version-marker updater matched `'Site-Converter'` against a key spelled `site_converter_extension`. The
+  loop matched nothing, updated nothing, and printed the value it *intended* to write — three times in a row,
+  each report believed.
+- `powershell -File D:\\claude-backup\\backup-repos.ps1` arrived as `D:claude-backupbackup-repos.ps1`.
+  PowerShell rejected the path and **exited 0**, so the backup looked fine and had not run.
+- `method_exists( $ext, 'manifest' )` is always false — `manifest` is a property — so a version read
+  degraded to `'unknown'` permanently, with no error anywhere.
+- `glob( '*' )` skips dotfiles, so a cleanup left `.htaccess` behind, `rmdir()` failed silently, and the run
+  leaked a directory while reporting success.
+
+Every one was caught by reading back the thing that was supposedly written — the file's new contents, the
+zips on disk, the value the getter returns, whether the directory is gone — and none by the exit code, the
+log line, or the absence of an error. **Assert on the artefact, not on the attempt.** A string match against a
+key name, in particular, is not a check: assert the key exists before writing to it.
+
 ### What a finished conversion report looks like
 
 Report the measurement, not the intention. Specifically:

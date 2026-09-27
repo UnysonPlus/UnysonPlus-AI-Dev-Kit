@@ -5,7 +5,7 @@ Registers UnysonPlus **abilities** with the WordPress Abilities API so an AI mod
 the (planned) builder panel, or anything calling the REST abilities endpoints — can read the site and
 build / edit page-builder pages through **validated, undoable** actions. **Active by default:** no
 (ships inactive). Requires WordPress **6.9+** (on older WP it loads but registers nothing) and the
-`shortcodes` + `page-builder` extensions. Version: 1.0.6. Human manual:
+`shortcodes` + `page-builder` extensions. Version: 1.0.7. Human manual:
 [AI Assistant](https://unysonplus.github.io/docs/extensions/ai-assistant/).
 
 ## Provides
@@ -146,6 +146,34 @@ A path may also be `id:<unique_id>`.
   `tabs[]` = `tab_title`, `tab_content`, `is_open`), choice types reject objects, and a scalar-default
   option rejects objects. `describe-element` returns `inner_options` + `shape`. A Theme Settings write
   whose CSS regeneration throws is rolled back.
+- **Extension abilities (1.0.7)** — each in `<ext>/includes/ai-abilities.php`, required from the
+  extension's `_init()`, registered on `fw_ai_assistant_register_abilities`: **megamenu** (`menus-list`,
+  `menus-create`, `menus-add-items`, `menus-assign`, `menus-remove-item`, `megamenu-set-item` — writes the
+  `mega-menu` meta + `fw_ext_mega_menu_set_db_item_option` directly, since the admin save handler only runs
+  on the Menus form POST), **snippets** (`snippets-list`, `snippets-create`; the validator accepts
+  `{type:'global_section', atts:{snippet_id}}` and `[snippet]` at the root), **portfolio** (`portfolio-list`,
+  `portfolio-describe`, `portfolio-save-project`; fields from `_filter_admin_add_post_options()`, featured /
+  hidden meta re-synced), **post-types** (via `save_definitions()`, defaults from the private blueprint
+  builders by reflection), **custom-fields** (group validated against `get_page_options()`; values via
+  `fw_set_db_post_option`), **forms** (`forms-add` normalises items via the form-builder item classes like
+  the starters; no entries ability). Toolkit spec keys: options, post_meta, created_posts, trashed_posts,
+  created_menus, post_fields, post_terms. Undo untrashes with `wp_untrash_post_set_previous_status` (WP 5.6+
+  untrashes to draft) and `FW_Cache::clear()`s.
+- **More extension abilities** — **woocommerce** 1.0.71 (`woo-settings` / `woo-settings-update` validate
+  against the settings page options and snapshot option `fw_ext_settings_options:woocommerce`;
+  `woo-list-products` / `woo-save-product` use the WC CRUD for SIMPLE products only — SKU uniqueness,
+  sale < regular, ribbon meta `_upwc_ribbon`, size guide `_upwc_size_guide`; after undo the
+  `fw_ext_woocommerce_ai_after_restore` hook re-saves the product so WC lookup tables / `_price` resync;
+  orders and customers are out of reach), **animation-engine** 1.3.90 (`animation-effects`,
+  `animation-apply`, `animation-site-modules`; fields = `upw_anim_field_defs()` ∩ the element's
+  multi-picker leaves from `FW_AI_Schema::leaves(tag)`; the saved value is `{<picker>: effect, <effect>:
+  {settings}}` and the field's off value (usually `none`) removes it; site modules are Theme Settings ids
+  switched with `update-theme-settings`), **animated-icons** 1.0.6 (`animated-icons-describe`: enabled
+  types from `animated_lottie|rive|svg|raster`, icon value `{type:'lottie'|'rive', src, trigger, speed}`,
+  uploaded files from `fw_icon_lottie_dir()` / `fw_icon_rive_dir()`).
+- **Site-build order in the instructions** — the site-wide assistant and MCP `instructions` follow this
+  kit's protocol (colours → typography → container width → presets → header / footer + menus → pages →
+  ship check) in condensed form, since sites don't have the kit.
 - Abilities carry `meta.mcp.public = true`, so the WordPress MCP adapter plugin exposes them too.
 - **render-check** (`includes/class-fw-ai-check.php`): each `simple` item is rendered alone via
   `json_to_shortcodes` + `do_shortcode` inside a bare flexbox wrapper (ob-buffered, Throwable caught).
