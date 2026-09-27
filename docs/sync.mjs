@@ -74,6 +74,7 @@ const NARRATIVE = new Set([
   // top-level guides
   'build-a-site.md', 'building-pages.md', 'cloning-gotchas.md', 'conventions.md',
   'design-parity-checklist.md', 'extending.md', 'fidelity-verification.md', 'converter-training-prompt.md', 'site-build-protocol.md',
+  'converter-fix-my-site-prompt.md',
   // aggregate reference docs (no single source dir)
   'option-types/containers.md', 'option-types/declaring-options.md', 'option-types/icon-v2.md',
   'option-types/icon-v3.md', 'option-types/primitives.md', 'theme-settings/programmatic-setup.md',

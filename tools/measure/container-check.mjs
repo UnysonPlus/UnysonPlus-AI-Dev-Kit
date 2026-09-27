@@ -56,29 +56,44 @@ async function measuredContentWidth(page, url) {
     for (const sec of document.querySelectorAll('section, main > div, article')) {
       const sr = sec.getBoundingClientRect();
       if (sr.height < 80) continue;
-      let best = 0;
+      // A CONTENT WIDTH IS A CONTENT BOX. This used to push the widest descendant's raw
+      // getBoundingClientRect().width — a BORDER box, gutter included — and then report `pad: 0`, so a
+      // capped column's own padding was counted as content. On the Tailwind shape these sources use
+      // (`max-w-7xl mx-auto px-8` → box 1280, padding 32/side, content 1216) it read the source as
+      // "1280px content, 0 gutter" and failed a build that rendered the correct 1216 — an outer box
+      // compared against a content box. Measured on a live source: box 1280 / padL 32 / padR 32.
+      // Pick the column by its OUTER width (that is what makes it the content column), then report its
+      // CONTENT box, which is the dimension a "Container Width" setting is supposed to yield.
+      let best = 0, bestPad = 0;
       for (const el of sec.querySelectorAll('div, .container, ul, header, footer')) {
         const r = el.getBoundingClientRect();
         if (r.height < 40) continue;
         const w = Math.round(r.width);
         // full-bleed is the section itself, not the content column
         if (w >= vw - 1) continue;
-        if (w > best) best = w;
+        if (w > best) {
+          const cs = getComputedStyle(el);
+          best = w;
+          bestPad = Math.round((parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0));
+        }
       }
       // a genuinely full-bleed section contributes the viewport inset by its own side padding
       if (!best) {
         const cs = getComputedStyle(sec);
         const pad = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
-        if (pad > 0) best = Math.round(sr.width - pad);
+        if (pad > 0) { best = Math.round(sr.width); bestPad = Math.round(pad); }
       }
-      if (best > 200) widths.push(best);
+      if (best - bestPad > 200) widths.push({ content: best - bestPad, outer: best, pad: bestPad });
     }
     if (!widths.length) return null;
+    // The mode is taken over the CONTENT widths; the outer box and gutter are carried alongside so the
+    // report can show the same "outer − gutter" breakdown the class-matched path prints.
     const tally = new Map();
-    for (const w of widths) tally.set(w, (tally.get(w) || 0) + 1);
+    for (const w of widths) tally.set(w.content, (tally.get(w.content) || 0) + 1);
     let mode = 0, mc = 0;
     for (const [w, c] of tally) { if (c > mc || (c === mc && w > mode)) { mc = c; mode = w; } }
-    return { content: mode, outer: mode, pad: 0, maxWidth: '(measured)', cls: `measured across ${widths.length} sections`, measured: true };
+    const rep = widths.find((w) => w.content === mode) || { outer: mode, pad: 0 };
+    return { content: mode, outer: rep.outer, pad: rep.pad, maxWidth: '(measured)', cls: `measured across ${widths.length} sections`, measured: true };
   });
 }
 

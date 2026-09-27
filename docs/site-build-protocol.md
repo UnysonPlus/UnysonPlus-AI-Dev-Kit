@@ -625,6 +625,13 @@ text but not the hairline divider above it.
 
 ## Rule 4 — Regenerate + verify REGION-BY-REGION, iterating each until it matches
 
+> **A PASS from a lens is a hypothesis, not a verdict — see `AGENTS.md` → "The tool must agree with your
+> own eyes — or the TOOL is the bug".** Before you accept any region as done, LOOK at it. A box metric
+> (height, container width, section count) can match perfectly while the type inside is wrong; a pixel
+> diff over a thin band of flat fill is dominated by the background and cannot see its content. If you
+> can see a difference the lens does not report, the lens is the defect — fix it in the SAME pass, with a
+> golden that includes a NEGATIVE proving it can still fail on the thing it exists to catch.
+
 - After writing settings outside the normal save flow: call **`unysonplus_hf_regenerate_css()`** and
   clear the optimizer/generated caches (`uploads/**/asset-optimizer/*`, `unysonplus-generated.css`,
   `presets-*.css`, `unysonplus/css/*.css`).

@@ -317,6 +317,64 @@ Then add the rule's case to **both** parity fixtures, never just the twin you ed
 A `saturate` rule once shipped in PHP only, and a `header_shadow_depth` regex bug shipped in both —
 that option had shipped and never once worked. Neither was caught until fixtures existed on both sides.
 
+## The tool must agree with your own eyes — or the TOOL is the bug (REQUIRED)
+
+A verifier that disagrees with what you can plainly see is not a neutral second opinion. It is a defect,
+and it is the most expensive kind, because it certifies broken output as finished.
+
+**The rule: if you can see it and the tool cannot, fix the tool in the same pass as the conversion.** Not
+later, not as a follow-up. A run that fixes the page and leaves the blind spot in place has fixed one site
+and guaranteed the next one repeats it.
+
+This is not hypothetical. Every item below was found on a real conversion, by looking at the page after a
+verifier had already passed it:
+
+| what the tool said | what was actually true |
+|---|---|
+| `container_width` FAIL, off by 64px | the converter was **right**; two checkers compared the source's OUTER box against the build's CONTENT box |
+| `chrome:header` drift **3.3%** | three defects — a spurious second CTA, a nav with no spacing, a missing current-page marker. Still read 3.3% *after* all three were fixed |
+| footer height delta **+0.8%**, "good" | a body paragraph rendering 24px serif italic where the source sets 14px sans |
+| never-drop gate: `font-style` dropped | the rule it reads had always emitted `font-style: italic` — the flag was hardcoded |
+
+### The four ways a check lies
+
+1. **A box metric says nothing about what is in the box.** Height delta, container width and section count
+   all matched while the type inside was wrong. Never accept a dimension as evidence of content.
+2. **An average over a mostly-empty region cannot see its content.** A masthead is a thin band of flat
+   fill; a cell-threshold pixel diff is dominated by the background, which matches perfectly. On a region
+   that is largely one colour, pixel drift is noise — use the chrome/type verifier there.
+3. **Reporting one property can suppress another.** A findings emitter written as an `else if` chain
+   reported `moved` OR `type`, never both — so every element in a shifted region became permanently
+   unable to report a wrong font. Independent properties get independent checks.
+4. **A predicate written for hand-authored CSS is a tautology against a computed-style dump.**
+   `strpos( $cs, 'border-radius:' ) !== false` reads as "is this rounded?" and means "does this element
+   exist?" — the capture stamps `border-radius` on **99% of elements**, nearly always as `0px`. Test the
+   VALUE. Measure the stamp density before trusting any presence test.
+
+### What a finished conversion report looks like
+
+Report the measurement, not the intention. Specifically:
+
+- **Numbers, before and after.** "Fixed the gallery" is not a result. "portfolio 485px -> 1548px against a
+  source of 1548, drift 29.6% -> 0.1%" is.
+- **A rendered measurement, not a data check.** The builder JSON being right does not mean the page is
+  right. Re-import, purge the combined CSS, and measure the DOM you actually shipped.
+- **Say which tool saw it, and re-run the one that found it.** A finding from step 2 that goes unmentioned
+  in step 8 has been dropped, not resolved.
+- **Name what is still wrong, with its number.** Every section that remains outside tolerance gets listed.
+  A report that mentions only what improved is a sales pitch.
+- **When a verifier changed, say so and say why.** Making a check pass by editing the check is legitimate
+  only when the check was wrong, and then it needs a golden — including a NEGATIVE proving the check can
+  still fail on the defect it exists for. A calibration with no NEGATIVE is coverage theatre: the first
+  attempt at one of these passed `9 <= 12` and could never have failed on the bug it was written for.
+- **Report your own mistakes in the same voice as the code's.** Two fixes in one session were wrong in
+  ways every suite passed: a parameter referenced that the function never took, and a literal NUL byte
+  written into a PHP source. PHP parsed both. Only measuring the page, and checking file integrity,
+  surfaced them.
+
+**Rule of thumb:** if the only evidence that something is fixed is that a number went green, you have not
+finished — open the page and look at the thing you changed.
+
 ## Hard rules
 
 - **Native options before CSS.** If a look is achievable via a Theme Settings

@@ -1,6 +1,11 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Training the deterministic converter — the audit prompt
 
+> **This is the MAINTAINER prompt** — it changes the shared conversion algorithm and assumes the converter
+> source, the goldens and the 187-site corpus. If you are closing the gap on ONE converted site, use
+> [converter-fix-my-site-prompt.md](converter-fix-my-site-prompt.md) instead: it fixes the site through
+> native options and scoped CSS, and never touches shared code that a plugin update would overwrite.
+
 A "convert this source and fix what's wrong" request is only as good as the **proof** it demands. Asked
 loosely ("do a full audit and update the converter"), an agent will read PHP, open one or two screenshots,
 and report a list that is really a restatement of its own guesses. The audit then misses exactly the

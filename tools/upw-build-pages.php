@@ -27,7 +27,7 @@
  *     upw_section(array( upw_column('1_2', array(
  *       upw_element('special_heading', array('title'=>'Welcome','heading'=>'h1','alignment'=>'left',
  *         'scroll_keyframes'=> upw_skf(array('y'=>60,'opacity'=>0), null, array())) ),
- *       upw_element('text_block', array('content'=>'<p>Intro copy.</p>')),
+ *       upw_element('text_block', array('text'=>'<p>Intro copy.</p>')),
  *     )), upw_column('1_2', array(
  *       upw_element('image', array()),  // fill via Media Library / attachment id
  *     ))),
@@ -180,11 +180,14 @@ function upw_build_page( $target, $title, $builder, $post_type = 'page' ) {
 	// Write the builder value — LAST, no render after. Both storages must agree: the framework reads
 	// the JSON from the flat `..:json` key but the ACTIVE FLAG from the `fw_options` aggregate, so
 	// write both (delete-first above guarantees no stale disagreement).
-	update_post_meta( $post_id, 'fw:opt:ext:pb:page-builder:json', $json );
+	// update_post_meta() UNSLASHES what it stores, so wp_slash() the value first. Without it every
+	// backslash in the JSON is stripped: escaped newlines and unicode turn into stray letters, and an
+	// escaped quote in element markup breaks the JSON outright (the page then renders nothing).
+	update_post_meta( $post_id, 'fw:opt:ext:pb:page-builder:json', wp_slash( $json ) );
 	update_post_meta( $post_id, 'fw:opt:ext:pb:page-builder:builder_active', true );
 	$fw = get_post_meta( $post_id, 'fw_options', true ); if ( ! is_array( $fw ) ) { $fw = array(); }
 	$fw['page-builder'] = array( 'json' => $json, 'builder_active' => true );
-	update_post_meta( $post_id, 'fw_options', $fw );
+	update_post_meta( $post_id, 'fw_options', wp_slash( $fw ) );
 	if ( class_exists( 'FW_Cache' ) ) { try { FW_Cache::del( 'fw:ext:page-builder:json-to-shortcodes/' . $post_id ); } catch ( Exception $e ) {} }
 
 	// Report effects present in the stored tree (front-end verify with curl — see the doc).

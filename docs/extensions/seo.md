@@ -456,3 +456,10 @@ screen with 30 template fields does not fire 30 requests at once.
   `render_options()` and `fw_get_options_values_from_input()` but keeps its own
   storage. A save with no `fw_seo_nonce` in `$_POST` is ignored, so quick-edit and
   REST saves cannot silently wipe the overrides.
+
+## AI Assistant abilities (2.0.14)
+
+`includes/ai-abilities.php` registers, via the AI Assistant toolkit (only while it is active):
+`seo-get-page` (panel; effective values via `FW_SEO_Chain::resolve` + `::source`, overrides from
+`FW_SEO_Store`, length hints), `seo-update-page` (panel; `FW_SEO_Store::set_post`, empty string clears,
+snapshot of the `_fw_seo_<field>` meta for `undo-change`), `seo-audit` (≤100 published posts).

@@ -2916,18 +2916,18 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   over-flagging them; import-site.php now matches the same promotion criteria (a real backdrop vs a portal/mask/
   shell/column/rounded content clip), so those read bg_media=100 (N/A) honestly.
 - **SITE TITLE / logo wordmark — brand from `<title>` for brand-less pages (site-converter 1.8.36).** A single-scene
-  page with NO header/nav (crafting-the-nocturnal-web, synthetic-light) has no brand chrome, so `detect_logo`
+  page with NO header/nav (fixture-04, fixture-05) has no brand chrome, so `detect_logo`
   returned empty and the masthead rendered the WP "Home" fallback. The site-title now derives the brand from the
   source `<title>`'s first segment (before a `|`/`–`/`—`/`·`/`:` separator — the same derivation the theme NAME
   already uses), so the masthead shows "Aether House" / "Lumina Gen" instead of "Home". **logo 0 → 100** on both;
-  homex (no header AND no `<title>`) legitimately stays the "Home" fallback.
+  fixture-06 (no header AND no `<title>`) legitimately stays the "Home" fallback.
 - **HARNESS — spacing excludes heroes + gap-spaced bands (score.mjs).** The metric counted any text section with
-  <24px vertical padding as collapsed, but a HERO uses min-height + vertical centering (autonomous-supply-chain's
-  1083px bg-video hero) and a `section--gap-<n>` band uses child GAP for rhythm (obsidian's `section--gap-32px`) —
+  <24px vertical padding as collapsed, but a HERO uses min-height + vertical centering (fixture-02's
+  1083px bg-video hero) and a `section--gap-<n>` band uses child GAP for rhythm (fixture-03's `section--gap-32px`) —
   both legitimately have ~0 section padding. Now a tall centered/flex/min-height/full-bleed-media section and a
   `section--gap-≥16` band are N/A for the padding-collapse check (the gap px is read from the class, since the gap
-  often sits on an inner flexbox and `cs.rowGap` reads 0). Cleared the false collapses (autonomous 0→100,
-  crafting 75→100, obsidian 33→67); a genuinely flush content band still counts.
+  often sits on an inner flexbox and `cs.rowGap` reads 0). Cleared the false collapses (fixture-02 0→100,
+  fixture-04 75→100, fixture-03 33→67); a genuinely flush content band still counts.
 - **SECTION-LEVEL bg-video hoist — inset-0 layers AND self-absolute `video-bg` videos (site-converter 1.8.31).**
   A hero `<video>` (autoplay+muted hallmarks) that lives inside a section — either wrapped in an `absolute/fixed
   inset-0` (or `w-full h-full`) text-free bleed LAYER, or as the video ITSELF being the full-bleed backdrop
@@ -2949,7 +2949,7 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   (≤24 chars, ≤3 WHITESPACE tokens — so a dotted acronym "S.P.Q.R." counts as ONE token, not 4 as
   `str_word_count` reads it) off as the wordmark, keeping the second as the tagline. Fixes art-of-living
   ("Vesta Atelier"/"Curated Living Spaces") + colosseum ("S.P.Q.R."/"Roma Antiqua") — **logo 0 → 100** each,
-  visually verified. NB the remaining logo=0 sites (homex, synthetic-light) are genuinely BRAND-LESS sources
+  visually verified. NB the remaining logo=0 sites (fixture-06, fixture-05) are genuinely BRAND-LESS sources
   (no header/nav/logo/img/title) — the "Home" fallback is the honest result, not a fixable defect.
 - **IMAGE BOX — arbitrary VIEWPORT-unit card heights recovered (site-converter 1.8.33).** `box_decl_from_classes`
   (both Stitch + Mapper twins) now recovers `h-[Nvh]`/`h-[Nvw]`/`h-[N%]`/`h-[Nem]` in addition to `h-[Npx|rem]`,
@@ -3692,6 +3692,188 @@ those engines, and `node docs/sync.mjs stamp extensions/site-converter.md` after
 **Keep this algorithm in sync across BOTH implementations** — the PHP `Mapper`/`Stitch`/`Tailwind`
 (file-upload path) and the JS `capture-extract`/`to-pages` (URL path) — so both produce consistent output.
 
+## Audit what the converter writes into Theme Settings
+
+`tools/settings-audit/audit.php` takes every value a conversion writes, finds the control that will render
+it, and **round-trips it through that control's own `get_value_from_input()`**. A value that cannot survive
+that trip is one the control cannot hold, so the moment the user opens the tab and saves, it is replaced.
+Empirical, so it needs no per-type knowledge and catches every class at once.
+
+```
+php D:/xampp/wp-cli.phar --path=D:/xampp/htdocs --allow-root eval-file     "…/tools/settings-audit/audit.php" [<capture-dir> …]
+```
+
+With capture dirs it audits what those conversions WOULD write; with none, what is stored on the site.
+
+It reports only values actually LOST — a `multi` legitimately fills in defaults for sub-options the stored
+value omits, `0` and `"0"` are the same value, and a multi-picker drops the branch of the choice that is not
+selected. Counting those as loss produced 18 false positives on the first run.
+
+**What it found, and the rules that came out of it:**
+
+| Symptom | Rule |
+|---|---|
+| `{predefined,custom}` written to a plain `color-picker` -> `""` | the compact shape is only for `sc_color_field_compact()` fields; a plain picker takes a STRING |
+| `rgba()` in a `typography` colour -> **`#000000`** | that field parses hex only — flatten the alpha, never pass rgba |
+| a per-heading `variation` with an empty `family` -> `false` | a variation is a property of a family; fall back to the Heading Font's family |
+| a colour string written to a compact field -> lands in `predefined` | `predefined` holds a palette SLUG, not a colour |
+| a measured column split -> snapped on save | snap to the `split-slider`'s own denominator up front, or the layout reflows under the user |
+| the UNSELECTED multi-picker branch populated | it is dropped on save; filling it is not a convenience, and it was the one place an un-sideloaded source URL survived |
+
+Run it after any change to what the converter writes into Theme Settings.
+
+## Never hand a SELECT a value it cannot hold
+
+A Theme Settings option backed by a `select` can only store one of its own choice strings. Give it a computed
+equivalent and it renders fine — and is then silently discarded the next time the user saves that tab.
+
+Reported as *"the top spacing of the entire footer disappears when I edit the footer settings"*. Footer Padding
+Top / Bottom are selects built from the site's spacing scale. The converter tested the measured px against a
+HARDCODED scale and, on a hit, wrote a computed rem string. Both halves were wrong: the real scale is the
+SITE's (a converted site carries whatever the source used), and a length can be on that scale as the literal
+string `40px` while the converter writes `2.5rem`. Measured: saving the Footer tab took the footer from
+80px/40px to 80px/24px.
+
+**The rule:** carry the exact measurement on the `*_custom` unit-input — it holds any value, survives a save,
+and the theme applies it AFTER the select (theme-vars.php). Set the select only when the value really is one
+of its choices, via `Stitch::spacing_scale_choice()`, which compares NUMBERS and returns the scale's OWN
+string. A miss there costs nothing because the override already carries the truth.
+
+This generalises: any converter write into a `select` must go through the option's real choice list. Guarded
+by golden `[BJ]`.
+
+## A price LIST is not a price GRID (pricing layout)
+
+`pricing_table` used to take its column count from the number of PLANS — which says nothing about how the
+source arranged them, so a four-item price list became a four-across card grid with the price stacked under a
+wrapped, centred title.
+
+Measured with the converter's own `is_pricing_table` over the capture corpus: of the priced groups whose
+container carries a measured `display`, most are **list**-shaped, not grids. Before this, every one of them
+converted to a grid — a **26%** layout match. Reading the source's geometry instead takes it to **100%**, and
+fixes 10 grids whose column count the plan count had wrong.
+
+**The rule:** the layout and the column count come from the source's measured container, never from the plan
+count. `Stitch::pricing_layout()` reads the stamped `display` (+ `grid-template-columns`):
+
+| Source container | Layout |
+|---|---|
+| `grid` with 2+ tracks | `grid`, columns = the source's tracks |
+| `grid` with one track | `list` |
+| `flex`, `flex-direction: column` | `list` |
+| `block` / flow | `list` |
+| `flex`, row | `grid` |
+| nothing stamped | `grid` (the old behaviour) |
+
+`Stitch::pricing_row_metrics()` then measures the LIST's rhythm — whether a rule separates the rows, their
+spacing (the container's gap, else the cells' sibling margin), their own padding, and the price element's own
+size / weight / family. Defaulting those was visibly wrong: a flush, rule-less menu rendered with a hairline
+on every row and 16px of padding it never had, each row 87px against the source's 56px.
+
+**Shortcode side:** LAYOUT is a separate axis from DESIGN. Design is a skin on shared markup; layout owns its
+own render partial under `views/layouts/`. Note it is deliberately NOT `views/designs/` — `fw_sc_designs()`
+treats that filename as the shortcode's one design registry and would prefer it over `views/parts/registry.php`,
+silently replacing the existing Design picker (and every installed skin pack) with the layout list.
+
+Back-compat: the layout lives under a NEW option id (`design_settings/layout`), so the legacy scalar `design`
+is untouched and anything saved before layouts existed falls back to `grid` and renders exactly as it did.
+
+Guarded by golden `[BI]`.
+
+## Multi-page: the SITE is the unit of conversion
+
+A site is **one** conversion, not one per page. Converting pages separately made every import re-derive the
+site-level design from whichever page ran last, so the last page converted decided how the whole site looked.
+
+**Capture.** `capture.mjs <url> <outdir>` now crawls the front page's nav (up to `MAX_PAGES`, default 10) and
+writes ONE bundle:
+
+```
+capture-out/<site>/
+  rendered.html                  the front page (unchanged — where it has always been)
+  pages/<slug>/rendered.html     one DOM snapshot per page, including the front page
+  pages-manifest.json            [ { slug, url, front, rendered }, ... ]
+  theme-design.json  presets.json  theme-settings.json  media.json   ONE site-level design
+```
+
+`--single-page` (or `UPW_SINGLE_PAGE=1`) captures only the URL given — what a targeted re-convert of one page
+wants. A bundle with no `pages-manifest.json` imports exactly as before.
+
+**Import.** `FW_Site_Converter_Bundle::import_dir()` runs the SITE phases once (media, presets, theme settings,
+theme generation, style guide) and then loops the page snapshots (`pages:multi` in the result's `sections`).
+Ordering matters and is now fixed: **pages → extra pages → menus → permalinks**, so every page a nav item
+points at exists before the menu is built, and the permalink structure is settled once at the end.
+
+Measured end-to-end from a hostile start (three pages deleted, permalinks on the PATHINFO structure, all three
+URLs 404): one capture (39s, 4 snapshots) + one import → all four pages 200 with their own content, the site's
+theme untouched, and `settings skipped: 0`.
+
+### Converting a whole site from the Convert panel
+
+There are TWO pipelines, and both are multi-page now:
+
+| Path | Route | Review screen |
+|---|---|---|
+| **Bundle import** | a `convert-bundle.zip` -> `looks_like_bundle()` -> `import_dir()` | skipped |
+| **Review path** | URL / paste -> `Stitch::build_bundle()` -> review -> `Mapper::build_pages()` | shown |
+
+The panel is the review path, and it used to be single-page by construction: `/capture?html=1` returned one
+rendered HTML string, and `build_bundle` with an `html` input pushed exactly one screen. Now:
+
+- **`/capture?url=…&pages=all`** returns `{ pages: [ { slug, url, front, html } ] }` for every page the run
+  captured, from the manifest it already writes. `&max=N` caps the crawl, `&also=url,url` adds pages the nav
+  does not link to, `&single=1` captures only the URL given. Falls back to the single-HTML response when a run
+  captured one page, so an older plugin is unaffected.
+- **`Stitch::build_bundle( [ 'screens' => [ … ] ] )`** takes them all and produces ONE mapping holding N pages.
+  `Sources::build_from_screens()` is the entry point; source identity is read from the FRONT page, since every
+  page of a site comes from the same generator. The `html` branch is untouched.
+- **`screen_identity( $url )`** is the one rule for slug + front: the site root is the front page with a blank
+  slug; any other path is an inner page under its last path segment. `build_bundle` then normalises to exactly
+  one front page, so a payload claiming several (or none) can never produce two homepages.
+- **The Convert panel's PAGES box** chooses the scope: *This page + linked pages* (default, with a max), *Just
+  this page*, and a textarea for extra URLs.
+
+### The review screen with several pages
+
+One tab per page, labelled `Title · <section count>`, the front page marked. **Chrome is NOT in the tabs** —
+the header and footer are site-level and reviewed once, above the strip; a per-page header would invite the
+"which page's header wins" bug the importer had. Each tab carries an **Omit page** checkbox, the same verb as
+`Omit section` one level down, which sets `mapping.pages[p].omit`; `build_pages()` then skips it exactly as
+`build_section()` skips an omitted section.
+
+A tab's tree is built the first time it is OPENED, not up front. That is a performance requirement: ten page
+trees rendered at once is the same main-thread stall a single huge options tab caused. With one page the
+review renders exactly as it always did, with no tab strip.
+
+### The rules this depends on
+
+- **An inner page contributes CONTENT, not a site design.** The generated theme is named after the capture, so
+  converting three inner pages once built three child themes named after them and ACTIVATED each in turn. The
+  theme phase is skipped when the capture is an inner page AND a converter-generated theme is already active
+  (`capture_is_inner_page()` + `converter_theme_active()`). A first conversion — front page, or an inner page on
+  a site with no converted theme — still generates and activates one.
+- **A manifest is DATA.** A `rendered` path that is absolute, drive-qualified, or climbs out of the bundle is
+  refused; a listed-but-missing or style-less snapshot is REPORTED, never silently treated as converted.
+- **Change permalinks through `$wp_rewrite`, not `update_option()`.** The global keeps its own copy of the
+  structure, so writing the option alone leaves it stale and the flush regenerates rules for the structure you
+  just replaced — the pages stay 404 until something flushes a second time. Use
+  `$wp_rewrite->set_permalink_structure()` then `flush_rules()`.
+- **Baseline the settings guard over everything the converter owns**, at the end of the whole import. Stamping
+  only the *imported* keys left cleared keys and keys that later phases rewrite carrying a stale stamp, so the
+  next conversion read the converter's own work as a user edit and skipped it — and a skipped key was never
+  re-stamped, so it stayed skipped forever. Measured: a clean run (0 skipped) followed by one reporting 26.
+
+Guarded by `tests/multipage-bundle-test.php` (15 assertions).
+
+### Still open
+
+- **Chrome is taken from the front page**, not from a consensus across pages. With one bundle there is no
+  contention — one capture derives it once — so this is a refinement, not a live bug: a site whose inner pages
+  carry a genuinely different header would want per-page overrides.
+- **Cross-page settings skips remain.** Importing the SAME bundle repeatedly is stable (0 skipped every time),
+  but importing different single-page bundles in sequence still reports skips. The multi-page path avoids it by
+  construction; the single-page sequence does not.
+
 ## Keep the no-AI conversion algorithm in sync (PHP ↔ JS)
 
 The deterministic ("no AI") converter exists in **two** implementations — the plugin for the
@@ -3703,6 +3885,144 @@ extraction — **apply the equivalent change to the other** so both paths produc
 (E.g. header/footer/nav are CHROME handled by the generated theme, NOT page-builder content —
 `capture-extract.mjs` excludes them from body sections; the PHP `section_roots()` matches.) When in
 doubt, the capture service's extraction is usually the more-complete reference.
+
+## Extension points — correct ONE site without patching shared code
+
+Three seams, so a site owner (or their agent) can fix their own conversion in their own code. All three
+live in the PHP path, which is the authoritative one on a WordPress bundle import. They are WordPress
+hooks, so they belong in a child theme or `framework-customizations/` — never in the plugin, which an
+update replaces. Guarded by `tests/extension-points-test.php` (17 assertions).
+
+**1. `FW_Site_Converter_Stitch::register_recognizer( $id, $priority, $match, $build )`** — claim a DOM
+element and emit your own block. Built-in priorities span 25–99 (so 100+ to outrank every built-in; note
+several built-ins tie at 99, and ties have no defined order). Re-use a built-in's id to REPLACE it;
+`unregister_recognizer( $id )` removes one; `recognizer_ids()` lists them, highest first. Register on the
+`fw_site_converter_recognizers` action, which fires after the built-ins are installed — so a subscriber can
+inspect, replace or remove one by id.
+
+> **This registry had a defect that made the documented path catastrophic, and it is worth knowing why.**
+> The built-ins were installed under `if ( ! self::$recognizers )`. A third party registering ONE recognizer
+> before the first conversion therefore left the set non-empty, and the built-ins were never installed at
+> all: **measured at 54 recognizers down to 1**, producing a near-empty conversion with no error to explain
+> it. Doing exactly what the docs invited broke everything, silently. The fix is a separate
+> `$builtins_registered` flag, plus re-applying anything registered early so a deliberate id replacement
+> still wins. The lesson generalises: *"is the collection empty" is not the same question as "has
+> initialisation run"*, and conflating them turns any early caller into a silent saboteur.
+
+**2. `apply_filters( 'fw_site_converter_block_nodes', null, $b, $css_id )`** — claim a stitched block and
+supply its builder nodes. Return `null` to fall through to the built-in mapping, an array of nodes to use
+instead, or an **empty array** to drop the block deliberately. The mapping is an ordered if/continue chain
+rather than one dispatch table, so this is the single point where a block can be intercepted without editing
+that chain. Returned nodes go into their own full-width column, after the pending text buffer is flushed so
+they land in source order.
+
+**3. `apply_filters( 'fw_site_converter_theme_settings', $incoming, $replace_chrome, $force )`** — the
+values a conversion is about to write, as `option id => value`. Add, change or unset keys. The
+fingerprinting and the user-edit guard apply to the *result*, so a value set here is still never written
+over one the user has since edited by hand. This is where a site-specific Theme Settings correction belongs.
+
+**Two notes for anyone writing a test against these.** `build_pages()` stamps a fresh random `unique_id` on
+every node, so two builds of identical input are never byte-equal — normalise the ids before comparing, or a
+pass-through assertion fails against nondeterminism rather than against the code. And `html_to_mapping()`
+produces *blocks*; blocks become *nodes* in the mapper, so a test of hook 2 has to run `build_pages()`. Both
+mistakes were made writing that suite, and each looked like a dead hook.
+
+**No JS twin.** These are WordPress hooks, and the JS path (`to-pages.mjs`) has no filter system. A
+correction made through them applies on WordPress import, which is the authoritative path — but it will NOT
+show up in a capture-service-side conversion, so don't reach for them to fix a discrepancy between the twins.
+
+## The conversion sandbox — a site's own corrections, where nothing deletes them
+
+The extension points above are the seam; this is where a site's corrections LIVE.
+`FW_Site_Converter_Sandbox` loads one PHP file per correction from `wp-content/unysonplus-sandbox/entries/`,
+each returning `array( id, summary, fragment, expected, probe, apply )`. Guarded by `tests/sandbox-test.php`
+(37 assertions, most of them negatives).
+
+**Why `wp-content/`, and not `framework-customizations/`.** The obvious home for user code is
+`framework-customizations/`, which a plugin update never touches — but it sits inside the THEME, and a new
+conversion **deletes the previous conversion's generated child theme** (`cleanup_previous_conversion()`). A
+sandbox stored there would be destroyed by the next conversion, which is exactly when the corrections matter
+most. `wp-content/unysonplus-sandbox/` survives a plugin update, a theme swap and a reconversion alike. The
+scaffold writes a README, an inert example entry, and an `index.php` + `.htaccess` so the folder cannot be
+browsed (the files are `include`d by PHP, never served).
+
+**Entries retire themselves.** Each may carry a `probe` answering one question: *is the defect I exist for
+still present?* `maybe_probe()` runs on `admin_init` and re-probes once per converter version — a converter
+update being precisely when a correction may have become unnecessary. A probe returning `false` retires the
+entry: it stops applying and is listed as safe to delete. Without this a site accumulates corrections that
+fight fixes it has already received, and a hook that "corrects" an already-correct value IS the bug.
+
+Three asymmetries in the retirement logic, each deliberate, because the costs are not symmetric:
+
+- **No probe → never retired.** "I don't know" must not read as "safe to drop".
+- **A probe that THROWS → entry stays active.** An inconclusive probe that retired its entry would silently
+  un-fix the site; keeping a correction one version too long is much cheaper.
+- **`revive( $id )`** exists because a probe can be wrong, or a regression can come back.
+
+**Nothing an entry does can break the site.** Loading, `apply()` and `probe()` each run in their own
+try/catch; a bad entry is disabled and reported through `errors()`. `boot()` is idempotent, so being called
+from `_init()` and again before a conversion cannot double-register a filter.
+
+**`report()`** renders the set as shareable text — each entry's source fragment plus what was expected,
+which is the reproducible-case shape a maintainer can turn into a permanent fix, with the case-not-a-patch
+and privacy cautions included. The result panel mentions the sandbox only when entries exist, and says how
+many are now handled upstream.
+
+### Two defects this cost, both silent
+
+**`method_exists( $ext, 'manifest' )` is always false** — `manifest` is a *property* on `FW_Extension`, not
+a method. `converter_version()` therefore returned `'unknown'` every time, and since `maybe_probe()` compares
+the stored version against it, the probes would have run exactly once and then never again: every entry
+frozen as permanently needed, forever. A unit test with a mocked version would have passed. Running the thing
+against a real install is what caught it, and the suite now asserts the version both is not `'unknown'` and
+*looks like* a version, so a change to it can actually be detected.
+
+**`glob( '*' )` does not match dotfiles.** The sandbox test's own cleanup left `.htaccess` behind, `rmdir()`
+failed silently, and the run leaked a temp directory while reporting success — caught only because the last
+assertion checks that the directory is gone. Use `scandir()` when a directory must actually be empty.
+
+## The result panel — the conversion tells the user what it already knows
+
+Every conversion grades itself: `build_parity_report()` writes `conversion-parity.json` (the structural
+checks, each pass/fail with its source and converted value) and the drop log writes
+`conversion-drops.json`. Both used to land in a capture folder the user never opens, so a conversion that
+knew exactly where it was weak reported none of it, and the user found out by scrolling.
+
+**`FW_Site_Converter_Bundle::remember_result( $dir, $files = null )`** persists a compact record to the
+option `fw_sc_last_result` — the score, the failed checks (id, label, source, converted, note) and the
+drop counts, with the source URL read from `theme-design.json`. It is called from two places, and the
+order matters: early in `import_dir()` (a bundle carrying its own reports but never rebuilt still has
+something to say) and again from `write_executed_report()`, which overwrites it with the PHP engine's own
+numbers — those are what the site was actually built from, so they are the authoritative ones.
+
+**`FW_Extension_Site_Converter::render_next_steps()`** renders it under the import notice, turning ONE
+findings list into the three things a reader might want:
+
+- a plain-language punch list — each failed check as a symptom plus where it is fixed (`$guide` maps check
+  id → symptom + Theme Settings path; an unmapped id still lists using the check's own label, because an
+  unnamed finding beats a silent one),
+- a copy-able brief for an AI agent, pre-filled with this conversion's own numbers and the source/converted
+  URLs — the condensed form of [converter-fix-my-site-prompt.md](../converter-fix-my-site-prompt.md),
+- a line pointing at the **AI Assistant** extension when it is active, since it can edit the converted
+  pages directly and every change it makes is undoable.
+
+Two deliberate choices:
+
+**It is result-aware.** A clean conversion is told it is clean and given the review order; it is not asked
+whether it is disappointed. A panel that says the same thing to a good and a bad result teaches the reader
+to ignore it, and priming someone to hunt for failure is a poor way to set expectations.
+
+**The brief asks for the finding to be SHARED, and says what for.** An agent told only to "report back"
+reports to the person in the room and the finding dies there — the next site of the same shape gets solved
+by hand again. Told that a source fragment plus the wrong output *is a test case*, and that one shared case
+is fixed once for everybody, it writes something a maintainer can act on. The ask is narrow on purpose:
+**the case, not the patch.** A patch tuned to a single source is exactly what the converter must not take;
+a reproducible case can be run against the corpus, which is the only way to tell a general rule from a
+coincidence. Privacy limits (no client names, no private URLs, the owner's consent) are stated in the ask
+rather than left to the agent.
+
+When you add a parity check, add its `$guide` entry in the same edit — otherwise the panel names the check
+but cannot say where to fix it.
 
 ## Conversion-report analysis → improve the converter
 
@@ -4472,3 +4792,60 @@ these presets still bind — only the definitions are skipped. Golden `[BD]`, JS
 **Measured:** `button_colors[Primary].bg_color` `{predefined:"bg-primary",custom:""}` → `rgb(255,255,255)`;
 the rendered CTA `bg rgb(255,255,255)` / `color rgb(0,0,0)` / padding `10px 24px`, with the user's own
 edited label in place. Not the cause of the corpus `contrast` regression — tested, unchanged at 18.
+
+### Converting a SECOND page of the same site (2026-09-25)
+
+Three defects surfaced from one report: *"I converted the site, then /services. I changed the header and
+footer text and it got changed back."*
+
+**1. A conversion may overwrite a value it wrote itself; it must not overwrite one the user has since
+changed.** The full design import rewrote every theme-settings key from the fresh capture, so chrome the
+user corrected after the first conversion silently reverted. `Theme_Settings::import` now fingerprints
+what it writes (`fw_sc_settings_fingerprint`) and, on a later import, skips any key whose stored value no
+longer matches — the same guard the page importers use with `_upw_import_hash`. `import_dir` re-stamps at
+the END of the run, because later phases legitimately rewrite values the theme-settings phase already
+fingerprinted; without that a key the converter itself changed would be protected forever. `force_chrome`
+re-applies everything when that is what you want.
+
+**2. The first captured URL is not necessarily the home page.** It was labelled `home` + `front: true`
+unconditionally, so capturing a sub-page on its own produced a bundle claiming to be the front page — and
+importing `…/services` REPLACED the home page instead of creating a services page. The PHP path already
+derived this from `source_url`, but the folder rebuild never received the real one: with no manifest
+`source` it scraped an ORIGIN out of the media URLs (often a CDN host), and an empty path reads as the
+root. It now prefers the capture's own recorded page URL (`design-capture.json` → `url`). A sub-page also
+takes its title from the path, because its `<title>` is usually all brand — every sub-page was arriving
+titled after the site. Covered by `page-identity.test.mjs`.
+
+**3. A card that paints nothing keeps its section behind it.** A plan card only received `card_bg` when the
+source card carried a fill. A source whose cards paint nothing — they sit straight on the section, which is
+where their ink was chosen to read — left it unset, so the shortcode's default WHITE plan card rendered and
+the captured near-white titles and prices were invisible on it (`.fw-pt__plan` painted rgb(255,255,255)
+under rgb(245,245,245) text). The absence is now carried explicitly. Golden `[BE]`.
+
+**Measured:** `/services`, `/shop` and `/about` each import as their own page (`front_page:false`, correct
+slug and title) with the home page untouched; a second conversion reports the edited chrome keys as
+`skipped` and leaves them alone; the services plan cards render transparent on the dark section with every
+title and price legible.
+
+### An inner page has to be REACHABLE (2026-09-25)
+
+After the inner-page fixes above, `/services`, `/shop` and `/about` existed as real pages and still
+returned **404**. The site's `permalink_structure` was the PATHINFO variant
+(`/index.php/%year%/%monthnum%/%day%/%postname%/`), which WordPress falls back to whenever it decides at
+install time that mod_rewrite is unavailable. The pages were only reachable at `/index.php/services/`,
+while the converted menus and in-page links all point at `/services`.
+
+A one-page conversion never notices — everything lives at `/`. The moment a conversion creates INNER pages
+it matters, so `import_dir` now calls `ensure_inner_pages_reachable()` when it created one: a structure
+that ALREADY cannot serve clean URLs — empty (plain `?p=`) or `/index.php`-prefixed — is switched to
+`/%postname%/` and the rules flushed. The change is reported as `permalinks` in the import result rather
+than made silently.
+
+A site with its own clean scheme is never touched: `/%category%/%postname%/`, a dated structure, anything
+custom, is a deliberate and SEO-bearing choice. **Measured both ways:** with the PATHINFO structure,
+`/services/` goes 404 → 200 and the result reports `/%postname%/`; with `/%category%/%postname%/` set, the
+import reports unchanged and the structure is left exactly as it was.
+
+Note for local XAMPP work: passing a leading-slash permalink to `wp rewrite structure` through Git Bash
+gets MSYS path-converted (`/%postname%/` became `/C:/Program Files/Git/%postname%/`). Set it with
+`update_option` under `MSYS_NO_PATHCONV=1` instead.

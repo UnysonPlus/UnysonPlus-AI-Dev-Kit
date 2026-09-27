@@ -35,7 +35,7 @@ $page = array(
       upw_flexbox(array(   // left cell (groups its own content)
         upw_element('special_heading', array('title'=>'Welcome','heading'=>'h1','alignment'=>'left',
           'scroll_keyframes'=> upw_skf(array('y'=>60,'opacity'=>0), null, array())) ),   // fade-up on scroll
-        upw_element('text_block', array('content'=>'<p>Intro copy.</p>')),
+        upw_element('text_block', array('text'=>'<p>Intro copy.</p>')),
       )),
       upw_flexbox(array(   // right cell
         upw_element('image', array()),  // fill via Media Library / attachment id

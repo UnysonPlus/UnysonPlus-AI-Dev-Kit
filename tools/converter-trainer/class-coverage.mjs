@@ -220,6 +220,14 @@ async function run(){
   console.log(`Class-Coverage Audit — ${sites.length} site(s)${KEEP?' (--keep: no reconvert)':''}\n`);
   const browser=await launch();
   const page=await browser.newPage({viewport:{width:1920,height:1080}});
+  // The SOURCE is read from a saved rendered.html — a STATIC snapshot of the captured DOM. It still carries
+  // the source site's own <script> tags, and a modern source is an SPA bundle: loaded in a real browser it
+  // re-hydrates, empties the captured markup and replaces it with its own empty root. Measured on a real
+  // capture: a file holding 3 <section>s, 9 <h3>s and 310 data-sc-cs stamps presented 0 sections, 1 heading
+  // and 7 stamps — so every source property silently went unread and the site scored a vacuous 100%. Read
+  // the snapshot with JAVASCRIPT OFF; nothing in it needs to run, and only then is it the DOM we captured.
+  const srcCtx=await browser.newContext({viewport:{width:1920,height:1080},javaScriptEnabled:false});
+  const srcPage=await srcCtx.newPage();
   // agg[role][prop] = {carried, dropped, examples:Set}
   const agg={}; const bump=(role,prop,ok,site)=>{ agg[role]=agg[role]||{}; const a=agg[role][prop]=agg[role][prop]||{carried:0,dropped:0,sites:new Set()}; if(ok)a.carried++; else {a.dropped++; a.sites.add(site);} };
   const perSite=[];
@@ -227,7 +235,7 @@ async function run(){
     const rp=renderedPath(slug); if(!rp) continue;
     if(!KEEP){ try{ execFileSync(PHP,[CONVERT,dirname(rp)],{stdio:['ignore','ignore','ignore'],timeout:180000}); }catch(e){ console.log(`  ${slug}: convert FAILED`); continue; } }
     // source
-    let srcItems=[]; try{ await page.goto(pathToFileURL(rp).href,{waitUntil:'domcontentloaded',timeout:60000}); srcItems=await page.evaluate(pageExtract,'attr'); }catch{ }
+    let srcItems=[]; try{ await srcPage.goto(pathToFileURL(rp).href,{waitUntil:'domcontentloaded',timeout:60000}); srcItems=await srcPage.evaluate(pageExtract,'attr'); }catch{ }
     // converted
     let convItems=[]; try{ await page.goto(URL,{waitUntil:'load',timeout:60000}); await page.waitForTimeout(1200); convItems=await page.evaluate(pageExtract,'computed'); }catch{ }
     const convByRole={}; convItems.forEach(c=>{(convByRole[c.role]=convByRole[c.role]||[]).push(c);});
@@ -241,8 +249,14 @@ async function run(){
         bump(s.role,prop,ok,slug); ok?sc++:sd++;
       }
     }
-    perSite.push({slug,carried:sc,dropped:sd,pct:sc+sd?Math.round(sc/(sc+sd)*100):100});
-    console.log(`  ${slug.padEnd(46)} carried ${sc} / dropped ${sd}  (${perSite[perSite.length-1].pct}%)`);
+    // ZERO properties examined is not a PASS. It means the source snapshot yielded nothing to compare —
+    // a blanked DOM, an unreadable file, a capture with no stamps — and reporting it as 100% turned a broken
+    // measurement into a clean bill of health. Mark it unmeasured and say so.
+    const measured = sc + sd;
+    perSite.push({slug,carried:sc,dropped:sd,pct:measured?Math.round(sc/measured*100):null,unmeasured:!measured});
+    console.log(measured
+      ? `  ${slug.padEnd(46)} carried ${sc} / dropped ${sd}  (${Math.round(sc/measured*100)}%)`
+      : `  ${slug.padEnd(46)} UNMEASURED — the source snapshot yielded 0 comparable properties (${srcItems.length} source items read)`);
   }
   await browser.close();
 
@@ -253,7 +267,13 @@ async function run(){
   rows.sort((x,y)=>y.sites-x.sites || y.dropped-x.dropped);
   for(const r of rows.slice(0,40)) console.log(`  ${r.sites.toString().padStart(3)} sites  ${(r.role+' · '+r.prop).padEnd(38)} dropped ${r.dropped}, carried ${r.carried}`);
   const totC=perSite.reduce((s,x)=>s+x.carried,0), totD=perSite.reduce((s,x)=>s+x.dropped,0);
-  console.log(`\ncorpus coverage: ${totC}/${totC+totD} = ${totC+totD?Math.round(totC/(totC+totD)*100):100}% of meaningful properties carried`);
+  const unmeasured=perSite.filter(x=>x.unmeasured).length;
+  console.log(totC+totD
+    ? `
+corpus coverage: ${totC}/${totC+totD} = ${Math.round(totC/(totC+totD)*100)}% of meaningful properties carried`
+    : `
+corpus coverage: UNMEASURED — no site yielded a comparable property`);
+  if (unmeasured) console.log(`  ⚠ ${unmeasured} site(s) UNMEASURED — excluded from the number above, not counted as passing`);
   const outFile=join(HERE,'score','_class-coverage.json');
   try{ writeFileSync(outFile, JSON.stringify({at:new Date().toISOString(), sites:perSite, dropped:rows.map(r=>({...r,examples:[...(agg[r.role][r.prop].sites)].slice(0,5)}))}, null, 1)); console.log('saved '+outFile); }catch{}
 }

@@ -32,6 +32,7 @@ shapes live in `../shortcodes/`, `../option-types/`, `../theme-settings/README.m
 | `site-migration` | no | Whole-site push to another install via a connection key; signed transport, staging-and-swap → `site-migration.md` |
 | `sidebars` | no | Custom widget areas |
 | `chat` | no | Floating chat button (Theme Settings → Site-wide UX) |
+| `ai-assistant` *(beta)* | no | `unysonplus/*` abilities (WP Abilities API, WP 6.9+): build/edit pages, Theme Settings, presets, templates, conversion — with validation + undo; builder panel, site-wide assistant, MCP server, Chat AI channel; `fw_ai_register_ability()` for other extensions → `ai-assistant.md` |
 | `newsletter-crm` | no | Stores `[newsletter]` signups + the base a CRM (tags/segments, campaigns, ESP sync) grows onto → `newsletter-crm.md` |
 | `update` | core | Plugin/extension auto-updates |
 | `woocommerce` | conditional | Shop integration (only when WooCommerce active) |

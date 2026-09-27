@@ -52,7 +52,36 @@ async function bandHandles(page, sels, hH) {
     if (out.length) return out; }
   return [];
 }
-const containerProps = async (h) => h ? h.evaluate((el, P) => { const cs = getComputedStyle(el); const o = {}; P.forEach(p => o[p] = cs.getPropertyValue(p).trim()); return o; }, CONTAINER_PROPS) : null;
+// A region's own box props. For CHROME (header/footer) the two sides put the box on DIFFERENT elements:
+// the source paints padding and fill straight on <footer>, while the theme rebuilds it as a wrapper whose
+// inner body carries them (`<footer class="footer"><div class="footer__body" style="padding:80px 0 40px">`).
+// Reading only the outer element reported `padding-top 80px -> 0px` on a footer whose rendered height
+// matched the source to within 5px — a depth artefact, not a defect, and one that sent a fix hunting a
+// non-bug. So for a chrome region, adopt each box prop that is DEFAULT on the outer element from the first
+// descendant that carries a real value, exactly as the class-coverage lens already does for chrome layout.
+const containerProps = async (h, deep = false) => h ? h.evaluate((el, [P, DEEP]) => {
+  const cs = getComputedStyle(el); const o = {};
+  P.forEach(p => o[p] = cs.getPropertyValue(p).trim());
+  if (DEEP) {
+    const isDefault = {
+      'padding-top': v => parseFloat(v) === 0 || v === '', 'padding-bottom': v => parseFloat(v) === 0 || v === '',
+      'padding-left': v => parseFloat(v) === 0 || v === '', 'padding-right': v => parseFloat(v) === 0 || v === '',
+      'background-color': v => v === 'rgba(0, 0, 0, 0)' || v === 'transparent' || v === '',
+      'background-image': v => v === 'none' || v === '',
+      'border-top-width': v => parseFloat(v) === 0 || v === '', 'border-bottom-width': v => parseFloat(v) === 0 || v === '',
+      'box-shadow': v => v === 'none' || v === '',
+    };
+    const inner = [...el.querySelectorAll('div,section,nav')].slice(0, 12);
+    for (const k of Object.keys(isDefault)) {
+      if (!isDefault[k]((o[k] || '').trim())) continue;
+      for (const nd of inner) {
+        const cv = getComputedStyle(nd).getPropertyValue(k).trim();
+        if (!isDefault[k](cv)) { o[k] = cv; break; }
+      }
+    }
+  }
+  return o;
+}, [CONTAINER_PROPS, deep]) : null;
 const textElems = async (h) => h ? h.evaluate((el, P) => {
   const norm = s => (s || '').replace(/\s+/g, ' ').trim();
   const out = [];
@@ -97,7 +126,8 @@ const M = await regionsOf(mp, 'mock'), D = await regionsOf(dp, 'dev');
 
 const report = [];
 async function region(label, mh, dh) {
-  const cD = diffObj(await containerProps(mh), await containerProps(dh), CONTAINER_PROPS);
+  const chrome = label === 'header' || label === 'footer';
+  const cD = diffObj(await containerProps(mh, chrome), await containerProps(dh, chrome), CONTAINER_PROPS);
   const mt = await textElems(mh), dt = await textElems(dh);
   const dMap = new Map(); dt.forEach(e => { if (!dMap.has(e.text)) dMap.set(e.text, e); });
   const textDeltas = [];

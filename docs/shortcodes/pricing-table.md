@@ -7,8 +7,9 @@ Comparable pricing plans as cards in a responsive grid — each with an icon, na
 | key | type | default | value shape / choices | what it does |
 |---|---|---|---|---|
 | `plans` | addable-popup | `[]` | array of plan objects (see below) | The pricing columns. |
-| `design` | image-picker | `'classic'` | `classic` `modern` `minimal` `gradient` `dark` `outline` | Card style. |
-| `columns` | select | `'3'` | `2` `3` `4` `5` | Plans per row on desktop. |
+| `design_settings` | multi-picker | `{ layout: 'grid' }` | `layout`: `grid` `list` — plus that layout's own options | **LAYOUT — the plans' STRUCTURE.** `grid` = cards side by side (the default, and what every table rendered before layouts existed). `list` = a price list / service menu: one full-width row per plan, name + description left, price right. `list` also takes `row_rule` (`yes`/`no`, default `yes`) for the hairline between rows. |
+| `design` | image-picker | `'classic'` | `classic` `modern` `minimal` `gradient` `dark` `outline` | Card **skin** — paint, not structure. Skins the Grid layout. |
+| `columns` | select | `'3'` | `1` `2` `3` `4` `5` | Plans per row on desktop (Grid layout). `1` gives a single centred plan. |
 | `gap` | select | `'4'` | Gap-Scale preset slug | Spacing between plans. |
 | `featured_style` | multi-select | `['raise','highlight','glow','badge','accent_button']` | any of `raise` `enlarge` `highlight` `glow` `fill` `badge` `accent_button` `emphasize` | How the featured plan stands out (composable). |
 | `button_preset` | button-style-picker | `''` (none) | a Theme Settings Button preset class | Themed button preset for every plan button; None = the accent `.fw-pt__btn`. (Legacy `button_style` `solid`/`outline` still read as a fallback.) |
@@ -65,9 +66,11 @@ Each **plan** object: `plan_title` (text), `icon` (icon-v2), `subtitle` (text), 
 
 ## Site Converter — automatic detection
 
-The Site Converter already carries the **featured/highlighted plan** (from a `featured`/`popular`/`recommended` class + its ribbon) and the **column count** (= plan count). It also sets the closest **`design`** (card fill) from the plan cards styling (`detect_pricing_design()`): a gradient fill → `gradient`; a dark fill → `dark`; bordered cards with NO fill → `outline`; else `classic`. `modern`/`minimal` and the monthly/yearly `billing_toggle` (needs dual price capture) are not auto-selected.
+The Site Converter already carries the **featured/highlighted plan** (from a `featured`/`popular`/`recommended` class + its ribbon) and the **layout + column count, read from the source's measured container** — never from the plan count, which says nothing about how the source arranged them. A `display:block` / flex-column / single-track container is a **`list`** (one row per plan, price right); a real grid stays a **`grid`** with the SOURCE's own track count. For a list it also measures the row rhythm: whether a rule separates the rows (`row_rule`), their spacing and padding, and the price's own size/weight/family — all carried as `--pt-row-*` custom properties, because defaulting them rendered a flush, rule-less menu with a hairline on every row and 16px of padding it never had. It also sets the closest **`design`** (card fill) from the plan cards styling (`detect_pricing_design()`): a gradient fill → `gradient`; a dark fill → `dark`; bordered cards with NO fill → `outline`; else `classic`. `modern`/`minimal` and the monthly/yearly `billing_toggle` (needs dual price capture) are not auto-selected.
 
 ## Notes
+- **Layout and Design are separate axes.** Layout (`design_settings/layout`) is the plans' STRUCTURE and owns its own render partial under `views/layouts/`; Design is a SKIN — a class on that structure. No skin turns a card grid into a price list, which is why the list had to be a layout. Measured across the capture corpus, list-shaped pricing is a large share of the priced sections a conversion meets.
+- **Back-compat:** the layout lives under a NEW option id, so the legacy scalar `design` is untouched and anything saved before layouts existed falls back to `grid` and renders exactly as it did.
 - `featured_style` is a **multi-select array** of composable emphasis treatments — pick any combination; an empty array = no emphasis. A featured plan shows a top badge only when both `featured:'yes'` and the `badge` emphasis are active.
 - In `features`, a line beginning with `-` or `!` renders crossed out (unavailable); all other lines render as available.
 - `button_target` uses the literal values `'_self'` / `'_blank'` (not `yes`/`no`).
