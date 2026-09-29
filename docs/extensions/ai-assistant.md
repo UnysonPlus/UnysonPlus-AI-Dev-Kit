@@ -5,7 +5,7 @@ Registers UnysonPlus **abilities** with the WordPress Abilities API so an AI mod
 the (planned) builder panel, or anything calling the REST abilities endpoints — can read the site and
 build / edit page-builder pages through **validated, undoable** actions. **Active by default:** no
 (ships inactive). Requires WordPress **6.9+** (on older WP it loads but registers nothing) and the
-`shortcodes` + `page-builder` extensions. Version: 1.0.9. Human manual:
+`shortcodes` + `page-builder` extensions. Version: 1.0.31. Human manual:
 [AI Assistant](https://unysonplus.github.io/docs/extensions/ai-assistant/).
 
 ## Provides
@@ -171,22 +171,148 @@ A path may also be `id:<unique_id>`.
   switched with `update-theme-settings`), **animated-icons** 1.0.6 (`animated-icons-describe`: enabled
   types from `animated_lottie|rive|svg|raster`, icon value `{type:'lottie'|'rive', src, trigger, speed}`,
   uploaded files from `fw_icon_lottie_dir()` / `fw_icon_rive_dir()`).
+- **AI Changes (1.0.18)** — `includes/class-fw-ai-changes.php`, submenu `fw-ai-changes` (edit_pages). `collect()` merges
+  page snapshots (`_upw_ai_revision` post meta, newest first per page), `FW_AI_Settings::OPTION_REVISIONS` and
+  `FW_AI_Toolkit::OPTION_REVISIONS`; undo records are detected by ability (`unysonplus/undo`, `undo-theme-settings`,
+  `undo-change`) and matched to their target through the note ("Before restoring revision N" / "Before undoing change
+  N") to show "Undid: …" and mark the target `undone` (unless the undo itself was reversed). Actions POST to the same
+  page (nonce `upw_ai_change`) → `FW_AI_Store::restore()` / `FW_AI_Settings::undo()` / `FW_AI_Toolkit::restore()`,
+  then PRG with `upw_ai_msg`. Page rows need edit_post, others manage_options.
+- **OAuth 2.1 for MCP (1.0.19)** — `includes/class-fw-ai-oauth.php` (`FW_AI_OAuth`). Discovery: `/.well-known/oauth-protected-resource`,
+  `/.well-known/oauth-authorization-server`, `/.well-known/openid-configuration` answered in `parse_request` (priority 0,
+  home-path aware) + REST copies `unysonplus-ai/v1/oauth/{protected-resource,authorization-server}`; issuer = `home_url()`.
+  DCR `POST oauth/register` (public clients only, redirect https or http loopback; option `upw_ai_oauth_clients`, cap 200,
+  unused ones pruned). Consent = hidden admin page `admin.php?page=fw-ai-authorize` (edit_posts; parent `fw-ai-hidden`),
+  nonce `upw_ai_oauth_consent`, Allow/Deny, access write|read; an admin's Allow turns `upw_ai_mcp_mode` on when Off.
+  Codes = transients `upw_ai_oac_<sha256>` (10 min, single use, deleted before checks). `POST oauth/token`
+  (authorization_code + PKCE S256 only; refresh_token with rotation), `POST oauth/revoke` (RFC 7009). Tokens stored hashed
+  in option `upw_ai_oauth_tokens` (access 1h `upwat_`, refresh 30d `upwrt_`). Bearer is resolved in
+  `determine_current_user` (priority 30) ONLY when the URI contains the `unysonplus-ai/v1` namespace.
+  `FW_AI_OAuth::read_only()` narrows `FW_AI_MCP::abilities()` + instructions. `FW_AI_MCP::permission()` now returns the
+  401 BEFORE the mode-off 403 (so a client can start sign-in), and `rest_post_dispatch` adds
+  `WWW-Authenticate: Bearer resource_metadata=…` to the MCP 401. Settings: "Apps signed in with your account" +
+  action `revoke_app`. Gotcha: Playwright's `page.route` does not see a redirect target, so an E2E needs a real listener
+  on the redirect port (`pw-screens/oauth-e2e.mjs`).
+- **Visual check (1.0.21)** — `includes/class-fw-ai-visual.php` (`FW_AI_Visual`), ability `unysonplus/visual-check` (read,
+  edit_posts; in `BROWSER_SITE_TOOLS`). Calls the capture service `POST /verify` with `lens: 'both'` (service 1.11.78+:
+  `bands` = verifyUrls, `sections` = verifySections, `both` = `{ok, lens, bands, sections}`) at
+  `FW_AI_Build::capture_service_url()`; `summarize()` keeps overall drift, heights, the 3 worst strips and up to 12
+  sections with findings (8 each, trimmed) + a `how_to_read` string. Drafts: `view_url()` issues a one-post token
+  (transient `upw_ai_pv_<sha256>`, 15 min) → `?page_id=N&upw_ai_view=…`; `posts_results` flips that one post to publish on
+  the main query, noindex + nocache, no admin bar; no/wrong token = 404. Server cannot reach the service (live site) →
+  returns `{ok:false, reason:'service_unreachable', verify_request:{path, body}}`; panel.js `runTool` then POSTs that to the
+  kit from the browser and calls the tool again with `measured` (summarize only). The kit's Claude agent path (1.0.30 /
+  capture service 1.11.84): `runAssistantAgent` adds a second MCP server `kit` = the service's own `POST /mcp-kit`
+  (tool `measure_pages`, runs verifyUrls + verifySections locally and trims to what `summarize()` reads); allowedTools
+  `mcp__unysonplus__*,mcp__kit__*`; the unreachable message tells the agent to use it and re-call with `measured`.
+  Verified: visual_check → kit measure_pages → visual_check, with the site unable to reach the kit.
+  Also: `FW_AI_Panel::clip()` replaces `wp_html_excerpt()` for replies / history / context — the latter collapsed line
+  breaks, so every list in a local-AI or agent reply rendered as one paragraph.
+- **Find and replace (1.0.22)** — `includes/class-fw-ai-replace.php` (`FW_AI_Replace::run`), ability `unysonplus/replace-text`
+  (in `BROWSER_SITE_TOOLS`). Scope: builder JSON of every show_ui post type (+ `nav_menu_item` titles for
+  edit_theme_options; WP `revision` posts are never read), post_title / post_excerpt, Theme Settings leaves. Key rules:
+  `TECH_GROUP` skips whole sub-arrays (icon/image/css/font/typography/colour/border/spacing …) and `TECH_KEY` skips single
+  string values (ids, classes, sizes, align, preset …) — keep them split: a group key like `copyright_columns` holds the
+  footer text, and one broad regex over group keys hid it. `LINK_KEY` + URL-looking values need `include_links`; JSON
+  strings skipped; HTML split on tags so only text nodes change; the esc_html'd form of `find` is matched too. Preview =
+  no `apply` → rows (≤60) + `plan` (transient `upw_ai_rp_<token>`, 30 min, user-bound, deleted on apply) holding the
+  options + expected count per place; apply re-scans and skips a place whose count moved. Writes: `FW_AI_Store::save_tree`
+  per page, one `FW_AI_Toolkit::snapshot` post_fields for titles/excerpts, `FW_AI_Settings::update(..., merge false)`
+  (honours hand-edited fingerprints). `identity_note()` flags blogname / tagline. Panel: `record_activity()` ignores
+  results with `preview` or `ok:false`; `md()` now renders pipe tables, `*em*`, ordered lists, `#` headings.
+- **Image help (1.0.23)** — `includes/class-fw-ai-media.php` (`FW_AI_Media::register` on `fw_ai_assistant_register_abilities`):
+  list-media / view-media / update-media / set-featured-image. view-media returns `_images: [{mime,data}]`;
+  `FW_AI_MCP::call()` moves them into MCP `image` content (not text / structuredContent). Encoded ONLY while
+  `FW_AI_MCP::is_calling()` — the WP AI Client resolver would serialize base64 into the model's text. Temp file via
+  `get_temp_dir()` (wp_tempnam() is admin-only and fatals in REST). Undo via `FW_AI_Toolkit::snapshot` (post_fields +
+  `_wp_attachment_image_alt` / `_thumbnail_id` post_meta). `used_on` = builder JSON LIKE `"attachment_id":"<id>"` +
+  `_thumbnail_id`. Builder image value = `{attachment_id, url, alt}`.
+- **Translate (1.0.24)** — `includes/class-fw-ai-translate.php`: get-page-text keys = `t:title|t:excerpt|t:content` and
+  `b:<node path>|<att key path>`; `is_text()` rejects single lowercase tokens, CSS lengths, links, JSON. translate-page
+  inserts a draft (all meta except `SKIP_META`, terms except Polylang's), sets texts with `set_in_tree()`, saves via
+  `FW_AI_Store::save_tree`, snapshots `created_posts` (undo = trash). Polylang: `pll_set_post_language` +
+  `pll_save_post_translations`. Kit (capture service 1.11.80): `runAssistantAgent` now runs `claude -p` with
+  `cwd` = its temp dir — a cwd inside `d:\Web Dev` loaded the workspace CLAUDE.md and its developer rules leaked into
+  replies ("No project folder files were edited").
+- **Sketch → page (1.0.25)** — panel.js: attach button / paste / drop → `POST cfg.mediaUrl` (wp/v2/media, X-WP-Nonce;
+  only when the user can upload_files) → message gets "[The person attached an image: Media Library id N … view_media
+  size large]". view-media `size: large` = 1568px. `FW_AI_Schema::normalize_icon()` (called from `validate_atts` for
+  option type `icon`, whose default is null so the generic shape check never fired): "leaf" / "lucide/leaf" → svg
+  library object (`sc_icon_svg_library_markup()` decides existence), font classes → icon-font, 1–2 chars → char, else an
+  error with an example; update-element now saves the validator's normalized values. Kit: `POST /local-ai/agent` with
+  `async: true` + `request_id` → 202 `{job}`; `GET /local-ai/agent?job=` → running / done (+reply) / error (jobs kept
+  30 min); panel `waitAgent()` polls every 2.5 s, tolerates 8 missed polls, 25 min cap. Held-open requests were dropped
+  on multi-minute builds and Chrome retried the POST → the agent ran twice (two pages) and the panel reported
+  "No AI model is connected".
+- **Brand kit (1.0.26)** — ability extract-colors in `FW_AI_Media`: GD `imagecreatefromstring` → 120px wide sample, alpha
+  > 90 skipped, 5-bit channel buckets, groups merged when |ΔR|+|ΔG|+|ΔB| < 60; SVG = hex colours counted in the code.
+  Returns hex, share_pct, kind (colour / grey / white / black) and WCAG contrast vs white and black. The workflow is
+  instructions only (MCP + site panel): view → measure → palette + fonts → show → apply with update_theme_settings /
+  save_preset after agreement. Gotcha seen in testing: a converted child theme's style.css can hard-code fonts that beat
+  Theme Settings typography. When undoing several settings revisions, undo them BY ID (newest first) — "undo the newest"
+  in a loop undoes your own previous undo, since every undo is itself a revision.
+- **More ideas (1.0.27)** — panel.js `showStarters()` adds a `.upw-aip__starter--more` button (data-label short,
+  data-prompt = l10n `moreIdeasPrompt`); `send( text, image, label )` shows the label. `md()` turns lines starting with
+  "→ " into `.upw-aip__starter.upw-aip__idea` buttons (data-prompt = the line) — the existing starter click handler sends them.
+- **Access + usage (1.0.28)** — `includes/class-fw-ai-access.php`: `can_use()` (manage_options always; else
+  `upw_ai_roles` empty or intersecting the user's roles). `rest_request_before_callbacks` gates every
+  `unysonplus-ai/v1/*` route except `oauth/*` (403 `upw_ai_role`) and logs panel/run, site/run, panel/local/start
+  (message now sent by the local-model path too) and MCP tools/call WITHOUT an X-UPW-AI-Session header. Log = option
+  `upw_ai_usage_log` (500), switch `upw_ai_usage_on`; screen `fw-ai-usage`. Enqueue + admin bar + OAuth
+  `check_request()` also call `can_use()`. Settings form action `save_access`; Reset deletes both options.
+- **Visitor extras (1.0.29)** — `FW_AI_Visitor`: Chat Button options `chat_ai_hours`, `chat_ai_log`, `chat_ai_price_in`,
+  `chat_ai_price_out`. `parse_hours()` (day ranges incl. wrap, HH:MM or am/pm) + `team_available()` (site timezone; null =
+  no hours) → system-prompt line + `hours` note on hand-off replies (visitor.js shows it above the channels). `shape()`
+  now takes `$meta { message, in_chars }` (ask_local keeps it in the session) and calls `record()`: monthly stats option
+  `upw_ai_visitor_stats` (n, in/out tokens ≈ chars/4, handoff; 13 months) and, when the log is on, `upw_ai_visitor_log`
+  (30 days / 1000; visitor = hmac of ip|ua|date, 8 chars). `render_usage()` is appended to the AI Usage screen;
+  `privacy_text()` adds the policy paragraph on admin_init while the log is on.
+- **Settings screen (1.0.16), newcomer first** — `views/page.php`: a status box (`data-backend`; `ready` /
+  `checking` / `none` / `off`; for `browser` the page calls `window.upwAiAssistant.findLocal()` from panel.js,
+  whose `open()` opens the panel), "Connect an AI" (kit steps + provider key; a `<details>` open unless
+  ready), "Where the assistant appears" (its own `save_panel` form with only `panel_position`), and
+  everything else under "Advanced" (model choice, "Outside AI programs" = MCP mode + connection
+  passwords, abilities, Reset). `save_panel` now updates ONLY posted fields (a form without a field no
+  longer resets it). Action `reset`: deletes backend / browser url / browser model / position / local cmd
+  options, MCP mode `off`, `clear_chats` deletes user meta `upw_ai_chats`; connection passwords and site
+  changes untouched. `get_connections()` hides `(temporary)` passwords and runs `FW_AI_Local::sweep()`.
+- **Subscription agent through the kit (1.0.13)** — `findLocal()` reads the kit's `/health` first: `aiBackend ===
+  'claude-code'` → `local.claude`, and `runBrowser` skips the JSON-action loop: `panel/local/start` with
+  `agent: true` (+ message, history) → `start_browser_agent()` issues a temporary Application Password (name
+  "… via the AI Dev Kit (temporary)", so `FW_AI_Local::sweep()` catches leftovers) and returns `{ session, mcp:
+  { url, headers }, prompt }` (prompt = `agent_prompt()`, shared with the local agent command; normal tool
+  sets, no small-model limits); the kit's `POST /local-ai/agent` → `runAssistantAgent()` writes a temp MCP
+  config and runs `claude -p --strict-mcp-config --allowedTools "mcp__unysonplus__*" --output-format json`;
+  `panel/local/finish` deletes the password. `cfg.backendLabel` gives the "Connected: …" line for wp /
+  local backends. Measured: a draft page on testsite in 36 s.
+- **Place awareness + saved chats (1.0.12)** — `FW_AI_Context::for_screen( WP_Screen )` / `for_post( id )` →
+  `{ key, label, facts[], suggestions[] }`; `text()` is sent as `context` on every run route (and
+  `panel/local/start`) and appended to the instructions via `FW_AI_Panel::$place` (`take_place()`), together
+  with the builder's typed `title` (so a new page is never "Auto Draft"). Ideas are RULES over real facts
+  (tagline default, pages without an SEO description via `fw_ext_seo_ai_page` cached 10 min, pages in no
+  menu, products without a description) — localized as `cfg.ideas` (NOT `suggestions`: that key is the
+  queued-jobs list from `FW_AI_Suggestions`, shown first). `FW_AI_History`: user meta `upw_ai_chats`
+  `{ post:<id> | screen:<id> => { updated, messages[] } }`, 30 messages / 30 days / 60 places;
+  `POST panel/history` appends a finished turn, `panel/history/clear`; `cfg.history.saved` restores on load
+  (no Undo button on restored replies). `update-site-identity` (blogname / blogdescription / site_icon,
+  toolkit snapshot → `undo-change`); its activity links to options-general, and its result key is `updated`
+  (a `changed` key would be read as a Theme Settings change by `record_activity`).
 - **Browser backend — free local AI (1.0.9)** — `backend()` returns `browser` when chosen (or as Automatic's
   last resort). The server CANNOT reach the editor's localhost, so panel.js runs the loop: probe
   `upw_ai_browser_url` (default `http://localhost:8787`) — kit `GET /local-ai` (`{up, selected, pulled}`),
-  else Ollama `GET /api/tags` — then `POST panel/local/start` (session `kind: 'browser'`, own `tools` list:
+  else the local runner's `GET /api/tags` — then `POST panel/local/start` (session `kind: 'browser'`, own `tools` list:
   `BROWSER_PAGE_TOOLS` / `BROWSER_SITE_TOOLS`; FW_AI_MCP::abilities() honours a session `tools` list), MCP
   `tools/list` + `tools/call` with cookie auth (X-WP-Nonce) + `X-UPW-AI-Session`, model turns via kit
-  `POST /local-ai/tool-chat` (or Ollama `/api/chat`), then `POST panel/local/finish` → the usual
+  `POST /local-ai/tool-chat` (or the local runner's `/api/chat`), then `POST panel/local/finish` → the usual
   `{check, tree, steps}` (partial changes survive an error). NO native tool calls: each turn is ONE JSON
-  action `{tool, arguments}` | `{reply}` constrained by Ollama `format` (tool enum from tools/list), tool
-  results go back as a user message — Qwen3 8B's native tool calls were silently dropped by Ollama's
+  action `{tool, arguments}` | `{reply}` constrained by the runner's `format` (tool enum from tools/list), tool
+  results go back as a user message — an 8B local model's native tool calls were silently dropped by the runner's
   parser whenever a long nested argument had one stray token (it appended `"parent_path"` inside
   `items`); `tidyArgs()` strips non-object entries from `items` / `_items`. What made an 8B model succeed: the
   instructions carry `browser_recipes()` — FAQ / feature cards / CTA / text sections that pass render_check
-  as written (emoji icons `{type:'emoji', char}`), `/no_think` for Qwen3, `num_predict` 3072, and JS nudges
+  as written (emoji icons `{type:'emoji', char}`), the `/no_think` soft switch for hybrid-reasoning models, `num_predict` 3072, and JS nudges
   (empty reply → "call the next tool"; a write since the last render_check → "finish, then render_check";
-  check issues → "fix them"; max 3). Without recipes Qwen3 8B explored schemas, invented atts and passed
+  check issues → "fix them"; max 3). Without recipes the 8B model explored schemas, invented atts and passed
   path "/". render_check's empty-icon test now counts `char`.
 - **Panel position (1.0.8)** — option `upw_ai_panel_position` (`bottom-right` default | `bottom-left` |
   `beside-sidebar`), passed to panel.js as `cfg.position` → class `.upw-aip--<pos>`. Bottom-left measures
@@ -212,3 +338,50 @@ A path may also be `id:<unique_id>`.
 - Class files: `includes/class-fw-ai-schema.php` (catalog + validator), `class-fw-ai-store.php`
   (tree I/O, revisions, paths, outline), `class-fw-ai-abilities.php` (registration + callbacks).
 - Hook: `do_action( 'fw_ai_assistant_tree_saved', $post_id, $tree )` after every AI write.
+
+## How another extension offers the user a job (`fw_ai_suggest`)
+
+```php
+fw_ai_suggest( array(
+    'id'     => 'site_converter_finish',
+    'title'  => 'Finish the conversion — 3 things to review',
+    'prompt' => '…the findings, pre-filled…',
+    'source' => 'site-converter',
+) );
+```
+
+The suggestion appears as a starter chip at the top of the assistant's panel, and the launcher shows a
+count badge. Three decisions in that shape are load-bearing:
+
+**The queue lives in `framework/includes/ai-suggestions.php`, not in this extension.** An extension's code
+is not loaded while it is inactive, and this assistant ships inactive — so a helper defined here would be
+missing in exactly the case it exists for: a conversion finishing while nothing is listening. Callers
+therefore do **not** guard on the assistant being present, and should not; guarding is what loses the
+suggestion in the one case that matters. A user who clicks "Enable the AI Assistant" and lands on an empty
+panel has done what was asked and got nothing, which is worse than never having been offered.
+
+**An extension can queue a job; it can never make the assistant speak.** A panel that talks first is a
+popup, which is the pattern this avoids. A chip in a panel the user opened is an offer.
+
+**`title` and `prompt` are separate fields.** A generic starter uses its own label as the message; a
+suggestion's label is short and its prompt is long, so the chip carries `data-prompt` and the click handler
+prefers it.
+
+### The launcher: motion announces, the badge informs
+
+The badge is the signal that lasts; the pulse (`upw-aip-attn`, a soft accent ring, three times, ~2.5s) only
+points at it, and fires **once per suggestion id**, tracked in user meta. Perpetual motion stops being
+information within seconds and becomes a nag on a page left open all day, while a count is still legible an
+hour later and survives the user looking away while it played. Under `prefers-reduced-motion` the pulse is
+dropped and nothing is lost, because the badge was carrying the information anyway — and the count is in
+the accessible name too, since a badge nobody can see is not a notification.
+
+Measured: motion + unseen → pulses; motion + seen → no pulse, badge remains; reduced motion → no pulse,
+badge remains.
+
+> **Note on assets:** `panel.min.js` and `panel.min.css` are referenced nowhere — `enqueue_admin()` loads
+> the unminified files. Edit `panel.js` / `panel.css`; the `.min` pair is dead weight.
+- **One screen, three tabs (1.0.31)** — `FW_Extension_AI_Assistant::current_tab()` / `tab_url()` / `header_html()`: the
+  `fw-ai-assistant` page (capability `edit_pages`) renders Settings (views/page.php), Changes (`FW_AI_Changes::render()`)
+  or Usage (`FW_AI_Access::render()`); non-admins are forced to Changes. `_handle_post()` routes POSTs by tab. The old
+  slugs `fw-ai-changes` / `fw-ai-usage` are hidden pages (parent `fw-ai-hidden`) that redirect with their query args.

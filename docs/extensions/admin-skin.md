@@ -1,13 +1,13 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # admin-skin extension
 
-A token-driven skin over the **real** wp-admin: grouped sidebar, slim top bar, card tables, quiet notices, light / dark / system modes with a per-user accent, and a skin package format the Skin Library installs into. It is **not** a replacement admin app — every screen (core, UnysonPlus, WooCommerce, any plugin) keeps its own markup and is restyled at once, so nothing needs an adapter. **Active by default:** yes — seeded once on a fresh install by `fw_upw_seed_default_extensions()` (`framework/includes/default-extensions.php`, guarded by the `unysonplus_default_extensions_v1` option). The seed runs **once** on purpose: an "always ensure active" version could never be switched off, because the next admin page load would turn it back on. After the seed the user owns the setting, and deactivating sticks. It only seeds what is present on disk, so the core-only public zip is a no-op until the extension is installed from the Extensions manager. Version: 1.1.5. Repo: `UnysonPlus-Admin-Skin-Extension`.
+A token-driven skin over the **real** wp-admin: grouped sidebar, slim top bar, card tables, quiet notices, light / dark / system modes with a per-user accent, and a skin package format the Skin Library installs into. It is **not** a replacement admin app — every screen (core, UnysonPlus, WooCommerce, any plugin) keeps its own markup and is restyled at once, so nothing needs an adapter. **Active by default:** yes — seeded once on a fresh install by `fw_upw_seed_default_extensions()` (`framework/includes/default-extensions.php`, guarded by the `unysonplus_default_extensions_v1` option). The seed runs **once** on purpose: an "always ensure active" version could never be switched off, because the next admin page load would turn it back on. After the seed the user owns the setting, and deactivating sticks. It only seeds what is present on disk, so the core-only public zip is a no-op until the extension is installed from the Extensions manager. Version: 1.1.51. Repo: `UnysonPlus-Admin-Skin-Extension`.
 
 ## Provides
 
 - **Settings/options:** its own settings page (Unyson+ → Extensions → Admin Skin → Settings), two boxes:
-  - **Skin** — `skin` (select, from the registry), `default_mode` (`light` / `dark` / `system`), `accent` (colour-picker; empty = the skin's own), `allow_user_prefs` (switch).
-  - **Layout** — `group_menu`, `sidebar_search`, `notice_tray`, `apply_to_editor`, `skin_customizer`, `dark_canvas`, `show_wp_logo` (switches), `hide_design` / `hide_fonts` (selects: `auto` / `yes` / `no`) and `account_placement`.
+  - **Skin** — `skin` (select, from the registry), `default_mode` (`light` / `dark` / `system`), `density` (`comfortable` / `compact`), `accent` (colour-picker; empty = the skin's own), `allow_user_prefs` (switch).
+  - **Layout** — `group_menu`, `sidebar_search`, `notice_tray`, `apply_to_editor`, `skin_customizer`, `skin_login`, `dark_canvas`, `show_wp_logo` (switches), `hide_design` / `hide_fonts` (selects: `auto` / `yes` / `no`) and `account_placement`.
 
 **`account_placement`** (select, default `sidebar`) decides where the account avatar and its menu — profile,
 visit site, log out — sit: `sidebar` (bottom left, the app-style position), `bar` (top right, where WordPress
@@ -25,6 +25,62 @@ keeps working in either placement.
 - **Scope to `body.wp-customizer`, not a class of our own.** `customize_controls_print_scripts` prints in `<head>`, where `document.body` is still null, so a JS-added class arrives too late to style first paint. The stylesheet is only *enqueued* when the skin applies, so its presence is already the condition; `upa-customizer` is still added on `DOMContentLoaded`, but only as a hook for extenders.
 
 `_filter_admin_color` also returns the skin's colour scheme under `is_customize_preview()`, so core's scheme-aware chrome in there matches instead of staying stock blue. The one surface left light on purpose is `.site-icon-preview`, which mocks a browser tab and an app icon — a preview, by the rule below.
+
+### Density — one token had to be connected up first
+
+`density` (site) and a per-user override in the Appearance menu. The registry derives the compact set from whatever the skin declares in `skin.json`, stepping lengths down with floors so a compact skin stays usable; a skin may declare its own `density_compact` and have the last word. It is emitted as an `html[data-upa-density="compact"]` override beside `:root`, so switching is one attribute and needs no reload — the same trick the modes use.
+
+Worth knowing: **`--upa-row-h` was declared by every skin and consumed by nothing**, so list tables ignored density entirely — the one place the setting earns its keep. List-table cell padding is now `calc((var(--upa-row-h) - 28px) / 2)`, which is identical to the constant it replaced at the default 52px.
+
+### Notices that stay dismissed
+
+Each notice in the tray carries a mute control; muted ones are kept out of the count and hidden until the footer offers them back. Keyed by a hash of the notice's own **text** (digits normalised, so "3 updates available" does not mint a new key weekly) — there is nothing else stable to key on, since notices rarely carry an id and share their classes with every plugin. Reworded text is a different notice and returns, which is the safer direction. Stored per user, capped at `MUTED_MAX` (200). Muted notices stay in the DOM rather than being deleted, so muting is recoverable from the one screen that knows the notice exists.
+
+### Command Palette
+
+Core ships the palette (6.3+); this registers UnysonPlus entries in it rather than building a second one. Navigation commands (Theme Settings, Extensions, Admin Skin settings) are built in **PHP behind capability checks** — a screen the viewer cannot open is never sent, so it can never be offered and then refused — and are filterable via `fw_ext_admin_skin_commands`. Two commands act instead of navigating (toggle mode, toggle density) and save through the same AJAX endpoint the Appearance menu uses. Nothing registers when `wp-commands` is not registered.
+
+### Housekeeping worth knowing about
+
+`primitives.css` carried a **1,090-line duplicated region** — a whole block of rules pasted twice, where the later copy silently won and shadowed fixes made in the earlier one. It is gone (4,807 → 3,717 lines; 148 overriding duplicate selectors → 8), verified behaviourally neutral by diffing computed styles across nine admin screens before and after. Three dead account-block rules in `structure.css` went with it. If you edit this CSS, run a duplicate check before assuming a rule "isn't working".
+
+The Site Converter's admin UI used to be recoloured for dark mode from the skin's side, by attribute-matching its inline colour literals (`[style*="background:#f6f7f7"]` and ~80 more). Those literals are now the converter's own `--sc-*` tokens, so the compensation is deleted and the converter themes itself.
+
+### One screen: Unyson+ → Admin Skin (Settings / Admin Menu tabs)
+
+`FW_Admin_Skin_Settings_Page`, page slug `fw-admin-skin`. The extension's settings form and the menu editor are **tabs on one page**, and the Extensions-manager card's Settings link is pointed here via `fw_ext_manager_settings_url` — the same shape SEO, Shortcodes, Site Converter and WooCommerce already use, so there is one settings screen rather than two that can disagree. Settings remain the extension's own `settings-options.php` schema and `fw_get_db_ext_settings_option()` store; only the route changed.
+
+Both tabs post to this screen and both saves are handled in `_action_maybe_save()` on `load-`, each behind its own nonce — the menu tab's handler (`FW_Admin_Skin_Menu_Layout::maybe_save()`) is dispatched when `fw_admin_skin_menu_nonce` is present, so neither form can be submitted through the other's. The menu save redirects back to `#menu_tab` rather than dropping the user on the first tab.
+
+### Admin Menu editor (the second tab)
+
+`FW_Admin_Skin_Menu_Layout`, option `fw_admin_skin_menu_layout`, keyed by **role**: `[ map, order, hidden, labels, slugs ]`. The screen lists every top-level item with a group select, drag-to-reorder and a Hide box, plus renameable group names.
+
+The split that matters: **grouping and order are presentation**, merged into the config the existing client-side grouping pass already consumes (one implementation, not two — the saved `map` goes first because `menu-groups.php` matches its keys in order). **Hiding is server-side** — `remove_menu_page()` plus a redirect — because an item removed only in the browser is still a working screen.
+
+Four things that bit during the build:
+
+- **The guard runs on `admin_init`, which is before `admin_menu`**, so there is no live menu to look a slug up in. The slug is therefore stored *with* the layout.
+- **A menu slug has three shapes** and one string comparison only handled the first: a plugin page (`fw-extensions`), a core file (`upload.php`), and a core file whose query is part of its identity (`edit.php?post_type=snippet` — matching `edit.php` alone would redirect Posts too). `request_matches()` handles all three.
+- **`$menu` is keyed by position**, so its natural array order is registration order. `ksort()` is what makes the screen list items the way the sidebar shows them.
+- **A menu title carries its count bubble as nested markup**, so a non-greedy strip to the first `</span>` leaves a tail behind ("Comments 0 Comments in moderation"). Everything from the bubble onwards goes.
+
+A user with several roles gets the first of their roles that has a layout saved — merging two would produce an order nobody chose. Hiding is **not** access control and the screen says so.
+
+**The lifeline rule.** This screen lives *under* the Unyson+ menu, so hiding that menu would take the editor away with it and leave the database as the only way back. `is_lifeline()` refuses the Unyson+ row's Hide box — but only for a role that could open this screen at all (`get_role( $role )->has_cap( 'manage_options' )`). Hiding it from an editor or an author is exactly what the feature is for and stays allowed. Enforced in `maybe_save()` as well as in the markup, since a disabled checkbox is a hint rather than a rule.
+
+### The login screen runs its own path too
+
+Same shape as the Customizer, for a different reason: `is_enabled()` requires `is_user_logged_in()`, and on `wp-login.php` nobody is. `is_login_enabled()` + `_action_enqueue_login()` + `_action_login_mode_script()` hang on `login_enqueue_scripts` / `login_head`, with `login_body_class` adding `upa upa-skin-<slug>` (and `upa-login-icon` when the site has an icon). Setting: `skin_login` (default on). Filter: `fw_ext_admin_skin_login_enabled`.
+
+Four things worth knowing before editing it:
+
+- **The hooks are registered ABOVE the `is_admin()` guard in `_init()`.** `wp-login.php` is not `is_admin()`, so hooks added after that guard never register there — the first version of this feature looked completely inert for exactly that reason.
+- **Only the tokens and `static/css/login.css` load.** `structure.css` / `primitives.css` are written against `#adminmenu`, `#wpadminbar` and `.postbox`, none of which exist here, and they restyle shared classes (`.button`, `.notice`) for a layout that screen was never measured against.
+- **Site defaults, never per-user.** There is no viewer yet, so `get_mode()` / `get_accent()` fall through to the site settings on their own (`get_user_prefs()` returns `[]` for user 0). A per-user mode on a logged-out screen is not a thing that can exist.
+- **Core styles several login controls through ID selectors**, which no class-scoped rule can outrank: `#login form p` (the paragraph gaps — miss it and the Lost Password button welds itself to its input) and `#pass1:focus` / `#pass1.strong` (the password field). More usefully, logged out there is **no admin colour scheme**, so `--wp-admin-theme-color` falls back to stock blue; `login.css` redefines that variable from `--upa-accent` on `body.login.upa`, which corrects every control core themes through it at once rather than one ID at a time.
+
+The mark above the form is the **site icon** when one is set, the **site name** when not, and links to `home_url()` rather than wordpress.org (`login_headerurl` / `login_headertext`). The interim-login modal core renders inside wp-admin on session expiry is the same form, so it inherits everything and only loses the outer padding and card shadow.
 
 ### Previews stay light — on purpose
 

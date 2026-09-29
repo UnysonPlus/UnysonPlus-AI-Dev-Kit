@@ -92,6 +92,13 @@ VERIFY LIKE THIS, not with a single number:
   - If you can see a difference that your measurement did not report, your measurement is looking at the
     wrong thing. Fix how you are measuring before you carry on.
 
+IF THIS SITE HAS THE AI ASSISTANT EXTENSION, you have hands as well as eyes: WP admin →
+Unyson+ → AI Assistant → "Connect an agent" issues an MCP connection. Prefer its tools —
+describe-theme-settings / update-theme-settings, save-preset, list-elements / update-element,
+render-check and undo — over editing files: they validate what you send, and every change is
+revertible. Ask the site owner for the connection details; they are shown once, and must never be
+pasted into a prompt, an issue or a chat.
+
 IF YOU HAVE THE UnysonPlus AI Dev Kit (optional — skip if not):
   - tools/measure/container-check.mjs <converted> <source>   → container content width
   - tools/measure/props.mjs <source> <converted>             → named-property diffs (type, spacing)

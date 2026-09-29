@@ -8,12 +8,13 @@ Combines enqueued frontend CSS and JavaScript into single minified, cached files
 - **Shortcodes:** none.
 - **Settings/options:** its own settings page under Extensions, three native `tab` containers:
   - **General** — `combine_css`, `combine_js` (master switches), `css_scope` (`site` shared bundle vs `per_page`), `css_delivery` (`file` linked stylesheet, default; `inline` = print the bundle in a head style tag when it is ≤ 50 KB gzipped), `webp_images` (off by default: WebP copy of every uploaded JPG/PNG, its sizes and `fw_image_tag` crops, swapped in on the front end when the copy exists and is smaller; existing images convert a few per page view; `.nowebp` marker for a copy that came out larger), `logged_out_only`, `exclude_urls` (one path/line, `*` wildcard).
-  - **General** also carries `purge_css` + `purge_safelist` (see **Unused-CSS purging**) and `preload_lcp_image` (see **Hero-image preload**). Both off by default.
+  - **General** also carries `purge_css` + `purge_safelist` (see **Unused-CSS purging**), `preload_lcp_image` (see **Hero-image preload**) and `image_quality` (see **Image quality**). The first two are off by default; `image_quality` defaults to 82.
   - **CSS** — `css_handles` (checkboxes; every discovered stylesheet, all checked by default).
   - **JavaScript** — `js_handles` (checkboxes; only first-party checked by default), `js_defer`, `js_minify`.
   - Both handle lists render as **collapsible groups** with a tri-state parent checkbox, per-group counts, Check all / Uncheck all, a filter box and an "Only unchecked" toggle. The group comes from `fw_ao_asset_group( $handle, $src )` in `settings-options.php`, which keys off the asset's **path** (never the handle name) and is emitted onto each input as `data-ao-group` / `data-ao-group-label`; the grouped UI itself is progressive enhancement built in `render_settings_page()`'s inline CSS+JS over the stock `checkboxes` option type, so the inputs, their names and the stored value are unchanged and the list degrades to a flat one with JS off. Rows are moved into groups but **never re-sorted** — the server emits them in `prioritize_css_handles()` cascade order and that order is information. The Animation Engine's effect partials (`/css/animate/`, *not* a path containing `animation-engine`) form their own group, since their classes are applied by JS after load.
 - **Public hooks/filters:**
   - `fw:ext:asset-optimizer:css_exclude_handles` / `:js_exclude_handles` — force-exclude handles from combining (passed the handle→src map).
+  - `fw_image_crop_quality` — core filter on the crop encoder quality (default 82); the extension hooks it with the `image_quality` setting.
   - `fw:ext:asset-optimizer:purge_safelist` — the purge safelist (full preg patterns; defaults from `FW_AO_Purger::default_safelist()`).
   - `fw:ext:asset-optimizer:css_inline_max_bytes` — gzipped-size cap for `css_delivery: inline` (default 51200); a larger bundle stays a linked file.
   - `fw:ext:asset-optimizer:webp_quality` — WebP quality for `webp_images` (default 80).
@@ -70,6 +71,26 @@ Measured at 1.6 Mbps / 150 ms RTT / 4× CPU: LCP **3,208 → 2,320 ms (28% faste
 ## Cache headers for generated files (automatic)
 
 `ensure_cache_headers()` drops an `.htaccess` into the cache dir setting `Cache-Control: public, max-age=31536000, immutable` on `.css`/`.js`. Measured before: the combined files came back with **no cache header at all**, so every repeat visit revalidated them. Caching them forever is safe by construction — each filename contains a hash of its contents, so a rebuild is a different URL. Written whenever the cache dir is created (both combine writers and the purge writer). Apache only; inert on nginx, where the same policy belongs in the server config.
+
+## Image quality (`image_quality`, default 82)
+
+The crop pipeline is CORE - `framework/includes/image-crops.php` - and this setting only surfaces its knob. Core applies the `fw_image_crop_quality` filter (default **82**, WordPress's own default) and calls `set_quality()` after `crop()` and before `save()`; the extension hooks that filter with `_filter_image_crop_quality()`. With the extension inactive the core default still applies.
+
+Until this existed, `$editor->save()` was called with no quality set at all, so crops took whatever the editor defaulted to. Measured on a real site that was roughly **q88 - 0.167 bytes per pixel**, about double what a well-tuned WebP needs. Re-encoding the same pixels: q82 ~12% smaller, q80 ~18%, q75 ~33%. A real crop regenerated from the same source measured **37.8 KiB at q82 vs 31.5 KiB at q75 (-17%)**.
+
+**WebP quality tracks it.** `fw:ext:asset-optimizer:webp_quality` was hard-coded to 80 while a crop could be written at any quality, so the two fought: at Image quality 90 the WebP copy was LOWER fidelity than the JPEG it replaced. The extension now hooks that filter with the same `image_quality` value.
+
+What this does NOT do is force WebP to win. `FW_AO_Webp::make()` discards a copy that comes out larger than its source and writes a `.nowebp` marker, and at low quality the JPEG genuinely is smaller - measured on one image: q55 jpg 23.1 KiB (webp larger, jpg served), q70 27.0 KiB webp, q80 26.9 KiB webp, q90 26.9 KiB webp. Two things follow: serving the JPEG at low quality is the pipeline working, not failing; and **quality above 80 is wasted**, because the WebP flattens at 26.9 KiB while the JPEG balloons to 51 KiB and is never downloaded.
+
+**Quality is part of the crop signature**, and it has to be. The signature is `ratio|crop|filesize|filemtime|q<quality>`; without the quality term every crop would still be found on disk under its old name and the setting would silently do nothing. Because the term is new, the first render after upgrading re-encodes each crop once, on demand - the saving appears gradually rather than all at once, and old files are left behind until the crops directory is cleared.
+
+PNG sources are lossless, so quality is a no-op there. When testing this, note two traps that produced a false negative: pick a JPEG/WebP rather than a PNG, and use a FRESH PHP process per value, because `general_setting()` caches the settings store at bootstrap and an `update_option()` in the same process will not be seen.
+
+## Crop width ladder
+
+`fw_image_crop_widths` (core, `image-crops.php`) offers 320 / 400 / 480 / 560 / 640 / 768 / 900 / 1024 / 1280 / 1600, filtered to those below 90% of the crop's own width plus the crop width itself.
+
+The ladder is dense at the small/middle end on purpose. `srcset` makes the browser take the first candidate at or above the slot it needs, so the wasted bytes are the gap to the next rung - on the old 320/480/640/768 ladder a 540px slot pulled the 640 file and threw ~12 KiB away, because 480 to 640 is a 1.33x step. No step now exceeds ~1.25x below 1024. Measured: a 540px slot picks 560w (13.3 KiB) instead of 640w (15.5 KiB), 14% less. Renditions are written on demand, so a width nothing asks for costs nothing; a typical crop gains about two extra files.
 
 ## Notes / gotchas
 

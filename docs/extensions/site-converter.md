@@ -115,6 +115,16 @@ decomposes to nested `column`s (PHP) or a `code_block` (JS). Those specific shap
 
 ## Notes / gotchas
 
+- **Custom local models (capture service 1.11.68).** `/local-ai/pull` runs every name through
+  `normalizeModelRef()` (local-runner library names and URLs, public model-hub GGUF repo references and
+  model-hub URLs; anything else → 400). `/local-ai/import` → `importGguf()` goes through the local runner's HTTP
+  API, not the CLI (works when the runner's program is not on PATH): sha256 the file, `POST /api/blobs/sha256:…`
+  (skipped when `HEAD` says the runner has it), `POST /api/create { model, files }`; progress shares
+  `pullStatus()` with `kind: 'import'`. `/local-ai/check` → `checkModel()`: a schema-constrained two-item FAQ
+  task graded ready / weak / fail. A one-field task was too easy: a 135M toy model passed it; with the FAQ
+  task it grades weak and the recommended 8B model ready. `localAiStatus().custom` = pulled models not on the shortlist.
+  The dashboard skips its 8 s redraw while a field in the section has focus (it wiped typing).
+
 - **Hosted sites: the BROWSER talks to the capture service, never PHP (1.10.15).** A hosted server's
   `localhost` is itself, so any `wp_remote_*` to the service only works when WordPress runs on the same
   machine. Block-theme output now fetches `GET /capture?target=block-theme` in the browser and uploads it
@@ -200,7 +210,7 @@ so the converted DOM stays clean instead of carrying raw utilities.
   approach. The wrapper approach needs no schema/doc/screenshot changes, so it's the default for now.
 
 - **Card WITH a nested feature list → don't flatten it (2026-08-24).** A card cell whose body is
-  icon + heading + description **followed by a grid/flex of icon+text rows** (e.g. modfii's "Loan Types
+  icon + heading + description **followed by a grid/flex of icon+text rows** (e.g. a converted source's "Loan Types
   Available" card) must NOT collapse into one `icon_box` — that drops the list. `grid_cols()` detects the
   nested list (`cell_wraps_icon_text_list`) and decomposes the cell into an `icon_box` HEADER block +
   a native `feature_list` block; `build_cell_items()` renders both. The card's box then lands on the
@@ -343,7 +353,8 @@ so the converted DOM stays clean instead of carrying raw utilities.
   (2) classify the path shape (wave / tilt / curve / triangle) — a coarse match of the path's silhouette
   against the built-in divider set, (3) read its height + fill + flip, (4) set the section's divider option
   (NOT a preset). Build it in the same DOM-walk pass as the pattern detector. **Needs a source that actually
-  uses shape dividers to verify** — modfii's §9 is a `bg-gradient-to-b` overlay, NOT a divider, so it can't
+  uses shape dividers to verify** — the conversion test corpus's closest candidate is a `bg-gradient-to-b`
+  overlay, NOT a divider, so it can't
   validate this. Ask the user for a source URL with visible top/bottom section dividers before building.
   - **section-styles bug fix** — `sectionStyles()` read the always-empty `background` shorthand instead of
     `backgroundColor`, so pure colour-fill bands were dropped; fixed (+ `to-presets.test.mjs` fixture).
@@ -1031,6 +1042,8 @@ reading any PHP:
 - **`verifyUrls({ sourceUrl, convertedUrl, bands })`** — per-band pixel drift plus the height delta. It says WHICH
   bands are wrong, so the work is ordered by measured damage — but it can only ever point at a band, never at an
   element: a few small controls in the wrong place are a rounding error in a 1440×425 band.
+  Over HTTP: `POST /verify {source_url, converted_url, width?, bands?, lens?}` — `lens` `bands` (default, this answer),
+  `sections` (`verifySections`) or `both` (`{ok, lens, bands, sections}`, service 1.11.78+; the AI Assistant's `visual_check`).
 - **`conversion-parity.json`** (written by the capture) — a scored checklist: container width, border colour,
   roundness, section count, header/footer presence, never-drop classes. A failing row is a converter bug with a number.
 - **`conversion-drops.json` / `capture-residue.csv` / `class-coverage.json`** — what the converter itself knows it
@@ -2699,7 +2712,7 @@ each with an **AI tier** for the ambiguous long tail. Both require/activate `ani
   `$sec['bgEffects']`; `apply_section_bg_effects()` (mapper) writes `bg_effect`, `bg_effect__2`, … on the
   section. **JS parity:** `findBgEffects()` (capture-extract) + `to-pages` apply. **AI tier:** an unnamed
   animated backdrop (raw WebGL/three.js canvas) becomes a `bgFxCandidate` (tokens + engine hint); `bgFxMicroTask`
-  (to-ai) picks the closest catalog effect (or none) via the local model / Claude — non-destructive, only where
+  (to-ai) picks the closest catalog effect (or none) via the local model / the cloud AI — non-destructive, only where
   deterministic found nothing. *Verified on kage:* `fg-leaves`+`fg-sakura` → one `snow/petals` layer.
 
 - **Preloader → Preloader module "Custom (code)" style.** `detect_preloader($html)` finds a source loading
@@ -3041,12 +3054,12 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   AMBIGUOUS structural calls that vary infinitely across markup, and keep the deterministic engine as the builder +
   validator. Pipeline: PHP `FW_Site_Converter_Stitch::structure_summary($html)` emits a COMPACT per-section signal
   summary (stable `sig` = first-heading slug, `dollars[]`, `hasPeriod`, `hasFeatureList`, per-video `{rounded,inColumn,
-  cover}`, `bands`) → `classify-structure.mjs` (capture-service; Ollama offline OR Claude, schema-constrained JSON via
+  cover}`, `bands`) → `classify-structure.mjs` (capture-service; the local runner offline OR the cloud AI, schema-constrained JSON via
   `askModel`) returns a per-section verdict `{sig, kind, pricing, video_role}` to `ai-structure.json` → the bundle
   importer loads it (gated: `FW_SC_AI_STRUCTURE` constant/`fw_sc_ai_structure` filter/env) and `set_ai_structure()`
   installs it; `is_pricing_table()` and the video recognizer then consult `ai_verdict_for($el)` (walks to the section,
   matches `structure_sig`) — ADVISORY: a verdict corrects the call, no verdict → heuristics decide. **Default OFF →
-  the deterministic path is byte-identical.** Verified end-to-end on build-products: both qwen3:4b AND Claude return
+  the deterministic path is byte-identical.** Verified end-to-end on build-products: both the 4B local model AND the cloud AI return
   `pricing:false` (correctly reading "$4.2B"/"$18.24M" as STATS, not plan prices — the semantic win heuristics miss)
   and `video_role:content`; flipping a verdict provably flips the converter's decision (the-art-of-living hero bg
   video true→false on `video_role:content`). KEY FINDING: the AI wins the **semantic** call (stats-vs-pricing — both
@@ -3054,7 +3067,7 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   rule than fuzzy reasoning (both models first said "background" until the prompt made the rounded→content rule
   explicit). So the division is: **AI for semantic judgment, deterministic for mechanical facts.** The `background`
   override is intentionally guarded by `in_card` (the AI can't force a clearly-rounded reel to full-bleed).
-  CORPUS MEASUREMENT (site-converter 1.8.44, qwen3:8b local/offline, 67 sites / 247 sections vs the deterministic
+  CORPUS MEASUREMENT (site-converter 1.8.44, the 8B local model offline, 67 sites / 247 sections vs the deterministic
   ground-truth proxy): **pricing 98.8%, video_role 96.8%, both 95.5%, 0 failures** — a small OFFLINE model
   reproduces the ambiguous structural calls reliably enough to be a useful advisory tier (validator/fallback covers
   the residual). The residual splits into: 3 pricing over-calls on number-heavy sections (apple-card/lumina-arctic/
@@ -3069,24 +3082,24 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   unset = capture is byte-identical to before), best-effort (needs an AI backend + PHP/WP via env; any failure is
   logged and skipped, never blocks capture). So capture → convert now carries the advisory verdicts with no manual
   step, behind the same flag the importer reads. The classifier CLI now DEFAULTS to the selected LOCAL model
-  (`selectedLocalModel()`) rather than Claude: this task is schema-constrained and Ollama's `format` grammar
-  GUARANTEES valid JSON, whereas the Claude CLI path returns free text that missed the shape ("classifier returned
+  (`selectedLocalModel()`) rather than the cloud AI: this task is schema-constrained and the local runner's `format` grammar
+  GUARANTEES valid JSON, whereas the command-line agent path returns free text that missed the shape ("classifier returned
   no sections"); `--model` still overrides, and with no local model selected it falls back to the active backend.
   The pricing override is a one-directional VETO — `is_pricing_table` honors `pricing:false` (suppress a wrong
   table) but NEVER `pricing:true`, so the model's 3 pricing false-positives can't fabricate a pricing table or
   regress a stat site; the `background` override is `in_card`-guarded. This is what makes AI-on SAFE to enable.
-  Next: run the same measurement on the Claude backend for a quality ceiling; expand verdicts to section-split + a
+  Next: run the same measurement on the cloud-AI backend for a quality ceiling; expand verdicts to section-split + a
   full role map; measure AI-on vs AI-off rendered scoring (expected ~neutral on the tuned corpus — heuristics are
   already correct — with the lift landing on UNSEEN sites where heuristics fail).
-- **ROADMAP — improve the LOCAL-AI tier (Ollama backend in `to-ai.mjs`).** The local models (Qwen3 4B/8B, `to-ai.mjs`)
-  are the free/offline tier and, per the code, "well below Claude." The cheap win is already in — the Ollama calls
+- **ROADMAP — improve the LOCAL-AI tier (local-runner backend in `to-ai.mjs`).** The local models (4B/8B, `to-ai.mjs`)
+  are the free/offline tier and, per the code, "well below" the cloud AI. The cheap win is already in — the local-runner calls
   pass a JSON **schema to `format`** (constrained decoding → always-valid JSON, `think:false, temp 0`), so the model
   never emits malformed JSON. Remaining levers, cheapest first: (1) **few-shot / retrieval** — inject 2–3 similar
   SOLVED mappings from the corpus into the prompt before each call (no training, big lift for a small model on a
-  patterned task; probably not wired yet). (2) **base/quant** — bigger Qwen3 if the hardware allows. (3) **fine-tune
-  via distillation** (the deep step, only after 1–2 plateau) — run Claude over the corpus for gold outputs, LoRA-tune
-  a Qwen3 with **Unsloth** (fastest single-GPU + GGUF export) or **LLaMA-Factory** (NOT the `Soup` repo — it's a thin,
-  unproven wrapper over these), export GGUF → serve via the existing Ollama backend → validate with the converter-trainer
+  patterned task; probably not wired yet). (2) **base/quant** — a bigger local model if the hardware allows. (3) **fine-tune
+  via distillation** (the deep step, only after 1–2 plateau) — run the cloud AI over the corpus for gold outputs, LoRA-tune
+  a local model with a fast single-GPU fine-tuning framework that exports GGUF (avoid thin, unproven
+  wrappers over such frameworks), export GGUF → serve via the existing local-runner backend → validate with the converter-trainer
   harness. Determinism is unaffected (this only powers the optional AI-assist tier). The real cost is building +
   maintaining the distillation dataset as the builder-JSON schema evolves; a larger captured corpus directly helps.
 - **Container max-width — content no longer sits flush to the screen edges (site-converter 1.8.21 + core presets).**
@@ -3128,7 +3141,7 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   brand-block detector (`header_brand_block` / `_mkBrandBlock`) and the wordmark guard both capped brand text at
   24 chars (a limit meant to reject a glued nav row), so the long-word brand fell through to the whole header →
   too much text → dropped. Both now allow up to 48 chars WHEN the text is genuinely multi-word (≥2 space-
-  separated words); a single glued token (`ModFiiFinancingResources…`) stays capped at 24. Verified:
+  separated words); a single glued token (`BrandFinancingResources…`) stays capped at 24. Verified:
   national-geographic now renders `inline-left` icon+wordmark (was icon-only, site_title "Home"). NB: a two-line
   brand (`<br>` between the lines) still glues without a space in the extracted text — a minor known nit.
 - **Gradient text on the HEADING element itself is now carried (site-converter 1.8.13).** A hero heading whose
@@ -4027,6 +4040,466 @@ against a real install is what caught it, and the suite now asserts the version 
 **`glob( '*' )` does not match dotfiles.** The sandbox test's own cleanup left `.htaccess` behind, `rmdir()`
 failed silently, and the run leaked a temp directory while reporting success — caught only because the last
 assertion checks that the directory is gone. Use `scandir()` when a directory must actually be empty.
+
+## The full-bleed hero, and five ways to miss one
+
+A real conversion put a hero's backdrop photo on the page as a small content tile, squeezed the headline
+into a fifth of the band so it wrapped one word per line, and measured **88% pixel drift** on that band --
+the worst region on the page and the first thing a visitor sees. Five separate defects produced it, and
+each is general rather than particular to that source.
+
+**1. The poster was detected by class name, not by computed style.** Every path in `section_bg_image()`
+keyed on Tailwind utilities (`absolute`, `inset-0`, `object-cover`) or a CSS `background-image:url()`. The
+source was hand-written CSS: `<picture class="hero-poster"><img>` where the img carried **no class at all**
+and only computed `position:absolute; object-fit:cover; width:1440px; height:900px`. Reading class names
+where a computed value is available is the same mistake as testing whether a property is PRESENT in a
+computed-style dump -- it asks "was this built with the framework we expected?" when the question is "does
+this element cover the band?".
+
+**2. Removing the image left its wrapper.** A responsive backdrop is `<picture><source><img></picture>`, so
+lifting just the `<img>` left a hollow `<picture>` in the flow -- and an empty element is still a child, so
+the row builder handed it a column. Most of the squeeze the lift was meant to cure survived it.
+
+**3. `muted` is a DOM property, not an attribute.** `detect_section_bg_video()` required
+`hasAttribute('muted')`, but browsers require `video.muted = true` for autoplay and that is how React and
+most hand-written players set it -- so the captured markup has no such attribute. `controls` is the sturdier
+discriminator: a backdrop never has them, a player almost always does.
+
+**4. The in-column test asked the element about itself.** The capture stamps `data-sc-col` on every direct
+child of a flex/grid container, so a backdrop sitting directly under the `<section>` carries the stamp too.
+The walk started at the video, saw its own stamp, and concluded it was content in a column -- meaning a
+hero's background video could never be promoted when written the commonest way.
+
+**5. "Rounded means content" assumed square sections.** The video was refused because its `border-radius`
+was 25px, over a fixed 24px threshold -- but the `<section>` itself was a 25px rounded card, and a backdrop
+follows the shape of the box it fills. Roundness only distinguishes a panel *relative to its band*.
+
+### Out-of-flow children are not columns -- carefully
+
+The browser gives `position:absolute` / `fixed` children no track, so counting them as columns is a layout
+error rather than a judgement call. The hero had six children and only ONE was in flow; each of the others
+took a column, and the content layer was left with 2/12 of the band.
+
+`el_takes_no_track()` is that rule, shared by **both** column builders -- the first version lived in
+`layout_cols()` alone and changed nothing, because this hero's row came from `grid_cols()`. A rule that
+applies to one of several builders is a rule that silently does not apply.
+
+It is deliberately narrow, and the goldens are why:
+
+- **Only the `hidden` ATTRIBUTE, never computed `display:none`.** A `md:hidden` card computes `display:none`
+  at the captured width and is visible on phones; the pipeline turns that into Responsive Hide. Dropping it
+  deleted a card a golden expects to survive.
+- **Media is kept.** A backdrop should have been promoted before this point; if it was not, dropping it here
+  would lose it silently.
+- **Paint is kept.** An absolutely-positioned painted layer -- a 1px "light river" hairline, a glow blob, a
+  scrim -- is decor that later paths lift out as its own layer. Dropping it first lost the paint, which
+  another golden caught.
+
+Both restrictions cost fidelity on the hero above (its scrim is still a column) and both are correct: the
+narrow rule loses a little layout, the wide one lost content.
+
+## Setting expectations, and handing the rest to an agent
+
+A conversion gets a site most of the way and leaves finishing to do. Everything below exists because a
+first-time user met none of that: a page of options, a one-minute wait, a front end that did not match the
+source, and no idea whether that was the tool working or the tool failing.
+
+### The panel that never appeared
+
+`render_next_steps()` bails when `fw_sc_last_result` is empty, and that option is only written when
+`conversion-parity.json` / `conversion-drops.json` exist in the bundle. `build_bundle()` emits them as a
+side effect — and the admin's "Build the site from this mapping" path does not use it, it calls
+`build_pages()` directly. So the primary conversion path produced **no self-assessment at all**, and the
+punch list and agent brief had never once rendered on the path almost everyone uses. The path now calls
+`FW_Site_Converter_Stitch::self_assessment( $html, $values, $pages )` — one method rather than two public
+builders, so a caller cannot take half the assessment and believe it has the whole thing.
+
+*The lesson worth keeping:* a feature whose entry condition is "some file exists" fails silently on any
+path that does not produce that file, and looks identical to a feature nobody triggered.
+
+### `text_coverage` — the audit that shares no code with the builder
+
+`conversion-drops.json` carries a `text_coverage` block: every **visible phrase the source renders**,
+checked for presence in the built pages + theme settings.
+
+It exists because the drop log beside it **structurally cannot see a whole class of loss**. That log is
+fed by the generic decompose walker, so it only ever records nodes *that walker* declined to emit. A node
+discarded because a **recognizer claimed its ancestor and then ignored it** never reaches the walker at
+all. On a real source the accordion recognizer claimed a services band and silently dropped the trailing
+call-to-action link and the entire `<figure>` beside it (image + caption), while the drop report showed 15
+drops — all from an unrelated FAQ group, none of them these. The instrument said the conversion was fine.
+
+So the audit deliberately reads the source DOM and the output as two bags of text and asks one question:
+is each source phrase somewhere in the output? That catches the whole class at once, whatever the cause —
+a recognizer over-claiming, a walker skip, or text **glued** to a neighbour so the phrase no longer exists
+as itself (`"01Complete home renovations"`).
+
+| Field | Meaning |
+|---|---|
+| `checked` | source phrases tested (2+ real words) |
+| `missing` / `items[]` | content we should have kept and did not |
+| `out_of_scope[]` | text we deliberately did not carry, each with a `reason` |
+| `coverage_pct` | `(checked - missing) / checked` |
+
+**`items` and `out_of_scope` are different claims and are kept apart on purpose.** A consent/cookie banner
+is a plugin's UI (the converted site gets its own consent plugin) and a skip link is an a11y affordance the
+theme provides itself — neither is a loss. Folding them into `missing` would have put 7 non-findings in
+front of 11 real ones on the first source this ran on.
+
+Deliberately **not** reported, because they would be false positives: `display:none` / `hidden` /
+`aria-hidden` subtrees (sources routinely ship a mobile *and* a desktop copy of a band with one hidden —
+dropping the hidden twin is correct), `script`/`style`/`svg`, and phrases under two real words.
+
+Two traps worth keeping in mind, both of which bit during the build:
+
+- **Scope the out-of-scope classifier to an actual container.** Complianz stamps `cmplz-*` on `<html>` and
+  `<body>`, so an ancestor climb that includes them matches *every* phrase on the page. The first run
+  declared a services figcaption and a footer email address to be consent-banner text and reported **100%
+  coverage with zero findings**. The climb now stops at `<body>`. A signature broad enough to match
+  everything is not a signature.
+- **`build_from_html()` returns `files`, not `pages`.** There is no top-level `pages` / `theme-settings`
+  key; they are `files['pages.json']` and `files['theme-settings.json']`. A harness that reads the wrong
+  key passes empty arrays and the audit reports ~6% coverage — a harness artifact that looks exactly like a
+  catastrophic converter regression.
+
+It is attached in `build_bundle()` (after `pages.json` and `theme-settings.json` are written, which is why
+it cannot sit beside `build_drop_report()`), so **every** conversion carries it, not only the admin path
+that calls `self_assessment()`.
+
+Guarded by `tests/text-coverage-test.php`.
+
+### Text glue: a boundary is a computed `display`, not a tag
+
+DOM `textContent` concatenates with **no separator**, so anything reading it flattens stacked lines into
+one word. `space_block_boundaries()` fixes that, and got it wrong twice in ways worth recording:
+
+1. **It judged the boundary by tag name.** A source stacked its wordmark as
+   `<span>NORTH RIDGE<small>HOME STUDIO</small></span>` — `<small>` is inline *by tag* and
+   `display:block` *as measured*, so the tag list walked past it and the brand kept reading back glued long
+   after a golden named "stacked wordmark lines are NOT glued" was passing. That golden was not a false
+   pass; it only ever tested `<div><div>`, which the tag list already handled. The capture stamps `display`
+   on every element — read it, and keep the tag list only as the fallback for an unstamped element.
+2. **The space went only *after* the block.** An inline sibling followed by a block —
+   `<span>01</span><h3>Complete home renovations</h3>` in an accordion toggle — is glued at the **front**,
+   which a trailing-only space cannot reach. The separator now goes on both sides.
+
+**Order matters:** `text_no_icons()` must space the boundaries **before** calling `scrub()`, because
+`scrub()` strips `data-sc-cs` — and that attribute is where the measured `display` lives.
+
+The JS twin is free: `capture-extract.mjs` runs in the browser, where `innerText` already honours layout,
+so the wordmark reads through a `vtxt()` helper rather than `textContent`.
+
+### Page discovery: the sitemap, not just the nav
+
+`navPageUrls()` read exactly one source — `homeCapture.header.nav`, the links inside the header element,
+filtered to labels under 30 characters. On a source whose `robots.txt` points at a sitemap listing **133
+URLs**, it found 1, so the conversion produced **2 pages and reported success**. When the nav is your only
+source, "the nav had one link" and "the site has one page" are the same observation, and a drawer that is
+closed at capture time or a mega-menu that mounts on hover produces the first while looking like the second.
+
+`discover.mjs` unions four sources, cheapest and most authoritative first:
+
+| Source | Why it is there |
+|---|---|
+| **sitemap** | `robots.txt`'s `Sitemap:` lines, then `/sitemap.xml`, `/sitemap_index.xml`, `/wp-sitemap.xml`; a sitemap index is followed one level. Authoritative, complete, one fetch, no browser render. |
+| **nav** | What the old code used. Still the best signal for *which pages are primary*, so it drives the default selection. |
+| **footer** | Where sites put what the header omits — legal, about, contact. |
+| **page** | Same-origin anchors anywhere on the rendered home page; the catch-all. |
+
+Every URL records **which sources produced it**, because that provenance is what lets a picker pre-select
+sensibly instead of presenting 133 equal-looking checkboxes. Hashes and query strings normalise away (one
+page with filters is one page), assets and `wp-*` internals are dropped.
+
+Guarded by `discover.test.mjs`, deliberately network-free — the judgement lives in the pure functions, and a
+test that needs the internet is a test that gets skipped.
+
+### The page picker, and the batch that says what it left out
+
+`/pages?url=` on the capture service answers the admin's **Check Pages** button. It is a separate, cheap
+call rather than part of `/capture` on purpose: the point is to show the real list and let someone choose
+**before** anything is captured.
+
+The picker is full width, because a real site does not fit in a fifth column, and it **groups by path
+prefix** — that source's 133 URLs are not 133 equal pages; 107 sit under one prefix (one template, many
+landing pages). Three ordering lessons, each of which was a bug first:
+
+1. **Sort groups by size descending and you rebuild the problem.** The panel opened with 107 near-identical
+   rows and pushed the dozen real pages off screen — the exact failure grouping exists to prevent,
+   reproduced by the sort meant to present it. Order is now: `Top level` first, then groups the nav points
+   at, then **small before huge**.
+2. **A top-level page is not its own group.** Grouping purely by first path segment gave `/about` a heading
+   and a "select" button of its own, so a dozen real pages arrived as a dozen single-item groups —
+   technically grouped, practically noise. A group is only drawn for a sub-tree (`depth > 1`).
+3. **Cap the big groups, never the important one.** Large groups render 12 rows plus "+N more"; `Top level`
+   renders up to 40, because truncating *that* hides real pages behind a "+4 more" while twelve rows of one
+   template sit below it.
+
+Selection is capped at **Max pages** and the panel states plainly how many are not in this batch. The chosen
+set rides to the capture as **`only=`** — not `pages=`, because `pages=all` already means "return every
+captured page in the response", and one parameter with two unrelated jobs is a bug waiting to happen. When
+`only=` is present the capture **skips discovery entirely**: the user has reviewed that list, and
+re-deriving it could only disagree with what they approved.
+
+Pages the site already holds are marked **already converted** (matched against existing WP slugs) — marked,
+never hidden, since someone may want to re-convert one and hiding it would look like discovery had missed
+it. When any are found, **"Replace existing site" is unticked automatically**: that reset rebuilds Theme
+Settings from the same source, so on a second round it is pure churn, and leaving it ticked invites the
+reading that each round starts from scratch. It leaves pages alone either way, so nothing from round one is
+ever at risk — batching is safe, and this is about not implying otherwise.
+
+### Re-running ONE page
+
+A conversion was all-or-nothing. One page wrong meant hand-fixing it (lost on the next conversion) or
+reconverting the whole site — which re-derives the design system and discards every other page's state.
+Neither is proportionate to "this one page is wrong", and neither helps in the common case: a converter
+fix only reaches a page once that page is rebuilt.
+
+It could not be offered before for a plain reason: **a converted page carried no record of the URL it was
+built from.** The bundle knew which URL produced which page and dropped it. Pages now store
+`_upw_source_url`, set in one place — `build_bundle()` takes `url` from each screen, and the single-page
+callers already passed it as `source_url`, so the front page and every per-page snapshot get it for free.
+
+`FW_Site_Converter_Rerun` then does the narrow thing:
+
+- rebuilds **one** page's content from a fresh capture of its own source URL;
+- does **not** re-derive the design system, theme, chrome, menus or Theme Settings — re-deriving those per
+  page is exactly what made "the last page converted decides how the whole site looks";
+- **does** overwrite that page's builder content, so the UI says so before running rather than letting the
+  reader discover it afterwards. Corrections that must survive belong in the sandbox.
+
+**It is the deterministic converter, not an AI pass.** Same source + same converter = same page (proven:
+identical output once the per-build `unique_id` / `u<hash>` values are normalised). The AI refine pass
+(`/refine-visual`) is the other tool — it writes CSS on top and keeps it only when measured drift improves.
+Re-run fixes what the converter got wrong; refine fixes what the converter cannot express.
+
+**The browser captures, not WordPress.** The admin endpoint takes a post id and HTML — never a URL. A
+WordPress admin endpoint that fetches an arbitrary URL because a form said to is an SSRF report waiting to
+happen, and fetching is the capture service's job.
+
+Two bugs from building it, both of which failed *silently* and are now pinned by `rerun-test.php`:
+
+- `import_json()` takes a JSON **string**; it was called with an **array**. PHP stringified it to `"Array"`,
+  nothing was written, and the re-run reported success. `import()` is the array-taking entry point.
+- The success check accepted an empty result as success — which is how a re-run that did nothing got
+  reported as "Rebuilt". Success now requires a **page ID** as proof.
+
+The list lives on the Convert panel, not the post-conversion results screen: that screen only renders
+immediately after an import, and a page most often needs re-running days later.
+
+### Refining ONE page — and why the CSS is scoped
+
+Beside each page's **Re-run** sits **Refine (AI)**, and the two are named apart on purpose: they fail
+differently and are worth reaching for at different times.
+
+| | Re-run | Refine (AI) |
+|---|---|---|
+| engine | the deterministic converter | `/refine-visual` |
+| does | rebuilds the page from a fresh capture | writes CSS on top |
+| keeps | always — it is the converter's output | only when measured drift drops |
+| for | what the converter got wrong | what the converter cannot express |
+
+**The CSS is confined to the page it was measured on.** The refine loop measures ONE page and keeps CSS
+only when THAT page improved. Writing it to the child theme unscoped would apply it to every page on the
+site, where it was never measured and can only make things worse — a pass that improves one page by 4% and
+quietly degrades eight others is not an improvement, and nothing downstream would notice.
+
+`FW_Site_Converter_Rerun::scope_css()` prefixes every selector with `body.page-id-N`. The care is in the
+cases that are not plain selectors, each of which silently breaks something if handled naively:
+
+- **Every selector in a list**, not just the first — `.a,.b` prefixed only on `.a` leaks `.b` site-wide.
+- **`@media` / `@supports` are recursed into**, not prefixed: prefixing the at-rule itself yields dead CSS.
+- **`@keyframes` / `@font-face` pass through untouched** — their contents are not selectors, and scoping
+  `from` / `0%` destroys the animation.
+- **`body` / `html` / `:root` are rewritten, not descended from** — `body.page-id-7 body` matches nothing,
+  so a whole-page background rule would vanish. What follows the tag decides how it rejoins: whitespace is
+  a descendant combinator (`body .x` → `<scope> .x`), while `.` / `:` / `#` / `[` is a compound on the same
+  element (`html.dark` → `<scope>.dark`). Reading only the first character conflates them, which turned
+  `body .x` into `<scope>.x` — a rule matching nothing. That bug was caught by its own test.
+- **Unbalanced CSS yields nothing**, rather than half a rule.
+- **No scope yields nothing** — never unscoped CSS.
+
+The block is labelled per page and replaced on a re-run rather than stacked, so repeated refines of the
+same page converge. Verified end to end: two refines of one page leave exactly one block carrying the
+second result, and empty CSS is a no-op success (the pass keeping nothing is a normal outcome, not a
+failure). Guarded by `rerun-test.php`.
+
+
+### Every page, not just the home page
+
+Two instruments had the same blind spot, and it was the expensive kind: they looked thorough.
+
+**The coverage audit** was wired into the bundle with `$screens[0]` — the home page — while its haystack
+held every built page. An inner page could lose its entire body and the report would still say 100%. The
+audit built to catch silent content loss was itself silent about every page but one. `build_text_coverage_all()`
+now audits each captured page and tags every finding with the page it came from, because "we lost the
+pricing table" and "we lost it on /pricing" are different amounts of information and only the second is
+actionable.
+
+**The layout lenses** (`verifySections`, `verifyUrls`) each take ONE source/converted pair, and nothing
+looped them — so every layout claim about a conversion was a claim about its home page. `verify-site.mjs`
+runs the section lens per page and ranks the result worst-first, exposed as `/verify-site` on the service.
+
+Measured on one real conversion, the first time either ran site-wide:
+
+| | home page alone | whole site |
+|---|---|---|
+| coverage | 97.7% | **97.4%** over 11 pages, worst page **83.8%** |
+| missing items (section lens) | 17 | **158** across 7 pages |
+
+The home page was about a tenth of the problem, and the two worst pages — a form page losing its trust
+badges, reassurance copy and a heading, and a calculator page — were ones nobody had opened. The two
+instruments agree on which pages are worst, which is the useful part: they share no code.
+
+`planPages()` is pulled out and tested without a browser. The home page always leads (everything else is
+judged against it), duplicates collapse, and the cap is applied LAST so it trims the tail rather than
+dropping `/` when a caller passes a full list and a small limit.
+
+*The lesson worth keeping:* a lens you have to aim will only ever be aimed at the easy page. Loop it, rank
+the output, and the pages nobody looks at stop being the pages where problems accumulate.
+
+### Time budgets: why a capture died at 300s with nothing to show
+
+A conversion failed with `capture exceeded 300s watchdog — aborted`. The obvious reading was "too many
+pages". The log said otherwise:
+
+```
+[161.2s] local AI (8B local model) → naming box presets…
+[281.2s] [box-names] local naming skipped: Could not reach the local runner … (aborted due to timeout)
+[294.1s] local AI (8B local model) → naming sections…
+[300.0s] FAILED: capture exceeded 300s watchdog
+```
+
+**One optional, cosmetic pass burned 120 seconds and produced nothing**, then the next began six seconds
+before the deadline. Every AI pass read `AI_TIMEOUT_MS || 120000` *independently*, against a single 300s
+whole-capture watchdog — so any one of them could spend 40% of the budget, and two in a row could end the
+run. All 294 seconds of completed work (typography, presets, accordions, patterns) were discarded.
+
+Three separate defects, all of which made the failure harder to read than it needed to be:
+
+**1. No shared budget.** `setAiDeadline()` now opens one budget per capture — a third of the watchdog,
+capped at 90s — and `aiTimeout(def)` returns `min(own default, AI_CALL_MAX_MS (30s), budget remaining)`.
+When the budget is spent it returns `1ms`, so the fetch aborts at once and each call site's existing catch
+reports a skip. *Skipping a naming pass costs a nicer preset label; overrunning the watchdog costs the
+whole conversion.* Guarded by `ai-budget.test.mjs`.
+
+**2. A flat watchdog for a variable amount of work.** One watchdog covers the design system *plus every
+page in the batch*, so 300s meant "comfortable for one page, a coin flip for ten". That was invisible while
+discovery only ever found one or two pages; the moment discovery started finding what sites really publish,
+it mattered. It now scales: `300s + 60s per extra page` (`CAPTURE_PER_PAGE_MS`), and the budget is printed
+at the top of every run so a deadline is never a mystery.
+
+| pages | watchdog | AI share |
+|---|---|---|
+| 1 | 300s | 90s |
+| 3 | 420s | 90s |
+| 10 | 840s | 90s |
+
+**3. The error named the wrong cause.** An `AbortSignal.timeout` rejection and a refused connection both
+printed *"Could not reach the local runner … — is it running?"*. On this run the runner **was** running and
+serving; the model was simply slower than the deadline. That message sends someone to check a service that
+is already up. `ollamaError()` now separates the two: a timeout says the model did not answer in time and
+points at `AI_CALL_MAX_MS` or a smaller model.
+
+**4. A deadline that discarded the work it was protecting.** Every output file is written in one block at
+the very end, so aborting at the watchdog left `error.txt` and nothing else. There are now **two**
+deadlines: a **soft** one, reached first, after which the capture stops *taking on* new optional work and
+heads for the write phase with what it has; and the **hard** watchdog, unchanged, for a stage that truly
+hangs. `CAPTURE_RESERVE_MS` (default 45s) is what the write phase needs.
+
+Past the soft line the capture stops adding pages and skips animation tracing — a bundle with four of six
+pages and no motion findings is useful; one that spent its last minute tracing motion and wrote nothing is
+not. Crossing it is **not an error and not silent**: the run reports how many pages it dropped and why, so
+a short bundle is never mistaken for a complete one.
+
+*The lesson worth keeping:* an optional enhancement must never be able to spend the budget the required
+work needs. Give the optional part its own allowance, and make the failure name the thing that actually
+failed — otherwise the diagnosis goes to the most visible number (page count) rather than the real cause.
+
+### Container width: one setting must not mean two things
+
+Every body section on every converted site rendered `2 × gutter` narrower than the header and footer, and
+sat 16px further in. The cause was a **double containment**, not a bad measurement:
+
+```
+main.site-content    w=1400 x=20  padL=16  maxW=1400px   <- correct: content 1368 at x=36 (= the source exactly)
+  .fw-page-builder-content  w=1368 x=36                  <- correct
+    section                 w=1368 x=36                  <- correct
+      .fw-flexbox           w=1336 x=52                  <- capped a SECOND time
+```
+
+The page wrapper has already applied the site container **and** its gutter. The flexbox's content-width cap
+then took `100% - 2*gutter` **of that**. The `100% - 2*gutter` term is a *viewport* safety gutter and is
+right when `.fw-contained` is used standalone, so it is scoped off rather than deleted: an ancestor that has
+already spent the gutter declares `--fw-inner-gutter: 0px`, and the cap reads
+`var(--fw-inner-gutter, var(--container-gutter, …))`. `.fw-full-bleed` reads `--container-gutter` directly
+and is unaffected.
+
+Verified by measuring the real text margins on both sides, which is the only claim that matters:
+**source `36 → 1404` (span 1368), converted `36 → 1404` (span 1368)** — and heading after heading matching
+to the pixel (`285/398`, `813/398`, `336/768`, `272/896`).
+
+*The lesson worth keeping:* the theme's own comment said it plainly — "Container Width is the CONTENT width:
+the gutter lives OUTSIDE it". `.fw-container` implemented that; `.fw-contained` and the flexbox cap treated
+the same value as an outer box. One setting meaning two things renders as a site whose body never lines up
+with its own chrome, and it is invisible until you measure both.
+
+### One accordion title derivation, whichever shape the source used
+
+`accordion_block()` has three branches (`<details>`, unannotated toggles, `aria-expanded`) and each derived
+its title differently — only the middle one stripped the `+`/`−` glyph. On an aria-expanded source whose
+toggle is `<span>01</span><h3>Title</h3><span aria-hidden="true">−</span>`, that produced
+`"01Complete home renovations−"`, which reads as **missing content** to anything looking for the source's
+own phrases. A cosmetic defect and real content loss were indistinguishable.
+
+All three now call `toggle_title()`: drop icon spans and space block boundaries, drop a decorative
+`aria-hidden` subtree that carries **no letters or digits** (a glyph — one carrying words is content
+someone chose to hide from AT, so it stays), then strip a leading/trailing toggle glyph. **The ordinal is
+kept** (`"01 Complete home renovations"`) — it is text the source renders, and dropping it would be content
+loss of exactly the kind this fix exists to prevent.
+
+### The first-run briefing (`FW_Site_Converter_Intro`)
+
+A modal, once per user, suppressed by `FW_SITE_CONVERTER_DEV`. The page already carried a beta notice and
+it did nothing — one of five notices on a screen that opens with a wall of options, so the user scrolled
+past their own warning. The copy is deliberately specific rather than reassuring: *content comes across
+reliably, layout and spacing usually need a pass, convert somewhere you can throw away.* "Results vary by
+source" tells a reader nothing they can act on. Naming the weak spot costs a little enthusiasm and buys the
+difference between "this is rough" and "this lied to me".
+
+Two rendering traps it hit, both worth knowing:
+
+- **It must render OUTSIDE `.wrap`.** WordPress relocates every admin notice into `.wrap`, immediately
+  after the first heading it finds — so a modal rendered inline was that heading, and unrelated notices
+  (the theme's welcome, update nags) were injected **inside the dialog box**. It renders on `admin_footer`.
+- **Dark mode is the Admin Skin's, not the OS's.** The skin publishes `html[data-upa-mode]` = light | dark
+  | system. Keying only off `prefers-color-scheme` produced a white dialog on a dark admin whenever the OS
+  was set to light, and an explicit `light` has to win over a dark OS — so the light case is stated rather
+  than left to the default.
+
+### The handoff, in four states
+
+The AI Assistant ships **inactive**, so "not activated" is the default a first-time user meets, not an edge
+case. The results panel therefore offers: *Enable the AI Assistant* → *Set up* → *Fix these with the
+assistant* → and, once declined, a quiet link that never asks again. It never activates the extension
+itself: silently switching on something that ships an MCP server and five write abilities spends trust that
+cannot be earned back, to save about two seconds.
+
+The three routes are ranked **by the job**, not by which is the newest feature. For a whole-site pass an
+external agent that can measure both pages and iterate is the better tool — the assistant's own UI says a
+local model is "best for one section at a time" — so presenting the copy-able brief as a fallback for people
+without the assistant would mis-rank it and set up a second disappointment.
+
+### A converted site is not a new site
+
+The parent theme's first-run checklist assumes a site with nothing set up. A conversion creates the menu,
+the homepage and the footer, so straight after one the theme greeted its owner with items already ticked,
+pointing at generic setup, while the converter's results panel sat beside it with the specific list. Two
+onboarding surfaces talking over each other at the moment someone is deciding whether the tool worked.
+
+The theme now exposes **`unysonplus_show_onboarding_notice`** and the converter answers it, so neither has
+to learn about the other. Keyed on *has this site ever been converted* rather than a time window — the
+checklist's premise does not become true again a week later. Getting Started stays reachable from
+Appearance; only the nag goes.
 
 ## Telling the user what a long build is doing
 
@@ -4927,3 +5400,227 @@ import reports unchanged and the structure is left exactly as it was.
 Note for local XAMPP work: passing a leading-slash permalink to `wp rewrite structure` through Git Bash
 gets MSYS path-converted (`/%postname%/` became `/C:/Program Files/Git/%postname%/`). Set it with
 `update_option` under `MSYS_NO_PATHCONV=1` instead.
+
+### The converted nav pointed at the ORIGINAL site (2026-09-29)
+
+Four defects, found by asking the plainest question about a clone — *do the menus work?* — and then clicking
+one. Each one had been invisible because the thing it broke still returned HTTP 200.
+
+**1. "Internal" was judged against the wrong site.** `FW_Site_Converter_Menus::resolve_target()` decided
+whether a link was internal by comparing its host to `home_url()` — the DESTINATION. Every link the source
+made to its own pages therefore classified as *external* and was imported verbatim, so the converted site's
+primary menu pointed at the live original. Clicking "Financing" on the converted site navigated away to the
+source domain, and a status check on that URL returned 200 — from the source. Nothing looked broken.
+
+Internal has to be judged against the site the markup **came from**. `set_source_origin()` now receives the
+origin from theme-design's `source_url` (with a fallback that reads the hosts recorded on the converted
+pages' own `_upw_source_url`, so the answer is right regardless of import order). Guarded by
+`tests/menus-test.php`, including a NEGATIVE that a genuinely third-party link is still left alone — the way
+to get this fix wrong is to swallow every outbound link.
+
+Worth noting the near miss: two menus existed. The theme's generated `functions.php` built a correctly
+localized one and then **declined to claim the `primary` location** because a menu was already assigned
+there — the converter's own, with absolute source URLs. The correct menu sat unused beside the broken one.
+
+**2. The logo was a nav item.** Logo detection took the first header link carrying any text. On a header whose
+brand is not a link — plenty render the wordmark as plain markup, e.g. `Mod` plus a `<span>Fii</span>` in a
+div — the first text link is the first MENU item. So the brand came out as "Financing" *and* the nav silently
+lost its first entry: two wrongs from one loose test. Candidates now exclude anything inside `<nav>`, exclude
+button-shaped links (an action, not a brand), prefer a root-href link, and otherwise take the largest type —
+20px/700 is what separates a wordmark from a 14px menu label. When no brand LINK exists, the wordmark is read
+out of the markup by the same type-size rule.
+
+**3. A disclosure control was captured as a destination.** An overflow toggle ("More") is a `<button>` carrying
+`aria-haspopup` / `aria-expanded`. It was captured as a menu item pointing at the site root, giving the
+converted nav a dead entry. SPA nav buttons that really do route carry neither attribute, so they still pass.
+Both rules are guarded by `header-logo.test.mjs`, in a real browser, because they read computed style and DOM
+relationships — exactly what the old tag-and-order tests could not see.
+
+**4. An explicit page list was silently trimmed to nine.** `--pages=` exists so a caller can enumerate the
+pages it wants, and `capture.mjs` then applied `slice(0, MAX_PAGES - 1)` to it — capturing 9 of 132 and
+reporting `pages: 9 chosen by the caller`, which reads as though nine were all that was asked for. Compounding
+it, `--max-pages` matched `\d{1,2}`, so `--max-pages=133` failed the pattern and fell through to the default
+10 without a word. An explicit list is no longer capped; the flag accepts three digits and *says* when a value
+is unusable; and the watchdog now sizes itself from the count that will actually be captured, because budgeting
+a 132-page run off `MAX_PAGES` gave it a ten-page deadline.
+
+**The shape all four share:** silence read as success. A menu link to the wrong site returns 200; a trimmed
+page list reports a count that sounds like the request; a missing nav item leaves a nav that still renders.
+None of them surfaces in a check that only asks "did it work?" — each needed a check that asked "did it do the
+thing I asked, and to what?"
+
+**Caveat on the offline harness.** `rendered.html` must be loaded with **JavaScript disabled** to reproduce a
+captured DOM (the page's own scripts re-run and wipe it — 38 elements with JS on, 463 with it off). But with
+JS off the stylesheet often does not apply, so computed styles are degenerate and any *style-based* rule
+cannot be adjudicated there. Style rules must be verified against the live source; the offline path is for
+structure only. This limits `path-parity.mjs`'s JS half in the same way.
+
+### Two more, from importing all 133 pages of the same source (2026-09-29, cont.)
+
+**5. Three source pages were silently overwritten by slug collision.** `slugFromUrl()` kept only the LAST path
+segment, so `/construction-loans/fha` and `/modular-home-financing/loan-options/fha` both became `fha` —
+likewise `usda` and `va`. The second import of each pair overwrote the first, and 132 source paths produced
+129 distinct slugs. What makes this one worth remembering is how it *passed verification*: a per-slug check
+finds a page for every path, because each path's leaf slug does resolve — the two paths just share one page.
+The check had to count DISTINCT slugs before the loss was visible. Slugs are now assigned against a set held
+for the whole batch, and a collision climbs the path one ancestor at a time (`loan-options-fha`), so the first
+claimant keeps the readable slug and the other says where it came from. Non-colliding paths are untouched, so
+no existing permalink moves. Guarded by `slug-unique.test.mjs`, written against the real colliding paths.
+
+**6. A 133-page bundle import reached 9 GB of resident memory and wedged at page 37.** Not slowness —
+thrashing. Measured in isolation the same pages cost about 3 MB each to build and import (≈510 MB for all
+133), and the per-page result retained by the snapshot loop is 0.2 KB, so the growth is somewhere else in the
+monolithic `import_dir` path and is **still unidentified**. Two hypotheses were checked and discarded rather
+than assumed. The clone was completed instead by importing inner pages in batches of 20, one fresh PHP
+process per batch, which peaked at 124–166 MB and is resumable because it skips slugs that already exist.
+Treat the batched path as the way to import a large bundle until the leak is found; a single-process
+`import_dir` is fine for a handful of pages and is not safe for a hundred.
+
+**What the 133-page report says about fidelity** (3846 elements): 406 verbatim `code_block` fallbacks (10.6%)
+and 286 opportunities. Of the 286 "unrecognized cell" fallbacks, **216 are `<svg>`-led** — by far the largest
+single defect on this source. A rule for icon-scale svg cells had been written earlier and then REVERTED,
+because proof-by-disabling against a 9-capture corpus showed it changed nothing; the case simply was not in
+that corpus. The lesson cuts both ways: disabling proved the code was inert *on the sample available*, which
+is not the same as inert. It also showed the rule as written was too narrow — only 24 of the 216 carry text
+beside the icon, so the dominant shape is a LONE icon cell needing the `icon` shortcode, not `icon_box`.
+
+### The clone passed verification and was still wrong (2026-09-29, cont.)
+
+**7. A source-URL match proves a page is LABELLED right, not that it IS right.** The verifier matched every
+converted page to its source by `_upw_source_url` and reported 132/132, PASS. Comparing RENDERED TEXT then
+showed `fha` and `loan-options-fha` were byte-identical, while the two source pages genuinely differ (9122 vs
+13848 characters). The slug collision had struck at CAPTURE time as well: both URLs wrote to
+`pages/fha/rendered.html`, so the second overwrote the first's snapshot while the manifest still labelled that
+entry `/construction-loans/fha`. The page carried one source's content under another's name, and every
+identity check agreed with it.
+
+Capture-side collision is the worse half: it destroys the evidence before any import runs, so no amount of
+import-side care recovers it. Both sides are now guarded (`uniqueSlugFromUrl` for one batch,
+`unique_page_slug` for pages arriving across separate captures), and `content-audit.mjs` compares rendered
+text to the source each page claims — including a check for two pages sharing identical content, which is the
+signature this produces.
+
+**8. Manufacturer-archetype pages lose about a fifth of their content, and the converter already knew.**
+A random 24-page content audit: mean 94.4% word coverage, 7 pages below 95% — and every one of the seven is a
+`/manufacturers/*` page (77.5%–81.8%). The missing text is absent from the builder JSON entirely, so it is
+DROPPED at build time, not kept as a verbatim fallback. It is present in the captured snapshot, so this is a
+Stitch/Mapper defect, not a capture gap.
+
+What goes missing falls into two general shapes:
+
+- **A multi-step form.** "What are you looking to do?" plus its option list, "Property ZIP code", "Check My
+  Rates Instantly". The same loss explains `/get-started` at 76.3% — anything carrying that widget loses it.
+- **A card's spec list**: the `label: value` pairs ("Square Feet:" / "1,800", "Bedrooms/Baths:" / "3 bed / 2
+  bath", "Starting Price:" / "$500,000+"), the model names beside them, and the SECTION HEADINGS above those
+  regions ("About …", "Key Features & Benefits", "Certifications & Standards", "Popular … Models").
+
+The converter's own `text_coverage` audit reports this page at **72.2%, 32 missing phrases**, and names every
+one of them. The instrument was right and unread: a bundle-level average washed a 72% page out against 130
+pages near 100%. Read coverage PER PAGE, worst first — the ranking is the finding.
+
+### A card has one heading; a region has several (2026-09-29, cont.)
+
+The largest content loss found while training on a real multi-page source, and the converter had been
+reporting it all along.
+
+`is_card_cell()` accepted a grid cell as a card if it contained ANY heading, and `card_from_cell()` then
+keeps the FIRST heading plus its text and **discards the rest of the cell**. So a content column holding
+several `<h2>` bands — About, Key Features, Certifications, Popular Models — was flattened into one card
+and the remainder of the page was thrown away. The page still rendered; it was simply missing most of
+itself, which is the worst shape this failure can take: nothing errors, nothing looks broken, and the
+only signal is a coverage number nobody reads.
+
+**The signal existed.** `text_coverage` reported those pages at **72.2%** and named all 32 missing
+phrases. A bundle-level average washed that out against a hundred pages near 100%. Read coverage
+PER PAGE, worst first — the ranking is the finding.
+
+**The rule.** An `<h2>` is a section heading, so two of them mean a region rather than a card. Chosen from
+data, not instinct: across 84 captures, 1354 heading-bearing containers carry no `<h2>` and 425 carry
+exactly one; only 92 carry two or more, and those are regions — several hold an entire nav bar. Below the
+line nothing changes; above it the cell decomposes into its bands.
+
+**Measured on 129–131 pages of a real source, by disabling the rule and re-running:**
+
+| | mean text coverage | worst archetype |
+|---|---|---|
+| before | 88.5% | ~70% |
+| after | **95.7%** | **~93%** |
+
+And a shortcode census confirms the structure was RECOVERED, not traded away — the obvious way to get
+this wrong is a rule that rescues text by turning every card into loose headings:
+
+| | icon_box | special_heading | button | feature_list |
+|---|---|---|---|---|
+| before | 1146 | 1418 | 778 | 402 |
+| after | **1386** | **1738** | **938** | **473** |
+
+Everything rises, because the recovered regions contain cards of their own.
+
+Guarded by golden `[RC]`, whose NEGATIVE is the one that matters: an ordinary three-card grid must still
+map to cards. An early version of that fixture put one region beside a single card and asserted the card
+survived as a card — it does not, and correctly so: one card is not a card *grid*, and the row decomposes.
+The fixture was wrong, not the rule; the corpus census is what settled it.
+
+### A testimonial has no section heading of its own (2026-09-29, cont.)
+
+Same shape as the card/region fix, in a different recognizer, found by reading coverage worst-first.
+
+`is_single_testimonial()` (priority 93, above everything) already bowed out when a descendant was a
+testimonials GRID — but a band holding ONE quote was still claimed whole, and `single_testimonial_item()`
+takes the longest paragraph in the element as the quote and discards the rest. On a real page a
+"Why Choose …" band — its heading, five trust badges and a customer quote — collapsed to the quote alone.
+The page produced **four nodes for an entire page** and read **66.2%** coverage.
+
+The existing guards (no `<h1>`, no `<button>`, no button-like anchor, a star rating, a quoted long line)
+all passed, because a mid-page band legitimately has none of those.
+
+**The rule:** a quote may itself be marked up as a heading — `single_testimonial_item()` reads h2/h3/h4 as
+quote candidates — so the test is not "has a heading" but **"has a heading that is NOT the quote"**. Such a
+heading titles a band, and the band must decompose. Rejecting is strictly better than claiming: a rejected
+band yields its heading, its content AND its testimonial, where claiming yields only the quote.
+
+Measured: `/get-started` **66.2% → 75.7%**, 4 nodes → 24. Corpus mean 95.7% → 95.8% (one page was
+carrying nearly all of this particular loss). No suite regressions.
+
+Guarded by golden `[TS]`, and the guard was verified by DISABLING the fix: (a) and (b) then fail with the
+real symptoms while (c) and the NEGATIVE stay green. That check mattered — the first version of the
+fixture used `<span class="star">` for the rating, but `testimonial_rating()` counts `<svg>`/`<i>` carrying
+a `star` class, so the recognizer never fired and every assertion passed with OR without the fix. A test
+that cannot go red guards nothing.
+
+### An avatar is a person; a round icon tile is not (2026-09-29, cont.)
+
+**What went wrong.** `has_author_block()` treated *any* round disc of portrait size as an avatar, including an
+empty one. So the shape "round tile + a heavier label over a lighter sublabel" — which is every option row,
+feature row and numbered step card ever drawn — read as an author attribution, and the cell containing it then
+qualified as a testimonial card. On one measured page a "how to get started" band holding a steps list *and* a
+multi-step form was claimed as testimonials, emitting step titles as people:
+
+```
+{ quote: "Complete our 2-minute form…", name: "Pre-Qualify Online", role: "Compare Lender Offers" }
+```
+
+and discarding the rest of the band. The page read **79.1%** text coverage.
+
+**The rule.** A disc whose content is an **icon** (an `<svg>` or an `<i>` glyph) is not an avatar. An `<img>`
+still is; a monogram (1–3 capitals) still is; and a *textless, iconless* disc still is, because that is how a
+CSS `background-image` portrait presents. The distinction is what the disc *contains*, not what it looks like —
+size and border-radius are identical in both cases, which is exactly why the old test could not tell them apart.
+
+**Result.** That page went **79.1% → 98.2%** (missing phrases 23 → 2). Corpus mean over 129 pages 95.8% → 95.9% —
+small in aggregate, which is the point: this is an archetype failure, not a broad one, and only the per-page
+ranking surfaces it. The shortcode census confirmed the content was *recovered*, not traded for loose headings.
+
+**This is the same antipattern as the two entries above it** — a recognizer claiming an ancestor and discarding
+its subtree — arriving for the third time through a different predicate. When a recognizer is about to claim a
+container, the question worth asking is always "what am I throwing away by claiming this?"
+
+**Two things the golden for this taught, both about tests rather than converters:**
+
+- The first version of `[BG]` was an end-to-end page fixture, and it **passed with the fix disabled** — it never
+  reproduced the defect, so it guarded nothing while looking like it did. `has_author_block()` was made public
+  and the golden now asserts on the predicate, which *is* the whole rule.
+- The predicate takes the **card**, and looks for the attribution row among its *descendants*. A fixture that
+  hands it the row itself scans the row's children and finds no flex row at all — every case returns `false`,
+  including the ones that should be `true`. Always confirm a new golden goes **red** with the fix disabled;
+  here that proof caught two separate fixture bugs before the golden was trusted.

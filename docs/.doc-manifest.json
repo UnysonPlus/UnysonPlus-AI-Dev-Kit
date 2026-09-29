@@ -1,7 +1,7 @@
 {
   "generated_against": {
-    "unysonplus": "3.0.32",
-    "unysonplus-theme": "2.6.24",
+    "unysonplus": "3.0.33",
+    "unysonplus-theme": "2.6.25",
     "synced": "2026-09-27"
   },
   "docs": {
@@ -275,16 +275,16 @@
         "{plugin}/framework/extensions/admin-skin/manifest.php",
         "{plugin}/framework/extensions/admin-skin/settings-options.php"
       ],
-      "hash": "fe6465a040813bbe89a8f0661b4ce074",
-      "synced": "2026-09-27"
+      "hash": "32b59aa3863d666eec485f03d80bd774",
+      "synced": "2026-09-29"
     },
     "extensions/ai-assistant.md": {
       "kind": "extension",
       "src": [
         "{plugin}/framework/extensions/ai-assistant/manifest.php"
       ],
-      "hash": "df9416291462008949044a93c414ba05",
-      "synced": "2026-09-27"
+      "hash": "0581dea51b88f66fcd70c2d142a69c2a",
+      "synced": "2026-09-29"
     },
     "extensions/animated-icons.md": {
       "kind": "extension",
@@ -308,8 +308,8 @@
         "{plugin}/framework/extensions/asset-optimizer/manifest.php",
         "{plugin}/framework/extensions/asset-optimizer/settings-options.php"
       ],
-      "hash": "becb5023eb4be83a6e44207b9250e2d6",
-      "synced": "2026-09-27"
+      "hash": "991d1a1ac443b1566ba5074fc53ba6e0",
+      "synced": "2026-09-28"
     },
     "extensions/blog.md": {
       "kind": "extension",
@@ -452,8 +452,8 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "345b9bfceaa62f2a95eb16232b8d69ac",
-      "synced": "2026-09-27"
+      "hash": "0b5960a4e35150d4803b4a522c8a25d3",
+      "synced": "2026-09-29"
     },
     "extensions/site-migration.md": {
       "kind": "extension",
