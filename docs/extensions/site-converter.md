@@ -6021,3 +6021,70 @@ thing that was never in doubt.
   sideloaded file's true type, rejected it, and the code correctly fell back to the URL. The suite failed and
   it looked like a bug in the code under test. A fixture that cannot survive the real validation tests the
   fallback, not the feature.
+
+### A second axis: what the converter gives up on (2026-09-29, cont.)
+
+Text coverage plateaued around 93%, and the remaining losses are a long tail. But coverage measures only
+whether the WORDS survived — it is blind to whether they arrived as something a user can edit. A
+`code_block` is the converter saying so out loud: a region emitted as raw HTML because nothing native fit.
+Every one of them is content the builder cannot touch, and coverage scores them as a perfect success.
+
+**Measured: 105 code_blocks across 21 of 89 pages** — roughly a quarter of pages contain at least one.
+
+| Shape | Count |
+|---|---|
+| EMPTY — no text, no media | **49 (47%)** |
+| SVG only | 22 (21%) |
+| short text | 21 (20%) |
+| a list, ~1000 chars each | 10 (10%) |
+| a grid of headed cells | 3 |
+
+**The empties are not a bug.** They are decorative shapes — an accent rule under a heading
+(`w-16 h-1 bg-… rounded-full`), a scroll dot, a separator dot — carried as a raw span with scoped CSS
+*instead of vanishing*. That is a deliberate fidelity trade, and the right one. 32 of the 49 are
+converter-generated `sc-dot`, concentrated on 5 pages (21 on a single glossary page), so the cost is
+lumpy rather than spread.
+
+Worth noting the codebase already found a better answer for one case: separator dots between labels are
+rendered as a `::before` on each label rather than as elements, because the editor strips a bare empty span
+anyway. Generalising that to standalone decorative dots would remove most of these blocks without losing
+the design — the technique exists, it is the application that is narrow.
+
+**The genuinely actionable item is the smallest bucket**: 10 list-shaped blocks carrying ~1,000 characters
+each — real product content sitting in raw HTML rather than an accordion or feature list. They are
+concentrated on three pages of one site, so by the spread test that is a page shape, not an archetype.
+
+**The method point.** Adding this axis took an afternoon and immediately showed something coverage could
+never report: on a quarter of pages the converter silently hands the user something they cannot edit. When
+a metric plateaus, the next move is usually a different metric rather than a harder push on the same one —
+a plateau often means the instrument has stopped discriminating, not that the work is done.
+
+### A rule's thickness is a measurement, not a class name (2026-09-29, cont.)
+
+Following the code_block axis to its largest bucket found something better than the bucket suggested. The
+"empty decorative" blocks were not all dots: `mirror_dot_css()` claims 244 elements corpus-wide, and while
+**173 (71%) are genuine round dots across 33 pages**, **39 (16%) are horizontal RULES** — an A–Z glossary's
+letter separators, an accent underline beneath a heading.
+
+`n_rule_bar()` already exists to turn exactly those into a native `divider`, and it is already tried first.
+It was declining them: it read the bar height only from the **class table**, and Tailwind's `h-px` (a
+one-pixel height) is not in it. Thickness scored zero, the rule was refused, and it fell through to the
+empty-dot path — one raw, uneditable code_block per rule, 21 of them on a single glossary page.
+
+The stamp said `height:1px` the whole time.
+
+**One line of fallback**, and the corpus moved exactly as it should: **code_block 105 → 83 (−22), divider
+7 → 29 (+22)**. An exact swap — nothing lost, 22 raw blocks became editable dividers.
+
+**A wrong guess, recorded because the checking is the point.** I first assumed the colour was the problem
+(`bg-border`, a custom token) and was ready to patch the colour path. `catalog_el_bg()` resolved it fine.
+Printing each gate in turn took two minutes and pointed at a different one.
+
+**And a golden that had to be rewritten.** The end-to-end fixture produced no divider at all: a rule only
+reaches `n_rule_bar()` from inside a MIRRORED subtree, and a small hand-built page decomposes natively
+instead, so the fixture never exercised the changed code. It would have failed for a reason unrelated to
+the rule, which is worse than not testing it — so `[RB]` asserts on the predicate, with negatives for a
+round dot, a tall box and an unpainted hairline.
+
+This is the third time in this corpus that the defect was **reading a class name where a computed value was
+already stamped**. It is worth treating as the first hypothesis, not the third.
