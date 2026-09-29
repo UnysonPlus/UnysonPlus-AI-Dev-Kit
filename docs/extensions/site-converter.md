@@ -5908,3 +5908,57 @@ itself`). The general rule: **an assertion about global state cannot tell its ow
 And the reason it stayed anonymous for so long was my own batch runner piping results through `tail -1`,
 which kept the summary line and discarded the `✗` line naming the assertion. A flake you cannot name is a
 flake you cannot fix.
+
+### A rule that can never match looks exactly like a rule that found nothing (2026-09-29, cont.)
+
+Found by accident while adding a new regex: a `\b` in the source had become a literal **BACKSPACE byte**
+(0x08). An edit that passes through a layer which resolves escapes — a shell heredoc, a language whose
+string literals treat `\b` as a control character — writes the byte instead of the two characters. The file
+still parses. Every test still passes. The rule simply never matches again.
+
+A sweep found **eight**, all previously shipped:
+
+| Regex | What it silently stopped doing |
+|---|---|
+| `/<(?:script\|foreignObject)\b/i` | an SVG sanitiser guard could no longer see a script tag |
+| `/<svg\b[^>]*>/i` (theme) | an SVG attachment's aspect ratio always returned 0 |
+| `/\bh-\[(\d+)px\]/`, `/\bmax-h-\[(\d+)px\]/` | measured heights never read |
+| `/\bmx-auto\b/` (capture service) | a centred tile never detected by class |
+| a time-format test | — |
+
+**Why no test caught it, and why that is the interesting part.** Every one of those rules had callers, and
+every caller behaved "correctly" — it just took the other branch, forever. A regex that matches nothing is
+indistinguishable, from the outside, from a rule that correctly found nothing. This is the same shape as the
+instrument defects above, one level down: the code was reporting confidently about something it had no way
+to see.
+
+`source-hygiene-test.php` now fails on any stray control character in source and names the file and line —
+with a calibration assertion, because a hygiene check that cannot detect the thing it exists for is the
+defect it is guarding against.
+
+**Measured honestly:** repairing all eight moved corpus text coverage by **0.1** (91.8% → 91.9%). The rules
+they govern are about SVG ratios and layout classes, which a *text* coverage metric cannot see. They are
+worth fixing on correctness, not because this number moved — and saying so is better than claiming the
+credit that belongs to the next entry.
+
+### A site-builder watermark is not the customer's content (2026-09-29, cont.)
+
+Classifying the remaining losses by the structure they sit in (rather than by which page they are on) put
+"overlay on media" top: 29 phrases across **26 different pages**, max 4 on any one — the profile of a real
+archetype. Looking at all 29 rather than the first three: **24 were the same builder watermark badge**,
+pinned to the page and linking back to the tool that built the site.
+
+Carrying that into someone's WordPress site would advertise the tool they are leaving, so the converter
+deliberately drops it — which makes it `out_of_scope`, not a loss. Corpus mean **91.9% → 92.9%**, pages
+under 95% from 33 to 30.
+
+The rule is narrow by construction, per the consent-banner lesson: it needs **both** an attribution phrasing
+(`made/built/powered by …`) **and** a container naming itself branding or watermark. The `[WM]` golden
+carries a negative for each half alone, because "Made in Italy" on a product card is real content and a
+`badge` class means nothing on its own.
+
+**Two method notes worth more than the fix.** First: *look at the whole bucket, not the first three samples*
+— three samples suggested an archetype, all 29 showed one badge repeated. Second: **page concentration is
+the test for whether a bucket is an archetype at all.** Card tag rows were 7.8% of all loss, which sounds
+systematic, but 24 of those 31 phrases sat on a single page; the watermark was 3-per-page across 26 pages.
+A bucket's size tells you how much is there; its spread tells you whether it is a rule or a page.
