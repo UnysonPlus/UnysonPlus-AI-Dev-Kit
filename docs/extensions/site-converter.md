@@ -5624,3 +5624,287 @@ container, the question worth asking is always "what am I throwing away by claim
   hands it the row itself scans the row's children and finds no flex row at all — every case returns `false`,
   including the ones that should be `true`. Always confirm a new golden goes **red** with the fix disabled;
   here that proof caught two separate fixture bugs before the golden was trusted.
+
+### A revealed tab panel must be stamped (2026-09-29, cont.)
+
+**What went wrong.** The computed-style pass runs once, over `body *`, while only the **active** tab panel
+exists in the DOM. `revealTabPanels()` then clicks each tab and keeps the markup it finds — but those nodes
+are rendered *after* the pass, so they carried no `data-sc-cs`, and an unstamped subtree is invisible to the
+mapper. Measured on a captured menu page: panel 0 was **459/459** stamped, panel 1 was **5/301**, and 3,780
+characters of the second panel never reached the converter.
+
+**The rule.** The stamping pass is now a named function (`stampComputedStyles`) and runs a second time after
+the tab reveal, with `onlyUnstamped: true` — its selector becomes `body *:not([data-sc-cs])`. Confining the
+second run to elements the first never saw means no existing capture's output can change.
+
+**This is an ORDER defect, not a rule defect**, and that decides what can test it. Every other stamp test here
+re-implements the decision in-browser and asserts on the copy; such a test passes whether or not the pass is
+run twice. The guard is therefore `tab-restamp.test.mjs`, which serves a tab widget on localhost, runs the
+**real `capture.mjs`**, and counts stamps in the emitted `rendered.html`. With the second run disabled it
+reports `second panel stamped 0/16`.
+
+Two mechanical notes that cost time: `execFileSync` blocks the event loop, so an in-process fixture server can
+never answer the capture it just launched — await the child instead. And an element's stamp is read by taking
+the **first** match of each property, so a `data-sc-cs` that declares `font-weight` twice silently ignores the
+second; a fixture must declare each property once.
+
+### An instrument that cannot follow a reference measures its own blind spot (2026-09-29, cont.)
+
+**What went wrong.** `n_tabs()` moves a rich panel into a `snippet` CPT and leaves `[snippet id="N"]` in the
+page. The text coverage audit read only the page tree and theme settings, so every word of that panel counted
+as **lost**. On the page above: **120 of 216 phrases "missing", 44.4% coverage** — and all 120 sat intact in
+the snippet the page pointed at. That made it the worst-ranked page in the whole corpus, and the ranking is
+what the training follows, so it sent the work after a defect that did not exist.
+
+**The rule.** `build_text_coverage()` now scans its own haystack for `[snippet id="N"]` and folds each
+referenced snippet's builder tree in before matching. Same page: **91.2%**, missing 19.
+
+**The general point, which is worth more than the fix.** A false miss costs more than a missed one, because a
+false miss is the one that gets *acted on*. This is the second instrument defect in this corpus (after an
+empty capture scoring 1.0), and both had the same shape: the instrument reported confidently about something
+it had no way to see. Before trusting a ranking, it is worth asking where the content could legitimately have
+gone that the measurement does not look.
+
+The `[SN]` golden in `text-coverage-test.php` carries a NEGATIVE for the opposite failure — a haystack widened
+until nothing can ever be reported lost. Following a reference must not blind the audit.
+
+### A recognizer block nested in a cell must still be built (2026-09-29, cont.)
+
+**What went wrong.** `build_cell_items()` dispatches a nested widget by its `t` through a hand-kept list
+(`table`, `accordion`, `tabs`, `steps`, `timeline`, `progress`, `pricing`, `gallery`, plus explicit branches
+for `feature_list` and `card`). Anything not on it falls to the role-router's default of `'code'` — and a
+block that carries `items` and no `html` becomes an **empty code block**. A testimonials wall one level down,
+inside a stack beside the band's own heading row, disappeared entirely that way: every quote, name and title.
+
+**Measured.** That one block was 8,906 characters; its section kept 2 of its 12 phrases. Adding the
+`testimonials` branch took the page from **57.5% → 80.8%** (missing 51 → 23), corpus mean 87.5% → 87.8%.
+
+A corpus tally of nested blocks that no cell branch handles put `testimonials` at 8,906 characters and the
+only other real candidate, `svg_draw`, at 26 — so this was one missing branch, not a general gap. Worth
+re-running that tally whenever a recognizer is added: the cell path is a **parallel hand-maintained list**,
+and the section loop is the one that gets updated.
+
+### A tightening that is right in principle and wrong in the measurement (2026-09-29, cont.)
+
+Worth recording because the instinct to keep it was strong.
+
+`looks_quote_card()` treats *any* dash before a capitalised word as an attribution, which is equally the shape
+of a feature row: `Fast global payments — Use your card worldwide with competitive interbank rates.` On a
+captured page that made four **feature panels** read as a testimonials grid; each panel then yielded one
+"quote" and its sibling rows were discarded — 20 lost phrases.
+
+So the dash rule was tightened: the tail after the last dash had to be short (≤48 chars, ≤6 words), free of
+sentence punctuation, and sitting in the last 40% of the text — a name, after a quote. It correctly rejected
+all four panels. **The page then got worse: 80.8% → 73.3%.** Corpus-wide, a wash: 87.8% → 87.7%.
+
+The reason is the [TS] lesson pointing the other way. There, rejecting a band beat claiming it, because a
+rejected band still yields its heading, its content *and* its testimonial. Here the path a rejected feature
+panel falls to keeps **less** than the wrong-but-partial claim did, so removing the wrong claim removed
+content with it.
+
+**Reverted, with the measurement left in the code comment.** The real defect is not the predicate: it is that
+claiming a card discards its siblings, and that is where a fix belongs. Re-tightening this without first
+making the fallback at least as good as the claim will lose content again.
+
+The general discipline: *a rule being conceptually correct is not evidence that it improves the output.* Two
+rules were reverted this way earlier in the same corpus (the PHP and JS icon rules, both dead on fresh data).
+Measure the change, on the page and on the corpus, before believing it.
+
+### A suite that asserts on GLOBAL state cannot be run beside another (2026-09-29, cont.)
+
+The PHP suites are run in parallel across `testsite` / `testsite2` to keep the loop short. `rerun-test` then
+began failing intermittently on **"the fixture cleaned up after itself"** — and passed in isolation every
+time, which is the signature worth recognising.
+
+It asserted `$count_pages() === $before_count`: the install's whole page count. Any suite running beside it
+creates a page, so it reported a cleanup defect that was really another test doing its job. Scoped to
+`! get_post( $pid )` — its own fixture — it is green under concurrency and still goes red when the
+`wp_delete_post` is removed, so it lost no power.
+
+The general point: **an assertion about global state cannot tell its own leak from someone else's work.** When
+a suite passes alone and fails in company, suspect the assertion's scope before the code under test.
+
+### On a page with no `<section>` at all, the `<div>`s ARE the bands (2026-09-29, cont.)
+
+**What went wrong.** `walk_section_roots()` claims a band-shaped `<div>` only when it sits among **two or
+more sibling `<section>` elements**. That guard asks "is this an interstitial between real sections?" — a
+sensible question for a page that has sections, and one a page without any can never answer. A WordPress
+**block theme** emits none: the bands are `div.wp-block-group` siblings of a `<main>` that itself wraps only
+one of them. Every band failed the guard, was dived into, yielded nothing, and was dropped outright.
+
+**Measured.** A captured block-theme page produced **one** section out of six and read **11.8%** coverage —
+hero, services, product grid and footer content all gone, emitted as 12 loose text blocks. After: **73.5%**,
+five sections. Corpus mean 87.8% → **90.2%** over 83 pages.
+
+**The rule.** When the document carries no `<section>` anywhere, count **band-shaped siblings** instead —
+the same question in the vocabulary the page actually uses. A second, smaller fix rode with it: the height
+gate treated an *unstamped* wrapper (`0.0`) as "shorter than 40px", and a block theme stamps no height on
+these wrappers at all, so bands holding a thousand characters were rejected as too short. Absent is not zero.
+
+The walk is top-down, so the **outermost** qualifying level claims and never descends — that is what stops
+this re-splitting the same content further in. The `[BT]` NEGATIVE pins it: a page that *has* sections must
+not gain extra bands, because over-claiming here is how a six-section page once became twenty-four.
+
+**The census is what makes this believable.** Across the corpus every shortcode count went up or stayed
+equal — `text_block` +31, `counter` +14, `media_image` +13, `special_heading` +8, `image_box` +5, `icon_box`
++4 — and none went down. Recovered content came back as real elements, not as a pile of loose text, and
+nothing already working was traded for it.
+
+### The coverage haystack: wide enough to be fair, narrow enough to mean something (2026-09-29, cont.)
+
+The converted header and footer are built from `theme-design.json`, so a nav label there **is** carried —
+yet the audit read only the pages and theme settings and reported every one as lost.
+
+Folding the file in wholesale took that page to 94.1%. **That number was a lie.** `theme-design` also carries
+`conversion_map` — a *record of the source*, body copy included — and 85 KB of `custom_css`. Flattening it
+puts the source's own text into the haystack the source is being checked against, and the audit then approves
+of anything: body phrases the page genuinely dropped were sitting in `conversion_map` and scored as carried.
+Narrowed to `header`, `footer` and `site_title` — the only keys that are **output the converted site renders**
+— the honest figure is **73.5%**, and the phrases still reported missing are real footer content that never
+reached the native footer settings. `raw_chrome` is excluded on the same principle: it is a copy of the
+capture, so counting it would hide a header that was never converted into real settings.
+
+**This is the third instrument defect in this corpus**, and the first where the fix could have caused a worse
+one. The `[CH]` golden therefore pins **both** directions — too narrow and the positive fails, too wide and
+the negative fails. Any change to what an audit counts as "carried" should be guarded that way: a measurement
+that cannot report failure is not a measurement.
+
+### Classify the losses, don't pick the pages (2026-09-29, cont.)
+
+Working down the worst-page ranking finds whatever those pages happen to be. Once the obvious archetypes
+were fixed, a better question was what the converter is *systematically* unable to carry — so all 397
+remaining missing phrases were classified by the shape of the element they came from:
+
+| Bucket | Share |
+|---|---|
+| **footer** | **27.7%** |
+| short label | 23.7% |
+| other | 16.1% |
+| button | 7.3% |
+| link / list item | 11.6% |
+| form, header, article, label, carousel | the rest |
+
+That immediately redirected the work. A separate scan had shown card **tag rows** (chips a card carries
+that `card_from_cell()` has no slot for) at 7.8% of the loss — but 24 of those 31 phrases sat on a single
+page, so it is one page's shape, not an archetype. The footer bucket was ~3 phrases on each of 74 pages:
+small per page, systematic across all of them, and invisible to any per-page ranking.
+
+**The finding.** `theme-design`'s `footer.copyright` was the hardcoded literal `'All rights reserved.'`,
+so every conversion replaced a source's real line — `© 2026 <name>. All rights reserved.` — with boilerplate.
+`detect_footer_copyright()` already existed, already read the real line, already normalised the year to
+`{{current_year}}` and already repaired the `©` mojibake, and was already used by the theme-settings path.
+It was simply never wired into theme-design. (I had begun writing a second copy of it before checking —
+worth searching for an existing helper before adding one.)
+
+**Result.** Corpus mean **90.2% → 91.8%**, and pages under 95% fell from **50 to 33** — a large drop in
+failing pages for a small mean movement, which is the signature of a fix that lands once on every page.
+
+One instrument note rode along: a carried copyright is stored as `{{current_year}}` on purpose, so the audit
+compared that literal against the source's `2026` and still called it lost. The rendered site resolves the
+token, so the audit now resolves it too before matching. A capture whose source year is *not* the current
+one will still report a miss — that is the substitution being visible, which is the honest result.
+
+### A converted background video: playable, and not a blank rectangle (2026-09-29, cont.)
+
+A converted hero backdrop took several seconds to appear on a live host. Three separate causes, only one
+of which was the hosting.
+
+**Measured first.** The source clip and the converted copy were byte-identical — 2,600,807 bytes, HEVC,
+1280×720, 5s, 4.2 Mbps — because the sideloader copies media verbatim. Fetched from one machine at one
+moment: **0.70 s** from the source's CDN, **12.68 s** from the converted site's shared host. TTFB was
+~0.27 s on both, so it is throughput, not latency. (One paired measurement; the file 404'd before it could
+be repeated, so treat it as strong evidence rather than an average.)
+
+**1 · The codec.** HEVC-in-MP4 decodes in Safari; Chrome and Firefox manage it only on some platforms. A
+converted site therefore inherited a backdrop that simply does not play for many visitors. The sideloader
+now probes with ffprobe and transcodes anything outside `h264 / vp8 / vp9` to H.264 (CRF 24, 1080p cap,
+`+faststart`). An already-H.264 file is left alone — re-encoding costs quality for little.
+
+**2 · Nothing on screen while it loads.** Neither the source nor the converter supplied a poster, so the
+hero was empty for the whole download. The sideloader now cuts one frame per video (at 0.5 s — frame 0 of a
+fade-in is usually black), stores it as its own attachment, and links it by `_sc_video_poster`. The mapper
+runs long before any media exists, so the *import* fills the option (`fill_video_poster`), and only when the
+source supplied none.
+
+**3 · The converter deferred bytes it was about to need.** `n_video()` emitted `preload="metadata"` for every
+video including autoplaying backdrops: the browser fetches the header, stops, and only then goes back for the
+media. Now `auto` when `autoplay` is yes, in **three** places that all had to agree — the PHP mapper, the JS
+twin in `to-pages.mjs`, and the two renderers (`unysonplus-theme` layout.php for the site-wide backdrop,
+`background.init.js` for a section one). A click-to-play clip still defers; there is no reason to spend a
+visitor's bandwidth before they ask.
+
+**Result, verified on a real reconvert and read off the rendered page** (not the data):
+
+| | before | after |
+|---|---|---|
+| codec | HEVC | **H.264** |
+| bytes | 2,600,807 | **395,115** (−85%) |
+| poster | none | generated, 116 KB |
+| markup | `preload="metadata"`, no poster | `preload="auto" poster="…"` |
+
+At the host rate measured above that is **12.4 s of blank → 1.9 s, with a poster from the first paint**.
+
+**Entirely optional.** No ffmpeg, `exec` disabled, or any failure at all → the original file imports exactly
+as before. A conversion must never fail because a host lacks ffmpeg.
+
+**Three things this cost time on, all worth remembering:**
+
+- The sideloader **de-dupes by source URL**, so re-importing the same video reuses the old attachment and no
+  new code runs. A media change is only observable after deleting the cached attachment.
+- `import_dir` imports the **bundle's** `pages.json`, which the *JS* engine wrote at capture time. Changing
+  only the PHP mapper leaves the observable output unchanged — the twin must move with it.
+- `media_video`'s self-hosted shape names the mp4 **`video_file`**, while Background-Pro names it
+  `source_mp4`. A poster lookup that knows only one of them silently fills nothing.
+
+And a golden that had to be rewritten: `[VP]` first asserted *"no metadata OR has auto"*, which passes when
+the fixture emits **no preload key at all** — and it did, because a plain background video takes the
+Background-Pro path, which carries no preload. The golden went green with the fix disabled. It now asserts
+the key is present *and* correct, and the fixture carries a wrapper `filter` so it reaches the `media_video`
+path that actually has one.
+
+### An existing site is repaired by its next conversion, not by a migration tool (2026-09-29, cont.)
+
+Video normalisation landed in `sideload()` — but the **de-dup path returns before any of it runs**. A site
+converted earlier keeps the file copied verbatim at the time (HEVC, no poster), and re-converting would
+never fix it: the reuse short-circuits first. That is worth noticing in general — *any* improvement placed
+after a cache hit is invisible to everything already imported.
+
+Rather than ship a separate "re-normalise my media" tool, the reuse path now tops the attachment up:
+transcode if the codec is unsafe, cut a poster if there is none. An existing site is repaired by its next
+conversion, with nothing to discover or run.
+
+Deliberately conservative:
+
+- the file is rewritten **in place, keeping its name**, so every URL already stored in a page still resolves
+  — a converted site is full of references to it;
+- which means only a `.mp4` is transcoded. Re-containering a `.webm` would change the extension, and the URL
+  with it;
+- the replacement is written to a temp file and only moved over the original once ffmpeg has succeeded, so a
+  failed transcode cannot leave a site holding a truncated video.
+
+Verified against a planted legacy attachment: `#456 hevc 2,600,807 B, no poster` → `#456 h264 395,115 B,
+poster #457`, **same id, same path**. Then run twice more: unchanged, one poster file, ~0.35 s (the probe
+alone). Idempotent by construction — once transcoded the codec is safe, once a poster exists the meta is set.
+
+One testing note. The first version of that check reported the right numbers for the wrong reason: it
+planted the de-dup meta under a guessed key, so `find_by_source` missed, the fresh-download path ran, and a
+**new** attachment was created. The output looked like a pass. The check only became real once it also
+asserted *the same attachment id came back* — the thing that distinguishes the path under test from the one
+that happens to produce the same answer.
+
+### Scope an assertion to what the code under test did (2026-09-29, cont.)
+
+`rerun-test`'s `no extra page was created` compared a global page count before and after, so any suite
+running beside it moved the number underneath. It failed about **one batch in three** at 14-way concurrency
+and passed alone every time — the signature worth recognising.
+
+It now compares the **set** of page ids and asks only what was *added*, which is the actual question and is
+immune to what anyone else creates or deletes. Four consecutive concurrent batches green, and it still fails
+— naming the id — when a stray page is planted inside the measured window.
+
+That is the second assertion in this suite with the same defect (the first was `the fixture cleaned up after
+itself`). The general rule: **an assertion about global state cannot tell its own effect from someone else's.**
+
+And the reason it stayed anonymous for so long was my own batch runner piping results through `tail -1`,
+which kept the summary line and discarded the `✗` line naming the assertion. A flake you cannot name is a
+flake you cannot fix.
