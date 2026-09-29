@@ -5962,3 +5962,62 @@ carries a negative for each half alone, because "Made in Italy" on a product car
 the test for whether a bucket is an archetype at all.** Card tag rows were 7.8% of all loss, which sounds
 systematic, but 24 of those 31 phrases sat on a single page; the watermark was 3-per-page across 26 pages.
 A bucket's size tells you how much is there; its spread tells you whether it is a rule or a page.
+
+### Where the footer loss actually is (and two things it is not) (2026-09-29, cont.)
+
+After the copyright fix, footers were still the largest named bucket — 45 of the 279 phrases the corpus
+loses. Two plausible archetypes were measured and **both were rejected**, which is the useful part:
+
+- **A navigation column whose items are `<button>` rather than `<a>`.** Real, and a real gap — the footer
+  column builder only understands links, so a router-driven button column is dropped whole. But it is
+  **2 phrases on 1 page**. A page, not a rule.
+- **Whole footer columns going missing.** Of 36 captured footers that have a column grid, only **2** build
+  fewer columns than the source. The column builder (logo / heading / list_item / text) works on 34 of 36.
+
+What is left is diffuse: the largest single shape is a paragraph inside a footer grid column, 13 phrases
+across 13 pages, and no shape below it exceeds six. That is a long tail, not an archetype.
+
+**So this is a stopping point rather than a fix**, and worth saying plainly: the systematic gaps this corpus
+could show have been found. Chasing the remainder means building per-shape handling that the evidence does
+not support as general — exactly the trade the reverted dash rule warned about.
+
+One more confirmation while here: the footer column content that *is* lost sits in `theme-design`'s
+`raw_chrome` only — a copy of the capture, not editable output — so excluding `raw_chrome` from the audit
+haystack was correct, and these 45 are real losses rather than another false miss.
+
+**Corpus at the end of this round: mean text coverage 92.9% over 83 pages (from 84.8%), 30 pages under 95%
+(from 50).** Goldens 1226 → 1311, plus a source-hygiene suite.
+
+### Put the work on the machine that can do it (2026-09-29, cont.)
+
+Video normalisation was added to `sideload()` — the WordPress host. It worked perfectly in development and
+would have done **nothing** where it mattered: the transcode and the poster both need ffmpeg, and a shared
+host almost never has it. `media.json` was a list of URLs, so the host downloaded and processed every asset
+itself; the one machine guaranteed to be able to do the job — the developer's, running the capture service —
+was doing none of it.
+
+So the work moved to capture time. `normalize-media.mjs` downloads each video once, transcodes anything
+outside `h264 / vp8 / vp9` to H.264 (CRF 24, 1080p cap, `+faststart`), cuts a poster at 0.5s, and ships both
+in the bundle. `media.json` gains an optional `local` map of source URL → bundled file + poster; the import
+prefers it. Measured on one real capture: **15 videos normalised, 14 transcoded from HEVC**, the hero going
+2,600,807 → 395,115 bytes.
+
+The import side is now also *faster* where ffmpeg does exist — 0.68s → **0.07s** for that asset, because it
+stops re-doing work the capture already did (`$already_normalized`).
+
+**The assertion that matters** runs with `fw_sc_video_normalize` filtered off, simulating a host that cannot
+normalise at all: the file and its poster still arrive. Without that case the suite would only ever prove the
+thing that was never in doubt.
+
+**Three things this turned up, worth keeping:**
+
+- The bundled file must carry the **original URL** as a second `SOURCE_META` value. Without it the page keeps
+  pointing at the remote original even though the file is already in the library — de-dup and `localize()`
+  both key on that URL.
+- `media.json` arrives inside an **uploaded zip**, so the `local` map is untrusted input that names files to
+  read off disk. `bundle_path()` realpaths both sides and refuses anything that escapes the bundle; the
+  traversal negatives are the most important assertions in that suite.
+- The first version of the test used **fake media** — text with an `.mp4` name. WordPress verifies a
+  sideloaded file's true type, rejected it, and the code correctly fell back to the URL. The suite failed and
+  it looked like a bug in the code under test. A fixture that cannot survive the real validation tests the
+  fallback, not the feature.
