@@ -16,13 +16,7 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
-let chromium;
-const candidates = ['playwright'];
-if (process.env.PLAYWRIGHT_PATH) { candidates.push(process.env.PLAYWRIGHT_PATH); }
-for (const p of candidates) {
-  try { ({ chromium } = require(p)); break; } catch {}
-}
-if (!chromium) { console.error('Playwright not found. Run `npm i` in tools/measure (or set PLAYWRIGHT_PATH).'); process.exit(1); }
+import { launchBrowser } from './lib/browser.mjs';
 
 const args = process.argv.slice(2);
 const [mockupUrl, devUrl] = args.filter(a => !a.startsWith('--'));
@@ -80,7 +74,7 @@ async function grab(page, url) {
   }, METRICS.map(m => ({ ...m, __which: page.__which })));
 }
 
-const browser = await chromium.launch();
+const browser = await launchBrowser();
 const mp = await browser.newPage(); mp.__which = 'mock';
 const dp = await browser.newPage(); dp.__which = 'dev';
 const mock = await grab(mp, mockupUrl);

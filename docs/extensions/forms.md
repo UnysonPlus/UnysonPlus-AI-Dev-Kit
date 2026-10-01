@@ -20,6 +20,7 @@ A drag-and-drop **contact-form builder** plus the `[contact-form]` shortcode/ele
 
 ## Notes / gotchas
 
+- **Front-end submissions are rate-limited** (since 2.0.57): `_frontend_form_validate()` refuses the 11th submission in 10 minutes from one visitor (`fw_rate_limit_exceeded( 'fw_ext_forms_submit', 10, 600 )`, error key `rate-limit`; `edit_posts` users exempt; tune or disable with the `fw_rate_limit` filter). A nonce and the honeypot do not bound volume, and each submission can send mail.
 - **Sends mail through the `mailer` extension** — that's how global email/SMTP options apply to form submissions.
 - **Requires the `builder` extension** (the form-builder option type is built on the base builder).
 - Standalone, displayed extension; the contact-form is both a shortcode and a native page-builder element.

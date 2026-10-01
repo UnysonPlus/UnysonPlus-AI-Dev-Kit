@@ -15,7 +15,7 @@
 //
 // Usage: node fidelity-check.mjs <srcUrl> <srcSel> <buildUrl> <buildSel>
 //   e.g. node fidelity-check.mjs https://src/ footer http://localhost/demos/pinky-bites/ footer
-import { chromium } from 'playwright';
+import { launchBrowser } from './lib/browser.mjs';
 import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
 import sharp from 'sharp';
@@ -97,7 +97,7 @@ async function capture(page, url, sel) {
 }
 
 const key = (e) => e.text.toLowerCase().replace(/^[^a-z0-9$]+/i, '').slice(0, 40).trim();
-const b = await chromium.launch();
+const b = await launchBrowser();
 const [ps, pm] = [await b.newPage(), await b.newPage()];
 const [S, M] = await Promise.all([capture(ps, srcUrl, srcSel), capture(pm, buildUrl, buildSel)]);
 await b.close();

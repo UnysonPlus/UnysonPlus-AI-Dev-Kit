@@ -21,9 +21,7 @@
 import { createRequire } from 'module';
 import { writeFileSync, mkdirSync } from 'fs';
 const require = createRequire(import.meta.url);
-let chromium = null;
-for (const p of ['playwright', process.env.PLAYWRIGHT_PATH].filter(Boolean)) { try { ({ chromium } = require(p)); break; } catch {} }
-if (!chromium) { console.error('Playwright not found (npm i in tools/measure, or set PLAYWRIGHT_PATH).'); process.exit(1); }
+import { launchBrowser } from './lib/browser.mjs';
 
 const args = process.argv.slice(2);
 const [mockupUrl, devUrl] = args.filter(a => !a.startsWith('--'));
@@ -98,12 +96,19 @@ const textElems = async (h) => h ? h.evaluate((el, P) => {
 const px = v => { const m = /(-?[\d.]+)px/.exec(v); return m ? parseFloat(m[1]) : null; };
 const normStr = v => v.replace(/["']/g, '').replace(/\s+/g, ' ').toLowerCase().trim();
 const ALIGN = { start: 'left', end: 'right', left: 'left', right: 'right', center: 'center', justify: 'justify' };  // start≡left in LTR
+import { colorKey } from './color-key.mjs';
+import { canvasDeltas } from './canvas-key.mjs';   // the page-canvas lens, tested in canvas-key.test.mjs
+
 function differs(prop, a, b) {
   if (a === b) return false;
   if (prop === 'text-align') return (ALIGN[a] || a) !== (ALIGN[b] || b);
   const pa = px(a), pb = px(b);
   if (pa != null && pb != null) return Math.abs(pa - pb) > PX_TOL;
-  if (/color/.test(prop)) return normStr(a) !== normStr(b);       // rgb(a) strings
+  // COLOURS ARE COMPARED BY VALUE, NOT BY SPELLING. A source writes `oklab(0.999994 ... / 0.6)` and the
+  // build writes `rgba(255, 255, 255, 0.6)` — the SAME colour — and a string compare called every one of
+  // them a delta. That inflated the count and, worse, hid the real ones: after a fix landed the number did
+  // not move, because the deltas it removed were replaced by spelling differences it could not see through.
+  if (/color/.test(prop)) { const ca = colorKey(a), cb = colorKey(b); return (ca && cb) ? ca !== cb : normStr(a) !== normStr(b); }
   if (prop === 'font-family') { const f = s => normStr(s).split(',')[0]; return f(a) !== f(b); }
   return normStr(a) !== normStr(b);
 }
@@ -118,11 +123,24 @@ const diffObj = (A, B, props) => {
   return d;
 };
 
-const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
+const browser = await launchBrowser();
 const pageFor = async (u) => { const p = await browser.newPage(); await p.setViewportSize({ width, height: 1000 }); await p.goto(u, { waitUntil: 'networkidle', timeout: 45000 }).catch(() => {}); await p.waitForTimeout(1200); return p; };
 const mp = await pageFor(mockupUrl), dp = await pageFor(devUrl);
 const regionsOf = async (page, side) => { const header = await firstHandle(page, CFG.header[side]); const footer = await firstHandle(page, CFG.footer[side]); const hH = header ? (await header.boundingBox())?.height : 0; const bands = await bandHandles(page, side === 'mock' ? CFG.bodyMock : CFG.bodyDev, hH); return { header, footer, bands }; };
 const M = await regionsOf(mp, 'mock'), D = await regionsOf(dp, 'dev');
+
+// PAGE CANVAS -- the background of <body>/<html>, which belongs to no region and so was reported by NO lens.
+// A source whose whole identity is a full-height gradient on <body> converted to one flat fill and every
+// band still matched its own counterpart, so the band scores were quiet and the property scan never looked:
+// it compares elements INSIDE regions. The canvas is page-level, and needs its own read.
+const canvasOf = async (page) => page.evaluate(() => {
+  const pick = (el) => { const cs = getComputedStyle(el); return { color: cs.backgroundColor, image: cs.backgroundImage, attachment: cs.backgroundAttachment, size: cs.backgroundSize }; };
+  const b = pick(document.body), h = pick(document.documentElement);
+  const real = (v) => v && v !== 'none' && v !== 'rgba(0, 0, 0, 0)' && v !== 'transparent';
+  // Either element can carry it; report whichever actually paints, body first (it wins visually when both do).
+  return { color: real(b.color) ? b.color : h.color, image: real(b.image) ? b.image : h.image,
+           attachment: real(b.image) ? b.attachment : h.attachment, size: real(b.image) ? b.size : h.size };
+});
 
 const report = [];
 async function region(label, mh, dh) {
@@ -139,6 +157,11 @@ async function region(label, mh, dh) {
     if (d.length) textDeltas.push({ text: e.text, deltas: d });
   }
   report.push({ region: label, container: cD, text: textDeltas });
+}
+// The canvas leads the report: it is the one signal that describes the WHOLE page rather than a band.
+{
+  const cm = await canvasOf(mp), cd = await canvasOf(dp);
+  report.push({ region: 'page canvas', container: canvasDeltas(cm, cd), text: [] });
 }
 await region('header', M.header, D.header);
 const n = Math.max(M.bands.length, D.bands.length);

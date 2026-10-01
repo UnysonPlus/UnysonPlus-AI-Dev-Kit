@@ -16,7 +16,7 @@
 // A band with no match on the build side is written source-only and tagged "(no converted match)".
 //
 // Deps: playwright-core (system Chrome via channel:'chrome') + sharp — both already in this folder.
-import { chromium } from 'playwright-core';
+import { launchBrowser, closeQuiet } from './lib/browser.mjs';
 import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
@@ -129,7 +129,7 @@ async function cropLabeled(pngPath, region, caption, targetW) {
     .composite([{ input: svg, top: 0, left: 0 }, { input: scaled, top: band, left: 0 }]).png().toBuffer();
 }
 
-const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const browser = await launchBrowser();
 try {
   console.log('snapping source   ', SRC_URL);
   const src = await snap(browser, SRC_URL, 'src');
@@ -163,5 +163,5 @@ try {
   fs.writeFileSync(path.join(OUT, 'manifest.json'), JSON.stringify(manifest, null, 2));
   console.log('DONE →', path.resolve(OUT), `(${n} section image(s); read them top-to-bottom)`);
 } finally {
-  await browser.close();
+  await closeQuiet(browser);
 }

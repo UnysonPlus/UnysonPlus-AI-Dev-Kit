@@ -8,7 +8,7 @@ the parent with your (empty) overrides layered last.
 A child theme is the right home for **one site's / one brand's** bespoke look and bespoke
 elements — CSS that must survive parent-theme updates, and elements that only make sense for
 that site (a booking widget, a review card, an interactive configurator). **Reusable-everywhere
-code goes in the plugin instead** (see [`docs/extending.md`](../docs/extending.md)).
+code goes in the plugin instead** (see [`docs/extending.md`](../../docs/extending.md)).
 
 ---
 

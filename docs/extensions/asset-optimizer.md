@@ -92,9 +92,81 @@ PNG sources are lossless, so quality is a no-op there. When testing this, note t
 
 The ladder is dense at the small/middle end on purpose. `srcset` makes the browser take the first candidate at or above the slot it needs, so the wasted bytes are the gap to the next rung - on the old 320/480/640/768 ladder a 540px slot pulled the 640 file and threw ~12 KiB away, because 480 to 640 is a 1.33x step. No step now exceeds ~1.25x below 1024. Measured: a 540px slot picks 560w (13.3 KiB) instead of 640w (15.5 KiB), 14% less. Renditions are written on demand, so a width nothing asks for costs nothing; a typical crop gains about two extra files.
 
+## Per-page memory of late-enqueued stylesheets (`css_scope = per_page`)
+
+With per-page scope the bundle is built from the LIVE `$wp_styles` queue at `wp_enqueue_scripts:99999`. Anything enqueued *after* that point - a shortcode registering its stylesheet while the content renders, a plugin enqueuing during `the_content` - is never in it. Per-page scope had no memory, so the same handles were missed again on every request, forever. Measured on a converted site: **7 shortcode stylesheets, ~35 KB, render-blocking, on every page view.**
+
+Site-wide scope never had this problem (it builds from the persisted map), but switching scope to dodge it is a bad trade - on the same site, site-wide + purge measured **112.0 KiB gzipped against per-page's 27.8**, because the bundle then carries CSS for every page and the safelist protects much of it from the purge. So per-page keeps its small bundle and gains the memory it was missing.
+
+**How it works.** At `shutdown` the extension records which `all`-media handles the page actually used, in a transient keyed by `md5(path)` (`fw_ao_pg_<16 hex>`, `WEEK_IN_SECONDS`, max `PAGE_HANDLES_MAX` = 120 handles). On the next view of that same path, `late_page_css_handles()` returns the remembered handles that are *not* in the live queue and folds them into the bundle.
+
+Guards worth knowing:
+
+- **Keyed by PATH only** - the query string is dropped, so `?utm_source=…` and pagination args do not each mint a row.
+- **No row is minted** for admin, AJAX, REST, non-GET/POST requests, or 404s (every typo'd URL is a different path).
+- **Only `all` media** is recorded; a print- or query-scoped sheet must stay its own tag and the remembered list carries no media information.
+- **Sources resolve through the site-wide map**, which is already filtered for dead files and backend-only assets - so a handle since removed, or one that turns out to be admin-only, cannot come back through this door.
+- **The transient is only written when the set changes**, so a page with a stable handle list does not re-write on every view.
+- Rows are dropped by `forget_page_css_handles()` on the same events that purge the bundles (theme switch, plugin activate/deactivate, upgrade, settings save).
+
+**Behaviour to expect:** the first view of a path still links the late stylesheets separately; the second and every later view absorbs them. Verified on the converter test site - view 1: 7 stylesheets outside the bundle, views 2 and 3: **0**.
+
+**Verifying a change here - read this first.** Comparing two captures by *hashing* `getComputedStyle` output is wrong: `JSON.stringify` of the property map is **order-sensitive**, and the enumeration order of custom properties shifts when stylesheet order changes, while every resolved value stays identical. That reported `754/754 elements differ` on a change with **zero** real differences - proved by an order-insensitive comparison over 668,703 property values (`0` diffs, and `0` elements differing in property *membership*; all 754 differed in property *order* alone). Compare property-by-property, as `pw-screens/verify-purge-live.mjs` does; never by serialised hash.
+
+## Static-asset cache headers (`static_cache_headers`, opt-in)
+
+Two separate mechanisms, deliberately different:
+
+| | `ensure_cache_headers()` (automatic) | `sync_static_cache_htaccess()` (opt-in) |
+|---|---|---|
+| Covers | `uploads/unysonplus/asset-optimizer/` only | everything under `wp-content` |
+| Policy | `max-age=31536000, immutable` | `max-age=31536000`, **no** `immutable` |
+| Why safe | filenames are content hashes | `?ver=` on plugin/theme assets; WP never reuses an upload filename |
+
+`immutable` is withheld from the general rule on purpose: it tells the browser not to revalidate even on an explicit reload, so a file replaced in place (FTP, a "replace media" plugin) would be unfixable for a year. Without it a hard refresh still picks up the replacement.
+
+Measured on a live site before this existed - the extension's own files came back `max-age=31536000, immutable`, while uploads and theme fonts got the host default of `604800` (7 days) and plugin static JS came back with **no `Cache-Control` at all**. Lighthouse estimated 20 KiB, repeat-visit only.
+
+**Why opt-in** rather than automatic like the folder rule: it writes outside the extension's own directory, it can interact with host rules and caching plugins, and the replace-in-place caveat is real. The folder rule is risk-free by construction; this one is a judgement call, so it belongs to the user.
+
+**Implementation.** Written via `insert_with_markers()` under the marker `UnysonPlus Asset Optimizer`, so other rules in `wp-content/.htaccess` survive. Switching the option off calls `remove_static_cache_rules()`, which strips the block *and its markers* and deletes the file when nothing else was in it - `insert_with_markers( …, array() )` is the obvious way to do that but leaves an empty BEGIN/END pair behind for good. Every directive is wrapped in `IfModule`, so a server without `mod_headers` ignores it rather than 500ing. Synced from both save paths (`_maybe_save_settings` and `_after_manager_settings_saved`).
+
+`server_reads_htaccess()` checks `SERVER_SOFTWARE` for apache/litespeed (unknown = assume yes). On nginx the settings description swaps to the equivalent `location` block from `static_cache_nginx_snippet()` instead of offering a switch that would silently do nothing.
+
+Filters: `fw_ao_static_cache_extensions` (default css/js/mjs/woff2/woff/ttf/otf/eot/svg/png/jpe?g/gif/webp/avif/ico/mp4/webm), `fw_ao_static_cache_max_age` (default `YEAR_IN_SECONDS`, floored at a minute).
+
+**Gotcha when editing the rule string:** the `FilesMatch` line is assembled from mixed single/double-quoted PHP and a stray `\"` lands a literal backslash before the closing quote, which is an Apache syntax error - i.e. a 500 on every page, not a silent no-op. Print the generated block (reflection on `static_cache_rules()`) and read it before trusting a change.
+
 ## Notes / gotchas
 
 - **Handle discovery** is done by a one-shot internal homepage fetch; behind a full-page cache (e.g. WP Engine) visit any page with `?fw_asset_optimizer_discover=1` to force a fresh scan.
 - **Cascade-aware CSS order:** everything in print order, then parent theme, then `unysonplus-presets`, then the child theme LAST (so the theme keeps override authority). The combine pass runs at `wp_enqueue_scripts:99999` (after the theme's stylesheet orderer).
 - **JS combining is conservative** — only local footer scripts with no async/defer and no inline/localized data are merged; core/CDN and per-request-data scripts are always left alone even if ticked. JS is always per-page.
 - Cached bundles auto-purge on theme switch, plugin activate/deactivate, or any upgrade.
+
+## What this extension can and cannot fix (2026-10-01)
+
+A Lighthouse run against a converted site put three of its complaints here, and only two belonged here. The
+split is worth stating, because reaching for an optimizer setting to paper over wrong markup wastes the
+setting and leaves the markup wrong.
+
+- **Unused CSS is a symptom; an enqueue is the cause.** A converted page shipped Font Awesome's 24 KB
+  stylesheet with **zero** elements using it, because three shortcodes named `font-awesome` as a hard CSS
+  *dependency*. `purge_css` would have stripped most of its rules and still left the five `@font-face`
+  declarations and the font requests — and those faces declare `font-display: block`, which withholds text
+  paint until they resolve. Purging a stylesheet that should never have been enqueued treats the wrong layer.
+  The fix was in the shortcodes (enqueue FA only where a font icon actually renders); the purger is for CSS
+  that is legitimately loaded and only partly used.
+- **`preload_lcp_image` and the converter's `fetchpriority` are complementary, not alternatives.** The
+  extension can preload the hero; it cannot undo an `<img loading="lazy">` on it. The Site Converter now marks
+  a page's first image `fetchpriority: high` (which the media-image view renders as eager) — turn
+  `preload_lcp_image` on as well and the two reinforce each other. Measured on a conversion before the fix:
+  the above-the-fold hero carried `loading="lazy"` while its source *preloaded* the same image.
+- **No setting here can supply a missing `width`/`height`.** Layout shift from an image with no stated box is
+  a markup defect; the optimizer only rewrites delivery. (Fixed converter-side — see
+  [site-converter.md](site-converter.md) → "A conversion's Lighthouse score is a converter measurement".)
+
+**Reading a conversion's Lighthouse report**: always run the SOURCE too and compare. Its complaints sort into
+three piles — ours, the source's (faithfully reproduced), and the host's — and only the first is worth acting
+on here. On one real pair the contrast failures and the oversized-image waste were both *inherited*, with the
+source wasting more than the conversion.

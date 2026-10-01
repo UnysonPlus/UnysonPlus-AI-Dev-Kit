@@ -283,7 +283,7 @@
       "src": [
         "{plugin}/framework/extensions/ai-assistant/manifest.php"
       ],
-      "hash": "0581dea51b88f66fcd70c2d142a69c2a",
+      "hash": "17d9e98693dc8fcdfbf8b97ced92eaa5",
       "synced": "2026-09-29"
     },
     "extensions/animated-icons.md": {
@@ -308,8 +308,8 @@
         "{plugin}/framework/extensions/asset-optimizer/manifest.php",
         "{plugin}/framework/extensions/asset-optimizer/settings-options.php"
       ],
-      "hash": "991d1a1ac443b1566ba5074fc53ba6e0",
-      "synced": "2026-09-28"
+      "hash": "c4be9e479c8ff14d2dbfba2cdbacc866",
+      "synced": "2026-10-01"
     },
     "extensions/blog.md": {
       "kind": "extension",
@@ -360,8 +360,8 @@
         "{plugin}/framework/extensions/forms/config.php",
         "{plugin}/framework/extensions/forms/settings-options.php"
       ],
-      "hash": "9cfeb0b4a808807a4e281e6afb55fd19",
-      "synced": "2026-09-27"
+      "hash": "5ddfcb1296bd4cb0294179208361de3d",
+      "synced": "2026-09-29"
     },
     "extensions/live-editor.md": {
       "kind": "extension",
@@ -452,8 +452,8 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "0b5960a4e35150d4803b4a522c8a25d3",
-      "synced": "2026-09-29"
+      "hash": "52ab5d6400f0feb556d4bb98c46d4291",
+      "synced": "2026-10-01"
     },
     "extensions/site-migration.md": {
       "kind": "extension",
@@ -1240,8 +1240,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/icon-box/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/icon-box/options.php"
       ],
-      "hash": "4069071cf21a823038b535a661e34ae1",
-      "synced": "2026-09-27"
+      "hash": "8bef120647c6c438dae5dcbdf78df3c3",
+      "synced": "2026-10-01"
     },
     "shortcodes/icon.md": {
       "kind": "shortcode",
@@ -1384,8 +1384,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/newsletter/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/newsletter/options.php"
       ],
-      "hash": "9501bd584a7754de5e9add0c4d029579",
-      "synced": "2026-09-27"
+      "hash": "e2aa04d04be45edf45f32697251b1fa7",
+      "synced": "2026-09-30"
     },
     "shortcodes/notification.md": {
       "kind": "shortcode",
@@ -1870,8 +1870,8 @@
         "{plugin}-theme/framework-customizations/theme/options/header-settings.php",
         "{plugin}-theme/framework-customizations/theme/options/header-topbar.php"
       ],
-      "hash": "dba9cf2519be42527fb90f3144bf19c3",
-      "synced": "2026-09-27"
+      "hash": "1ffffde2ee036653d0e6b8bcec385db4",
+      "synced": "2026-10-01"
     },
     "theme-settings/hover-animations.md": {
       "kind": "theme-settings",
@@ -1897,8 +1897,8 @@
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/miscellaneous-reset.php",
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/miscellaneous-scripts.php"
       ],
-      "hash": "049f06d4f50eacbb0e508ce8a51db005",
-      "synced": "2026-09-27"
+      "hash": "396a9dea9bdcd79e50a382c3a3de2aaa",
+      "synced": "2026-09-29"
     },
     "theme-settings/pages.md": {
       "kind": "theme-settings",
@@ -1977,6 +1977,15 @@
       ],
       "hash": "258948e0c1b130e2785770f6e7745e85",
       "synced": "2026-09-27"
+    },
+    "extensions/security.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/security/manifest.php",
+        "{plugin}/framework/extensions/security/settings-options.php"
+      ],
+      "hash": "7f88d55477dfb9b0cb172f92f978e665",
+      "synced": "2026-09-29"
     }
   }
 }

@@ -22,11 +22,37 @@ node measure.mjs "file:///<abs-path-to>/mockup/index.html" "http://localhost/<si
 
 - Tune the `METRICS` selector map so each metric resolves on BOTH the mockup and the
   unysonplus-theme DOM (multiple selectors tried in order).
-- Tolerances are in `../../design-parity-checklist.md`. Don't advance a phase while its
+- Tolerances are in `../../build-reference.md`. Don't advance a phase while its
   metrics FAIL.
 - For the logo: measure the **visible glyph**, not the PNG box (transparent padding
   makes a logo read small even at the "right" px).
 
+## `lib/` — the shared machinery (edit here, not in each tool)
+
+Every tool in this folder drives the browser through **`lib/browser.mjs`** and picks/reads elements
+through **`lib/elements.mjs`**. Before these existed each tool launched its own browser, which left
+three different ways of resolving chromium, **two different browsers** (system Chrome in
+`probe`/`shot`/`section-audit`, bundled Chromium in the rest) and five different "page has settled"
+policies. Numbers from two tools were therefore not strictly comparable — different font
+rasterisation, different UA defaults — and nothing said so.
+
+- `launchBrowser()` — one driver decision: `playwright-core` + the **system Chrome** channel when
+  present, else bundled `playwright`, else `PLAYWRIGHT_PATH`. Falls back automatically if the Chrome
+  channel is missing, so a caller never has to care which it got.
+- `openPage(browser, url, { width, height, wait })` — one settle policy (`networkidle` + a fixed
+  grace period + a hard timeout). Change the policy here and every tool changes with it.
+- `openPair(browser, sourceUrl, buildUrl, opts)` — the source-vs-build shape most of these want.
+- `collectElements({ sel, text, props, all })` — the in-page reader. `--text` resolves to the
+  **smallest** matching element (the leaf that carries the type, not the wrapper that contains it);
+  rects are rounded and `y` is document-relative, so two pages stay comparable when they scroll
+  differently.
+- `diffElements(source, build, props)` — returns only what actually differs.
+
+`canvas-key.mjs` / `color-key.mjs` are pure functions (no browser) and stay as they are — they are
+lenses, not duplicated machinery.
+
+**When adding a tool here, import the session; do not call `chromium.launch` yourself.** A tool with
+its own launch silently opts out of the shared browser and its measurements stop being comparable.
 ## Ad-hoc: `probe.mjs` / `shot.mjs` — DON'T hand-roll a Playwright script
 
 The tools above compare **fixed regions** (header/footer/hero) against a known selector map. For the
@@ -55,6 +81,35 @@ If either tool returns empty matches or a "This site can't be reached" title, th
 start XAMPP/Apache, not the tool. Reach for a hand-written probe only when you need something these
 genuinely can't express.
 
+## Spacing / padding — `spacing-audit.mjs` (the lens the others do not have)
+
+Every other lens here measures **text**: typography compares matched text elements, geometry compares
+column x-positions, Lens 4 compares gaps between text rows. Spacing lives on the **containers** — a
+section's padding, a wrapper's margin, a flex gap — which carry no text, so nothing matched them and
+nothing reported them. A converted page could lose a section's side padding on every band and every
+lens would still say PASS. (It did: a converted hero measured 390px-wide content inside a 390px
+phone viewport, text touching both edges, while the source kept its 24px gutter. Desktop looked
+perfect, because centred content is narrower than the band either way.)
+
+```
+node spacing-audit.mjs <sourceUrl> <buildUrl> --src-sel "header" --build-sel "section:first-of-type"
+node spacing-audit.mjs <src> <build> --width 390        # ALWAYS re-run at phone width
+```
+
+It prints two things:
+
+- **the distribution** — each padding / margin / gap value and how many boxes use it on each side.
+  `24px : 2 → 0  ← never used in build` is the signal that a whole class of spacing was dropped.
+  Three lines reading `distribution matches` is the pass condition.
+- **the per-box walk** — only boxes whose spacing signature differs, plus boxes present on one side
+  only, which is how a FLATTENED wrapper shows up.
+
+Read the distribution first. The walk's indices drift apart wherever the two trees differ in depth
+(a pill that is `<p>` + `<span>` here and `<div>` + `<span>` there), so a run of "differences" that
+are really the same values one row apart means the trees differ in shape, not the spacing.
+
+**Run it at 390px as well as 1440px.** Horizontal padding is invisible at desktop width and obvious
+on a phone; that is exactly how the defect above survived several rounds of checking.
 ## Auditing a CONVERSION section-by-section — `section-audit.mjs` (DON'T paste screenshots)
 
 When you're checking a converted site against its source and want to *see* what's off band-by-band —

@@ -28,6 +28,7 @@ shapes live in `../shortcodes/`, `../option-types/`, `../theme-settings/README.m
 | `blog` | hidden (core) | Blog rendering (settings in Theme Settings → Blog) |
 | `mailer` | hidden (dependency) | Mail transport (`fw_ext_mailer_send_mail()`) |
 | `admin-skin` | **yes** (seeded once on install; deactivating sticks) | Token-driven skin over the real wp-admin: grouped sidebar, top bar, light/dark/system + per-user accent, skin packages → `admin-skin.md` |
+| `security` | **no** (never seeded — changes how people sign in) | Login throttling, TOTP two-factor, XML-RPC/header/user-listing hardening, custom login address, Site Health checks; each measure off until switched on → `security.md` |
 | `asset-optimizer` | no | CSS/JS combine + optimization (own settings page) |
 | `site-migration` | no | Whole-site push to another install via a connection key; signed transport, staging-and-swap → `site-migration.md` |
 | `sidebars` | no | Custom widget areas |

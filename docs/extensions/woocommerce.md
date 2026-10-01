@@ -87,7 +87,7 @@ The item-count badge on both the **cart link** (`wc_cart_link`) and the **mini-c
 
 ## Building a store demo (products → grid → chrome)
 
-The e-commerce equivalent of the [build-a-site](../build-a-site.md) flow:
+The e-commerce equivalent of the [build-a-site](../build-reference.md) flow:
 
 1. **Detect it's a store.** "Add to Cart"/"Basket" buttons, per-item prices, a Shop/Menu nav, product cards → build on WooCommerce, not static columns.
 2. **Activate + provision.** Add `woocommerce` to `fw_active_extensions`. On a **multisite subsite**, network-activating the WooCommerce plugin does **not** create that blog's WC tables — run `WC_Install::install()` once while `switch_to_blog()`'d (delete `woocommerce_db_version` first to force it), then `WC_Install::create_pages()` for shop/cart/checkout/account. Set currency/`woocommerce_currency_pos` to match the source.

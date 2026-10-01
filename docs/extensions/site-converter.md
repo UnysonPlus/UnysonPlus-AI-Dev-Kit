@@ -115,6 +115,139 @@ decomposes to nested `column`s (PHP) or a `code_block` (JS). Those specific shap
 
 ## Notes / gotchas
 
+- **A stretched button abstains only when its inset is ABSENT (Site Converter 1.10.91).** The rule that keeps
+  a full-width CTA from defining a size's `padding_x` was too blunt: it silenced EVERY stretched sample. On a
+  site whose buttons are all `w-full` at their breakpoint but carry a real `px-8`, that left the dominant
+  sizes with no padding-x at all and every button collapsed or stretched to its container — measured on the
+  capture, `px=NULL` against the 32px its buttons actually have. A stretched button abstains only when its
+  measured inset is zero, which is the case the original rule was written for.
+- **The snapshot directory and `pages-manifest.json` are reconciled.** The manifest is an INDEX of the
+  snapshots and the two can disagree: a capture that writes `pages/<slug>/rendered.html` but omits the row
+  left a page silently unconverted (measured: an 11-page capture whose manifest listed ten).
+  `reconcile_snapshot_list()` appends a row per unlisted snapshot — but ONLY when the snapshot names its own
+  URL in a canonical link, because that URL is what decides the page's slug and its front/inner standing. A
+  row without one is read as the FRONT page, and the snapshot then overwrites the home page with its content;
+  that happened once in development, which is why an unidentifiable snapshot is now left alone rather than
+  guessed at.
+
+- **A capped image keeps its MEASURED object-fit (Site Converter 1.10.90).** `img_self_cap_css()` read the
+  fit from one class only (`object-cover`) and sent everything else to `contain`, so a source setting its fit
+  from a stylesheet — or using any other keyword — was letterboxed whatever it said. The value goes into
+  scoped CSS, so any legal keyword is carried verbatim. Where the capture records nothing the historic
+  `contain` stands: under a max-height cap with `width:auto;height:auto` the image keeps its own aspect
+  anyway, so that is the conservative reading and the helper documents it as deliberate.
+
+- **A badge's LABEL stamp is captured (Site Converter 1.10.89).** `pill_parts()` claims a short, uppercase
+  text span as the badge's TAG CHIP rather than its message — right for a two-part badge ("NEW · We shipped
+  it"), but on the commoner one-label shape the label's computed stamp went to a field nobody kept. `msgCs`
+  came back EMPTY, so every reader of the kicker's measured type found nothing and the theme's type won: a
+  10px uppercase 2px-tracked brand-coloured eyebrow rendered as 14px sentence case in the body ink, on every
+  hero of that shape. The chip span's stamp is now captured as `tagCs` and stands in for `msgCs` when that is
+  empty, and the merged eyebrow stamp rides to the heading as `overline_cs` — the carrier the heading's CSS
+  builder already reads for size, tracking, case and ink. Verified on four pages: 10px / 700 / uppercase /
+  2px / `rgb(124,92,224)`, matching the source exactly.
+
+- **A list keeps the SOURCE's marker and invents none (Site Converter 1.10.88).** Every `<ul>` was mapped to
+  the feature list's CHECKLIST design, drawing a check glyph per item — a page of caveats came back looking
+  like a list of features ticked off, with 4 and 5 icons added to sections that have none. The `<li>`'s own
+  computed style decides: `display:list-item` with a marker → `bullet`, `list-style:none` → `none`, and the
+  historic `check` only when the capture could not say. `text_list_block()` now also carries each item's own
+  inline `<svg>` as its icon (and strips it from the words), so a source that draws its own glyph still shows
+  it whatever the design. Measured over 138 pages: 440 unordered lists → 353 bullet, 87 marker-less; of the
+  marker-less, 69% draw their own glyph and 31% show no marker in the source either.
+- **Prose keeps its reading width.** A source caps its copy on the WRAPPER, not each paragraph
+  (`<div class="max-w-xl mx-auto space-y-4">`), so `element_max_width()` found nothing on the `<p>` and the
+  converted copy ran the full column — fewer lines, and a section shorter than its source (measured: copy
+  576px wide against 723px, section 558px against 428px). It now walks up to 3 ancestors for a cap, stopping
+  at the section. Only a PROSE measure is adopted — at most 800px — because the band's own cap is already
+  applied by the section and inheriting it would say nothing while overriding narrower intent further in.
+
+- **The accordion wears the SOURCE's skin (Site Converter 1.10.87).** Three drops, one symptom — a FAQ whose
+  source draws translucent dark panels came back as near-white slabs with dark headings and grey-on-white body
+  copy. (a) Every colour read in `accordion_design()` matched `rgb()` only, so an `oklab()` / `oklch()` source
+  yielded nothing; all reads now go through `color_keep_alpha()` and translucency is kept, because a 5%-white
+  panel over a dark page IS the fill. (b) `title_bg_color` skins only the header bar while the design's CSS
+  paints the ITEM, so the measured tint landed on top of an opaque white slab — the item's fill, hairline and
+  corner now ride as scoped CSS on `.accordion-item`, with the bar and panel cleared. (c) An inline `<svg>`
+  toggle carries no stamp, and on that page every wearer of its colour token was one of those icons —
+  `token_ink_from_document()` resolves a `text-<token>` utility from a stamped instance of the same token on
+  ANY captured route (a map built once from the cross-route markup), and returns '' rather than guessing when
+  there is none. Measured: that section went from 33% pixel / 38% perceptual to 5.2% / 4.3%.
+
+- **A quoted HEADLINE over labelled sections is not a testimonial (Site Converter 1.10.86).** A
+  problem/solution card quotes the customer's complaint as its title and explains it in labelled groups (a
+  short all-caps label over a paragraph, twice), with no author, role, avatar or rating. `looks_quote_card()`
+  claimed it on the quotation marks alone and a testimonial holds only a quote, so every labelled group went
+  with the claim — measured, 0 of 11 body phrases kept, against 11 of 11 for the fallback.
+  `is_labelled_problem_card()` rejects exactly that shape: no attribution of any kind, the quote in a HEADING
+  rather than a paragraph, and two or more label-over-paragraph groups. **Keep it narrow.** The note in
+  `looks_quote_card()` records an earlier broader tightening that made a corpus page WORSE (80.8% → 73.3%),
+  because a rejected card can fall to a path that keeps less than a wrong-but-partial claim did. Measured over
+  138 captured pages and 268 claimable cards, this rule excludes 8 cards, all on the one capture that motivated
+  it — re-measure before widening it.
+
+- **A positional section id is scoped to its page (Site Converter 1.10.85).** `page_css()` writes every page's
+  `#<css_id>` rules into ONE site-wide stylesheet, so the positional fallback `section-N` — which means only
+  "the Nth section of whatever page you are on" — was the same selector on every page. `scope_section_ids()`
+  (called by both `build_pages()` and `page_css()`, idempotent) renames it to `<page-slug>-section-N` on every
+  page but the home. A SOURCE-given id (`#pricing`) is never renamed: in-page anchors point at it.
+- **A stretched button is not a size.** A `w-full` button's box comes from its container and its horizontal
+  padding is usually 0, so it abstains from the `padding_x` vote when button size presets are clustered (it
+  still votes on type, vertical padding, radius and height). Letting it vote invented a size whose defining
+  trait was `padding-x: 0`; where full-width CTAs are the commonest button that became the DEFAULT and every
+  ordinary button lost its side padding.
+- **Button presets are derived from EVERY route.** `build_from_html()` runs once per page, so
+  `FW_Site_Converter_Bundle::import_dir()` hands `FW_Site_Converter_Stitch::set_button_scan_html()` the markup
+  of `rendered.html` plus every `pages/*/rendered.html` before any build. Derived from the home page alone, a
+  button shape appearing only on an inner page had no preset and fell into the nearest one it did not belong to.
+- **A colour preset carries only what its members agree on.** The preset group key includes the TYPE signature
+  (`text-transform` + `letter-spacing`), so an uppercase tracked pill and a sentence-case CTA sharing one fill
+  become two presets rather than one whose first-seen member imposes its type. Every route that picks a preset
+  keys on COLOUR, and two presets split on type are the same colour by construction — so
+  `Mapper::button_style_for_type( $style, $cs )` makes that last choice from the button's own stamp. It only
+  ever swaps between presets that paint identically, and the header CTA path calls it too.
+
+- **The favicon's type comes from the BYTES (Site Converter 1.10.84).** `image_ext_of_bytes()` sniffs the
+  downloaded icon's magic number; the URL's extension is only a fallback. Sites answer `/favicon.ico` with an
+  SVG often enough that trusting the URL wrote SVG bytes as `favicon.png`, WP's sideload refused it, and
+  `site_icon` kept whatever the LAST conversion had set — the tab showed the previous source's mark. A vector
+  favicon now ships as `favicon.svg` with a `type="image/svg+xml"` `<head>` link and clears a stale
+  converter-owned `site_icon`; a raster still seeds the Site Icon. A Site Icon the USER picked is never touched.
+- **The signup's fine print is the shortcode's Consent / Fine Print.** The small line after the submit
+  ("No cost, no obligation…") maps to `consent_text` with its measured size, ink, alignment and the collapsed
+  distance below the button — not to a loose text block beside the form, where it lost the form's rhythm and
+  could drift from what it qualifies. `form_fine_print()` takes only prose AFTER the submit; a hint above or
+  between fields still belongs to its field.
+
+- **A form's card is the form's own, never the section's (Site Converter 1.10.84).** `form_card_of()` walks up
+  from the `<form>` for a painted, rounded/padded ancestor, but now only through wrappers the form is the sole
+  content of (`el_sole_content()`). A panel that also holds the section's heading and copy is the SECTION's
+  card — it is already reproduced as the column box — so adopting it wrapped the signup in a second identical
+  inset. Measured: a source form with `padding: 0` and no fill came back with 32px of padding on a filled slab.
+- **With no field wrapper, the INPUT is the field.** `n_newsletter()` falls back from `field_cs` to `input_cs`,
+  so a plain `<input class="px-4 py-3 rounded-xl bg-white/5">` carries its measured inset, height, corner, fill
+  and hairline. Reading only the wrapper meant the commonest field shape contributed nothing.
+- **The label gap is not the field gap.** The label's own `margin-bottom` rides as `--nl-label-gap`; the field
+  row's `gap` stays the field-to-field distance. The shortcode groups each label with its input
+  (`.fw-nl__group`), so the two distances are finally independent.
+- **The footer's own lockup (`footer_logo`).** The theme renders the HEADER logo in the footer, which is wrong
+  whenever the source draws a different one there — a compact mark in the nav, the full wordmark below.
+  `detect_footer_logo()` takes the first MEASURED footer `<img>` that is not a small square glyph and is not
+  inside an off-site link (a "built with" badge, a seal); when it is not the header's image
+  (`same_media_ref()`), the brand column emits `footer_logo` with `footer_logo_image` + `footer_logo_width`
+  instead of `logo`, and it still leads the centred stack. A `data:image/…` lockup survives: theme-settings'
+  `localize_media()` now sideloads inline images as well as http ones.
+- **`el_margin()` reads longhands too.** Only the `margin` shorthand was ever parsed from `data-sc-cs`, so a
+  stamp spelling out `margin-top` / `margin-bottom` measured as zero and every rhythm keyed to it fell back to
+  a default. Same family as the scientific-notation and `oklab()` drops: a value in an unexpected FORMAT is
+  silently discarded.
+- **Modern colour functions on a step marker.** The steps marker's fill and ink are resolved through
+  `color_keep_alpha()` before the rgb()-shaped reads, so an `oklab(… / .2)` chip and its `oklch()` numeral
+  survive instead of falling back to the design's default (white-on-near-white — an invisible numeral).
+- **A step body keeps every paragraph.** `item_body_text()` joins all sibling `<p>` copy with a blank line
+  (wpautop turns it back into paragraphs) instead of returning only the first; a paragraph nested deeper (a
+  caption) is not joined on. A four-step section had been losing ~1000 characters and rendering 44% short.
+
 - **Custom local models (capture service 1.11.68).** `/local-ai/pull` runs every name through
   `normalizeModelRef()` (local-runner library names and URLs, public model-hub GGUF repo references and
   model-hub URLs; anything else → 400). `/local-ai/import` → `importGguf()` goes through the local runner's HTTP
@@ -6088,3 +6221,134 @@ round dot, a tall box and an unpainted hairline.
 
 This is the third time in this corpus that the defect was **reading a class name where a computed value was
 already stamped**. It is worth treating as the first hypothesis, not the third.
+
+### The page canvas is a region no lens was looking at (2026-09-30)
+
+A source whose entire identity was a full-height `linear-gradient(145deg, …)` on `<body>` converted to **one
+flat fill**. Nothing reported it. Every band-level lens compared a band against its own counterpart and found
+them alike; `props.mjs` compares elements *inside* regions, and the canvas belongs to no region. It took a
+whole-page screenshot pair — the cheapest lens there is — to see that the page's colour journey was gone.
+
+Three defects sat behind it, and only the first is the one that was obvious:
+
+- **The canvas gradient was never read.** `detect_body_background()` returned a *colour*; there was no
+  gradient sibling. Now `detect_body_gradient()` reads the body/html `background-image` (the capture stamps it
+  — that stamp is also new) and `gradient_css_to_v2()` converts the CSS into the **gradient-v2 value shape**,
+  so the result lands in General → Layout → Site Background as an **editable** gradient layer over the
+  detected colour, not as a frozen CSS string. Background Pro stacks colour under gradient, so the flat colour
+  stays as the base — what shows if a stop ever fails to resolve.
+- **The option was emitted by neither twin on the JS side.** `to-theme-settings.mjs` emitted the site
+  background's *pattern* and *video* but never its colour or gradient, so a JS-path conversion left the canvas
+  at the palette default. `capture-extract.mjs` now records `home.canvas = { color, gradient }` and the twin
+  emits both. This is exactly what `option-reachability/check.mjs` exists to catch.
+- **All 147 CSS named colours resolved to `''`** — on BOTH twins. Computed styles give `rgb()`, so the gap
+  hid; authored CSS in a `<style>` block does not, and `background: white` lost its colour. In a gradient it
+  was worse than losing one stop: a dropped stop leaves fewer than the two `gradient-v2` requires, so the
+  **whole gradient vanished**. Both `color_to_hex()` and `normc()` now carry the table.
+
+Two parsing details that were wrong in the first cut and are now guarded on both sides:
+
+- **Split the argument list at top level only.** `oklch(.2 .04 265 / .5), oklab(…)` must not be cut inside a
+  colour's own parens. A plain `explode(',')` produced fragments that parsed as nothing.
+- **Peel the position off the END of a stop.** The colour may contain spaces (`oklch(0.205 0.045 265) 38%`),
+  so splitting on whitespace loses it. And `transparent` is a legitimate *stop* (it is the fade) while
+  everywhere else it means "no colour" — so it is mapped to a zero-alpha colour **in the gradient parser
+  only**, leaving `color_to_css()` free to keep returning `''` for it, which other paths rely on.
+
+**The lens fix is half the work.** `tools/measure/canvas-key.mjs` now compares the page canvas by *structure*
+— kind, angle, stop positions, colour keys — so `oklch(…)` versus `rgb(…)` is not a delta but a wrong angle
+is. Its first run on the live pair immediately reported a delta that was **the lens crying wolf about its own
+target**: the theme's body rule reserves a second background slot for the pattern
+(`background-image: var(--site-bg-image, none), var(--site-bg-pattern, none)`), so a pattern-less page
+legitimately renders `<gradient>, none` and every layered longhand doubles to `fixed, fixed`. The lens now
+compares only the layer that carries the gradient. A lens that reports a defect on a canvas that matches is
+how a lens stops being read.
+
+Guards: golden `[CG]` (14 assertions, 9 proved red by disabling the wiring, 2 more by disabling the named
+table) and its JS twin `canvas-gradient-parity.test.mjs` (23), plus `canvas-key.test.mjs` (10) for the lens.
+
+### A conversion's Lighthouse score is a converter measurement (2026-10-01)
+
+A converted page scored **CLS 0.168 against its source's 0.018**, and Lighthouse named three diagnostics
+("image elements do not have explicit width and height", "reduce unused CSS", "render-blocking requests"). All
+three traced back to the converter or the shortcodes it emits. The lesson is that Lighthouse is a lens we had
+not been pointing at conversions at all — and unlike the fidelity lenses it reports things no screenshot pair
+can show, because they are about *timing*, not pixels.
+
+What it found, in the order that mattered:
+
+- **The page shipped Font Awesome with zero elements using it.** `icon`, `icon-box` and `notification` named
+  `font-awesome` as a hard CSS *dependency*, so its 24 KB stylesheet loaded on any page carrying one of those
+  shortcodes, whatever the icons turned out to be. A converted site draws its glyphs as inline SVG — measured
+  on a real conversion, **0 `fa-*` elements against 11 inline SVGs**. The cost is not only bytes: those faces
+  declare `font-display: block`, which *withholds text paint* until the font resolves, so an unused font was
+  also moving the page. Font Awesome is now enqueued by `sc_icon_render()` at the one place a font icon
+  actually renders, gated on the class really being FA.
+- **No converted image stated its box.** `img_html()` rebuilds every image as `<img src alt>` and everything
+  downstream works from that string, so a width and height dropped there can never be recovered. Measured: the
+  source carried both on 5 of 5 images, the conversion on 3 of 5 — and the two bare ones were the **SVGs**,
+  where it hurts most, because WordPress stores no dimension metadata for an SVG attachment and there is
+  nothing left to infer from. Now carried from the author's attributes, falling back to the computed stamp. A
+  percentage is deliberately ignored: `width="100%"` is a layout instruction, not an intrinsic size.
+- **The hero was explicitly deprioritised.** Every image shipped `fetchpriority: auto`, which the media-image
+  view renders as lazy — so the one image the browser most needs early was both deprioritised and deferred,
+  while the source *preloads* the same image. The page's first image node is now marked `fetchpriority: high`;
+  anything later stays lazy, because promoting everything is as useless as promoting nothing.
+
+**Two of the report's complaints were not ours, and saying so is part of the work.** The contrast failures
+were measured identical on both sides — same `text-white/40` label, same `#0d162c` panel, same 3.79:1 — so the
+converter had reproduced a source that genuinely fails WCAG, and "fixing" it would mean deliberately diverging
+from the source. That is a product decision, not a converter bug, and it needs to be made explicitly rather
+than smuggled in. "Improve image delivery" was likewise inherited: the source wastes *more* on oversized
+images than the conversion does (2061 KB against 1493 KB at phone width). A performance report aimed at a
+conversion will always mix the three categories — ours, the source's, and the host's — and the first job is
+to sort them, because chasing an inherited trait is how you end up diverging from the source for no gain.
+
+**How to run it.** Lighthouse against the converted URL *and* the source URL, then compare — a bare score is
+uninterpretable. CLS and the structural diagnostics are the converter-sensitive ones; Speed Index and LCP move
+mostly with hosting. Guards: `image-dimensions-test.php`.
+
+### The box-owner rule, and why it needs enforcing twice (2026-10-01)
+
+One box, one owner. A card's skin — fill, border, radius, shadow, hover — is painted by exactly one
+node:
+
+- **One shortcode in the container** → the shortcode owns it (`box_style` on the icon_box).
+- **Two or more** → the container owns it (`border_preset` on the column / flexbox), because only the
+  container wraps them all.
+
+The PHP mapper enforced this on the column path with a `$box_via_class` flag, set by the branch that
+gives the box to a single icon_box so the later column fallback stands down. That flag guards one
+route to the node, and the shape is reachable by others — the panel builder registers a panel's skin
+onto its flexbox and then builds its blocks inside, and a single card block registers the same skin
+again on the icon_box.
+
+The JS path had no equivalent at all. Its Box-Preset census runs two independent loops: one points
+every icon_box at its preset, the other every column/flexbox at the same lookup. Neither knows what
+the other did, so a container and its only child could both be assigned the same slug — the page then
+shipped `boxp-x` on a flexbox *and* `boxp-x` on the icon_box inside it: two borders, two fills, two
+radii, nested, plus the inner card's own padding. **Measured across the corpus: 24 of 134 boxed
+flexboxes (18%) wrap exactly one icon_box, over 7 of the 22 sites that have a boxed flexbox at all.**
+
+Both paths now run a collapse after their tree is assembled, where every route converges, rather than
+adding a flag to each builder that can reach the shape:
+
+- PHP: `Mapper::collapse_double_box()`, called beside `mark_lcp_image()`.
+- JS: `collapseDoubleBox()` in the census, after both assignment loops.
+
+Only an **exact** duplicate collapses — both sides assigned, same slug. A child with no preset is the
+legitimate container-owned case; two *different* presets are a card inside a panel, which the source
+really does draw as two boxes. Goldens: `box-owner-flexbox-test.php` and `box-owner-parity.test.mjs`.
+
+### A positional counter is dropped, not relocated (2026-10-01)
+
+A services card can head itself with one `justify-between` flex row: the icon at the left end, a small
+`01 / 3` counter at the right. `card_eyebrow()` accepts any small leaf preceding the heading, so the
+counter was filed as the card's overline and rendered on a line *above* the title — and once that was
+fixed, the card's content collector picked it up instead and rendered it *below* the title.
+
+The icon box has no slot for a label beside its icon, and the corpus says it should not grow one: the
+shape appears on **one site in 117 captures**, twice, both the same string. So the counter is dropped,
+by `is_counter_text()` — and keyed to the counter *shape*, never to the position alone, because that
+same slot can hold a price or a duration on another source and deleting those silently would be worse
+than the bug. Golden: `icon-row-meta-test.php`.

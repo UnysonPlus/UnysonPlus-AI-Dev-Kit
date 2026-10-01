@@ -118,8 +118,8 @@ Every switch below shares the same choices:
 ### Remove WordPress version meta tag — `perf_remove_version_meta`
 - **Type**: switch — **Default**: `no` — Hides the `<meta name="generator">` tag from front-end source.
 
-### Disable XML-RPC — `perf_disable_xmlrpc`
-- **Type**: switch — **Default**: `no` — Turns off the `/xmlrpc.php` endpoint. Disable only if no apps depend on it (Jetpack, mobile apps).
+### Disable XML-RPC logins — `perf_disable_xmlrpc`
+- **Type**: switch — **Default**: `no` — Adds `xmlrpc_enabled → false`, which turns off only the XML-RPC methods that need a login. `/xmlrpc.php` still answers and **pingbacks keep working**; switching pingbacks off or blocking XML-RPC entirely is the `security` extension's `xmlrpc_mode` (→ `../extensions/security.md`). The description changes to "the Security extension is handling XML-RPC" while that mode is not `leave`. (Label was "Disable XML-RPC" and claimed to turn off the endpoint; corrected in shortcodes 1.15.36 — the stored key and value are unchanged.)
 
 ## Media — Custom Image Sizes — `theme_image_sizes`
 

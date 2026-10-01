@@ -13,6 +13,29 @@
 > reference, the harness, the starter, or the tooling — i.e. **algorithm/kit updates**,
 > not site builds. Examples use neutral placeholders (`<site>`, `<abs-path-to>`).
 
+> ## 🔁 ONE protocol for every build — route here first
+>
+> When the request is any of *"fix my site"*, *"fix the converted site"*, *"train on <url>"*, *"do a
+> training"*, *"close the gap"*, *"make it match the source"* — **open**
+> [`docs/site-build-protocol.md`](docs/site-build-protocol.md) **and follow it end to end.** It is the
+> ONLY protocol document — four others were merged into it; if anything else sequences or gates work, it
+> is stale. Do not
+> improvise an order, and do not hand-roll a Playwright script: `tools/measure/` is the general form of
+> every one-off lens.
+>
+> They are one job, not two. **Training is fixing the site with the algorithm updated**: the page must end
+> up matching its source either way, and every rule found is **logged and sent upstream** either way
+> (`send-finding.mjs`, after ONE consent question at the start — never per bug). What differs is only
+> *where a given fix lands* — a general rule in the converter if you have the goldens and the corpus,
+> otherwise a theme option → scoped CSS → a sandbox hook. That decision is per **defect**, never per request.
+> In converter mode the run then **closes the loop**: `pull-findings.mjs` reads the shared findings ledger,
+> and every fixture-backed row you adopt passes the same golden + twin + corpus gates as your own work.
+>
+> The two copy-paste prompts are audience variants of that one protocol, not alternatives to it:
+> [`docs/converter-fix-my-site-prompt.md`](docs/converter-fix-my-site-prompt.md) for a site owner's agent,
+> [`docs/converter-training-prompt.md`](docs/converter-training-prompt.md) for a maintainer.
+
+
 
 You are building (or polishing) a **WordPress site or demo** on the **UnysonPlus**
 plugin + **unysonplus-theme** parent theme, usually to match a **source mockup**.
@@ -78,7 +101,7 @@ build-a-site) differs, the protocol wins.
 
 An all-in-one toolkit for working with UnysonPlus — pick the surface that matches the task:
 
-1. **Build** a site from a prompt — [`docs/build-a-site.md`](docs/build-a-site.md) (workflow) +
+1. **Build** a site from a prompt — [`docs/build-reference.md`](docs/build-reference.md) (workflow) +
    [`docs/building-pages.md`](docs/building-pages.md) + [`tools/upw-build-pages.php`](tools/upw-build-pages.php) (compose pages programmatically).
 2. **Convert** an existing site into UnysonPlus — the capture service + Site Converter pipeline
    (see the converter folders below and [`docs/extending.md`](docs/extending.md)).
@@ -144,13 +167,13 @@ guessing a per-page slug.)
 | `docs/option-types/` | Per-option-type **value shapes** (multi-picker, background-pro, compact color, typography, unit-input, …) — the exact JSON to store for any option/att. |
 | `docs/animation-engine/` | Per-**module** effect shapes (hover, text-effects, scroll-motion, parallax, …) — the `fx`-block JSON to animate a node. Extension ships inactive. |
 | `docs/extensions/` | One **overview** per plugin extension (what it is, active-by-default, what it provides) — cross-links to the granular refs. |
-| `docs/design-parity-checklist.md` | The metric set + the measurement algorithm (mockup ⟷ dev, ±2px tolerance). |
+| `docs/build-reference.md` | The metric set + the measurement algorithm (mockup ⟷ dev, ±2px tolerance). |
 | `assembled/unysonplus-theme-child/` | The **child-theme starter** you copy + rename per site. Ships a polished-chrome `design/design.json` so header/footer/container are ~90% right on activation. |
 | `tools/measure/measure.mjs` | The frame-metric harness (container/header/logo/footer/type). Run after every change. |
 | `tools/measure/compare.mjs` | Region-by-region **ensemble** — header↔header, each section↔section, footer↔footer, scored by geometry + pixelmatch + Resemble.js + a DOM-structure diff (fail-loud). |
 | `tools/measure/props.mjs` | Full-body **property diff** — walks both bodies, matches elements by text/region, reports NAMED computed-style deltas (caught the site-wide Inter→Open Sans miss). |
 | `tools/upw-build-pages.php` · `docs/building-pages.md` | **Compose UnysonPlus builder pages programmatically** (sections/columns/elements + Animation Engine effects) via `wp eval-file` in ~15 lines, leaving the page EDITABLE in the visual builder. Read the doc first — it documents the builder-value storage rules. For any page — test, demo, or real. |
-| `docs/build-a-site.md` | The **prompt → UnysonPlus site** workflow: how to go from "build me an X site" to a finished site (Theme Settings tokens → compose pages → wire animations → verify). The orchestration layer over the reference docs. |
+| `docs/build-reference.md` | The **prompt → UnysonPlus site** workflow: how to go from "build me an X site" to a finished site (Theme Settings tokens → compose pages → wire animations → verify). The orchestration layer over the reference docs. |
 | `docs/conventions.md` | The **generalized UnysonPlus conventions** every build must follow (color presets, clean DOM, heading order, links, replaceable media, option-value shapes). Public, site-agnostic. |
 | `docs/extending.md` | **Create / convert shortcodes, option types, and extensions** — where things live, the anatomy of each, the best reference extension per case, the conventions (thumbnail icon spec, settings-page layout, migrations, keep-docs-in-sync). |
 | `samples/sample-shortcode/` | **The shortcode TEMPLATE** — a complete, installable skeleton of a page-builder element. Every file present and documented inline, with commented-out reference code for repeaters, uploads, dimensions, icons, conditional options and design variants. `HOW-TO.md` beside it is the procedure for porting a standalone component (a CodePen, a demo, a bought template) into an element. **Copy this folder to start a new element** — don't hand-assemble one. |
@@ -274,12 +297,14 @@ Two failure modes, and you need both guards:
 2. **Generalising from n=1.** An abstraction invented from a single site is speculative — it just fails
    on a different set of sites. This is the one that feels like good engineering and isn't.
 
-The second guard is the one that gets skipped, and it is cheap: **`tools/chrome-survey` already holds
-187 captured sites.** After a fix, count how many of them exhibit the pattern:
+The second guard is the one that gets skipped, and it is cheap: **`tools/chrome-survey` already holds 187
+captured URLs** — two surveys, `out/openhero.json` (67) and `out/wegic.json` (120); those two filenames are
+the whole corpus on disk, and the command below is the one that reads them. After a fix, count how many
+exhibit the pattern:
 
 ```bash
 cd tools/chrome-survey
-node digest.mjs out/a second AI-page generator.json out/AI-page.json --section coverage
+node digest.mjs out/openhero.json out/wegic.json --section coverage
 ```
 
 That number does three jobs: it says whether the fix was worth generalising, it sizes the blast radius

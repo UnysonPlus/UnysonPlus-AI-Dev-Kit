@@ -12,7 +12,7 @@ real misses. Skim this before and during a clone; the detail lives in the linked
 > "measure X" because that's how the miss was *diagnosed*; the **durable fix is a converter rule**, and any
 > hand value is only the residual delta the converter can't yet express. Measuring-to-create is legitimate
 > only on a **from-scratch** build. See [site-build-protocol.md](site-build-protocol.md) Rule 0 +
-> [fidelity-verification.md](fidelity-verification.md).
+> [build-reference.md](build-reference.md).
 
 ## Design system
 - **Container width** — the theme default desktop container is **1170px**; match the source's content

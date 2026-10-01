@@ -8,7 +8,7 @@
 //   node shot.mjs <url> --sel "footer" --out foot.png     # clip to a region (element bounding box)
 //   node shot.mjs <url> --text "24/7 Care" --pad 20  # clip around the element containing that text
 //   node shot.mjs <url> --width 1440 --height 900
-import { chromium } from 'playwright-core';
+import { launchBrowser, openPage, closeQuiet } from './lib/browser.mjs';
 
 const argv = process.argv.slice(2);
 const url = argv.find((a) => !a.startsWith('--'));
@@ -24,12 +24,9 @@ const width = parseInt(flag('width') || '1440', 10) || 1440;
 const height = parseInt(flag('height') || '900', 10) || 900;
 const full = has('full');
 
-const b = await chromium.launch({ channel: 'chrome', headless: true });
+const b = await launchBrowser();
 try {
-  const p = await b.newPage();
-  await p.setViewportSize({ width, height: full ? Math.max(height, 2400) : height });
-  await p.goto(url, { waitUntil: 'networkidle' }).catch(() => {});
-  await p.waitForTimeout(1500);
+  const p = await openPage(b, url, { width, height: full ? Math.max(height, 2400) : height });
   let clip = null;
   if (sel || text) {
     clip = await p.evaluate(({ sel, text, pad }) => {
@@ -45,4 +42,4 @@ try {
   }
   await p.screenshot({ path: out, fullPage: full && !clip, clip: clip || undefined });
   console.log('→ ' + out + (clip ? ` (region ${Math.round(clip.width)}×${Math.round(clip.height)})` : full ? ' (full page)' : ` (viewport ${width}×${height})`));
-} finally { await b.close(); }
+} finally { await closeQuiet(b); }

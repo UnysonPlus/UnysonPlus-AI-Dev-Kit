@@ -5,10 +5,13 @@ The Site Converter gets a site most of the way in about a minute. Closing the re
 job — but only if it is done in the right order, with measurements instead of impressions, and in the
 right *place*. This is the prompt that makes an agent do that.
 
-> **This is the SITE-BUILDER prompt.** It fixes **one site's output** using the theme's own options.
-> It is not the converter-training prompt ([converter-training-prompt.md](converter-training-prompt.md)),
-> which changes the shared conversion algorithm and belongs to maintainers with the test corpus. If you
-> hand an agent the wrong one it will edit plugin files, and the next plugin update will erase its work.
+> **This is the SITE-BUILDER variant of one protocol.** Fixing a site and *training* the converter are the
+> same job — the page must end up matching its source either way, and every rule found is reported upstream
+> either way. The only difference is **where a fix may land**, and that follows from what you have: this
+> prompt is for an agent **without** the converter source, the goldens or the test corpus, so a fix lands in
+> a theme option, scoped CSS, or a site-local hook — never in plugin files, which the next update erases.
+> The maintainer's variant is [converter-training-prompt.md](converter-training-prompt.md); the full runbook
+> behind both, with every phase and gate, is [site-build-protocol.md](site-build-protocol.md).
 
 **Fill in the four values at the top, paste the whole thing to your agent, and leave it to work.** The
 converter's result panel can fill them in for you and give you a Copy button.
@@ -116,7 +119,22 @@ REPORT BACK at the end, in this shape:
     maintainers can turn into a permanent converter fix, so the next conversion needs no manual pass.
   - Anything you fixed that you believe the converter should have got right on its own.
 
-THEN SHARE IT. Every rule you worked out by hand here is a rule the converter is missing, and your
+SEND EACH FINDING AS YOU FIND IT, not batched at the end. Ask the site owner ONCE, at the start, whether
+findings may be sent upstream -- one "yes" covers the whole run; never ask per bug. Then, the moment you
+understand a systematic miss:
+  node send-finding.mjs --url=<src-url> --finding='{"region":"s2","property":"font-weight","got":"400",
+    "expected":"700","construct":"button.btn-amber .font-bold","path":"capture-out/<site>","twin":"php",
+    "loss":"overridden","recurs":true,"ref":"s2:hero buttons",
+    "solution":"the GENERAL rule: which source construct -> which converter path"}'
+  node send-finding.mjs --url=<src-url> --summary --stats=<capture-out>/<site>/share-stats.json --positives="..."
+It posts a few hundred structural-only bytes: a salted host HASH (never the URL), class tokens and property
+NAMES, the note auto-redacted of URLs/emails/quoted content. No content text, images, hrefs or screenshots.
+The contract is ENFORCED and each refusal has a reason: a finding with no `construct` + `path` cannot be
+reproduced; a `fixture` must carry data-sc-cs stamps (cut it with make-fixture.mjs); a `solution` that is an
+#id stylesheet rule teaches the converter nothing; "fixed per-site" without the general `solution` throws
+away the valuable half; a POSITIVE belongs in --summary --positives. Send the CASE, never a patch.
+
+WHY IT MATTERS. Every rule you worked out by hand here is a rule the converter is missing, and your
 report is already in the form that fixes it: a source fragment plus the wrong output is a test case.
 Shared, it becomes a permanent improvement — the next site of this shape converts correctly for
 everyone, including you, with no manual pass of your own. Open an issue on the UnysonPlus repository

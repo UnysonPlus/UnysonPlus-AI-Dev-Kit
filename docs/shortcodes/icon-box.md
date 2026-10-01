@@ -8,8 +8,6 @@ An icon (or emoji/SVG) paired with an optional title and body content — the st
 |---|---|---|---|---|
 | `icon` | icon-v2 | see Notes | icon-v2 object | The icon shown. Lucide SVG, font icon, emoji, or custom SVG. |
 | `custom_icon` | hidden | `''` | legacy string | Retired field; leave `''` (the picker above supersedes it). |
-| `overline` | text | `''` | string | A short eyebrow label rendered ABOVE the title inside the same head slot (`<div class="icon-box__overline">`; small / uppercase / tracked / muted by default via `.icon-box__overline`, restyle through Advanced CSS). Empty = no markup. The Site Converter fills it from a card's eyebrow — a short (≤ 40 chars) small (≤ 13px) or uppercase leaf before the heading (PHP `card_eyebrow`, JS `cardEyebrowOf`). Shortcodes 1.15.11. |
-| `title` | text | `''` | string | Headline next to/above the icon. Empty = icon-only box. |
 | `title_tag` | select | `'h3'` | `h3` `h4` `h5` `h6` `span` `p` | Semantic tag for the title. |
 | `content` | wp-editor | `''` | HTML string (WYSIWYG) | Optional body text. |
 | `style` | image-picker | `'top-title'` | `top-title` `inline-left` `inline-right` `stack-left` `stack-right` `between-title-content` | Icon position / layout. |
@@ -76,3 +74,10 @@ LEFT vs RIGHT is taken from DOM order. Card alignment (left/centered) + the box 
 - `content` is WYSIWYG — keep it plain semantic HTML with no classes on `<p>`/`<li>` (see `text-block.md`).
 - For a card + button (content the icon_box can't hold), render `icon_box` + `button` in the column and put the box style on the column's Inner Wrapper Class instead of `box_style`.
 - **Icon badges:** the current control is `icon_badge_preset` (a reusable [Icon Badge preset](../option-types/icon-badge-presets.md) → `iconb-<slug>`). When set it fully styles the badge (shape/fill/border/shadow + icon colour & size) and supersedes the retired `icon_badge` shape + `icon_badge_color`. Those two still render for pages that saved them, but new work should use `icon_badge_preset` only.
+
+> **The `overline` option was REMOVED in Shortcodes 1.15.47 (2026-10-01).** The icon box has no
+> eyebrow slot: the option is gone from the Content tab, the view renders no `.icon-box__overline`, and
+> its default CSS rule is dropped. A page with a saved value keeps it in the database and renders
+> nothing for it. Use the Title, or a `special_heading` above the box (which keeps its own Overline),
+> instead. The Site Converter no longer fills it on either twin — a card's eyebrow is **dropped**, not
+> folded into the body copy.

@@ -19,6 +19,7 @@
  * Deps (npm i in tools/measure): pixelmatch, pngjs, resemblejs (+ playwright). Set
  * KIT_MODS to a node_modules dir to resolve them from elsewhere; PLAYWRIGHT_PATH still works.
  */
+import { launchBrowser } from './lib/browser.mjs';
 import { createRequire } from 'module';
 import { pathToFileURL } from 'url';
 import { writeFileSync, mkdirSync, readFileSync } from 'fs';
@@ -29,14 +30,12 @@ const MODS = process.env.KIT_MODS || null;
 const rq = (name) => { try { return require(MODS ? require.resolve(name, { paths: [MODS] }) : name); } catch (e) { return null; } };
 const resolveFrom = (name) => { try { return require.resolve(name, MODS ? { paths: [MODS] } : undefined); } catch { return null; } };
 
-let chromium = (rq('playwright') || {}).chromium;
-if (!chromium && process.env.PLAYWRIGHT_PATH) chromium = (rq(process.env.PLAYWRIGHT_PATH) || {}).chromium;
 const PNG = (rq('pngjs') || {}).PNG;
 const pmPath = resolveFrom('pixelmatch');
 const pixelmatch = pmPath ? (await import(pathToFileURL(pmPath).href)).default : null;
 const rjPath = resolveFrom('resemblejs/package.json');
 const resembleSrc = rjPath ? readFileSync(dirname(rjPath) + '/resemble.js', 'utf8') : null;
-if (!chromium || !PNG || !pixelmatch || !resembleSrc) { console.error('Missing deps. Run `npm i` in tools/measure (needs playwright, pixelmatch, pngjs, resemblejs), or set KIT_MODS/PLAYWRIGHT_PATH.'); process.exit(1); }
+if (!PNG || !pixelmatch || !resembleSrc) { console.error('Missing deps. Run `npm i` in tools/measure (needs playwright, pixelmatch, pngjs, resemblejs), or set KIT_MODS/PLAYWRIGHT_PATH.'); process.exit(1); }
 
 const args = process.argv.slice(2);
 const [mockupUrl, devUrl] = args.filter(a => !a.startsWith('--'));
@@ -112,7 +111,7 @@ async function normAndResemble(scratch, bufA, bufB) {
 const decode = (dataUrl) => PNG.sync.read(Buffer.from(dataUrl.split(',')[1], 'base64'));
 const savePng = (file, dataUrl) => writeFileSync(file, Buffer.from(dataUrl.split(',')[1], 'base64'));
 
-const browser = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
+const browser = await launchBrowser();
 const pageFor = async (url) => { const p = await browser.newPage(); await p.setViewportSize({ width, height: 1000 }); await p.goto(url, { waitUntil: 'networkidle', timeout: 45000 }).catch(() => {}); await p.waitForTimeout(1200); return p; };
 const mp = await pageFor(mockupUrl), dp = await pageFor(devUrl);
 const sp = await browser.newPage(); await sp.addScriptTag({ content: resembleSrc });

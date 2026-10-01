@@ -10,13 +10,14 @@ already know a filename.
 
 | I need to… | Read |
 |---|---|
-| **The core rule — CONVERSION = translation, not design** (a source exists → translate its captured classes via the converter, fix the converter for a wrong value, prove with a class-string fixture; NEVER measure/eyeball/hand-author) | [`site-build-protocol.md`](site-build-protocol.md) → Rule 0 / Rule −1 |
-| **Follow the strict, authoritative build checklist** (canonical — start each section here) | [`site-build-protocol.md`](site-build-protocol.md) → "THE PER-SECTION CHECKLIST" |
-| Prompt → finished site (narrative workflow — **fresh builds only**) | [`build-a-site.md`](build-a-site.md) |
+| **THE PROTOCOL — one document for build, convert, fix and train** (phases, gates, the per-section checklist; nothing else overrides it) | [`site-build-protocol.md`](site-build-protocol.md) |
+| Value shapes, translation tables, fresh-build order, parity metrics, known misses (**reference, not authority**) | [`build-reference.md`](build-reference.md) |
+| Prompt → finished site (fresh builds — nothing to reproduce) | [`site-build-protocol.md`](site-build-protocol.md) (job selector) + [`build-reference.md`](build-reference.md) Part 2 |
 | Compose builder pages programmatically (fresh/demo/test — **not** conversions) | [`building-pages.md`](building-pages.md) + [`../tools/upw-build-pages.php`](../tools/upw-build-pages.php) |
 | The generalized conventions every build follows | [`conventions.md`](conventions.md) |
-| Verify a region — **conversion:** the browser-free class-string fixture is the proof; **fresh build:** the 4-lens rendered PASS gate | [`fidelity-verification.md`](fidelity-verification.md) + [`../tools/README.md`](../tools/README.md) |
-| Audit a finished conversion and improve the converter AND the lenses | [`converter-training-prompt.md`](converter-training-prompt.md) |
+| Verify a region — run every lens, **then open every band image** (both; neither alone is verification) | [`site-build-protocol.md`](site-build-protocol.md) Phases 3-4 + [`../tools/README.md`](../tools/README.md) |
+| **"Fix my site" / "train on <url>"** — the same job; the only choice is *where each fix lands* | [`site-build-protocol.md`](site-build-protocol.md) |
+| The copy-paste prompts to hand ANOTHER agent (site owner / maintainer) | [`converter-fix-my-site-prompt.md`](converter-fix-my-site-prompt.md) · [`converter-training-prompt.md`](converter-training-prompt.md) |
 | Cloning gotchas (Tailwind, spacing, emoji vs SVG, wp-emoji…) | [`cloning-gotchas.md`](cloning-gotchas.md) |
 | The deterministic converter (capture service + Site Converter) | [`extensions/site-converter.md`](extensions/site-converter.md) |
 

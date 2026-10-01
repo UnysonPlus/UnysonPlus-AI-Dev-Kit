@@ -477,6 +477,19 @@ No Enable switch — renders when any column has an element. `multi` wrapper, gr
 
 - `topbar_presets` — **Type** `preset-loader` (`preset_group: header_topbar`).
 - `topbar_columns_note` — **Type** `html-full` (info note on zone alignment).
+- `topbar_unstick` — **Type** `switch`. **Default** `false`. **Label** "Scrolls Away". Lets the Top Bar scroll
+  out of view while the main header stays pinned. Only applies when Header Position is Sticky or Transparent
+  overlay; no effect on a Static header, and none when the Top Bar has no elements.
+  **Why it exists**: Position lives on the main header, and its Sticky setting pins `.site-header`, which
+  *contains* this bar — so by default a utility bar pins with the nav. That is right for a phone number or a
+  language switcher, but it is not the commoner shape: a bar carrying an address, opening hours or a contact
+  line is usually written to scroll away, so the viewport is not spending 30-odd pixels on an address the
+  visitor has already read. Measured across 114 captured sites: 91 have a header, 68 pin it, and **47 pair a
+  non-sticky utility bar with a sticky header** — about half of every site with a header at all.
+  **How**: a child of a `position:sticky` box cannot scroll out from under it (the whole box is what pins), so
+  the sticky moves down one level — `.site-header` goes static and `.header-main` becomes the pinned box, with
+  the painted fill carried onto it for both states. No JS. The Site Converter sets this automatically when it
+  finds the source's bar OUTSIDE a pinned header, and deliberately does not when the source pins it inside.
 - `topbar_left` / `topbar_center` / `topbar_right` — **Type** `addable-popup` (header column; see element popup below).
 - `topbar_custom_styling` — the shared Custom Styling block (prefix `topbar`; see below).
 
@@ -539,7 +552,17 @@ Each header column is an `addable-popup` whose `popup-options` add elements. Per
   - `custom_html` → `custom_html_content` (textarea).
   - `menu` → `menu_id` (select; choices = existing WP nav menus by term_id).
   - `menu_area` → `menu_location` (select; default `primary`; choices `primary` Primary menu, `secondary` Secondary menu, `footer` Footer menu, plus any registered theme locations).
-  - `heading` → `heading_text` (text), `heading_level` (select `h2`/`h3`/`h4`/`h5`/`h6`, default `h3`). Renders `<{level} class="footer-links-title hf-heading">`. (Shared with the footer builder; see [footer.md](footer.md).)
+  - `heading` → `heading_text` (text), `heading_level` (select `h2`/`h3`/`h4`/`h5`/`h6`, default `h3`),
+    `heading_icon` (`icon-v2`, default `{type:none}`) — an optional small mark shown BEFORE the heading text,
+    e.g. a pin over an address column or a clock over opening hours. Renders
+    `<{level} class="footer-links-title hf-heading hf-heading--has-icon"><span class="hf-heading__icon-wrap" aria-hidden="true">…</span>Text</{level}>`;
+    without an icon the markup and classes are unchanged. The mark is decorative — it is hidden from
+    assistive tech and the heading keeps its own text as the accessible name. Gap is
+    `--hf-heading-icon-gap` (default `.5rem`). (Shared with the footer builder; see [footer.md](footer.md).)
+    **Why it exists**: the element carried text and level only, so a source that marks its column titles had
+    nowhere to put the glyph and it was dropped — three missing images on a real four-column footer. The Site
+    Converter now carries the title mark here, and a ROW mark onto the list item (`li_icon`), which had
+    always existed.
   - `link` → `link_label` (text), `link_url` (text — full URL or in-page anchor), `link_target` (select `_self` Same tab / `_blank` New tab, default `_self`). Renders one `<a class="footer-link hf-link">` (New tab adds `rel="noopener noreferrer"`). Stack several under a `heading` to build a link column — the atomic replacement for the removed compound `links` element.
   - `text` → `text_content` (`wp-editor`, tinymce/shortcodes; supports `{{current_year}}`).
   - `widget_area` → `sidebar_id` (select; default `sidebar-right`; choices = registered sidebars incl. `sidebar-right`,`sidebar-left`,`header-1..3`,`footer-1..5`).

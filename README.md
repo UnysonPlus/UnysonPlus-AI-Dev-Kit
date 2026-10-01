@@ -48,7 +48,7 @@ That is the entire setup. Everything after this, the agent does.
 
 ## The whole thing in one prompt
 
-Point your agent (Claude Code, Cursor, …) at this kit and paste this, filling the 3 blanks. The
+Point your AI coding agent at this kit and paste this, filling the 3 blanks. The
 agent reads `AGENTS.md` and does the rest.
 
 ```text
@@ -113,7 +113,7 @@ Run `update.ps1` whenever you come back, so you build against the current plugin
 | `PLAYBOOK.md` | The outside-in build process (frame → sections → elements). |
 | `tools/README.md` | **Tools inventory** — every runnable tool by capability (measure, compare, capture, build). |
 | `docs/theme-settings/README.md` | **Every** Theme Settings option — configure the design from these, not CSS. |
-| `docs/design-parity-checklist.md` | Metric set + the measurement algorithm. |
+| `docs/build-reference.md` | Metric set + the measurement algorithm. |
 | `tools/measure/*.mjs` | The parity harness — frame metrics, region ensemble (pixelmatch + Resemble.js + DOM), full-body property diff. |
 | `assemble.ps1` · `.wp-env.json` | Populate the assembled folders; one-command WordPress. |
 

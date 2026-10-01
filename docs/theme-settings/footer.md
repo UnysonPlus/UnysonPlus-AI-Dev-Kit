@@ -302,7 +302,12 @@ Rule of thumb: **links → Menu, words → Text, logo → Footer Logo; Custom HT
 
 - **Saved value shape**: `[ 'element' => 'text', '<element>' => {…sub-options…} ]`
 - **Per-element sub-options**:
-  - `heading` → `heading_text` (text), `heading_level` (select `h2`/`h3`/`h4`/`h5`/`h6`, default `h3`). Renders `<{level} class="footer-links-title hf-heading">`; use it above a stack of `link` elements to title a column.
+  - `heading` → `heading_text` (text), `heading_level` (select `h2`/`h3`/`h4`/`h5`/`h6`, default `h3`),
+    `heading_icon` (`icon-v2`, default `{type:none}`) — an optional mark before the text (a pin over an
+    address column, a clock over opening hours). Renders `<{level} class="footer-links-title hf-heading">`,
+    gaining `hf-heading--has-icon` plus a `<span class="hf-heading__icon-wrap" aria-hidden="true">` when an
+    icon is set; gap `--hf-heading-icon-gap` (default `.5rem`). Use it above a stack of `link` elements to
+    title a column. See [header.md](header.md) for the full note.
   - `link` → `link_label` (text), `link_url` (text — full URL or in-page anchor), `link_target` (select `_self` Same tab / `_blank` New tab, default `_self`). Renders one `<a class="footer-link hf-link">` (New tab adds `rel="noopener noreferrer"`); stack several under a `heading` to build a link column. Replaces the old compound `links` element.
   - `cta_button` → `cta_text` (text, default `Get Started`), `cta_link` (text, default `#`), `cta_style` (`button-style-picker` from Theme Settings → Buttons; fallback select `filled` Filled/`outline` Outline/`pill` Pill (Rounded)), `cta_size` (`button-style-picker` sizes).
   - `icon_text` → `icontext_icon` (icon-v2), `icontext_text` (text), `icontext_link_type` (select: `none` No link, `url` Website URL, `email` Email (mailto:), `phone` Phone (tel:); default `none`), `icontext_link` (text).

@@ -181,6 +181,8 @@ A path may also be `id:<unique_id>`.
 - **OAuth 2.1 for MCP (1.0.19)** — `includes/class-fw-ai-oauth.php` (`FW_AI_OAuth`). Discovery: `/.well-known/oauth-protected-resource`,
   `/.well-known/oauth-authorization-server`, `/.well-known/openid-configuration` answered in `parse_request` (priority 0,
   home-path aware) + REST copies `unysonplus-ai/v1/oauth/{protected-resource,authorization-server}`; issuer = `home_url()`.
+  The three open POST routes are rate-limited per visitor (`fw_rate_limit_exceeded`; 429 `temporarily_unavailable`):
+  register 5/hour (each call creates a client toward the cap), token and revoke 30 per 10 min.
   DCR `POST oauth/register` (public clients only, redirect https or http loopback; option `upw_ai_oauth_clients`, cap 200,
   unused ones pruned). Consent = hidden admin page `admin.php?page=fw-ai-authorize` (edit_posts; parent `fw-ai-hidden`),
   nonce `upw_ai_oauth_consent`, Allow/Deny, access write|read; an admin's Allow turns `upw_ai_mcp_mode` on when Off.

@@ -8,7 +8,7 @@ You describe the page as a tree of **Div** layout primitives (`upw_div_section` 
 PHP array, and call `upw_build_page()`; it stores the value the way the builder itself does.
 
 Helpers live in **`tools/upw-build-pages.php`**. This is the *mechanical* how-to. For the end-to-end
-"turn a prompt into a site" workflow, see **[build-a-site.md](build-a-site.md)**.
+"turn a prompt into a site" workflow, see **[build-reference.md](build-reference.md)**.
 
 > **⛔ Hand-authoring a tree to reproduce a SOURCE is a Rule-0 violation.** This file's PHP-array
 > authoring is legitimate for a **fresh build, a demo, or a test** — where you're *creating* a page. It is
