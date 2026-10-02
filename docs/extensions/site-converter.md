@@ -6514,3 +6514,32 @@ Two rules, both learned here:
 
 Whether the suite is safe is itself checkable: read a known settings value, run the whole suite, read it
 again. It now survives all 54.
+
+### The page shell is not where the content column goes (2026-10-02)
+
+A source `<main>` usually carries a content column — `max-width:720px`, 24px gutter. `main_style()`
+reproduced it by pinning that onto the theme's `#main.site-main` with `!important`. Every section lives
+*inside* that shell, so this clamped every section's own background with it: a `bg-white/5` wash the source
+spreads edge to edge rendered as a 720px panel floating mid-page, and an image box received a width its
+height had never been computed for, leaving an empty band under the photo.
+
+The source does the opposite of a clamp. The `<section>` spans the viewport; only the container inside it is
+narrow. `content_width` on each band expresses exactly that, so the measured width now goes to the band
+fallback (`$site_container_px`) and the shell keeps only its VERTICAL padding — which is page padding and
+constrains nothing. The horizontal gutter is left off too: on the shell it insets every section background,
+when in the source that gutter sits *inside* the full-bleed section.
+
+**Three things worth carrying forward:**
+
+- **`!important` turned a wrong rule into an unbeatable one.** It also beat the full-bleed page width the
+  importer sets, so two converter behaviours fought and the wrong one won. A converter rule that can be
+  overridden fails visibly; one that cannot, fails silently and survives every later fix.
+- **A baked rule is not fixed by a plugin update.** This shipped in the generated child theme, so the site
+  kept rendering the old way after updating to a build that no longer emits it. Anything written into the
+  conversion needs a reconvert, and that has to be said out loud when reporting a fix.
+- **The dead `#main is the container` mode went with it.** It only existed to stop the clamp double-gutting a
+  band; with no clamp there is nothing to compensate for.
+
+Goldens: `main-shell-not-a-clamp-test.php` (proved red: 3 assertions fail against the old clamping
+behaviour), plus two `golden-fixture-1` assertions that encoded the old shape and were updated to the new
+one rather than deleted.

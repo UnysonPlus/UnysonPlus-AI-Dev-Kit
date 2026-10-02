@@ -452,7 +452,7 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "316e469a1b42bbd8251f007c7e15bd06",
+      "hash": "4555a90476fa9d516bc87cf329f1261d",
       "synced": "2026-10-02"
     },
     "extensions/site-migration.md": {
