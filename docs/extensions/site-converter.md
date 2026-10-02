@@ -6352,3 +6352,165 @@ shape appears on **one site in 117 captures**, twice, both the same string. So t
 by `is_counter_text()` — and keyed to the counter *shape*, never to the position alone, because that
 same slot can hold a price or a duration on another source and deleting those silently would be worse
 than the bug. Golden: `icon-row-meta-test.php`.
+
+### An overlay caption is a chip, and the half of it nothing reports (2026-10-02)
+
+A badge centred on a hero photo arrives through `caption_tile_block()` as the image box's caption, which
+is text. The source draws it as a **pill**: a translucent fill, a hairline ring, a full radius, a backdrop
+blur, and a small painted dot leading the label. Only the label's own stamp was carried, so the words came
+through correctly sized, uppercased and tracked while everything around them vanished and the badge read as
+loose text lying on the picture.
+
+Two things made it hard to see:
+
+- **The title's stamp is not the chip's stamp.** The label span holds the type; the chip is one or two
+  levels up. Walk from the title toward the caption layer and keep the first ancestor that is actually
+  *painted* (a non-transparent fill or a real border) — guessing a fixed depth gets a different element on
+  every source.
+- **The dot carries no text.** Drop it and every text-matching parity lens still passes: the label just
+  sits a little too far left in a pill that looks subtly empty. Nothing in the harness was ever going to
+  report it, which is the general lesson — a decorative, textless node is invisible to a text lens, so it
+  has to be found by looking at the rendered badge.
+
+The dot detector is now **one** helper, `painted_dot_in()`, shared by the badge path (`pill_parts()`) and
+this caption path, because both meet the identical chip. It was two copies for a while and only one of them
+carried the fix for a `rounded-full` radius, which stamps in **scientific notation** (`3.35544e+07px`) and
+does not match a naive `[0-9]+px` test — the second copy would have silently lost the dot the first time
+anyone touched it.
+
+Rendered as a `::before` on the title rather than a real node, so the caption stays a single text element,
+with the pulse behind `prefers-reduced-motion: no-preference` so a still dot is a choice and not a loss.
+Golden: `caption-pill-skin-test.php` (proved red: 10 assertions fail without it). **PHP-only** — the JS
+twin has no `caption_tile_block`; it decomposes image-with-overlay along a different route entirely, which
+is a real divergence between the two paths but a pre-existing one.
+
+### Preloading the webfaces, and the restraint that makes it worth doing (2026-10-02)
+
+`font-display:swap` is settled (see the `optional` revert: a cold load rendered the headings in a fallback
+serif, and silently substituting the typeface is a worse defect for a conversion tool than a shift). But
+`swap` does shift, so the generated theme now preloads the few self-hosted faces first paint needs, on
+`wp_head` at priority 1 — ahead of the stylesheet that references them, since a preload placed after the CSS
+saves nothing.
+
+**The work is entirely in the restraint.** One real capture rehosts **65** `@font-face` blocks across two
+families. Preloading them would pull roughly a megabyte of Cyrillic, Greek and Vietnamese subsets onto the
+critical path and be far worse than the shift it set out to fix. Only 15 of the 65 cover basic latin and most
+of those are italic. The correct answer there is **two files**; on another conversion, one.
+
+Two bugs are worth keeping in mind because both were written and both measured:
+
+- **A loose subset test matched `U+2DE0-2DFF` and preloaded the Cyrillic file.** A rule that matches
+  everything fails exactly as badly as one that matches nothing — and this one fails expensively, by putting
+  the wrong megabyte on the critical path. Basic latin is the range that *starts at zero*: `U+0000-00FF`, or
+  `U+0-FF` shortened.
+- **Two different things duplicate, and each needs its own guard.** A family can arrive twice, once from the
+  source's Google stylesheet and once from an inline `@font-face` the source also carried — only a
+  family+weight key collapses that. And a **variable** font serves every weight from one file — only a url
+  check collapses that. With either guard alone the same `<head>` preloaded the identical woff2 twice.
+
+Golden: `font-preload-test.php` (proved red both ways: 6 assertions fail on the loose subset test, 4 on the
+missing url guard). It also lints the generated `functions.php`, because this emitter writes PHP into a
+user's theme.
+
+**Measured outcome, stated honestly.** On the conversion this was built against, the selection is exactly
+right — one variable latin file, the one the hero heading uses at weight 700 — and **CLS did not move**
+(0.164 → 0.170, noise). That page's shift is a 63px hero collapse-and-restore that correlates with font
+loading but is not cured by preloading the face, and is still unexplained. The preload is correct work that
+addresses the originally measured font-swap case; it is not a fix for this page, and should not be reported
+as one.
+
+### Self-hosted meant self-hosted everywhere except where it counted (2026-10-02)
+
+Rehosting downloads the source's webfaces into the generated child theme so the converted site has **no CDN
+dependency**. It did not have that. The Typography settings still name the family, the parent theme builds
+its Google Fonts `<link>` from those settings, and nothing connected the two — so a converted page shipped
+the faces locally *and* requested the identical typeface from Google. Three requests to Google hosts (the
+stylesheet plus two preconnects) on a site whose fonts were already present.
+
+The remote copy is the harmful one, and for a reason worth remembering: it is deliberately fetched
+`media="print"` so it does not block paint. That is a Lighthouse win for a site that needs it, and a defect
+for one that does not — non-blocking means it lands **after** first paint and re-enters font loading on a
+page that had already settled.
+
+A theme now declares what it ships, through `unysonplus_self_hosted_font_families`; the generated
+`functions.php` registers the families the rehost produced (`rehosted_fonts.families`, which until now
+existed only "for reference"). The parent drops exactly those from the link, prints nothing when none
+remain, and leaves a family it does *not* self-host alone — dropping that one would blank a real typeface.
+
+**Two traps, both hit:**
+
+- **The preconnect hints have to read the same answer as the printer.** Reading the raw option left a page
+  that never contacts Google still preconnecting to two Google hosts — a DNS + TLS round trip for a
+  connection nothing uses.
+- **Asserting the helper proves nothing about the page.** The first version of the golden passed with the
+  call *removed from the printer*: the conversion went on loading the font from Google and every assertion
+  stayed green. The golden now exercises `_action_theme_print_google_fonts_link()` itself, and to get a
+  meaningful baseline it must detach the hook first — the install's own converted theme already declares its
+  families, so an unguarded baseline prints nothing and the test skips itself into a green that means
+  nothing.
+
+Golden: `self-hosted-fonts-test.php` (proved red three ways: printer wiring removed, hint wiring removed,
+and the helper ignoring the declaration).
+
+**Measured: LCP 2472ms → 1860ms median (−25%), Google requests 3 → 0. CLS did NOT move** — it stays 0.159 on
+five runs in six. That shift is now precisely attributed and is a different defect: the hero's flexbox grows
+**729 → 792px** as the h1 re-wraps from two lines to three, because the fallback face is narrower than the
+real one. Preloading does not prevent it — the face is downloaded at ~1500ms, *before* FCP at ~1596ms, and
+the swap still lands at ~1816ms. The deterministic fix is a **metric-matched fallback**
+(`size-adjust` / `ascent-override` computed from the rehosted face), so the fallback occupies identical space
+and the swap cannot reflow. That is unbuilt, and it is the next thing to do for this page's CLS.
+
+### The section fill that became a floating panel (2026-10-02)
+
+Reported as "the sections now have background colours". They do, and the colours are right — the bug is that
+the page they sit on is the wrong width.
+
+A converted design is **full-bleed**: the `<section>` spans the viewport and only the container inside it is
+narrowed, which is what the `section--cw-*` classes are for and exactly what the source does. The theme's
+default for a page is the opposite, a 720px reading column, and a conversion never set otherwise — so every
+converted page rendered inside that column.
+
+That was invisible while sections had no fill of their own. Once a section's background is carried, the same
+bug paints: a `bg-white/5` wash the source spreads edge to edge is clipped to the reading column and reads as
+a panel floating in the middle of the page. Measured, before → after, against the source:
+
+| | before | after | source |
+|---|---|---|---|
+| section | 672px at left 339 | 1350px at left 0 | 1350px at left 0 |
+| container | 624px | 768px | 768px |
+| image box | 624×436 | 1024×436 | — |
+
+**One cause, three symptoms**, which is why it was worth chasing past the first one. The too-narrow content
+and a grey band under a photo were the same defect: the image box's height had been computed for the
+full-width geometry it never got, so 171px of empty box sat under the picture with the scrim painting it.
+Page height after the fix is 5401px against the source's 5411px.
+
+The fix is one value — `pages_layout.default_content_width = 'full'` — written in the importer, where every
+conversion path funnels, rather than per page. It is written as a normal incoming value, so the user-edit
+guard and the fingerprinting both apply: set a reading column by hand afterwards and the next conversion
+leaves it alone. A bundle that states its own width keeps it.
+
+Golden: `full-bleed-pages-test.php`. Note what it asserts last — the value read back through the THEME's
+reader in a clean process, not the option the test just wrote. A test that re-reads its own write would pass
+even if the key were renamed out from under the theme.
+
+### A test that broke the site it was testing (2026-10-02)
+
+The golden for the full-bleed fix drove the real importer against the live install, and to mean "a conversion
+that says nothing about width" it passed `array( 'general_layout' => array() )` with `$force`. The importer
+did exactly what it is told to do and wrote that real key as **empty**. `general_layout` holds the site
+background, so running the test blanked the converted site's dark background — and white body text on a now
+white page simply vanished, leaving only the gradient-coloured words of the hero heading visible. The bug
+report that followed was "the conversion is broken", and the conversion was fine.
+
+Two rules, both learned here:
+
+- **Never use a real settings key as a throwaway payload value.** The importer has no way to distinguish a
+  deliberate "clear this" from a test's filler. Pass the key back at its current value when the point is
+  merely that some other key is absent.
+- **A test that writes to the live install must put back everything it can touch**, through a snapshot taken
+  before the first write and a `register_shutdown_function` restore so a failing assertion cannot leave the
+  site broken either. Restoring only the key under test is not enough — the damage was to a different key.
+
+Whether the suite is safe is itself checkable: read a known settings value, run the whole suite, read it
+again. It now survives all 54.

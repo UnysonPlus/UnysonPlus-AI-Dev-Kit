@@ -452,8 +452,8 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "52ab5d6400f0feb556d4bb98c46d4291",
-      "synced": "2026-10-01"
+      "hash": "316e469a1b42bbd8251f007c7e15bd06",
+      "synced": "2026-10-02"
     },
     "extensions/site-migration.md": {
       "kind": "extension",
