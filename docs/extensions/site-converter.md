@@ -6543,3 +6543,43 @@ when in the source that gutter sits *inside* the full-bleed section.
 Goldens: `main-shell-not-a-clamp-test.php` (proved red: 3 assertions fail against the old clamping
 behaviour), plus two `golden-fixture-1` assertions that encoded the old shape and were updated to the new
 one rather than deleted.
+
+### A preset control that does nothing is the quietest bug here (2026-10-05)
+
+Reported as "I changed the button's Background Color and it doesn't get reflected". The control was working
+perfectly. A converted gradient-border button paints two background layers — an inner solid clipped to the
+padding box, and the gradient clipped to the border box so it shows through a transparent edge — and the
+inner solid, which IS the fill, was written into the preset's Custom CSS as a colour literal. It is also
+already parsed into `bg_color`, so the same colour was stored twice and the layer sat on top of the control's
+own value. The colour changed, the page repainted, nothing moved.
+
+Nothing errors in this class of bug and the page never looks broken. The only symptom is a control that does
+nothing, which is why it survived every visual check.
+
+The fix is a variable, not a special case: `css-tokens.php` publishes `--btn-bg` and `--btn-border` beside
+the preset's `background-color` / `border-color`, and the converter emits `var(--btn-bg, C)` and
+`var(--btn-border, transparent)` with the measured value as the fallback. Default output is byte-identical;
+a value chosen in Theme Settings now wins, which is what choosing one means.
+
+**The audit matters more than the fix.** Comparing every converted preset's Custom CSS against the
+properties its native controls own, across all four families:
+
+| family | presets | properties restated in Custom CSS |
+|---|---|---|
+| `button_colors` | 2 | `background-image`, `border-color`, `box-shadow` |
+| `button_sizes` | 3 | none — no Custom CSS at all |
+| `border_presets` | 20 | 2 only (`backdrop-filter`, `padding`) |
+| `table_presets` | 5 | none |
+
+Most presets carry no Custom CSS, so their controls are unobstructed. **Border Color was a second dead
+control**, found by that audit rather than by a report, and fixed the same way. Still unverified: the two
+`border_presets` collisions, and `box-shadow` on buttons (the preset state has no `box_shadow` field, so
+where that control stores its value is unresolved).
+
+**Two things to know before telling anyone a preset fix is live.** The preset's Custom CSS is *stored data*,
+written at conversion time — a plugin update cannot rewrite it, so the fix needs a reconvert. And a reconvert
+**skips any preset the user has hand-edited**: the user-edit guard compares a fingerprint, so an edited
+preset is protected from the very conversion that would repair it. Resetting it means clearing both the value
+and its entry in `fw_sc_settings_fingerprint`.
+
+Golden: `button-preset-editable-test.php`.

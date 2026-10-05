@@ -308,8 +308,8 @@
         "{plugin}/framework/extensions/asset-optimizer/manifest.php",
         "{plugin}/framework/extensions/asset-optimizer/settings-options.php"
       ],
-      "hash": "c4be9e479c8ff14d2dbfba2cdbacc866",
-      "synced": "2026-10-01"
+      "hash": "d800ea9eefd3bd717e39edb5c002ca44",
+      "synced": "2026-10-04"
     },
     "extensions/blog.md": {
       "kind": "extension",
@@ -452,8 +452,8 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "4555a90476fa9d516bc87cf329f1261d",
-      "synced": "2026-10-02"
+      "hash": "db202440fdac557ae5417d70da5c555f",
+      "synced": "2026-10-05"
     },
     "extensions/site-migration.md": {
       "kind": "extension",
@@ -1259,7 +1259,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/image-box/options.php"
       ],
       "hash": "1b4b31dd2c9761f1f5959c403f309d14",
-      "synced": "2026-09-27"
+      "synced": "2026-10-03"
     },
     "shortcodes/image-content.md": {
       "kind": "shortcode",
@@ -1986,6 +1986,15 @@
       ],
       "hash": "7f88d55477dfb9b0cb172f92f978e665",
       "synced": "2026-09-29"
+    },
+    "extensions/short-links.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/short-links/manifest.php",
+        "{plugin}/framework/extensions/short-links/settings-options.php"
+      ],
+      "hash": "3ee6a07b42d3a9e77b6517501404a666",
+      "synced": "2026-10-05"
     }
   }
 }
