@@ -137,6 +137,60 @@ Filters: `fw_ao_static_cache_extensions` (default css/js/mjs/woff2/woff/ttf/otf/
 
 **Gotcha when editing the rule string:** the `FilesMatch` line is assembled from mixed single/double-quoted PHP and a stray `\"` lands a literal backslash before the closing quote, which is an Apache syntax error - i.e. a 500 on every page, not a silent no-op. Print the generated block (reflection on `static_cache_rules()`) and read it before trusting a change.
 
+## Front-end editors are exempt (automatic)
+
+`request_is_editor()` stands the whole optimizer down - combining **and** purging - for a request carrying a front-end editor's query var. Checked in `should_combine()`, which `purge_enabled()` and the public `is_combine_enabled()` both route through, so one check covers every path.
+
+**Why it is needed.** The Live Editor draws its entire interface with JavaScript after the document loads, so none of the class names it styles exist in the HTML the purger scans. Every rule styling the editor reads as unused and is removed, and the editor comes up as an unstyled stack of links. Reproduced and confirmed by control: with the bypass disabled the editor rendered as a bare list (`liveEditorSheets: 0`, its CSS folded into the purged bundle and stripped); with it enabled, 128 individual stylesheets, no bundle, editor correct.
+
+The safelist cannot solve this - the markup does not exist at scan time, and hand-listing an entire extension's CSS is a list nobody maintains.
+
+**Why combining is disabled too**, though combining is not what broke it: the editor then sees exactly the stylesheets it enqueued in the order it enqueued them, which is the state it was built against. Nothing is lost - a logged-in authoring screen has no visitor performance to win.
+
+Two seams, both public:
+
+- `fw_ao_editor_query_vars` - the query vars that mark an editing context (default `fw-live-editor`, `fw-live-editor-frame`). An extension rendering its own editor through the theme adds its own here.
+- `fw_ao_skip_request` - a bool to skip all optimization for this request. The Live Editor hooks this itself (`_filter_asset_optimizer_skip`, registered in its `_init`) so the two stay in step if its query vars are ever renamed; the defaults above are the belt to that braces.
+
+Verified scoped: a plain visitor request to the same URL still receives the purged bundle.
+
+## Generate missing image sizes (`generate_image_sizes`, opt-in)
+
+`FW_AO_Subsizes` (includes/class-fw-ao-subsizes.php) fills in intermediate sizes an import never produced, so a `srcset` has something between the smallest file and the full original.
+
+**The problem.** A srcset can only offer sizes that exist on disk. The Site Converter imported with `thumbnail` + `medium` only (resizing is the bulk of its media phase), so the browser was handed a 300w file and the original and nothing between, and took the original at every slot. Measured on a converted page: a **1024x434 slot pulled the 1440w file at 91.9 KiB**; with the sizes present it took the **1024w file at 67.7 KiB — 26% less for identical rendered pixels**.
+
+**The hook matters.** `wp_calculate_image_srcset_meta` runs *before* the candidate list is built and returns the metadata used to build it, so generating there corrects the srcset **on the request that triggered the work**, not the next one. Verified: the repair and the smaller download both happened on view 1.
+
+**Budget.** One attachment per request (`fw_ao_subsizes_per_request`), against WebP's eight, because this runs while a visitor waits — measured **~154 ms** to generate 3 sizes from a 1440x611 original. Only images actually rendered on a page are ever touched.
+
+**The bug this nearly shipped with.** Judging success by `is_wp_error()` is not enough: given a **corrupt original, `wp_update_image_subsizes()` returns an ordinary array**, having generated nothing, in ~7 ms. The sizes stay missing, the attachment is picked again next view, and since the budget is 1, that one unfixable image would consume the whole allowance **on every view, blocking every other image on the page forever**. Success is therefore judged by whether the missing-size count actually fell; if not, `_fw_ao_subsizes_failed` is set and the attachment is skipped (cleared on `attachment_updated`). Verified: marker sets on view 1, view 2 moves on.
+
+**Front-end gotcha.** `wp_get_missing_image_subsizes()` and `wp_update_image_subsizes()` live in `wp-admin/includes/image.php`, which is **not loaded on the front end**. Gating registration on `function_exists()` for either is always false exactly where the feature must work, and the filter is never registered — this cost a debugging round. The file is required on demand inside `maybe_fill()`.
+
+**Converter side.** As of site-converter 1.11.25 the import default is `thumbnail, medium, medium_large, large` (filter `fw_sc_media_image_sizes`), measured at **61 ms -> 162 ms per image, about +5 s on a 50-image conversion**. 1536/2048 are still skipped - rarely chosen, most expensive. This option remains the repair path for libraries imported before that change, and for any non-converter site with incomplete metadata.
+
+## Move late CSS into the head (`hoist_late_styles`, opt-in)
+
+`hoist_late_styles()` moves `<style id="...">` blocks printed in the BODY up to the end of `<head>`, inside the existing output buffer (which this option now also triggers on its own).
+
+**Why.** The flexbox shortcode collects each instance's rules while the content renders and prints one consolidated block on `wp_footer` — [class-fw-shortcode-flexbox.php](../../../unysonplus/framework/extensions/shortcodes/shortcodes/flexbox/class-fw-shortcode-flexbox.php) calls it *"Phase 4 of the clean-output plan"*. Consolidating is right; the problem is that those rules include `max-width` and `margin:auto`, i.e. they decide where an element **sits**. The browser lays the element out without them, paints, then re-lays out when the block lands at the bottom of the document.
+
+Measured on a converted page: the hero painted left-aligned at **x=24** and jumped to its centred **x=384** when the footer block arrived (byte 52,223 of 53,437) — a 360px *horizontal* move.
+
+```
+hoist OFF   CLS: 0.1468  0.1468  0.1468
+hoist ON    CLS: 0       0       0
+```
+
+Zero computed-style differences across 249 elements: the page renders identically, it just stops moving.
+
+**⚠ Lighthouse blames the wrong thing.** It attributes this shift to **"Web font"** and names the woff2. It is not the font: blocking every font outright still measured **0.1451**. Earlier work in this repo chased the font on that basis and produced a metric-override fix that is correct in isolation and changes nothing on the real page (the converter's font preload already lands the font before first paint). If a layout shift here is *horizontal*, it is not a font.
+
+**Cascade safety.** Blocks keep their relative order and are inserted at the very end of `<head>`, after every stylesheet already there, so each rule keeps the priority it had; nothing else in a normal document sits between them and the body. Only `id`'d blocks move (an anonymous `<style>` may be hand-placed in content), `<noscript>` blocks are left alone, and `fw_ao_hoist_styles_skip` exempts an id. Skipped in admin/AJAX/REST and in the Live Editor.
+
+**Gotcha for anyone editing the regex:** the pattern was first written through a Python heredoc, which turned `` and `` into literal control bytes (0x08, 0x01) in the PHP source. It compiled, matched nothing, and failed silently — the feature appeared to do nothing while every step passed when tested in isolation. `sed -n 'Np' file | cat -A` is what found it. Verify any regex written by tooling with `cat -A` before trusting it.
+
 ## Notes / gotchas
 
 - **Handle discovery** is done by a one-shot internal homepage fetch; behind a full-page cache (e.g. WP Engine) visit any page with `?fw_asset_optimizer_discover=1` to force a fresh scan.

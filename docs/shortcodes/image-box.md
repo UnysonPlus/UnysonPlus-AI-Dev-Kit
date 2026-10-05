@@ -73,6 +73,17 @@ An image paired with an optional eyebrow, title, text, icon and button — a por
 
 The Site Converter maps a **titled image tile** — a prominent photo + title + short text (+ a CTA / hover "explore" link), the portfolio / service-card / feature-tile pattern — to a cohesive `image_box` (`n_image_box`), instead of decomposing it into loose `media_image` + heading + text blocks. It carries the image (cropped to the source frame aspect → `image_ratio`), title/text, a CTA (`button_style` = `arrow` when the source label/icon has an arrow glyph, else `link`; label from the explore link), the whole-card link (`link_url`), and the **Stacked** family (`img-title-text`). An image-only / untitled blob still falls back to the decomposed image_card. Overlay / Side families are not auto-selected yet.
 
+## Rendered `<img>` attributes (since shortcodes 1.15.54)
+
+The tag carries `width`, `height`, `srcset` and `sizes` resolved from the attachment, on top of the long-standing `src` / `alt` / `class` / `loading="lazy"` / `decoding="async"`. `sc_imgbox_img_dimension_atts()` builds them; `sc_imgbox_attachment_id_from_url()` recovers the attachment when the option carries no `attachment_id`, normalising a protocol-relative `//host/path` (what the Site Converter emits) and an http/https mismatch first — `attachment_url_to_postid()` matches the stored URL character for character and returns 0 for either form. Memoised per request. An image outside the media library yields an empty array and the old five-attribute tag.
+
+**Do not oversell this.** Two things were measured on a real converted page and neither matched the obvious expectation:
+
+- **CLS did not move.** 0.1577 with the attributes and 0.1577 without, on the same page, same throttling. The whole shift was one `DIV.fw-flexbox` — the hero's font swap — and none of it was the image, because the design's own CSS already pins the media box to a fixed height. The attributes help on designs that let the image size itself; they are correct to emit either way and they silence Lighthouse's "Image elements do not have explicit width and height", but a page whose box is already fixed will show no improvement.
+- **`srcset` is only as good as the sizes that exist.** The measured attachment registered `medium` (300x127) and `thumbnail` and nothing else, so a 1024px slot still took the 1440w original — the browser had nothing in between to pick. Where intermediate sizes are missing, generating them is the fix, not the markup.
+
+Verified that the attributes do not fight the layout: with `width="1440" height="611"` the image still rendered at the CSS-driven 1024x434.
+
 ## Notes
 - `design_settings` is a **popover multi-picker** keyed by family. Each family reveals its own sub-object: `stacked` → `{ stacking }` (`img-title-text` `title-img-text` `title-text-img` `text-img-title`); `side` → `{ image_side:'left'|'right', panel:'yes'|'no', media_width:'33'|'40'|'50'|'60' }`; `overlay` → `{ reveal, overlay_color, overlay_opacity }` (reveal: `scrim` `cover` `overlap` `bar` `fade` `slide` `center` `frame`); `card` → `{ style:'card'|'caption-below' }`; `frame` → `{ style:'polaroid'|'postcard'|'badge'|'photo-stack' }`.
 - Image masking is now handled by the shared **Image Style** preset (`image_style` — Styling tab; Theme Settings → Components → Image Styles), which carries the shape library. (Boxes saved with a legacy `image_mask` value still render for back-compat, but it is no longer an editable option.)
