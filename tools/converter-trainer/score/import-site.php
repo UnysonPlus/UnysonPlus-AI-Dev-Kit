@@ -7,6 +7,10 @@
  * Node scorer can combine them with its rendered measurements. Rendering happens in score.mjs afterward.
  *
  * Usage:  php import-site.php <slug> [<batch-root>]
+ * Env:    WP_LOAD        the install's wp-load.php (default: the localhost root install)
+ *         FW_SC_TARGET   the converter OUTPUT TARGET to import into (default: the native page builder) —
+ *                        e.g. `elementor` with WP_LOAD=D:/xampp/htdocs/elementor/wp-load.php. The builder-level
+ *                        signals are then read from that target's own page storage.
  *   <slug>       a captured site folder name under the batch root
  *   <batch-root> default: the kit's assembled capture-service batch dir
  */
@@ -35,16 +39,64 @@ if (!class_exists('FW_Site_Converter_Bundle')) { echo json_encode(['ok'=>false,'
 
 // silence converter notices so stdout stays pure JSON
 $prev = error_reporting(0);
-$r = FW_Site_Converter_Bundle::import_dir($dir);
+// RUN AS AN ADMINISTRATOR, as a real conversion does (the admin flow has the user, wp-cli is trusted). A plain-PHP
+// import has no user, and on an Elementor site that fatals: Elementor mirrors site options (title, tagline, icon)
+// into its Site Kit on every update_option, and refuses to save the kit for nobody.
+$admins = get_users(array('role' => 'administrator', 'number' => 1, 'fields' => 'ID'));
+if ($admins) { wp_set_current_user((int) $admins[0]); }
+
+// EACH CORPUS SITE IS ITS OWN SITE. The converter deliberately skips the theme phase when an INNER page is imported
+// while a converted theme is active (an inner page contributes content, not a site design) — and a corpus served from
+// a preview endpoint reads as an inner page by its URL. So after the first site, no theme was ever generated again and
+// every site was scored under the first one's design. Start each import from the bare parent theme instead.
+if (wp_get_theme('unysonplus-theme')->exists() && get_stylesheet() !== 'unysonplus-theme') { switch_theme('unysonplus-theme'); }
+$target = (string) ( getenv('FW_SC_TARGET') ?: '' );
+try {
+    $r = FW_Site_Converter_Bundle::import_dir($dir, '', '' !== $target ? array('target' => $target) : array());
+} catch (\Throwable $e) {
+    // A fatal mid-import used to surface as WordPress's HTML "critical error" page, which the scorer can only call
+    // IMPORT-FAIL. Report WHAT failed, as JSON.
+    echo json_encode(['ok'=>false,'err'=>'exception','message'=>get_class($e).': '.$e->getMessage(),'at'=>basename($e->getFile()).':'.$e->getLine(),
+        'trace'=>array_slice(array_map(function ($f) { return basename($f['file'] ?? '?').':'.($f['line'] ?? '?').' '.($f['class'] ?? '').($f['type'] ?? '').($f['function'] ?? ''); }, $e->getTrace()), 0, 8),'slug'=>$slug]);
+    exit(0);
+}
 error_reporting($prev);
 
+// ACTIVATE the generated child theme, as the admin Convert flow does after its import. Without it every site was
+// rendered under whichever theme was active before — the PREVIOUS site's CSS — which the lenses then measured.
+if (!empty($r['theme']['slug']) && empty($r['theme']['error']) && wp_get_theme($r['theme']['slug'])->exists() && get_stylesheet() !== $r['theme']['slug']) {
+    switch_theme($r['theme']['slug']);
+}
 foreach (glob(WP_CONTENT_DIR.'/uploads/unysonplus/asset-optimizer/combined-*.css') as $f) { @unlink($f); }
 if (function_exists('wp_cache_flush')) wp_cache_flush();
 
+// The page just imported IS what gets scored — make it the front page, as this harness promises. A corpus served
+// from a preview endpoint (`/api/preview?…`) reads as an INNER page by its URL path, so the import leaves the old
+// front page in place and the scorer would measure THAT page for every site (it did, on a fresh install).
+$imported = 0;
+foreach ((array) ($r['pages']['pages'] ?? array()) as $row) { if (!empty($row['id'])) { $imported = (int) $row['id']; break; } }
+if ($imported) { update_option('show_on_front', 'page'); update_option('page_on_front', $imported); }
 $front = (int) get_option('page_on_front');
 // builder-level signals from the stored page-builder JSON
 $sections = 0; $verbatim = 0; $heroBgVideo = false; $heroBgImage = false;
-if ($front) {
+if ($front && 'elementor' === get_post_meta($front, '_fw_sc_target', true)) {
+    // ELEMENTOR TARGET — the same signals from the Elementor document: top-level containers are the sections,
+    // HTML widgets are the verbatim fallbacks, and the first container's background is the hero backdrop.
+    $els = json_decode((string) get_post_meta($front, '_elementor_data', true), true);
+    $els = is_array($els) ? $els : array();
+    $sections = count($els);
+    $walk = function ($list) use (&$walk, &$verbatim) {
+        foreach ((array) $list as $e) {
+            if (!is_array($e)) continue;
+            if (($e['widgetType'] ?? '') === 'html') $verbatim++;
+            $walk($e['elements'] ?? array());
+        }
+    };
+    $walk($els);
+    $first = $els[0]['settings'] ?? array();
+    $heroBgVideo = (($first['background_background'] ?? '') === 'video') && !empty($first['background_video_link']);
+    $heroBgImage = !empty($first['background_image']['url']);
+} elseif ($front) {
     $json = get_post_meta($front, 'fw:opt:ext:pb:page-builder:json', true);
     $data = is_string($json) ? json_decode($json, true) : $json;
     $walk = function ($n) use (&$walk, &$sections, &$verbatim) {

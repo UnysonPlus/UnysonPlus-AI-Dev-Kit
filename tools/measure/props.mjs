@@ -35,7 +35,8 @@ const CFG = {
   header: { mock: ['#navbar', 'header', 'nav[class*="nav"]', 'nav'], dev: ['#masthead', '.site-header'] },
   footer: { mock: ['footer', '#footer'], dev: ['#colophon', '.site-footer'] },
   bodyMock: ['main > *', 'body > div > *', 'body > *', 'section'],
-  bodyDev: ['.fw-page-builder-content > section', 'main section'],
+  // the build's body bands: the Unyson+ page builder, an Elementor document (a converter output target), then any <section>
+  bodyDev: ['.fw-page-builder-content > section', '.elementor > .e-con', '.elementor .elementor-top-section', 'main section'],
 };
 const CONTAINER_PROPS = ['background-color', 'background-image', 'backdrop-filter', '-webkit-backdrop-filter', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right', 'border-top-width', 'border-bottom-width', 'border-top-color', 'border-radius', 'box-shadow', 'display', 'flex-direction', 'justify-content', 'align-items', 'gap', 'min-height', 'opacity'];
 const TEXT_PROPS = ['color', 'font-size', 'font-weight', 'font-family', 'line-height', 'letter-spacing', 'text-transform', 'text-align', 'text-decoration-line'];

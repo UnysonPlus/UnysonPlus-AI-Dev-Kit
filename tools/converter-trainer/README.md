@@ -140,3 +140,11 @@ The harness proves the *data*. For a section that renders wrong without a data f
 stale combined-CSS cache, a preset-colour miss), still do the full `import_dir` + screenshot
 pass on that one site (see the kit's `docs/extensions/site-converter.md` verify loop). The
 harness narrows *which* site — it doesn't replace looking at the hard ones.
+
+## Scoring an output target
+
+`FW_SC_TARGET=elementor WP_LOAD=D:/xampp/htdocs/elementor/wp-load.php URL=http://localhost/elementor/ node score.mjs`
+imports through that target and keeps its own `_baseline[.<corpus>].<target>.json`. For an Elementor page the
+builder-level signals come from `_elementor_data`: top-level containers are sections, HTML widgets are verbatim.
+(The native `verbatim` lens counts page-builder nodes of type `html`, which the native builder never emits — so it
+reads 100 natively by construction; compare target-to-target, not target-to-native, on that one dimension.)

@@ -51,9 +51,12 @@ keep their values.
 | `grid_autofit` | switch | `no` | `yes` \| `no` | Auto-fit grid tracks (responsive card grids) instead of a fixed count. |
 | `grid_min` | unit-input | `''` | e.g. `240px` (`px rem em %`) | Min track width when `grid_autofit:yes`. |
 | `grid_dense` | switch | `no` | `yes` \| `no` | Dense packing — backfill gaps left by spanned cells (`fw-grid-dense`). |
+| `grid_rows` | text | `''` | `''` (auto) \| integer \| raw `grid-template-rows` | Row tracks (Display = Grid): a count → `repeat(N,minmax(0,1fr))`, or a raw template (`240px auto`). |
+| `grid_row_height` | unit-input | `{value:'',unit:'px'}` | units `px rem em vh` | **Row Height** → `grid-auto-rows`, so spanned tiles have fixed rows to span. |
 | `direction` | responsive image-picker | `{base:'row',…}` | `row` `column` | Main axis (flex). Row = side-by-side; Column = stacked. |
 | `gap` | responsive short-select | `{base:'',…}` | gap scale slug \| `''` | Spacing between children (site gap presets, not `--bs-gutter`). **Applies to flex AND grid.** |
 | `row_gap` / `col_gap` | responsive short-select | `{base:'',…}` | gap scale slug | Per-axis gap overrides. |
+| `gap_custom` | responsive unit-input | `{base:{value:'',unit:'px'},…}` | units `px rem em % vw` | **Custom Gap** — an exact length the spacing scale lacks; overrides `gap` (the per-axis `row_gap`/`col_gap` presets still win on their axis). Scoped rule on the box's `fx-*` class. |
 | `justify_content` | responsive image-picker | `{base:'',…}` | `''` `start` `center` `end` `between` `around` `evenly` | Distribution on the main axis (flex/grid). |
 | `align_items` | responsive image-picker | `{base:'',…}` | `''` `start` `center` `end` `stretch` `baseline` | Cross-axis alignment (flex/grid). |
 | `wrap` | responsive switch | `{base:'yes',…}` | `yes` \| `no` | Allow children to wrap (flex rows only). |
@@ -75,6 +78,16 @@ keep their values.
 | `align_self` | responsive image-picker | `{base:'',…}` | `''` `start` `center` `end` `stretch` `baseline` | Override the parent's cross-axis align for just this box. |
 | `order` | responsive short-select | `{base:'',…}` | `''` `first` `0`..`12` `last` | Reorder among siblings (flex). |
 | `col_start` | responsive short-select | `{base:'',…}` | `''` (Auto) \| `1`..`12` | **Grid Column Start** — place this box at an exact grid column (`grid-column-start`, via `fw-col-start-{bp}-N`, scoped under `.fw-grid`), so you can position an item without empty spacer cells. Combine with `width` for the span. Inert outside a Grid parent. |
+| `col_span` | responsive short-select | `{base:'',…}` | `''` (Auto) \| `1`..`12` \| `full` | **Grid Column Span** — how many columns this box covers in a Grid parent, with ANY column count (Span 2 in a 3-col grid = a double tile); `full` = `1 / -1`. Overrides a fraction `width` span. Emitted with `col_start` as ONE `grid-column` rule per device from the effective (inherited) values: `.fw-grid>.fx-*{grid-column:<start\|auto>/span N}`. |
+| `row_start` | responsive short-select | `{base:'',…}` | `''` (Auto) \| `1`..`12` | **Grid Row Start** — pin to an exact row in a Grid parent. |
+| `row_span` | responsive short-select | `{base:'',…}` | `''` (Auto) \| `1`..`6` | **Grid Row Span** — a tall bento tile. Pair with the parent's `grid_row_height`. `grid-row:<start\|auto>/span N`. A collapsing grid (`responsive_collapse`) resets column AND row placement on phones. |
+
+## atts — Link
+| key | type | default | value shape / choices | what it does |
+|---|---|---|---|---|
+| `link_url` | text | `''` | URL / `#anchor` / path | **Box Link** — the whole box clickable, as a STRETCHED link: one empty `<a class="fw-flexbox__link">` covering the box (`.fw-flexbox--linked`), absolutely positioned so it takes no flex slot / grid cell; links, buttons and fields inside are lifted above it (z-index 2) and keep working — no `<a>` inside `<a>`. |
+| `link_label` | text | `''` | text | The link's accessible name (`aria-label`); empty → the box's first heading, else the URL. |
+| `link_new_tab` | switch | `no` | `yes` \| `no` | `target="_blank" rel="noopener"`. |
 
 ## atts — Styling
 | key | type | default | value shape / choices | what it does |
@@ -89,6 +102,17 @@ keep their values.
 | `aspect_ratio` | text | `''` | e.g. `16 / 9`, `1` | Lock the box to a width : height ratio (`aspect-ratio`). |
 | `text_align` | alignment field | `''` (Inherit) | `''` `left` `center` `right` (+ justify) | Text alignment of inline/text content (`text-*` utility) — applies to **any** tag. |
 | `spacing` | spacing block | see `README.md` | margin/padding scale classes | Per-Div margin/padding (spacing-scale utilities). |
+
+## Layout rules worth knowing (frontend-grid.css)
+- **A column never wraps by default.** `.fw-flex` sets `flex-wrap:wrap` for rows; a column direction (base or per-device
+  `fw-flex[-md|-lg]-column`) resets it to `nowrap`. In a wrapping column, a line is as wide as its widest child's natural
+  width — one long unbroken code line made a whole band overflow a tablet. An explicit Wrap setting (the `!important`
+  `fw-flex-*wrap` classes) still wins.
+- **A Grid stacked in a column gets `width:100%`** (zero specificity via `:where()`, so any Width Override wins; a parent
+  that becomes a row on a larger device hands it back to content sizing). Without it Chrome measures the grid's height
+  before its width: an auto-fit grid as ONE column (rows stretched ~4×) and aspect-ratio tiles at zero width.
+- **Fraction widths do not subtract the gap.** Two 1/2 children + a gap overflow and wrap. For equal shares with a gap use
+  Grow to Fill + Flex Basis 0, or a Grid.
 
 ## Clean output
 An **empty** flexbox (no child content) drops its inert "lay out my children" classes — `fw-flex`,

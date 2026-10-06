@@ -32,6 +32,22 @@ from a global install or a personal copy.
 | **Compose UnysonPlus builder pages programmatically** (sections/columns/elements + effects, still editable) | `tools/upw-build-pages.php` (via `wp eval-file`) + `docs/building-pages.md` | WP-CLI on a live install |
 | **Record / verify the docs manifest** after editing a doc | `docs/sync.mjs check | stamp <doc> | build` | node (no deps) |
 
+## Testing a converter OUTPUT TARGET (e.g. Elementor)
+
+The Site Converter writes into more than one page builder (docs/extensions/site-converter.md → *Output targets*).
+Every tool above works on a target's output — run it against that target's own install, never the root one:
+
+- `section-audit.mjs` / `probe.mjs` / `shot.mjs` — unchanged; point `--converted` / the URL at the target install
+  (e.g. `http://localhost/elementor/`). Elementor sections render as `<section class="e-con">`.
+- `props.mjs` — body bands also match `.elementor > .e-con`. `container-check.mjs` — measures an Elementor page's
+  boxed `.e-con-inner` (selectors are a PRIORITY list: page content before the theme's header container).
+- `converter-probe/probe.sh` — `WP=/d/xampp/htdocs/elementor probe.sh --tests` runs the suites on that install.
+- `converter-trainer/score.mjs` — `FW_SC_TARGET=elementor WP_LOAD=D:/xampp/htdocs/elementor/wp-load.php
+  URL=http://localhost/elementor/ node score.mjs --only … [--baseline]`. Baselines are namespaced per target
+  (`_baseline[.<corpus>].elementor.json`), so a target run never overwrites the native baseline. The importer now
+  starts each site from the bare parent theme, activates the generated theme, makes the imported page the front
+  page and runs as an administrator — each of those had let a score measure the WRONG page / theme.
+
 ## Work from the REPORT, not the raw trees (token discipline)
 
 A capture's `design-capture.json` / `pages.json` are large (100–300 KB) — loading one into context costs

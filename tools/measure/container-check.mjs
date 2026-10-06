@@ -20,13 +20,22 @@ if (!buildUrl || !target) {
   process.exit(2);
 }
 const TOL = 2;
-const SEL = selArg || '.fw-page-builder-content .fw-container, main .fw-container, .fw-container, .container';
+// An Elementor page (a converter output target) holds its content in each boxed container's .e-con-inner; it is
+// tried before the theme's own .fw-container, which on such a page is only the header's.
+const SEL = selArg || '.fw-page-builder-content .fw-container, .elementor .e-con-boxed > .e-con-inner, main .fw-container, .fw-container, .container';
 
 // The WIDEST matching container's CONTENT box (rect width minus horizontal padding) at desktop.
 async function contentWidth(page, url) {
   await page.goto(url, { waitUntil: 'networkidle' });
   return page.evaluate((sel) => {
-    const els = [...document.querySelectorAll(sel)].filter((e) => e.getBoundingClientRect().width > 200);
+    // The selectors are a PRIORITY list (page-builder content first, the theme's own containers last): take the
+    // first one that matches, then the widest of its matches. One combined query would mix them, and the
+    // header's container — first in the document — would be measured instead of the page's.
+    let els = [];
+    for (const one of sel.split(',')) {
+      els = [...document.querySelectorAll(one.trim())].filter((e) => e.getBoundingClientRect().width > 200);
+      if (els.length) break;
+    }
     if (!els.length) return null;
     // pick the widest (the main content container, not a nested one)
     let best = null;

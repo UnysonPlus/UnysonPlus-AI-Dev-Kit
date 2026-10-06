@@ -109,9 +109,103 @@ decomposes to nested `column`s (PHP) or a `code_block` (JS). Those specific shap
 - **Shortcodes:** none — it's an importer toolkit, not builder elements (it *emits* page-builder trees + presets that shortcodes consume).
 - **Admin page:** Unyson+ → **Convert**. Tools: Media scanner/importer, Styling Presets importer, Theme-settings importer, Pages importer, Menu importer, one-shot **Convert bundle** (`.zip`), a **header/footer Theme Generator** (child or standalone), and **"Duplicate as landing page"** (a verbatim, non-decomposed mirror import — see engines below). Two conversion methods (URL / file) with auto-detected source adapters + an optional **"Use AI"** fidelity pass and a human-in-the-loop "Review mapping first" editor.
 - **Reusable engines (`includes/`, all static):** `FW_Site_Converter_Media`, `_Presets`, `_Theme_Settings`, `_Pages`, `_Menus`, `_Bundle`, `_Theme_Generator`, `_Stitch` (deterministic no-AI section decompose + block recognizers), **`_Mapper`** (block → shortcode / Theme-Settings-preset mapping — the counterpart of the JS `to-pages`), **`_Tailwind`** (Tailwind class → CSS compiler **and** class → design-token translation: arbitrary `[…]` values, the full default colour palette, `shadow-*`), **`_Blocks`** (emits WordPress **core-block** markup from the section/block intermediate — the PHP twin of the capture service's `to-blocks.mjs` — so a conversion can output a portable **block-theme** page body; unmapped blocks degrade to a scoped `core/html` block), **`_Landing`** (the **"Duplicate as landing page"** action: imports a verbatim site mirror — capture service `GET /mirror` → `mirror.mjs` — into `uploads/unysonplus/landing/<slug>/` as a single `section → column → code_block` on the no-chrome **Landing Page** template; a frozen, deliberately non-decomposed WebGL-friendly copy), `_Sources` (source adapter registry).
-- **Public hooks/filters:** `fw_site_converter_sources` (register a builder adapter). The AI backend + capture service live **outside WordPress** (local `unysonplus-site-capture` service — `/capture`, `/capture-file` (renders an uploaded Stitch `.zip` / HTML through the same engine as a URL), `/ai-convert`).
+- **Public hooks/filters:** `fw_site_converter_sources` (register a builder adapter); `fw_site_converter_targets` (register / replace an output target — see *Output targets*). The AI backend + capture service live **outside WordPress** (local `unysonplus-site-capture` service — `/capture`, `/capture-file` (renders an uploaded Stitch `.zip` / HTML through the same engine as a URL), `/ai-convert`).
 - **Training harness (`tools/converter-trainer/`):** a token-cheap loop for improving the converter against a corpus of demo sites (AI-generated demo sites / any URL list). `bash train.sh` batch-captures a `sites/*.txt` list (per-slug dirs so the shared capture slug doesn't collide), then runs each capture through `Stitch::html_to_mapping` + `Mapper::build_pages` headlessly and prints a **ranked list of fidelity flags** (`LIGHT_OVERLAY_WASH`, `LOW_CONTRAST_TEXT`, `NO_HERO_BG`, `EMPTY_SEC`, `VERBATIM`, `FEW_SECTIONS`) → `batch/_audit.csv`. After a converter edit, `train.sh <list> --audit-only` re-scores the existing captures in seconds (no browser) so you see whether flags cleared. Content signals read the MAPPING (heading text lives in a block's `text`), background/overlay signals read the BUILT tree. See its `README.md`.
 - **Training harness (`tools/converter-trainer/`):** a token-cheap loop for improving the converter against a corpus of demo sites (AI-generated demo sites / any URL list). `capture.mjs` batch-captures a `sites/*.txt` list into per-slug dirs (no slug collision); `audit.php` runs each capture through Stitch+Mapper **headlessly** (no browser) and prints a ranked list of fidelity flags (`LIGHT_OVERLAY_WASH`, `LOW_CONTRAST_TEXT`, `NO_HERO_BG`, `EMPTY_SEC`, `VERBATIM`, …) + a CSV; `train.sh` orchestrates capture+audit, with `--audit-only` for a fast re-score after a converter edit. See its `README.md`. Use it to find WHICH sites regressed/drift before spending time looking at any — content signals come from the mapping, background/overlay from the built tree.
+
+## Output targets — writing a conversion into other page builders (2026-10-06)
+
+A conversion is two halves joined by one seam. **Analysis** (Stitch: recognizers, sections, roles, measured
+computed styles) produces the *mapping*; an **output target** writes that into one builder's pages. Everything
+site-level that is not a page body — Theme Settings, button / box presets, the child theme, header and footer,
+menus, media — is shared: **every target renders inside the Unyson+ parent theme**, which owns the chrome. A
+target owns only how a page BODY is stored.
+
+| Target (slug) | Status | Writes pages as |
+|---|---|---|
+| `page-builder` | Available | Unyson+ page-builder trees (the Mapper's `pages.json`), unchanged |
+| `block-theme` | Experimental | a standalone FSE block theme (the capture service's JS emitter) |
+| `elementor` | **Pre-Alpha** | Elementor documents: Flexbox Containers + the free widget set, "Elementor Full Width" template |
+| `divi`, `bricks`, `beaver-builder`, `wpbakery`, `oxygen`, `breakdance`, `kadence-blocks`, `generateblocks`, `spectra` | Coming soon | placeholders — listed, not selectable; a request for one converts to `page-builder` |
+
+**Files (`includes/targets/`):**
+
+- `class-fw-sc-target.php` — `FW_SC_Target` (abstract: `slug`, `label`, `status`, `unmet_requirements`,
+  `needs_parent_theme`, `import_pages( $mapping, $built, $ctx )`, `after_design_import`, `verify_profile`),
+  `FW_SC_Target_Placeholder`, and the registry **`FW_SC_Targets`** (`all()`, `get()`, `resolve()` — unknown or
+  unselectable slugs resolve to `page-builder`).
+- `class-fw-sc-site-model.php` — **`FW_SC_Site_Model::from_mapping( $mapping, $palette )`**, the builder-NEUTRAL
+  page description every non-native target reads (schema `unysonplus/site-model`, version 1). It is the one place
+  Unyson+ vocabulary left in the mapping is translated into facts: container presets → px, `{predefined,custom}`
+  colours → CSS colours, `row-cols-N` → a column count, computed-style strings → parsed property maps. A column is
+  its blocks, one `card`, or its own verbatim `html`, with per-device `hidden` flags.
+- `class-fw-sc-style.php` — `FW_SC_Style` parse / px / box / colour helpers for the measured CSS.
+- `class-fw-sc-target-unysonplus.php` — the native and block-theme targets (thin wrappers on the existing code).
+- `elementor/class-fw-sc-elementor-emitter.php` — Site Model page → Elementor element tree (pure; testable
+  without WordPress). `elementor/class-fw-sc-target-elementor.php` — requirements, kit sync, `Document::save()`.
+
+**How a target is chosen and travels:** the Output picker (built from the registry) posts `fw_sc_target`; the
+prepare step runs a **preflight** (the target's unmet requirements, then the Unyson+ parent theme — missing →
+`code: needs_parent_theme`, and the panel offers a one-click install via `wp_ajax_fw_sc_install_parent_theme`,
+which uses `UnysonPlus_Theme_Suggestion::install()`); the stash carries the target to the build step;
+`Stitch::import_bundle()` writes **`target.json`** and **`site-mapping.json`** (the analysis) beside the bundle
+files; `Bundle::import_dir()` resolves the target (`$opts['target']` → `target.json` → default), calls
+`after_design_import()` once after Theme Settings / presets / theme, and routes the pages phase **and** every
+multi-page snapshot through `import_pages()`. The PHP rebuild of a capture bundle writes `site-mapping.json` too.
+The REST `target` param resolves through the same registry. A single-page Re-run rebuilds into the target
+recorded on the page (`_fw_sc_target` meta).
+
+**Page creation is shared:** `FW_Site_Converter_Pages::import( $data, array( 'writer' => callable ) )` — slug,
+parent chain, cross-source fork guard, front page, source URL, per-page theme options are the same for every
+target; a `writer` replaces only the page-builder storage (`writer( $post_id, $spec, $existed )` → row fields).
+
+**Elementor specifics (Pre-Alpha):**
+
+- Requires Elementor active with the **Flexbox Container** feature on (`unmet_requirements`). Elementor Pro is
+  not required.
+- Pages are written with `Document::save()` on the `elementor_header_footer` template, as an admin (a CLI import
+  switches to one), then read back — Elementor silently drops unregistered elements, so the import reports
+  `Elementor kept N of M elements` when it does. An existing page-builder tree on the post is cleared first.
+- Every container sets `flex_gap` 0 and padding 0 explicitly (the kit's 20px widget gap / 10px container
+  padding would add spacing the source never had); every button sets its background, border and radius
+  explicitly (unset button properties fall through to the kit's global button, which Builder Sync fills from the
+  theme's primary button preset).
+- Widget font family is left unset when it equals the site's heading / body font, so the widget follows the
+  synced global font. Body text placed in a heading widget (overline, link label, pill) uses role `label` and
+  always writes its family. The generated child theme's `:is(h1…h6)` heading-font `!important` rule excludes
+  `.elementor-heading-title`.
+- Colours equal to a palette colour bind as Elementor globals (`__globals__` → `globals/colors?id=…`), via the
+  Builder Sync identity map (primary / secondary / accent are Elementor system colours; the body ink is `text`).
+- CSS the free controls cannot express (gradients, shadows, backdrop filters, absolute offsets, image skins) is
+  stored per page in `_fw_sc_elementor_css` and printed in that page's `<head>`.
+- **First rung — the Unyson+ element itself** as an Elementor widget, when the Elementor Widgets extension
+  (`framework/extensions/elementor`, see `elementor.md`) registers `up-<tag>` for it: the target pairs the Nth model
+  block of a type with the Nth `[tag]` node of the native build (only when the counts on the page agree) and emits
+  `FW_Elementor_Option_Bridge::settings_from_atts( $tag, $atts )`. Type → tag: testimonials→testimonials,
+  accordion→accordion, steps→steps, logos→logo_grid, list→feature_list, avatars→avatar (`$native_tags`).
+- The **fallback ladder** is counted per page (`trace`): `native` widget → `composed` container of widgets →
+  `html` widget. Raw HTML has root-relative URLs absolutised against the source and localised to the media
+  library. Report native-ness (native + composed share) beside visual fidelity.
+- Section width: a section with no measured width is boxed at the SITE container (Theme Settings' desktop container,
+  else the width most of the site's sections measure — remembered across a multi-page run), never Elementor's 1140px
+  kit default and never edge to edge; only a full-bleed band is `full`.
+- Columns that ARE content: a `counter` column → `up-counter` or Elementor's counter widget (it used to vanish), a
+  `card` column → `up-icon-box` or a composed card, a column's own `html` → an HTML widget; the column's box skin is
+  applied only to the fallback rungs (a Unyson+ widget draws its own card).
+- Runs of buttons sharing one flex-row group (a CTA pair) stay in one row container; gradient text (`.sc-gradtext`)
+  carries its clip rule on the page (it ships in a page-builder stylesheet Elementor pages never load); an icon list
+  with no measured colour inherits instead of falling to Elementor's global text colour.
+- Kit sync: `after_design_import()` activates **Builder Sync** if needed and pushes Theme Settings into the
+  active Site Kit (see `builder-sync.md`).
+
+**Tests:** `tests/output-snapshot-test.php` (every fixture's mapping + bundle files byte-for-byte —
+`SC_SNAPSHOT=update` to re-record; the build reads the active theme's settings, so record and compare on the same
+site state) and `tests/output-targets-test.php` (registry, Site Model neutrality, Elementor tree validity, no text
+lost, palette colours bound to globals).
+
+**Adding a builder:** subclass `FW_SC_Target` under the roadmap slug, emit from `FW_SC_Site_Model`, write through
+`FW_Site_Converter_Pages::import()` with a `writer`, register through `fw_site_converter_targets`. Nothing in the
+analysis half should need to change — if it does, the Site Model is missing a fact; add it there.
 
 ## Notes / gotchas
 

@@ -18,6 +18,8 @@ shapes live in `../shortcodes/`, `../option-types/`, `../theme-settings/README.m
 | `forms` | no | `[contact-form]` + a form-builder option type (needs `builder` + `mailer`) |
 | `portfolio` | no | `portfolio` CPT + `portfolio` / `project-gallery` shortcodes |
 | `breadcrumbs` | no | `[breadcrumbs]` shortcode + schema.org BreadcrumbList |
+| `builder-sync` | no | Two-way design sync between Theme Settings and another page builder's globals (Elementor Site Kit first) |
+| `elementor` | no | 35 Unyson+ elements as native Elementor widgets (`up-<tag>`), edited in Elementor's side panel; hides the locked Pro tiles; `settings_from_atts()` for the Site Converter → `elementor.md` |
 | `seo` | no | Dynamic `%%tag%%` title/description templates with auto-generation, canonical URLs, robots control, XML sitemaps, live SERP preview → `seo.md` |
 | `custom-fields` | no | ACF-style fields → post meta (`fw_get_field()`) |
 | `post-types` | no | Custom post types / taxonomies |
@@ -35,6 +37,7 @@ shapes live in `../shortcodes/`, `../option-types/`, `../theme-settings/README.m
 | `chat` | no | Floating chat button (Theme Settings → Site-wide UX) |
 | `ai-assistant` *(beta)* | no | `unysonplus/*` abilities (WP Abilities API, WP 6.9+): build/edit pages, Theme Settings, presets, templates, conversion — with validation + undo; builder panel, site-wide assistant, MCP server, Chat AI channel; `fw_ai_register_ability()` for other extensions → `ai-assistant.md` |
 | `newsletter-crm` | no | Stores `[newsletter]` signups + the base a CRM (tags/segments, campaigns, ESP sync) grows onto → `newsletter-crm.md` |
+| `short-links` | no | Branded short URLs on the site's domain (301/302/307/308) with click tracking, reports, categories, CSV/JSON import + export (incl. from another link plugin), `[short_link]`, `fw-short-links/v1` REST API with API keys + signed webhooks → `short-links.md` |
 | `update` | core | Plugin/extension auto-updates |
 | `woocommerce` | conditional | Shop integration (only when WooCommerce active) |
 

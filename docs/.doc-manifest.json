@@ -452,8 +452,8 @@
       "src": [
         "{plugin}/framework/extensions/site-converter/manifest.php"
       ],
-      "hash": "db202440fdac557ae5417d70da5c555f",
-      "synced": "2026-10-05"
+      "hash": "b5927903e3a2b30e0506c03c58add734",
+      "synced": "2026-10-06"
     },
     "extensions/site-migration.md": {
       "kind": "extension",
@@ -1195,8 +1195,8 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/flexbox/config.php",
         "{plugin}/framework/extensions/shortcodes/shortcodes/flexbox/options.php"
       ],
-      "hash": "18f7cbdf6ec0eab62f6c31d1dfde528e",
-      "synced": "2026-09-27"
+      "hash": "431a0be9fb90f05a0ea624eed8ed0545",
+      "synced": "2026-10-06"
     },
     "shortcodes/flip-box.md": {
       "kind": "shortcode",
@@ -1995,6 +1995,24 @@
       ],
       "hash": "3ee6a07b42d3a9e77b6517501404a666",
       "synced": "2026-10-05"
+    },
+    "extensions/builder-sync.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/builder-sync/manifest.php",
+        "{plugin}/framework/extensions/builder-sync/settings-options.php"
+      ],
+      "hash": "02b11a4a82c5c99e646d69d407269102",
+      "synced": "2026-10-06"
+    },
+    "extensions/elementor.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/elementor/manifest.php",
+        "{plugin}/framework/extensions/elementor/settings-options.php"
+      ],
+      "hash": "cd9ff576bb4afa635114e922c0069f46",
+      "synced": "2026-10-06"
     }
   }
 }

@@ -32,4 +32,11 @@ An embedded interactive map (OpenStreetMap/Leaflet or Google Maps) with manually
 - `map_engine` is a nested multi-picker. `engine: 'osm'` reveals `osm.osm_style` — itself a multi-picker `{ provider, … }` where `provider` is one of `osm` `carto` `opentopomap` `cyclosm` `hot` `esri` `stadia` `thunderforest` `maptiler`. Keyless providers (`osm`, `opentopomap`, `cyclosm`, `hot`, `esri`) reveal nothing extra; `carto` reveals `carto_variant`; `stadia`/`thunderforest`/`maptiler` reveal a `*_variant` select plus a site-wide API-key field. `engine: 'google'` reveals `{ gmap-key, map_type }` (`map_type`: `roadmap` `terrain` `satellite` `hybrid`).
 - API keys are stored **site-wide** (a WP option), so they are entered once and shared across all Map instances.
 - `data_provider.population_method` values come from the shortcode's registered choices (e.g. `custom` for manual pins, `events` to auto-plot event locations); the chosen method reveals its own fields.
+- **Custom pins (`population_method: 'custom'`)** live in `data_provider.custom.locations`, an addable-popup array. Each row: `{ location: { location, venue, address, city, state, country, zip, coordinates: { lat, lng } }, title, description, url, thumb }` (`thumb` is an upload value or `''`). A row whose `coordinates.lat`/`lng` is empty is dropped at render, so a scripted pin must carry both numbers. The map centres and fits to the pins; one pin = an approximate-area map.
+  ```json
+  { "population_method": "custom", "custom": { "locations": [ {
+      "location": { "location": "Town, Region", "venue": "", "address": "", "city": "Town", "state": "Region", "country": "Country", "zip": "",
+                    "coordinates": { "lat": "-8.8150", "lng": "115.1210" } },
+      "title": "Approximate area", "description": "Exact address sent on booking", "url": "", "thumb": "" } ] } }
+  ```
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, NOT a raw hex string. See `README.md`.

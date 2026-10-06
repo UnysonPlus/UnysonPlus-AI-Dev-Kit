@@ -17,7 +17,9 @@
 set -uo pipefail
 
 SRC="/d/Web Dev/unysonplus"
-WP="/d/xampp/htdocs"
+# The install to probe. Default: the localhost root install. Override per run, e.g. the Elementor
+# output-target test site:  WP=/d/xampp/htdocs/elementor probe.sh --tests
+WP="${WP:-/d/xampp/htdocs}"
 DST="$WP/wp-content/plugins/unysonplus"
 PHP="/d/xampp/php/php.exe"
 CLI="/d/xampp/wp-cli.phar"

@@ -87,7 +87,7 @@ function match(src, conv) {
   // highest-similarity pairs first. Greedy-per-source mis-aligned near-duplicate headings — e.g. the source
   // "Trusted by buyers…" (logos) would steal the converted "Trusted by 2,000…" (testimonials) on the shared
   // "trusted" token, leaving the real testimonials unmatched.
-  const usedS = new Set(), usedC = new Set(), matchOf = {};
+  const usedS = new Set(), usedC = new Set(), matchOf = {}, byPosition = new Set();
   // SECTION ID FIRST. Heading text alone is a fragile key: the converter may split, re-case or re-wrap a
   // heading, and then a section that converted perfectly well reports "(no converted match)" — a false
   // negative that reads as a dropped section. The converter deliberately PRESERVES the source `id`
@@ -107,8 +107,28 @@ function match(src, conv) {
   sSecs.forEach((sc, si) => { if (usedS.has(si)) return; cSecs.forEach((c, ci) => { if (usedC.has(ci)) return; const v = sim(sc.label, c.label); if (v > 0.15) cand.push({ si, ci, sc: v }); }); });
   cand.sort((a, b) => b.sc - a.sc);
   for (const { si, ci } of cand) { if (usedS.has(si) || usedC.has(ci)) continue; usedS.add(si); usedC.add(ci); matchOf[si] = ci; }
+  // …and FINALLY by POSITION, for the bands neither key can reach. A band whose content is a single image
+  // carries no heading and no text, so it has no id to match on and nothing to score — and it was reported
+  // "(no converted match)", exactly as a genuinely dropped section is. Measured: a source's whole process-flow
+  // band is one flat PNG, converted perfectly at its natural size, and this tool called it missing. That false
+  // alarm is worse than no signal, because it sends you building a recognizer for content that converted fine.
+  //
+  // Position is only trustworthy BETWEEN established anchors, so a leftover is paired with a leftover that sits
+  // between the same matched neighbours. That can never reorder a page or cross an anchor: an unmatched band
+  // with matched sections either side can only pair inside that gap, and a genuinely dropped section leaves no
+  // candidate in its gap and still reports as missing.
+  const leftC = cSecs.map((_, ci) => ci).filter((ci) => !usedC.has(ci));
+  sSecs.forEach((_, si) => {
+    if (si in matchOf) return;
+    let lo = -1, hi = cSecs.length;
+    for (let k = si - 1; k >= 0; k--) if (k in matchOf) { lo = matchOf[k]; break; }
+    for (let k = si + 1; k < sSecs.length; k++) if (k in matchOf) { hi = matchOf[k]; break; }
+    const ci = leftC.find((c) => !usedC.has(c) && c > lo && c < hi);
+    if (ci === undefined) return;
+    usedS.add(si); usedC.add(ci); matchOf[si] = ci; byPosition.add(si);
+  });
   sSecs.forEach((s, si) => {
-    if (si in matchOf) pairs.push({ label: s.label || 'section', src: s, conv: cSecs[matchOf[si]] });
+    if (si in matchOf) pairs.push({ label: (s.label || 'section') + (byPosition.has(si) ? ' (by position)' : ''), src: s, conv: cSecs[matchOf[si]] });
     else pairs.push({ label: (s.label || 'section') + ' (no match)', src: s, conv: null });
   });
   const sf = src.find((r) => r.kind === 'footer'), cf = conv.find((r) => r.kind === 'footer');

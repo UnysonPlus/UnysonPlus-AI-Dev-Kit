@@ -100,6 +100,18 @@ The folder name is the identity: `hero-banner` → the shortcode tag `hero_banne
   heading, and the link rules ([conventions](conventions.md) §3).
 - **Replaceable media** → every image and video is an editable option, never baked-in markup
   ([conventions](conventions.md) §4).
+- **Name a view's helper functions after the element, in full.** Views define helpers behind
+  `function_exists()`, so two elements that pick the same name silently share whichever loaded
+  first. `timeline` and `tag-list` both used `sc_tl_render()`, and a Tag List placed after a
+  Timeline rendered nothing. Use `sc_<element>_…` (`sc_timeline_render`, `sc_taglist_render`).
+- **A script that initialises markup registers a re-init hook.** Wrap the DOM work in an
+  idempotent `init( scope )` that queries `( scope || document )` and skips nodes it has
+  already set up, call it on load (wrap the `DOMContentLoaded` handler, `function () { init(); }`
+  — the event object must not arrive as `scope`), and push it onto the shared registry:
+  `window.fwShortcodeInit = window.fwShortcodeInit || []; window.fwShortcodeInit.push( init );`.
+  Surfaces that insert an element's markup after page load (the block editor's preview, the
+  Elementor widgets' editor re-renders) call every entry with the new markup's container.
+  Without it the element renders but its slider / accordion / counter stays inert there.
 - **Ship `static/img/page_builder.svg`.** The builder auto-detects that exact path. Simple
   content elements use a 16×16 monochrome `#b3b3b3` pixel glyph; section-like elements use the
   larger `0 0 60 40` outlined style. Spec and rationale are in the template's SVG file.

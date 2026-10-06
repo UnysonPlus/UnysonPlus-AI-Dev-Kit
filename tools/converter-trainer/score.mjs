@@ -16,7 +16,7 @@
  *   node score.mjs --sample 12                score a fixed representative sample
  *   node score.mjs --viewport 1920            monitor width to test flush at (default 1920)
  *
- * Env: PHP (php binary), WP_LOAD (wp-load.php), NODE_PATH (playwright), URL (default http://localhost/).
+ * Env: PHP (php binary), WP_LOAD (wp-load.php), NODE_PATH (playwright), URL (default http://localhost/), FW_SC_TARGET (output target, e.g. elementor — pair with WP_LOAD + URL of that install).
  * Requires the localhost root install with the Site Converter plugin + a captured corpus (see train.sh).
  */
 import { execFileSync, spawn } from 'node:child_process';
@@ -75,7 +75,10 @@ const SAMPLE = parseInt(opt('--sample','0'),10) || 0;
 // writes/reads `_baseline.<id>.json` / `_scores.<id>.json`. (An audit once overwrote a baseline by
 // re-running on a different corpus/install — the namespacing makes that impossible.)
 const CORPUS = (opt('--corpus','')||'').replace(/[^a-z0-9_-]/gi,'').toLowerCase();
-const SUFFIX = CORPUS ? `.${CORPUS}` : '';
+// …and per OUTPUT TARGET: an Elementor run (FW_SC_TARGET=elementor) keeps `_baseline[.<corpus>].elementor.json`,
+// so scoring another target can never overwrite the native page builder's baseline either.
+const TARGET = (process.env.FW_SC_TARGET || '').replace(/[^a-z0-9_-]/gi,'').toLowerCase();
+const SUFFIX = (CORPUS ? `.${CORPUS}` : '') + (TARGET && TARGET !== 'page-builder' ? `.${TARGET}` : '');
 const BASELINE_FILE = join(HERE, 'score', `_baseline${SUFFIX}.json`);
 const SCORES_FILE   = join(HERE, 'score', `_scores${SUFFIX}.json`);
 
