@@ -72,7 +72,7 @@ const SC_OVERRIDE = {
 // drift risk among genuine resolver failures). Review these by hand when the underlying surface changes.
 const NARRATIVE = new Set([
   // top-level guides
-  'building-pages.md', 'cloning-gotchas.md', 'conventions.md',
+  'building-pages.md', 'cloning-gotchas.md', 'conventions.md', 'editing-elements.md',
   'extending.md', 'converter-training-prompt.md', 'site-build-protocol.md',
   'converter-fix-my-site-prompt.md', 'build-reference.md', 'conversion-protocol.md',
   // aggregate reference docs (no single source dir)

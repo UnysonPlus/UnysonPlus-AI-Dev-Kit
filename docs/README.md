@@ -14,6 +14,7 @@ already know a filename.
 | Value shapes, translation tables, fresh-build order, parity metrics, known misses (**reference, not authority**) | [`build-reference.md`](build-reference.md) |
 | Prompt → finished site (fresh builds — nothing to reproduce) | [`site-build-protocol.md`](site-build-protocol.md) (job selector) + [`build-reference.md`](build-reference.md) Part 2 |
 | Compose builder pages programmatically (fresh/demo/test — **not** conversions) | [`building-pages.md`](building-pages.md) + [`../tools/upw-build-pages.php`](../tools/upw-build-pages.php) |
+| **Change ONE element's option value** (programmatically or in the builder) — value lands, shows in the builder, renders; the traps that waste a session | [`editing-elements.md`](editing-elements.md) |
 | The generalized conventions every build follows | [`conventions.md`](conventions.md) |
 | Verify a region — run every lens, **then open every band image** (both; neither alone is verification) | [`site-build-protocol.md`](site-build-protocol.md) Phases 3-4 + [`../tools/README.md`](../tools/README.md) |
 | **"Fix my site" / "train on <url>"** — the same job; the only choice is *where each fix lands* | [`site-build-protocol.md`](site-build-protocol.md) |

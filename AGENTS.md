@@ -125,6 +125,10 @@ module exist?" · "what are its options / value shape?" · "how does X work?" ·
   `docs/animation-engine/`, `docs/extensions/`, `docs/theme-settings/`. Architecture/internals (render
   pipeline, option value-shape flows, hooks & extension points, the Animation-Engine module loader +
   Lenis singleton, the theme's preset + CSS-generation systems) → `docs/architecture/`.
+- **Changing an existing element's value** (edit a page, set a spacing/color/style on a node) → read
+  [`docs/editing-elements.md`](docs/editing-elements.md) FIRST. It is the mechanical "make the change land,
+  show in the builder, and render" playbook — native-option-before-CSS, the render-from-meta model, caches
+  to purge, and the value-format traps. Skipping it is how a one-line spacing change becomes an hour.
 - **If the doc answers it → use it and do NOT open the PHP.** That is the entire point of the kit.
 - **If the doc is MISSING or ambiguous,** treat it as a signal, not an answer — a missing doc can mean
   "feature doesn't exist" OR "exists but undocumented." FIRST run `node docs/sync.mjs check` (it *hashes*
@@ -173,6 +177,7 @@ guessing a per-page slug.)
 | `tools/measure/compare.mjs` | Region-by-region **ensemble** — header↔header, each section↔section, footer↔footer, scored by geometry + pixelmatch + Resemble.js + a DOM-structure diff (fail-loud). |
 | `tools/measure/props.mjs` | Full-body **property diff** — walks both bodies, matches elements by text/region, reports NAMED computed-style deltas (caught the site-wide Inter→Open Sans miss). |
 | `tools/upw-build-pages.php` · `docs/building-pages.md` | **Compose UnysonPlus builder pages programmatically** (sections/columns/elements + Animation Engine effects) via `wp eval-file` in ~15 lines, leaving the page EDITABLE in the visual builder. Read the doc first — it documents the builder-value storage rules. For any page — test, demo, or real. |
+| `docs/editing-elements.md` | **Change ONE element's option value and have it stick** — the operations playbook: native-option-before-CSS, the render-from-meta model (edit the builder value, not `post_content`), caches to purge, verify by computed value, and the value-format traps (spacing = utility slugs; a value that renders but isn't a dropdown choice shows "Default"). **Read before editing any element value**, by script or in the builder. |
 | `docs/build-reference.md` | The **prompt → UnysonPlus site** workflow: how to go from "build me an X site" to a finished site (Theme Settings tokens → compose pages → wire animations → verify). The orchestration layer over the reference docs. |
 | `docs/conventions.md` | The **generalized UnysonPlus conventions** every build must follow (color presets, clean DOM, heading order, links, replaceable media, option-value shapes). Public, site-agnostic. |
 | `docs/extending.md` | **Create / convert shortcodes, option types, and extensions** — where things live, the anatomy of each, the best reference extension per case, the conventions (thumbnail icon spec, settings-page layout, migrations, keep-docs-in-sync). |
