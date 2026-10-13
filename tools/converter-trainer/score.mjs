@@ -116,7 +116,19 @@ function siteList() {
 async function measure(page) {
   return await page.evaluate((vw) => {
     const px = v => parseFloat(v)||0;
-    const lumaOf = (c) => { const m=(c||'').match(/(\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/); if(!m) return null; if(m[4]!==undefined && parseFloat(m[4])<0.1) return null; return (0.2126*+m[1]+0.7152*+m[2]+0.0722*+m[3])/255; };
+    // Any CSS colour → [r,g,b,a]. Computed colours are NOT always rgb(): a page whose CSS uses oklch()/lab()/
+    // color-mix() keeps that space in getComputedStyle, which the rgb regex can't read. A dark oklch() body then
+    // read as null → white, so light text on it scored as low contrast (a builder that passes the source's
+    // colour strings through verbatim lost ~30 contrast points to this). Resolve non-rgb colours through a canvas.
+    const cx = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+    const rgbaOf = (c) => {
+      const m=(c||'').match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/);
+      if (m) return [+m[1], +m[2], +m[3], m[4]!==undefined ? parseFloat(m[4]) : 1];
+      if (!c || c==='transparent' || c==='none') return null;
+      cx.clearRect(0,0,1,1); cx.fillStyle='rgba(0,0,0,0)'; cx.fillStyle=c; cx.fillRect(0,0,1,1);
+      const d=cx.getImageData(0,0,1,1).data; return [d[0], d[1], d[2], d[3]/255];
+    };
+    const lumaOf = (c) => { const v=rgbaOf(c); if(!v) return null; if(v[3]<0.1) return null; return (0.2126*v[0]+0.7152*v[1]+0.0722*v[2])/255; };
     const bgLuma = (el) => { let n=el; for(let i=0;i<8&&n;i++){ const l=lumaOf(getComputedStyle(n).backgroundColor); if(l!==null) return l; n=n.parentElement; } const b=lumaOf(getComputedStyle(document.body).backgroundColor); return b!==null?b:1; };
     const secs = [...document.querySelectorAll('section')].filter(s=>s.getBoundingClientRect().width>0);
 
@@ -124,7 +136,14 @@ async function measure(page) {
     let textSecs=0, flushBad=0, padCollapsed=0;
     for (const s of secs) {
       const texts=[...s.querySelectorAll('h1,h2,h3,p')].filter(e=>e.textContent.trim().length>15 && e.getBoundingClientRect().width>0);
-      const cs=getComputedStyle(s); const pad=px(cs.paddingTop)+px(cs.paddingBottom);
+      const cs=getComputedStyle(s); let pad=px(cs.paddingTop)+px(cs.paddingBottom);
+      // A section's vertical padding can sit one or two wrappers down: a boxed builder container pads its
+      // inner content wrapper, not itself (a boxed container's padding lands on `.e-con-inner`, so the
+      // <section> reads 0 while its text sits 225px down). Count the padding of a SOLE full-width element
+      // child chain (max two levels), the same visual band.
+      // (absolutely-positioned children — a background-video or overlay layer — are not layout, so they don't
+      // count against the "sole child" test: a video hero's padding sits on its content wrapper beside that layer)
+      for (let w=s, d=0; d<2; d++){ const kids=[...w.children].filter(k=>k.getBoundingClientRect().height>0 && !/^(absolute|fixed)$/.test(getComputedStyle(k).position)); if (kids.length!==1) break; w=kids[0]; if (!w.classList.contains('e-con-inner') && w.getBoundingClientRect().width < s.getBoundingClientRect().width*0.5) break; /* a boxed container's inner IS the section's content box, at any width */ const wc=getComputedStyle(w); pad+=px(wc.paddingTop)+px(wc.paddingBottom); }
       // full-bleed bg media legitimately spans the viewport — don't penalise it
       const media=[...s.querySelectorAll('video,img')].some(m=>{const r=m.getBoundingClientRect(); return r.width>vw*0.9 && r.height>200;});
       // a HERO uses min-height + vertical CENTERING, not padding — a tall section (or one carrying full-bleed
@@ -228,12 +247,22 @@ async function measure(page) {
       }
       return false;
     };
+    const overPageImage = (el) => {
+      for (let n=el; n && n!==document.body; n=n.parentElement){ if (lumaOf(getComputedStyle(n).backgroundColor)!==null) return false; }
+      for (const n of [document.body, document.documentElement]){ const cs=getComputedStyle(n); if (lumaOf(cs.backgroundColor)!==null) return false; if (cs.backgroundImage && cs.backgroundImage!=='none') return true; }
+      return false;
+    };
     const sample=[...document.querySelectorAll('section h1,section h2,section h3,section p,section a,section button,section span')]
       .filter(e=>e.textContent.trim().length>8 && e.getBoundingClientRect().width>0).slice(0,120);
     let contToo=0, contN=0;
     for (const e of sample){ const sec=e.closest('section'); if(!sec) continue;
       if (sec.querySelector('video')) continue;                 // over a bg video → unmeasurable headless
       if (overUnpaintable(e, sec)) continue;                    // over an image / gradient / media caption
+      // Over the PAGE's own gradient / image (a body or html background-image with no solid colour anywhere
+      // between the text and the page): unmeasurable for the same reason as a section gradient. bgLuma would
+      // fall back to white and score light-on-dark as low contrast — and painting MORE section gradients then
+      // shrank the measurable sample to exactly these false readings (a converter fix read as a regression).
+      if (overPageImage(e)) continue;
       const tl=lumaOf(getComputedStyle(e).color); const bl=bgLuma(e); if(tl!==null&&bl!==null){ contN++; if(Math.abs(tl-bl)<0.22) contToo++; } }
 
     // bg-media (hero video should be full-bleed): score PER SECTION (dedupe), not per <video> element, and
@@ -480,7 +509,10 @@ const DIMS = ['overall','container','spacing','logo','iconbox_pad','contrast','b
         // body tens of thousands of pixels tall — thousands of 45ms steps, i.e. minutes inside one
         // evaluate that nothing interrupts. Forty steps reaches ~24000px, past any real page.
         const h = Math.min(document.body.scrollHeight, 600 * 40);
-        for (let y = 0; y < h; y += 600) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 45)); }
+        // 120ms a step, not 45: Elementor lazy-loads container BACKGROUND images (`e-lazyloaded` set by an
+        // IntersectionObserver), and at 45ms a step its observer never marked the sections, so photo cards that
+        // render for every scrolling visitor measured as missing (media 0 on a page showing all four photos).
+        for (let y = 0; y < h; y += 600) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 120)); }
         window.scrollTo(0, 0);
       }), 45000, 'lazy-image pass');
       await page.waitForTimeout(500);

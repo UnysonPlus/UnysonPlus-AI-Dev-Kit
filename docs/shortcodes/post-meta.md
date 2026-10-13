@@ -27,5 +27,9 @@ A **dynamic post-data element** (used in post / archive templates) that outputs 
 
 ## Notes
 - Dynamic element — the value resolves from the current post's `meta_key`; there is nothing to type for the value itself.
+- **Lookup order:** the post's framework options first (`fw_get_db_post_option( $post_id, $meta_key )` — where the **Custom Fields** extension and code-defined post options store their values; see `../extensions/custom-fields.md`), then plain WordPress post meta (`get_post_meta( $post_id, $meta_key, true )`) for fields saved by code or other plugins.
+- **Formatting of non-string values:** a measurement `{ value, unit }` renders as `value unit` (e.g. `1200 sq ft`); a list / choice array renders its scalar entries joined with `, `, skipping nested data such as upload objects (so Image / Gallery / Repeater fields render nothing useful — and a Checkboxes presence map `{choice:true}` prints `1`s). Use a template + `fw_get_field()` for those.
+- The post is `get_the_ID()` (falling back to the queried object), so it belongs in a single-post page, a Theme Builder Body template, or a loop card; with no post it shows an editor-only notice and renders nothing.
+- Same lookup as the Dynamic Content token `{{post_meta|key=…}}` (`../extensions/theme-builder.md`).
 - Renders nothing when the named field is empty or absent.
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, not raw hex. See `README.md`.

@@ -14,7 +14,7 @@
 // browser-free class-string fixture (tailwind-matrix.test.mjs) — see tools/README.md.
 //
 // Usage: node fidelity-check.mjs <srcUrl> <srcSel> <buildUrl> <buildSel>
-//   e.g. node fidelity-check.mjs https://src/ footer http://localhost/demos/pinky-bites/ footer
+//   e.g. node fidelity-check.mjs https://src/ footer http://localhost/demos/<demo>/ footer
 import { launchBrowser } from './lib/browser.mjs';
 import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';

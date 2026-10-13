@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # asset-optimizer extension
 
-Combines enqueued frontend CSS and JavaScript into single minified, cached files to cut HTTP requests and payload. **Active by default:** yes.
+Combines enqueued frontend CSS and JavaScript into single minified, cached files to cut HTTP requests and payload. **How you get it:** not in the core-only plugin zip; it is in the parent theme's recommended set (offered on the *Install Compatible Extensions* screen when the plugin is activated with `unysonplus-theme` active), otherwise download it from **Unyson+ → Extensions**.
 
 ## Provides
 

@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # breadcrumbs extension
 
-Renders a simplified navigation trail (home → … → current page) placeable anywhere in the theme, with schema.org structured data. **Active by default:** yes. Version: 1.0.23.
+Renders a simplified navigation trail (home → … → current page) placeable anywhere in the theme, with schema.org structured data. **How you get it:** not in the core-only plugin zip — download + activate it from **Unyson+ → Extensions**. Version: 1.0.25.
 
 ## Provides
 

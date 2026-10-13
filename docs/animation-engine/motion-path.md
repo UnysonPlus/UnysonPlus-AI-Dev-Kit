@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # motion-path — Motion Path (Animation Engine)
 
-Sends a node travelling along an SVG path instead of a straight line — scrubbed by scroll, looped, or played once on view. Rides the shared `fx` block on the **`motion_path`** slot (appended to every element's Animations tab). Picker key **`mode`** = the path shape, off = `none`. Requires the `animation-engine` extension ACTIVE (ships inactive). Pure SVG geometry + one runtime; honours "reduce motion" (stays put); loads only on pages that use it.
+Sends a node travelling along an SVG path instead of a straight line — scrubbed by scroll, looped, or played once on view. Rides the shared `fx` block on the **`motion_path`** slot (appended to every element's Animations tab). Picker key **`mode`** = the path shape, off = `none`. Requires the `animation-engine` extension ACTIVE (not in the core-only plugin zip — download + activate it under Unyson+ → Extensions). Pure SVG geometry + one runtime; honours "reduce motion" (stays put); loads only on pages that use it.
 
 ## Effects / styles
 37 preset shapes **all share one option group**; `custom` adds a raw SVG path field on top.

@@ -52,10 +52,15 @@ Top-level leaves plus grouped sections (`group_footer_mode`, `group_footer_color
 - **Saved value shape**: `{predefined:'text-{slug}',custom:'#hex'}` (legacy hex string tolerated)
 - **Notes**: Default text color for the whole footer. Choices = live palette presets.
 
+### Heading Color — `footer_heading_color` (`group_footer_colors`, theme 2.6.47)
+- **Type**: same compact color (kind `text`)
+- **Default**: `{predefined:'',custom:''}` (automatic)
+- **Notes**: Colour of the footer's column titles, widget titles and text headings, via `--footer-heading-color`. **Empty = automatic:** when the footer background (a colour set in Theme Settings) is dark, headings turn white; otherwise they keep the global heading colour. Before this option, footer headings inherited the global heading colour and vanished on a dark footer. `footer.php` adds `footer--tone-dark` / `footer--tone-light` (the detected background tone) and `footer--heading-color` (when a colour is chosen or the tone is dark). Builder sections placed in the footer keep their own heading colours; child-theme CSS still wins. Widget titles use the heading colour, falling back to the link colour.
+
 ### Link Color — `footer_link_color` (`group_footer_colors`)
 - **Type**: same compact color (kind `text`)
 - **Default**: `{predefined:'',custom:''}`
-- **Notes**: Default link color for the whole footer.
+- **Notes**: Default link color for the whole footer. Empty = automatic: white on a dark footer background, the body text colour (`var(--color-text)`) on a light one (the same fallback applies to an empty Text Color on a light background).
 
 ### Link Hover Color — `footer_link_hover_color` (`group_footer_colors`)
 - **Type**: same compact color (kind `text`)
@@ -429,7 +434,7 @@ When `yes`, reveals 4 container-only groups:
 ]
 ```
 - **This is where a header/footer bar's TEXT size/color, LINK color, BACKGROUND, PADDING and BORDERS belong** — not a `.footer .builder-text-element{…}` child rule. Resolved to CSS by `inc/includes/hf-custom-css.php` (scoped to that section), so it's editable + rebrandable.
-- Set `<prefix>_typography` to the source's *measured* footer text spec (size/weight/color) — e.g. the source Pinky Bites footer is `14px / rgba(157,23,77,.8)` body, so that goes in `main_footer_custom_styling.yes.main_footer_typography`, not child CSS.
+- Set `<prefix>_typography` to the source's *measured* footer text spec (size/weight/color) — e.g. the fixture-01 source footer is `14px / rgba(157,23,77,.8)` body, so that goes in `main_footer_custom_styling.yes.main_footer_typography`, not child CSS.
 
 ---
 

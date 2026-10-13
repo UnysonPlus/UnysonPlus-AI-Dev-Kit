@@ -122,15 +122,17 @@ It is a curated skeleton, not a reference corpus. For depth — how an option ty
 internally, how an existing element solved a specific problem, what helpers exist — read the
 real source.
 
-**The kit already fetches it.** `assemble.ps1` populates the (gitignored) `unysonplus/` and
+**The kit fetches part of it.** `assemble.ps1` populates the (gitignored) `unysonplus/` and
 `unysonplus-theme/` folders:
 
 ```bash
-pwsh assemble.ps1 -Source github     # latest full plugin release + parent theme
+pwsh assemble.ps1 -Source github     # latest CORE-ONLY plugin release + parent theme
 ```
 
-Then browse `unysonplus/framework/extensions/shortcodes/shortcodes/` — every shipped element,
-each with its own `AGENTS.md`. That directory's own `AGENTS.md` is the section-like recipe this
+The public release zip is core-only (framework + blog + update), so the shortcodes extension is not in
+it — clone the Shortcodes-Extension repo below (or read it from a site where the extension was installed
+through Unyson+ → Extensions) and browse its `shortcodes/` folder — every shipped element, each with its
+own `AGENTS.md`. That directory's own `AGENTS.md` is the section-like recipe this
 template's class file is condensed from.
 
 **Or clone directly:**
@@ -141,10 +143,10 @@ template's class file is condensed from.
 | `https://github.com/UnysonPlus/UnysonPlus.git` | The plugin **core** | Option-type and container-type internals under `framework/includes/`; the `FW_Option_Type` base class |
 | `https://github.com/UnysonPlus/UnysonPlus-Theme.git` | The parent theme | How Theme Settings define the presets elements consume — colours, typography, buttons, box presets, spacing |
 
-> **Trap worth knowing:** cloning `UnysonPlus.git` gets you **core only** — blog and update.
-> It has **no page builder and no shortcodes**. It activates cleanly, which is what makes the
-> mistake hard to spot. For a working install use the **release zip** (or `assemble.ps1`,
-> which fetches it); for shortcode *source*, use the Shortcodes-Extension repo above.
+> **Trap worth knowing:** the core plugin — the release zip *and* a clone of `UnysonPlus.git` — is
+> **core only** (blog and update). It has **no page builder and no shortcodes** until they are
+> downloaded from **Unyson+ → Extensions** on the site. It activates cleanly, which is what makes the
+> gap easy to miss. For shortcode *source*, use the Shortcodes-Extension repo above.
 
 **Also in this kit:**
 

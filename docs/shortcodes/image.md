@@ -1,6 +1,10 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `media_image` — Image
 
+> **The tag is `media_image`, not `image`.** This file is named `image.md`, but the registered shortcode
+> (folder `media-image/`) is `media_image`. A node with `shortcode:'image'` is not a registered element —
+> the page renders the literal text `[image]`. Note `image` *is* the name of this element's upload **att**.
+
 A single responsive image with sizing, loading priority, and an optional link. Leaf node: `{ type:'simple', shortcode:'media_image', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.
 
 ## atts
@@ -16,6 +20,9 @@ A single responsive image with sizing, loading priority, and an optional link. L
 | `image_ratio` | select | `''` | `''` (original) · `1/1` `4/3` `3/2` `16/9` `3/4` `2/3` `9/16` | Crop into a fixed ratio box. |
 | `image_fit` | select | `'cover'` | `cover` `contain` | Cover crops to fill; Contain fits the whole image. Only with `image_ratio`. |
 | `focal_position` | select | `'center center'` | `left top` … `right bottom` (9 positions) | Which part to keep when cropping. Only with Fit = Cover. |
+| `sp_enable` | switch | `'no'` | `yes` \| `no` | **Screen Preview** — make the wrapper a fixed-height clipped viewport (a framed "screen"). Pair with Animations → Marquee (Up, Gap 0) to auto-scroll a long screenshot. |
+| `sp_frame` | select | `'browser'` | `none` `card` `browser` | Frame for the preview. `browser` = title bar + traffic-light dots (CSS-only, so an attached Marquee scrolls only the image). |
+| `sp_height` | unit-input | `{value:660,unit:'px'}` | units `px vh rem` | Height of the visible viewport the image is clipped to. |
 | `image_style` | image-style-picker | `''` | `''` (none) · `imgs-rounded` · `imgs-circle` · `imgs-portrait-card` · `imgs-monochrome` · `imgs-duotone` · `imgs-diagonal` · `imgs-hexagon` · `imgs-cinematic` | Preset visual treatment (shape / filter) applied to the image. |
 
 ## Ready-to-use example (the atts object)
@@ -32,6 +39,8 @@ A single responsive image with sizing, loading priority, and an optional link. L
 ```
 
 ## Notes
+
+- **Screen Preview (`sp_enable`):** the wrapper becomes `position:relative; overflow:hidden; height:var(--sp-h)` with the frame drawn in **CSS only** (padding + `::before`/`::after`). Because the chrome is CSS (not DOM content), an attached **Marquee** (direction **Up**, **Gap 0**, and `controls: yes` for the WCAG pause button) scrolls only the `<img>` while the browser bar / dots stay put. A tall image fills the frame width; anything taller than the viewport scrolls on a loop — the classic auto-scrolling long-screenshot preview. The scroll motion lives in the Animation Engine's `marquee` module (reused), not in this element.
 - `image` is an **upload** value: `{ "attachment_id": "<id>", "url": "<url>" }`. When generating without a real media ID, leave `attachment_id:''` and set `url` — importers can sideload the URL. An empty image is `''`.
 - **Cropping rule:** when BOTH `width` and `height` are in `px`, the source is cropped to that exact size (can stretch if the ratio differs). To keep aspect ratio, set `width` and leave `height`'s number blank (`{ value:'', unit:'px' }`).
 - **Ratio crops are real files (server-side):** with `image_ratio` + Fit = Cover on an attachment, `fw_image_tag()` calls `fw_image_crop_renditions()` (`framework/includes/image-crops.php`), which cuts the ratio out of the original around `focal_position` and saves it at 320 / 480 / 640 / 768 / 960 / 1280 / 1600 px (never upscaled; the crop's own width is always included) in `uploads/unysonplus/image-crops/`. The `<img>` gets that `srcset` with `sizes="auto, 100vw"` (lazy) so each device downloads only what it shows. Files are made on first view, re-made when the original or the crop changes, and deleted with the attachment. Filter the widths with `fw_image_crop_widths`; the CSS `aspect-ratio`/`object-fit` stays as a fallback (SVG, plain URL, no image editor). With the Asset Optimizer's *Serve WebP images* on, each crop also gets a WebP copy.

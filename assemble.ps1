@@ -4,7 +4,7 @@
     These folders live under assembled/ and are NEVER committed (see .gitignore); they come
     from their own sources so the kit never drifts from the real plugin/theme/repos:
 
-        unysonplus/                              full plugin (all extensions)
+        unysonplus/                              the plugin (local: the full working copy; github: core-only)
         unysonplus-theme/                        parent theme
         unysonplus-theme-child/                  child-theme starter (copy per site)
         UnysonPlus-Capture-Service/ capture service + AI companion
@@ -15,7 +15,7 @@
                       parent theme from the working copies (siblings of this kit;
                       override with -WorkDevRoot), and clone the two service repos
                       from GitHub.
-      -Source github  : download the latest full-plugin release zip + git clone
+      -Source github  : download the latest CORE-ONLY release zip (other extensions come from Unyson+ > Extensions) + git clone
                       the theme and the two service repos. Use this on any other
                       developer's machine.
 

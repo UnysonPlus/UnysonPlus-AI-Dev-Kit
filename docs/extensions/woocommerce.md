@@ -161,7 +161,7 @@ To let a **bespoke child-theme element** (e.g. a product configurator) add a cus
   - `woocommerce_add_cart_item_data` — read the posted fields into `$cart_item_data['<key>']`. WooCommerce hashes cart-item data into the cart id, so **distinct configs are separate lines and identical ones merge quantity automatically** — no manual unique key needed.
   - `woocommerce_before_calculate_totals` — `$item['data']->set_price( $item['<key>']['price'] )` to apply the computed price.
   - `woocommerce_cart_item_name` — show the chosen name + a recipe/spec line (the configured options) under the title, in cart **and** mini-cart.
-- The bespoke element stays **store-agnostic**: gate the JS on a localized global (e.g. `window.PinkyCart`) so with WooCommerce inactive it's a pure visual configurator, and the cart glue lives in the theme, not the element.
+- The bespoke element stays **store-agnostic**: gate the JS on a localized global (e.g. `window.DemoCart`) so with WooCommerce inactive it's a pure visual configurator, and the cart glue lives in the theme, not the element.
 
 ## Notes / gotchas
 

@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # confetti — Confetti Burst (Animation Engine)
 
-Fires a celebratory Canvas 2D particle burst from an element on a trigger. It is **not** an `fx`-block slot — it is appended to every element's **Animations tab** as the top-level `confetti` att (`sc_animation_fields`). Requires the `animation-engine` extension ACTIVE (ships inactive). One shared full-viewport `<canvas>`, no library. Honours "reduce motion" (no burst); global on/off: Theme Settings → Animations.
+Fires a celebratory Canvas 2D particle burst from an element on a trigger. It is **not** an `fx`-block slot — it is appended to every element's **Animations tab** as the top-level `confetti` att (`sc_animation_fields`). Requires the `animation-engine` extension ACTIVE (not in the core-only plugin zip — download + activate it under Unyson+ → Extensions). One shared full-viewport `<canvas>`, no library. Honours "reduce motion" (no burst); global on/off: Theme Settings → Animations.
 
 ## Effects / styles
 One `multi-picker` (picker id **`style`**, off = `none`). 26 styles across four tabbed groups; **all styles share one option group**:

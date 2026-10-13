@@ -20,12 +20,14 @@ the **unysonplus-theme** parent active. Pick one path:
 ```bash
 git clone https://github.com/UnysonPlus/UnysonPlus-AI-Dev-Kit
 cd UnysonPlus-AI-Dev-Kit
-pwsh assemble.ps1 -Source github     # downloads the full plugin (latest release) + parent theme
+pwsh assemble.ps1 -Source github     # downloads the plugin's core-only release zip + parent theme
 npx @wordpress/env start             # boots WordPress with BOTH installed & active
 ```
 
 WordPress is now at **http://localhost:8888** (admin `http://localhost:8888/wp-admin`,
 user `admin` / pass `password`) — use that as your **"Create the dev site at"** URL below.
+Then open **Unyson+ → Extensions** and install the extensions the build needs — at least **Page
+Builder** (it brings Shortcodes + Builder with it); see the extensions note under Option B.
 Stop it later with `npx @wordpress/env stop`. (`.wp-env.json` mounts the assembled
 plugin/theme, so `assemble` must run first. On the maintainer's machine, plain
 `pwsh assemble.ps1` uses the local working copies.)
@@ -34,15 +36,21 @@ plugin/theme, so `assemble` must run first. On the maintainer's machine, plain
 
 Already run WordPress locally? Install + activate these, then use your own site URL:
 
-- **UnysonPlus plugin** — the **latest release zip**: <https://github.com/UnysonPlus/UnysonPlus/releases/latest>
-  → *Plugins → Add New → Upload*. **Do NOT `git clone` the repo** — that's **core only**; the release
-  zip is the full plugin with the page builder + all shortcodes.
 - **unysonplus-theme (parent)** — <https://github.com/UnysonPlus/UnysonPlus-Theme> → *Code → Download ZIP*
-  → *Appearance → Themes → Add New → Upload*.
-- **Classic Editor** — install + activate from *Plugins → Add New* (search "Classic Editor"). UnysonPlus's
-  page builder + meta boxes need the classic editor, not Gutenberg. (Option A installs it automatically.)
-- **Site Converter extension** (only if converting a source) — activate under *Unyson+ → Extensions →
-  Site Converter*; it's inactive by default, and the "Unyson+ → Convert" screen needs it.
+  → *Appearance → Themes → Add New → Upload*. Activate it first.
+- **Unyson+ plugin** — the release asset **`unysonplus.zip`** from
+  <https://github.com/UnysonPlus/UnysonPlus/releases/latest> → *Plugins → Add New → Upload*. It is
+  **core-only**: the framework + the `blog` and `update` extensions. (Don't use GitHub's "Source code
+  (zip)" or a `git clone` — wrong folder name.)
+- **Extensions — downloaded, not bundled.** Everything else (Page Builder + Shortcodes, Forms, Theme
+  Builder, Custom Fields, SEO, Animation Engine, …) is downloaded and activated from **Unyson+ →
+  Extensions**. With the parent theme active, activating the plugin opens an *Install Compatible
+  Extensions* screen for the theme's recommended set (Page Builder, WordPress Shortcodes, Theme Builder,
+  Asset Optimizer, Live Editor, Snippets, SEO) — accept it; add others from Unyson+ → Extensions later.
+- **No Classic Editor plugin needed.** Unyson+ switches the block editor off itself and uses WordPress's
+  own classic edit screen for the page builder.
+- **Site Converter extension** (only if converting a source) — download + activate under *Unyson+ →
+  Extensions → Site Converter*; the "Unyson+ → Convert" screen needs it.
 
 That is the entire setup. Everything after this, the agent does.
 
@@ -87,7 +95,7 @@ also reads computed styles.
 The agent will, on its own:
 
 1. Run `pwsh assemble.ps1` if the plugin/theme folders are empty.
-2. Copy the `assembled/unysonplus-theme-child/` starter into your WordPress, rename + activate it.
+2. Copy the `samples/sample-child-theme/` starter into your WordPress, rename + activate it.
 3. **Lock the header, footer, and container to your mockup first** — native theme options — and
    **measure** with `tools/measure/measure.mjs` instead of eyeballing.
 4. Build the page section by section, then fill in the details. (Hard elements can start as a
@@ -116,22 +124,26 @@ Run `update.ps1` whenever you come back, so you build against the current plugin
 | `docs/build-reference.md` | Metric set + the measurement algorithm. |
 | `tools/measure/*.mjs` | The parity harness — frame metrics, region ensemble (pixelmatch + Resemble.js + DOM), full-body property diff. |
 | `assemble.ps1` · `.wp-env.json` | Populate the assembled folders; one-command WordPress. |
+| `samples/sample-child-theme/` | The **child-theme starter** — copy + rename per site. A `style.css` header + empty stylesheet (loads last), a `functions.php` with reference blocks, and an empty folder for bespoke shortcodes. No design file, no chrome CSS: the look comes from Theme Settings. |
+| `samples/sample-shortcode/` | The template for a new page-builder element. |
 
-**Assembled (gitignored — never committed, filled by `assemble.ps1`):** `assembled/unysonplus/` (full plugin),
-`assembled/unysonplus-theme/` (parent theme), `assembled/unysonplus-theme-child/` (child-theme **starter** — copy per site;
-ships polished-chrome `design.json`), `assembled/UnysonPlus-Capture-Service/` + `assembled/UnysonPlus-Site-Converter-Extension/`
-(the automated conversion pipeline this kit shares standards with).
+**Assembled (gitignored — never committed, filled by `assemble.ps1`):** `assembled/unysonplus/` (the plugin —
+from GitHub that is the **core-only** release zip; extensions are added through Unyson+ → Extensions),
+`assembled/unysonplus-theme/` (parent theme), `assembled/UnysonPlus-Capture-Service/` + `assembled/UnysonPlus-Site-Converter-Extension/`
+(the automated conversion pipeline this kit shares standards with). (`assembled/unysonplus-theme-child/` is
+only filled on a maintainer machine — the tracked starter is `samples/sample-child-theme/`.)
 
 ## Why assemble instead of submodules
 
 The **full plugin isn't one repo** — it's core + many `UnysonPlus-<Name>-Extension` repos; the
-distributable is the release zip. So the kit commits only its **own** content (playbooks, starter,
-tools) and pulls the plugin/theme/services in on demand. Small repo, zero drift, still fully duplicatable.
+distributable is a core-only release zip, and each extension is downloaded on demand by the plugin's
+Extensions manager. So the kit commits only its **own** content (playbooks, starter, tools) and pulls
+the plugin/theme/services in on demand. Small repo, zero drift, still fully duplicatable.
 
 ## The idea in one line
 
-Lock the **header, footer, and container** to measured parity **first** (native options + the starter's
-`design.json`), then it's just section-by-section — and hard elements can start as a `code_block`
+Lock the **header, footer, and container** to measured parity **first** (native Theme Settings
+options), then it's just section-by-section — and hard elements can start as a `code_block`
 placeholder and be swapped for shortcodes later.
 
 ## License

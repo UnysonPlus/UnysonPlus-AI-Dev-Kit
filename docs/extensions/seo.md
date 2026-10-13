@@ -4,8 +4,9 @@
 Dynamic title and meta-description templates with auto-generation, canonical URLs,
 indexing control, sharing cards, and a live search-result preview in the editor.
 
-- **Slug:** `seo` · **Repo:** `UnysonPlus-SEO-Extension` · **Active by default:** no
-  (downloadable from Unyson+ → Extensions)
+- **Slug:** `seo` · **Repo:** `UnysonPlus-SEO-Extension` · **How you get it:** not in the core-only plugin zip;
+  in the parent theme's recommended set (offered on the *Install Compatible Extensions* screen when the
+  plugin is activated with `unysonplus-theme` active), otherwise download it from Unyson+ → Extensions
 - **Provides:** `%%tag%%` template engine · title + description resolution ·
   `<link rel="canonical">` · robots directives · **XML sitemaps** ·
   **Open Graph + Twitter cards** · **JSON-LD graph** ·
@@ -13,7 +14,9 @@ indexing control, sharing cards, and a live search-result preview in the editor.
   SEOPress / AIOSEO** · site-verification tags ·
   two option types (`seo-template`, `seo-preview`)
 - **Does not provide (yet):** a redirect manager, per-page schema overrides,
-  Product/Event/Recipe types. `BreadcrumbList` lives in the separate
+  Product/Event/Recipe types, and **no `LocalBusiness` (or subtype: `Dentist`, `MedicalClinic`,
+  `LegalService`, `Restaurant`, …) node** — the site identity is only `Organization` or `Person`. Add one
+  with the `fw_seo_schema_graph` filter ([JSON-LD graph](#json-ld-graph--adding-localbusiness-and-other-types)). `BreadcrumbList` lives in the separate
   [`breadcrumbs`](breadcrumbs.md) extension; `FAQPage` is emitted by the
   **accordion shortcode**, not here.
 
@@ -245,6 +248,7 @@ Rewrite rules flush once, gated on `FW_SEO_Sitemap::REWRITE_VERSION` stored in t
 | `fw_seo_auto_description` | filter | The generated description before trimming. |
 | `fw_seo_canonical_url` · `fw_seo_robots` · `fw_seo_separator` | filter | Self-explanatory. |
 | `fw_seo_locations` · `fw_seo_post_types` · `fw_seo_taxonomies` | filter | What gets templates and metaboxes. |
+| `fw_seo_schema_graph` | filter | `( array $nodes, FW_SEO_Context $ctx )` — the whole JSON-LD `@graph` before printing; return the node list. |
 
 Registering a tag:
 
@@ -262,6 +266,52 @@ add_action( 'fw_seo_register_tags', function () {
     ] );
 } );
 ```
+
+### JSON-LD graph — adding LocalBusiness and other types
+
+`FW_SEO_Schema::graph( $ctx )` builds one `@graph` of four nodes — the **publisher** (`Organization` or
+`Person`, per the *represents* setting; `@id` = `FW_SEO_Schema::publisher_id()`, i.e. `<home>#organization` /
+`#person`, carrying name, logo, email, `telephone`, `sameAs`), **`WebSite`**, the **`WebPage`** / article node
+(its `publisher` points at the publisher `@id`) and the **author** `Person` — then applies
+**`fw_seo_schema_graph`** (`apply_filters( 'fw_seo_schema_graph', $nodes, $ctx )`) and drops empty entries.
+There are no built-in `LocalBusiness` types and no address / opening-hours / geo settings, so a local
+business adds them in this filter (child theme `functions.php` or a small plugin). Re-typing the publisher
+node keeps its `@id`, so every node that references it now references the business:
+
+```php
+add_filter( 'fw_seo_schema_graph', function ( array $nodes, FW_SEO_Context $ctx ) {
+    foreach ( $nodes as &$node ) {
+        if ( ! is_array( $node ) || ( $node['@id'] ?? '' ) !== FW_SEO_Schema::publisher_id() ) {
+            continue;
+        }
+        $node['@type']   = 'Dentist';                 // any LocalBusiness subtype (Organization stays implied)
+        $node['address'] = [
+            '@type'           => 'PostalAddress',
+            'streetAddress'   => '1 Example Street',
+            'addressLocality' => 'Example City',
+            'postalCode'      => '00000',
+            'addressCountry'  => 'US',
+        ];
+        $node['openingHoursSpecification'] = [ [
+            '@type'     => 'OpeningHoursSpecification',
+            'dayOfWeek' => [ 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday' ],
+            'opens'     => '09:00',
+            'closes'    => '17:00',
+        ] ];
+        $node['priceRange'] = '$$';
+    }
+    unset( $node );
+    return $nodes;
+}, 10, 2 );
+```
+
+- Only when the site *represents* an organization — with **Person** selected the publisher node is a
+  `Person` and should stay one; append a separate business node instead (`$nodes[] = [ '@type' => …, '@id' => home_url( '/' ) . '#business', … ]`).
+- Use `$ctx->is( FW_SEO_Context::FRONT_PAGE )` (or `$ctx->post_id()`) to add page-specific nodes only where
+  they belong. Keep values consistent with the visible page (address / phone in the footer) — the graph is
+  the machine-readable copy that gets believed.
+- Put the telephone in the SEO settings (`schema_phone`) rather than hard-coding it here; it is already on
+  the publisher node.
 
 Adding a head tag:
 

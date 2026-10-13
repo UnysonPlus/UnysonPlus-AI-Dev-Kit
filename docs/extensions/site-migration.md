@@ -1,8 +1,8 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Site Migration extension
 
-Moves a **whole** WordPress site to another install over HTTP. Ships **inactive**;
-the user activates it in Unyson+ → Extensions.
+Moves a **whole** WordPress site to another install over HTTP. Not in the core-only plugin
+zip; the user downloads + activates it in Unyson+ → Extensions.
 
 - **Folder:** `framework/extensions/site-migration/`
 - **Repo:** `UnysonPlus-Site-Migration-Extension`

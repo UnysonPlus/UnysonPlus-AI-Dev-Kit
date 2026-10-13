@@ -28,7 +28,7 @@ Two independent questions. Answer both in your first message.
 |---|---|---|
 | Trigger | a URL, screenshot, PDF/Figma, HTML/CSS dump, or a named site — whatever the verb ("convert", "clone", "rebuild", "turn this into", "make it look like", "here's the site: …") | a brief with nothing to reproduce ("build me a bakery site") |
 | Phase 0 | **capture-first, hard gate** | skipped — there is nothing to capture |
-| Everything else | applies | applies |
+| Everything else | applies | the subset in **"Fresh build (no source site)"** below |
 
 **(b) What may you change?**
 
@@ -44,6 +44,41 @@ either way. The only per-**defect** choice is where the fix lands.
 
 Converter mode never excuses leaving the site unfixed. A rule you shipped but never reconverted into the
 page has fixed nothing anybody can see.
+
+---
+
+## Fresh build (no source site)
+
+Use this path only when **nothing exists to reproduce** — a brief like "build me a CRM / clinic / bakery
+site". A URL, screenshot, PDF/Figma, HTML dump or "make it like X" is a conversion: take the phases below.
+The rest of this page is written for conversions; a fresh build follows **its own order**, which lives in:
+
+- [`build-reference.md`](build-reference.md) **Part 2 — "Fresh builds"** — the order (tokens → chrome →
+  pages → motion → verify) and the prompt → build mapping.
+- [`building-pages.md`](building-pages.md) — composing each page as a builder tree with
+  `upw_build_page()` (Div-first layout, element tags, the storage rules).
+
+**Still applies — in this order:**
+
+1. **Setup** (`AGENTS.md` → Phase 0): WordPress + parent theme + the Unyson+ plugin, then download the
+   extensions the build uses from **Unyson+ → Extensions** — the release zip is core-only, so Page Builder
+   (with Shortcodes) is never there by default. A copy of `samples/sample-child-theme/` for site CSS / bespoke elements.
+2. **Design system first** — colours, typography, buttons, boxes, spacing as Theme Settings presets
+   ([`theme-settings/`](theme-settings/README.md), [`programmatic-setup.md`](theme-settings/programmatic-setup.md)).
+   Elements consume presets; no per-element hex values.
+3. **Chrome** — container width, header, footer (Theme Settings, or Theme Builder parts for per-template
+   headers/footers — [`extensions/theme-builder.md`](extensions/theme-builder.md)) before any page body.
+4. **Pages, section by section** — run checklist 5a items 3–6 for every section (native options before CSS,
+   real shortcodes not HTML blobs, the six checks against your own design intent, flag residuals).
+   Post / archive / CPT layouts → Theme Builder Body templates with dynamic elements and `{{tokens}}`.
+5. **Motion last**, then **verify**: open every page yourself (Gate 4a applies to your own render — write
+   a line per band), no PHP notices / console errors, each page opens in the visual builder, heading order,
+   contrast, alt text. If you were given a mockup to hit, `tools/measure/` against it is the proof.
+
+**Skipped — there is nothing to capture or translate:** Phase 0 (capture + the upstream-consent question),
+Phase 1 (convert), the source-vs-build comparisons of Phases 2–3 and Gate 3d, the converter-side steps
+(5a items 1, 2 and 7, goldens, `send-finding.mjs`), Phase 7 (corpus) and Phase 8 (findings ledger).
+Phase 9 housekeeping still applies to anything you changed in the plugin, theme or kit.
 
 ---
 

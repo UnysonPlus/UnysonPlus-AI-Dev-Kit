@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # cursor — Custom Cursor (Animation Engine)
 
-Replaces the pointer with a custom cursor **site-wide**. It is **not** an `fx`-block slot — it is a Theme Settings control (Site-wide UX → **Cursor** sub-tab), saved under the `animation_cursor` option. Requires the `animation-engine` extension ACTIVE (ships inactive). Auto-disabled on touch screens.
+Replaces the pointer with a custom cursor **site-wide**. It is **not** an `fx`-block slot — it is a Theme Settings control (Site-wide UX → **Cursor** sub-tab), saved under the `animation_cursor` option. Requires the `animation-engine` extension ACTIVE (not in the core-only plugin zip — download + activate it under Unyson+ → Extensions). Auto-disabled on touch screens.
 
 ## Effects / styles
 An enable switch + a `style` `multi-picker` (picker id **`shape`**, default `dot_ring`) whose tiles are grouped Dot&Ring / Targeting / Shapes / Trails / Fluid&Lens / Interactive / Custom. Most styles reveal one or more extra params; the rest use only the shared modifiers.

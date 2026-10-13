@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # animation-engine extension
 
-The home for UnysonPlus's animation capabilities — WebGL objects, scroll motion, hover/physics interactions, text effects, backgrounds, cursors, page transitions and a seamless-scroll loop. **Active by default:** no (ships INACTIVE — activate it under Extensions).
+The home for UnysonPlus's animation capabilities — WebGL objects, scroll motion, hover/physics interactions, text effects, backgrounds, cursors, page transitions and a seamless-scroll loop. **Active by default:** no (not in the core-only plugin zip — download + activate it under Unyson+ → Extensions).
 
 ## Provides
 
@@ -16,7 +16,7 @@ The home for UnysonPlus's animation capabilities — WebGL objects, scroll motio
 
 ## Notes / gotchas
 
-- **Ships inactive by default** — the user activates it in Extensions; nothing renders until then.
+- **Not in the core-only plugin zip** — the user downloads + activates it in Unyson+ → Extensions; nothing renders until then.
 - **On-demand loading:** a page ships only the styles/scripts for effects it actually uses ("ship only used styles" contract).
 - Requires the `shortcodes` loader + `page-builder` (to surface the 9 elements).
 - Repo is **flattened** (`UnysonPlus-Animation-Engine-Extension`, root = the extension folder).

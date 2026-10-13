@@ -3,7 +3,7 @@
 
 Stores and manages the people who sign up through the `[newsletter]` element, and is the base a
 full CRM (tags/segments, campaigns, automations, ESP sync) grows onto. **Active by default:** no —
-enable it under Unyson+ → Extensions.
+not in the core-only plugin zip; download + activate it under Unyson+ → Extensions.
 
 Without it, a `[newsletter]` signup is only emailed to the site admin and is never stored anywhere.
 
@@ -38,6 +38,20 @@ Without it, a `[newsletter]` signup is only emailed to the site admin and is nev
   and `POST` (email/name/list/tags). Capability-gated; tokens are never exposed.
 - **GDPR:** registers a personal-data exporter and eraser, so WordPress's own
   Tools → Export/Erase Personal Data covers subscribers.
+
+## AI abilities (1.0.37)
+
+With the AI Assistant active, a connected AI app (MCP) can set up the CRM, never read or contact the people in it:
+
+| Ability | Does |
+|---|---|
+| `crm-describe` | Settings, lists, tags, segments, campaigns, the email sender, with subscriber **counts** only |
+| `crm-save-lists` | `{ lists: [{title, slug?, description?}], tags: [...] }`; matched by slug, so a repeat call updates |
+| `crm-save-segment` | `{ title, filters: { status?, list?, tag?, search? } }`; list / tag by slug, id or title; same title updates |
+| `crm-settings` | `double_optin`, `admin_notify`, `default_list`, `confirm_subject` / `confirm_body` (must contain `{{confirm_url}}`), `welcome_email`, `welcome_subject` / `welcome_body`; undoable |
+| `crm-save-campaign` | Saves a **draft** `{ title, subject, body, audience: { list?, tag?, segment?, status? } }`; returns its current reach; nothing schedules or sends |
+
+Pipeline stages are tags titled `Stage: <name>`, each with a saved segment (tag + status `subscribed`). Forms join the CRM through `forms-add`'s `subscribe` input. Lists, segments and campaigns are not covered by undo-change (they live in the CRM tables); the ability messages say what was created so the owner can rename or delete it.
 
 ## Tables
 
@@ -115,6 +129,7 @@ list ID to the provider's audience/group ID — mapped, never guessed.
   touched, and a segment referencing it survives — it just matches nobody.
 - **The element's List ID is free text.** An unrecognised ID auto-creates the list when
   `auto_create_lists` is on (the default); otherwise the signup falls back to `default_list`.
+- **Double opt-in is ON by default.** The `double_optin` setting defaults to `yes`, and `Service::subscribe()` treats a site that never saved the setting as on (`setting_is_on( 'double_optin', true )`); a caller can still pass `double_optin => false` explicitly. Turn it off only deliberately.
 - **Double opt-in is complete.** Signups land as `pending` and are emailed a tokened link. The link
   opens a page with a **button that POSTs** rather than confirming on the GET — mail scanners visit
   every URL in an inbound email and would otherwise opt people in; `confirm_on_visit` disables that
@@ -179,7 +194,7 @@ list ID to the provider's audience/group ID — mapped, never guessed.
   links with an optional uploaded icon; **Video** links a poster image because no client plays
   video; **Hero** carries a VML background fallback for Outlook; **Raw HTML** is filtered by the
   saving user's `unfiltered_html` capability, which only works because compilation happens on save.
-- **Forms bridge:** a *Subscribe to the newsletter* action for the Forms extension (per-form list + tags + name field), gated strictly on a ticked Consent field with purpose `newsletter` — an email field alone never subscribes anyone; and a *Form entries* activity panel on the subscriber screen (read by email; the CRM never writes entries).
+- **Forms bridge:** a *Subscribe to the newsletter* action for the Forms extension (per-form atts `action_subscribe`, `action_subscribe_list` (list slug, `''` = default list), `action_subscribe_tags` (comma-separated), `action_subscribe_name` (the name field's label) — see `../shortcodes/contact-form.md`), gated strictly on a ticked Consent field with purpose `newsletter` — an email field alone never subscribes anyone. Double opt-in applies. **Tags given by name match admin-created tags:** `resolve_membership()` slugs every non-numeric list / tag value the same way the admin screen does (`sanitize_key( sanitize_title( $name ) )`, so `Stage: New lead` → `stage-new-lead`) and reuses the existing tag instead of creating a look-alike; a missing tag is created with the original text as its title (lists are auto-created only while `auto_create_lists` is on); and a *Form entries* activity panel on the subscriber screen (read by email; the CRM never writes entries).
 - **The email template library is the framework's**, switched on with `'template_saving' => true`
   on the builder option — the Templates panel, save/load/delete and JSON export/import come from
   the builder extension, scoped by builder type so email and page templates never mix. Six

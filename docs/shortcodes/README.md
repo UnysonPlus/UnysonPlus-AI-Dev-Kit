@@ -140,13 +140,15 @@ every sub-shape must be present (that's why the wrapper blocks above are always 
 
 **Every shortcode has its own file here** (~90 total) — open `docs/shortcodes/<name>.md` for its
 atts. Filenames are the shortcode folder name (kebab); the tag is dashes→underscores
-(`call-to-action.md` → `call_to_action`). `image.md` = the `media_image` shortcode.
+(`call-to-action.md` → `call_to_action`). **Exception: `image.md` documents the `media_image` shortcode** —
+use the tag `media_image` in builder JSON / `upw_element()`; there is no `image` tag (an `image` node
+renders as literal `[image]` text).
 
 **Structure / layout:** `flexbox` (the **Div** — default container) · `section` · `row` · `column` · `container` · `bleed-section` *(the last four are the classic/legacy Bootstrap grid)* · `masonry-section` · `divider` · `steps` · `timeline`
 **Headings / text:** `special-heading` · `text-block` · `blockquote` · `highlight-text` · `animated-heading` · `text-expander` · `toc`
 **CTA / actions:** `button` · `call-to-action` · `badge` · `newsletter`
 **Cards / features:** `icon-box` · `feature-list` · `image-box` · `image-content` · `flip-box` · `pricing-table` · `team-member` · `testimonials` · `comparison-table` · `table`
-**Media:** `image` · `media-video` · `gallery` · `carousel` · `before-after` · `image-hotspots` · `lottie` · `video-popup` · `audio-player` · `logo-grid` · `avatar` · `featured-image`
+**Media:** `image` (tag `media_image`) · `media-video` · `gallery` · `carousel` · `before-after` · `image-hotspots` · `lottie` · `video-popup` · `audio-player` · `logo-grid` · `avatar` · `featured-image`
 **Data / display:** `counter` · `countdown` · `progress` · `star-rating` · `calendar` · `map` · `business-info` · `tag-list`
 **Interactive:** `accordion` · `tabs` · `tooltip` · `modal-popup` · `scroll-indicator` · `scroll-to-top` · `menu-toggle`
 **Icons / social:** `icon` · `social-icons` · `social-share` · `notification`

@@ -12,7 +12,8 @@ already know a filename.
 |---|---|
 | **THE PROTOCOL — one document for build, convert, fix and train** (phases, gates, the per-section checklist; nothing else overrides it) | [`site-build-protocol.md`](site-build-protocol.md) |
 | Value shapes, translation tables, fresh-build order, parity metrics, known misses (**reference, not authority**) | [`build-reference.md`](build-reference.md) |
-| Prompt → finished site (fresh builds — nothing to reproduce) | [`site-build-protocol.md`](site-build-protocol.md) (job selector) + [`build-reference.md`](build-reference.md) Part 2 |
+| Prompt → finished site (fresh builds — nothing to reproduce) | [`site-build-protocol.md`](site-build-protocol.md) → "Fresh build (no source site)" + [`build-reference.md`](build-reference.md) Part 2 |
+| Single-post / CPT / archive / 404 layouts, per-section headers + footers, `{{dynamic}}` values in text | [`extensions/theme-builder.md`](extensions/theme-builder.md) |
 | Compose builder pages programmatically (fresh/demo/test — **not** conversions) | [`building-pages.md`](building-pages.md) + [`../tools/upw-build-pages.php`](../tools/upw-build-pages.php) |
 | **Change ONE element's option value** (programmatically or in the builder) — value lands, shows in the builder, renders; the traps that waste a session | [`editing-elements.md`](editing-elements.md) |
 | The generalized conventions every build follows | [`conventions.md`](conventions.md) |

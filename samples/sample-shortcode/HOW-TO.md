@@ -56,7 +56,7 @@ three-step flow gives a pixel-faithful result:
    - **Screenshot the shipped element against the replica** — they must match.
 
 This is the difference between an "unsatisfactory" hand-built result and a faithful one: on the
-pinky-bites cupcake builder the captured markup revealed the frosting was a **white-bordered ellipse
+fixture-01 product configurator the captured markup revealed the frosting was a **white-bordered ellipse
 over a rounded-bottom base, overlapping by 40px, with white text** — none of which my measurements
 had produced. Steps 1–5 below still apply (they are the *translation*); Step 0 is how you get a
 correct thing to translate.

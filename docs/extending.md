@@ -201,7 +201,7 @@ shortcode, not a per-build nag):
 
 | Home | Ships as / distributed by | Right when… | Notes |
 |---|---|---|---|
-| **Core plugin** `framework/extensions/shortcodes/shortcodes/<name>/` | the full-plugin release ZIP (auto-updater) | it's **generic + reusable** AND belongs in the framework for everyone | contributor task (needs the plugin repo + a version bump); a core tag wins over same-named theme/upload tags |
+| **Core plugin** `framework/extensions/shortcodes/shortcodes/<name>/` | the Shortcodes extension (its own repo; sites get it through the Extensions manager) | it's **generic + reusable** AND belongs in the framework for everyone | contributor task (needs the plugin repo + a version bump); a core tag wins over same-named theme/upload tags |
 | **Child theme** `<theme>/framework-customizations/extensions/shortcodes/shortcodes/<name>/` | inside the child-theme ZIP (Appearance → Add New → Upload) | it's **one site's / one brand's bespoke** element that should travel with the theme | no registration call — the loader scans the active theme; version = the theme's `style.css` |
 | **Standalone extension** `framework/extensions/<name>/` (manifest `standalone`/`author`/`license`) | its **own** distributable module, activatable in Extensions | the user wants to **ship / sell / hand it out independently** of any one plugin or theme | see *Creating an extension* below; the closest thing to a self-contained, distributable package |
 | **User-uploaded** (uploads dir) | dropped into the uploads dir | a quick per-site drop-in with no packaging | lightest path; no packaging UI/zip format today |
@@ -215,7 +215,7 @@ The porting procedure (`samples/sample-shortcode/HOW-TO.md`) is **identical for 
 folder (and the version marker) changes.
 
 **References:** the `newbingosite` child theme ships `mini-reviews` / `pros-cons` / `casino-matcher` /
-`toplist-offers` this way; the `pinky-bites` demo ships an interactive `cupcake-builder` configurator.
+`toplist-offers` this way; a demo child theme ships an interactive product configurator.
 
 ---
 
@@ -411,12 +411,15 @@ the source.
 usually don't need the source at all.** Only when it doesn't cover what you need, read the PHP —
 and backfill the matching doc in the same turn (see [`architecture/README.md`](architecture/README.md)).
 
-**The kit fetches it for you.** `assemble.ps1` populates the gitignored `unysonplus/` and
+**The kit fetches part of it.** `assemble.ps1` populates the gitignored `unysonplus/` and
 `unysonplus-theme/` folders:
 
 ```bash
-pwsh assemble.ps1 -Source github     # latest full plugin release + parent theme
+pwsh assemble.ps1 -Source github     # latest CORE-ONLY plugin release (framework + blog + update) + parent theme
 ```
+
+The public release zip is core-only, so on a non-maintainer machine `assembled/unysonplus/` has **no
+shortcodes / page-builder source** — clone the extension repos below for that.
 
 **Or clone directly:**
 
@@ -429,10 +432,10 @@ pwsh assemble.ps1 -Source github     # latest full plugin release + parent theme
 Individual extensions also have their own repos, named
 `UnysonPlus-<Name>-Extension` (every word hyphenated).
 
-> **Trap:** cloning `UnysonPlus.git` gets you **core only** — no page builder and no shortcodes.
-> It activates cleanly, which is what makes the mistake hard to spot. For a working install use
-> the **release zip** (or `assemble.ps1`); for shortcode source, use the Shortcodes-Extension
-> repo.
+> **Trap:** the core plugin — the release zip *and* a clone of `UnysonPlus.git` — has **no page
+> builder and no shortcodes**. It activates cleanly, which is what makes the gap easy to miss. On a
+> site, download Page Builder (+ Shortcodes, Builder) and any other extension from **Unyson+ →
+> Extensions**; for shortcode *source*, use the Shortcodes-Extension repo.
 
 ---
 

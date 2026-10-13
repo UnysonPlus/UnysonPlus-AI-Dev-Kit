@@ -44,12 +44,17 @@ const PX_TOL = 1.5;
 
 async function firstHandle(page, sels) { for (const s of sels) { const h = await page.$(s); if (h) { const b = await h.boundingBox().catch(() => null); if (b && b.height > 4) return h; } } return null; }
 async function bandHandles(page, sels, hH) {
+  // PREFER A SELECTOR THAT ACTUALLY SEGMENTS — see the same note in compare.mjs. Returning on the first
+  // selector that matches anything made this lens compare a single whole-page wrapper against the build's
+  // first band, and report PASS for every band it never looked at.
+  let single = null;
   for (const s of sels) { const hs = await page.$$(s); const out = [];
     for (const h of hs) { const b = await h.boundingBox().catch(() => null); if (!b || b.height < 80) continue;
       const tag = await h.evaluate(el => el.tagName.toLowerCase()); if (['nav', 'footer', 'script', 'style'].includes(tag)) continue;
       if (hH && Math.abs(b.y) < 2 && Math.abs(b.height - hH) < 2) continue; out.push(h); }
-    if (out.length) return out; }
-  return [];
+    if (out.length > 1) return out;
+    if (out.length === 1 && !single) single = out; }
+  return single || [];
 }
 // A region's own box props. For CHROME (header/footer) the two sides put the box on DIFFERENT elements:
 // the source paints padding and fill straight on <footer>, while the theme rebuilds it as a wrapper whose

@@ -95,16 +95,40 @@ try {
     console.log('');
   }
 
-  // Then the ordered walk, so a specific box can be found.
-  const n = Math.max(s.boxes.length, d.boxes.length);
-  let shown = 0;
-  console.log('per-box walk (only where the signature differs):');
-  for (let i = 0; i < n && shown < limit; i++) {
-    const a = s.boxes[i]; const z = d.boxes[i];
-    if (a && z && sig(a) === sig(z)) continue;
+  // Then the per-box walk. PAIRED BY LABEL, NOT BY INDEX.
+  //
+  // Index pairing is what this did first, and on any real pair the two sides drift apart within a few
+  // boxes — the build emits wrappers the source does not, and vice versa. Measured on one conversion:
+  // row #59 compared the SOURCE's 992x845 content column against the BUILD's 1024x46 eyebrow, and
+  // every row after it was similarly offset. A mismatched pair is not evidence (it is one of the three
+  // permitted non-differences), so an audit built on that walk reports mostly noise.
+  //
+  // Boxes are matched on their own text label instead. A label that is empty, or that occurs more than
+  // once on either side, cannot identify a box — those are listed separately as UNPAIRED rather than
+  // guessed at, so the reader can tell "this differs" from "this could not be compared".
+  const norm = (t) => String(t || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const count = (boxes) => {
+    const m = new Map();
+    for (const bx of boxes) { const k = norm(bx.label); if (k) m.set(k, (m.get(k) || 0) + 1); }
+    return m;
+  };
+  const sCount = count(s.boxes); const dCount = count(d.boxes);
+  const dByLabel = new Map();
+  for (const bx of d.boxes) { const k = norm(bx.label); if (k && dCount.get(k) === 1) dByLabel.set(k, bx); }
+
+  let shown = 0; let unpaired = 0;
+  console.log('per-box walk (paired by label; only where the signature differs):');
+  for (const a of s.boxes) {
+    if (shown >= limit) break;
+    const k = norm(a.label);
+    if (!k || sCount.get(k) !== 1 || !dByLabel.has(k)) { unpaired++; continue; }
+    const z = dByLabel.get(k);
+    if (sig(a) === sig(z)) continue;
     shown++;
-    console.log(`  #${String(i).padStart(3)} SRC ${a ? fmt(a) : '(none)'}`);
-    console.log(`       BLD ${z ? fmt(z) : '(none)'}`);
+    console.log(`  SRC ${fmt(a)}`);
+    console.log(`  BLD ${fmt(z)}`);
+    console.log('');
   }
-  if (!shown) console.log('  every box signature matches');
+  if (!shown) console.log('  every paired box signature matches');
+  if (unpaired) console.log(`  (${unpaired} source box(es) had no unique label to pair on — not compared)`);
 } finally { await closeQuiet(b); }

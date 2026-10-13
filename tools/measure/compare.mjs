@@ -60,6 +60,7 @@ const NORMW = 700;
 
 async function firstHandle(page, sels) { for (const s of sels) { const h = await page.$(s); if (h) { const b = await h.boundingBox().catch(() => null); if (b && b.height > 4) return h; } } return null; }
 async function bandHandles(page, sels, headerH) {
+  let single = null;
   for (const s of sels) {
     const hs = await page.$$(s); const out = [];
     for (const h of hs) {
@@ -69,9 +70,17 @@ async function bandHandles(page, sels, headerH) {
       if (headerH && Math.abs(b.y) < 2 && Math.abs(b.height - headerH) < 2) continue;
       out.push(h);
     }
-    if (out.length) return out;
+    // PREFER A SELECTOR THAT ACTUALLY SEGMENTS. Returning on the first selector that matches ANYTHING
+    // is how this lens silently compared nothing: on a source whose bands sit inside one wrapper,
+    // `main > *` yields a SINGLE band holding the whole page. The report then read
+    // "body sections — mockup 1, dev 7", compared that one mega-region against the build's first
+    // section, and printed PASS for sections 2-7 having examined none of them — a PASS that means
+    // "not looked at" is worse than a FAIL.
+    // A single match is kept only as a fallback, if nothing else segments the page.
+    if (out.length > 1) return out;
+    if (out.length === 1 && !single) single = out;
   }
-  return [];
+  return single || [];
 }
 const shoot = async (h) => { try { return await h.screenshot({ timeout: 8000 }); } catch { return null; } };
 const domStruct = async (h) => h ? h.evaluate(el => ({

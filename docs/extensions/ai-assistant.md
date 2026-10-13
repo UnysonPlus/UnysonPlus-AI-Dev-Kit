@@ -4,8 +4,8 @@
 Registers UnysonPlus **abilities** with the WordPress Abilities API so an AI model — an MCP agent,
 the (planned) builder panel, or anything calling the REST abilities endpoints — can read the site and
 build / edit page-builder pages through **validated, undoable** actions. **Active by default:** no
-(ships inactive). Requires WordPress **6.9+** (on older WP it loads but registers nothing) and the
-`shortcodes` + `page-builder` extensions. Version: 1.0.31. Human manual:
+(not in the core-only plugin zip — download + activate it under Unyson+ → Extensions). Requires WordPress **6.9+** (on older WP it loads but registers nothing) and the
+`shortcodes` + `page-builder` extensions. Version: 1.0.36. Human manual:
 [AI Assistant](https://unysonplus.github.io/docs/extensions/ai-assistant/).
 
 ## Provides
@@ -16,7 +16,8 @@ build / edit page-builder pages through **validated, undoable** actions. **Activ
 
 | Ability | Input | Notes |
 |---|---|---|
-| `unysonplus/site-info` | — | Start here: site, theme, active extensions, builder post types, ≤100 pages |
+| `unysonplus/site-info` | — | Start here: site, theme, Unyson+ version, active extensions + `extension_versions`, `permalinks` (`plain` breaks MCP), builder post types, ≤100 pages |
+| `unysonplus/build-docs` | `path?` | The AI Dev Kit docs for an MCP client with no disk (1.0.38, `FW_AI_Docs`): no path = `README.md` index + a fresh-build reading order; a path reads one `.md` (validated, no `..`) from the kit's public repo (`raw.githubusercontent.com/…/main/docs/`, filter `fw_ai_build_docs_base`), cached 12 h in a transient, capped at 60k chars. Unreachable = an error that points to `list-elements` / `describe-element` |
 | `unysonplus/list-elements` | `category?` | Layout types + every builder element (tag, title, category) |
 | `unysonplus/describe-element` | `element`, `include_effects?` | Flattened leaf options: id, type, tab, label, choices, default. Effect atts hidden by default |
 | `unysonplus/get-page` | `post_id`, `detail?` (`outline`/`full`) | Outline gives every item a `path` (`0.2.1`) + unique_id + text label |
@@ -38,6 +39,7 @@ build / edit page-builder pages through **validated, undoable** actions. **Activ
 | `unysonplus/render-check` | `post_id` | Renders the (sandboxed) tree element by element → `{ok, summary, stats, headings, issues[{severity,path,element,message}]}` |
 | `unysonplus/list-revisions` | `post_id` | Newest 20 kept |
 | `unysonplus/undo` | `post_id`, `revision_id?` | Snapshots current first, so undo is undoable |
+| `unysonplus/create-child-theme` | `name`, `confirm?` | 1.0.38, `FW_AI_Theme`, `switch_themes` + `install_themes`. Two steps like `manage-extension`. Writes `style.css` (`Template: unysonplus-theme`) + a guarded `functions.php` via the direct filesystem, copies the ACTIVE theme's `theme_mods_*` (menu locations, logo) to the child when it has none, then `switch_theme()`. Theme Settings carry over because they are keyed by the manifest id, which a child without its own manifest inherits. Usually not needed: styling lives in the database |
 
 A path may also be `id:<unique_id>`.
 
@@ -156,7 +158,16 @@ A path may also be `id:<unique_id>`.
   hidden meta re-synced), **post-types** (via `save_definitions()`, defaults from the private blueprint
   builders by reflection), **custom-fields** (group validated against `get_page_options()`; values via
   `fw_set_db_post_option`), **forms** (`forms-add` normalises items via the form-builder item classes like
-  the starters; no entries ability). Toolkit spec keys: options, post_meta, created_posts, trashed_posts,
+  the starters; since Forms 2.0.64 it also sets the form's actions: `store`, `subscribe { list, tags,
+  name_field }` → `action_subscribe*` atts, and `failure_message`; no entries ability), **newsletter-crm**
+  1.0.37 (`crm-describe` — settings, lists, tags, segments, campaigns with subscriber COUNTS only;
+  `crm-save-lists` — lists + tags matched by slug, so repeat calls update; `crm-save-segment` — filters
+  status / list / tag / search, list and tag by slug, id or title; `crm-settings` — double opt-in, admin
+  notify, default list, confirmation / welcome emails, snapshots `fw_ext_settings_options:newsletter-crm`,
+  rejects a confirm body without `{{confirm_url}}`; `crm-save-campaign` — DRAFTS only, nothing schedules or
+  sends; lists / segments / campaigns live in CRM tables that undo-change cannot restore; no ability returns
+  a subscriber), **mailer** 1.2.24 (`mailer-sender` — From name / address, snapshots
+  `fw_ext_settings_options:mailer`; the send method and SMTP credentials are deliberately not settable). Toolkit spec keys: options, post_meta, created_posts, trashed_posts,
   created_menus, post_fields, post_terms. Undo untrashes with `wp_untrash_post_set_previous_status` (WP 5.6+
   untrashes to draft) and `FW_Cache::clear()`s.
 - **More extension abilities** — **woocommerce** 1.0.71 (`woo-settings` / `woo-settings-update` validate
@@ -356,7 +367,7 @@ The suggestion appears as a starter chip at the top of the assistant's panel, an
 count badge. Three decisions in that shape are load-bearing:
 
 **The queue lives in `framework/includes/ai-suggestions.php`, not in this extension.** An extension's code
-is not loaded while it is inactive, and this assistant ships inactive — so a helper defined here would be
+is not loaded while it is inactive, and this assistant is off until someone installs + activates it — so a helper defined here would be
 missing in exactly the case it exists for: a conversion finishing while nothing is listening. Callers
 therefore do **not** guard on the assistant being present, and should not; guarding is what loses the
 suggestion in the one case that matters. A user who clicks "Enable the AI Assistant" and lands on an empty
@@ -387,3 +398,13 @@ badge remains.
   `fw-ai-assistant` page (capability `edit_pages`) renders Settings (views/page.php), Changes (`FW_AI_Changes::render()`)
   or Usage (`FW_AI_Access::render()`); non-admins are forced to Changes. `_handle_post()` routes POSTs by tab. The old
   slugs `fw-ai-changes` / `fw-ai-usage` are hidden pages (parent `fw-ai-hidden`) that redirect with their query args.
+- **Extensions + live convert (1.0.36)** — `includes/class-fw-ai-extensions.php`: list-extensions / manage-extension call
+  `fw()->extensions->manager` (`install_extensions` with `cancel_on_error`, `activate_extensions`, `deactivate_extensions`);
+  install loads wp-admin `file.php`/`misc.php`/`plugin.php` + `WP_Filesystem()` and needs direct FS access; preview without
+  confirm; `PROTECTED_EXTS` never deactivated. convert-url: `rendered_html` input; with no render and no `allow_raw` it returns
+  `{ok:false, reason:'service_unreachable', capture_request:{path:'/capture?single=1&html=1&url=…'}}`; panel.js browser loop
+  fetches that from the kit and re-calls. Kit (capture service 1.11.97): `AGENT_SITES` (to-ai.mjs) maps a per-run key to the
+  site's MCP url + headers; `/mcp-kit?site=<key>` adds tool `convert_site` (renders via its own /capture, then POSTs the
+  site's convert_url with rendered_html; without confirm it only forwards the preview). Site Converter 1.11.61:
+  `capture_is_inner_page()` only trusts an http(s) `bundle.json` source (a format label like "stitch" read as a path made
+  every HTML-built import an inner page, so a site with a converted theme kept it) and reads `theme-design.json` source_url.

@@ -11,7 +11,7 @@ A single call-to-action link styled from Theme Settings button presets, with ico
 | `target` | switch | `'_self'` | `_self` \| `_blank` | Open in a new window (`_blank`). |
 | `icon` | icon-v2 | none | icon-v2 object (see Notes) | Optional icon beside the label. |
 | `icon_position` | select | `'after'` | `before` \| `after` | Icon before or after the label. |
-| `style` | button-style-picker | first preset (e.g. `btn-primary`) | preset slug, e.g. `btn-primary` `btn-secondary` `btn-outline-*` `btn-link` | Button style from Theme Settings → Buttons. |
+| `style` | button-style-picker | first preset (e.g. `btn-primary`) | `''` (bare `.btn`) or a `btn-{slug}` preset class, e.g. `btn-primary` `btn-secondary` `btn-primary-outline` `btn-gradient` `btn-link` | Button style from Theme Settings → Buttons. |
 | `size` | button-style-picker | `''` | size slug, e.g. `btn-sm` `btn-lg` | Button size preset. |
 | `shape` | image-picker | `'default'` | `default` `pill` `rounded` `square` | Corner rounding override. |
 | `width` | multi-picker | `{mode:''}` | see Notes | Auto / full-width / custom width. |
@@ -40,7 +40,7 @@ A single call-to-action link styled from Theme Settings button presets, with ico
 ## Notes
 - `icon` is a full **icon-v2** object. No icon = `{ "type":"none", "icon-class":"", "icon-class-without-root":false, "pack-name":false, "pack-css-uri":false }`; a library SVG = `{ "type":"svg", "svg-source":"library", "svg-id":"lucide/<name>" }`.
 - `width` is a **multi-picker**. Default `{ "mode": "" }` = auto (fit content); `{ "mode": "w-100" }` = full width; custom = `{ "mode": "custom", "custom": { "custom_width": { "value": "200", "unit": "px" } } }` (units `px % rem em vw`). The known-good verbose shape is `{ "mode": "", "custom": { "custom_width": { "value": "", "unit": "px" } } }`.
-- `style` / `size` slugs are the Bootstrap-style class names the Theme Settings presets emit (`btn-primary`, `btn-secondary`, `btn-outline-*`, `btn-link`, `btn-sm`, `btn-lg`, …). `style` defaults to the first configured preset; there is no "None" — use the link preset for text-only.
+- `style` / `size` values are the class names the Theme Settings presets emit: `btn-` + the preset **name** slugged (lower-case, non-alphanumerics → `-`). The default presets give `btn-primary`, `btn-secondary`, `btn-success`, `btn-info`, `btn-warning`, `btn-danger`, the outline presets **`btn-primary-outline`**, `btn-secondary-outline`, … (the preset is *named* "Primary Outline", so the suffix comes last), `btn-gradient`, `btn-link`; sizes `btn-sm`, `btn-lg`, …. The style picker lists exactly these — **not** `btn-outline-primary`. (The theme also generates a `.btn-outline-{slug}` rule per preset, but it is not offered by this element and is only a colour / border swap derived from the solid preset, without that preset's Custom CSS or hover animation — use the named outline preset.) `style` defaults to the first real preset; `''` = "Default", the bare `.btn` base. Use the link preset for text-only.
 - `target` uses `_self` / `_blank` as its literal values (a switch, not `yes`/`no`). For links to an **external host**, set `_blank`.
 - `shape` overrides only the border-radius the `size` preset would apply (e.g. a pill CTA at any size).
 - Padding comes from the `size` preset; the shared `spacing` block controls **margin only** on a button.

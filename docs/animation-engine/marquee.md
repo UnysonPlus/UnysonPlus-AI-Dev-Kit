@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # marquee — Marquee (Animation Engine)
 
-Scrolls a node's content in a seamless, never-ending loop (a ticker / running-text banner). Rides the shared `fx` block on the **`marquee`** slot (added to the element's Animations tab). Picker key **`mode`** = the scroll direction, off = `none`. Requires the `animation-engine` extension ACTIVE (ships inactive). Content is cloned so the loop has no jump; pure CSS animation, no library; loads only on pages that use it.
+Scrolls a node's content in a seamless, never-ending loop (a ticker / running-text banner). Rides the shared `fx` block on the **`marquee`** slot (added to the element's Animations tab). Picker key **`mode`** = the scroll direction, off = `none`. Requires the `animation-engine` extension ACTIVE (not in the core-only plugin zip — download + activate it under Unyson+ → Extensions). Content is cloned so the loop has no jump; pure CSS animation, no library; loads only on pages that use it.
 
 ## Effects / styles
 `mode` is the direction: **`left`** · **`right`** · **`up`** · **`down`**. Horizontal (`left`/`right`) share one option set; vertical (`up`/`down`) add `text_orientation` (inserted after `gap`). Best on a heading / large type.
@@ -9,7 +9,7 @@ Scrolls a node's content in a seamless, never-ending loop (a ticker / running-te
 ## Value shape
 ```json
 "marquee": { "mode": "left", "left": {
-  "speed": "normal", "gap": 40, "separator": "", "pause_on_hover": "yes",
+  "speed": "normal", "gap": 40, "separator": "", "pause_on_hover": "yes", "controls": "no",
   "edge_fade": "no", "scroll_reactive": "no", "draggable": "no", "custom_speed": 0,
   "text_style": "normal",
   "skew_h": 0, "skew_v": 0, "tilt": 0, "bend": 0, "curve": 0, "wave": 0 } }
@@ -23,6 +23,7 @@ Vertical (`up` / `down`) add `"text_orientation": "horizontal"`.
 | `gap` | slider | `40` | px between repeats (0–200) |
 | `separator` | text | `""` | optional text between repeats (e.g. `•`) |
 | `pause_on_hover` | switch | `yes` | |
+| `controls` | switch | `no` | show an accessible **Pause / Play** button (a real `<button>`, keyboard-focusable) — satisfies WCAG 2.2.2 for auto-motion; recommended for auto-scrolling screenshots / any looping motion |
 | `edge_fade` | switch | `no` | soft fade at container edges |
 | `scroll_reactive` | switch | `no` | speed up as visitor scrolls |
 | `draggable` | switch | `no` | grab & flick with momentum |

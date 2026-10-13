@@ -30,6 +30,7 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
 - `transparent_image` — **Type** `upload` (images_only). Logo while header transparent/overlaying hero.
 - `alt` — **Type** `text`. **Default** `''`. Alt text; falls back to Site Title.
 - `width` — **Type** `unit-input` (units `px`,`rem`,`em`). **Default** `{value:'',unit:'px'}`. Empty = auto to header height.
+- `logo_tagline_show` — **Type** `switch`. **Default** `yes`. Image logo only: prints the tagline (Header → Identity tagline, else the WordPress Tagline) as a separate `.site-description` line under the logo. Set `no` when the logo artwork already carries its own tagline, or any site with a WordPress Tagline grows an extra line beneath the logo. Stored **inside the simple branch**: `header_logo.logo_type.simple.logo_tagline_show`. A value written anywhere else is read by the front end (the config is flattened) but is NOT the form's field, so the next Theme Settings save writes the form's own value (default `yes`) and the tagline reappears.
 
 > **Logo images are portable (no cross-site 404s).** Every logo image — Simple `image`/`image_2x`/`sticky`/`mobile`/`transparent`, and the Footer Logo element — is **re-resolved from its `attachment_id` on the CURRENT site at render time** (`unysonplus_upload_option_src()`), never the URL stored at save time. If the attachment isn't present on this site (cloned/migrated/deployed), the logo falls back to the **text logo** instead of emitting a dead URL. **Implication for builders:** to ship a logo with a demo / cloned / starter site, **sideload the image into the target site's Media Library** (so a real `attachment_id` exists there) — do NOT rely on a hardcoded URL or an attachment id from another install. **SVG logos are fully supported**: uploads are sanitized + flattened (Illustrator `<style>`/class exports → presentation attributes), PostScript font names normalized, negative radii fixed, and SVG attachments get metadata/preview (shortcodes ext ≥ 1.12.7). Outline text in Illustrator (Type → Create Outlines) for font-independent fidelity.
 
@@ -179,6 +180,7 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
 - `min_height` — **Type** `unit-input` (`rem`,`px`,`em`). **Default** `{value:'5',unit:'rem'}`. Main header row min height.
 - `mobile_min_height` — **Type** `unit-input` (`rem`,`px`,`em`). **Default** `{value:'',unit:'rem'}`. Below 768px; empty reuses desktop.
 - `mobile_breakpoint` — **Type** `select`. **Default** `lg`. **Choices**: `lg` Below 992px (tablet & phone), `md` Below 768px (phone only).
+- **Collapses early when the menu does not fit** (theme 2.6.47, no option): above the breakpoint, `assets/js/navigation.js` measures the main header row and adds `header-nav-overflow` to the header when the row overflows, two columns overlap, or the top-level menu wraps onto a second line. That class switches the header to its collapsed state (inline menu + CTA hidden, toggle shown), re-checked on resize, load and font load. So a long menu (8+ items, or a 1200px container that cannot hold logo + menu + CTA) shows the hamburger instead of spilling over or wrapping to two rows. To keep the full menu, shorten it (nest items under a parent; legal pages go in the footer).
 
 ### Position & motion (`group_behavior`)
 - `header_position` — **Type** `select`. **Default** `static`. **Choices**:
@@ -260,6 +262,9 @@ Menu). Its options are **top-level** Theme Settings keys (read directly via `fw_
   `header-mlayout--<key>` on `<header>` (template-parts/header-builder.php); the arrangement is pure CSS on
   the existing columns (logo in `.header-col--start`, toggle in `.header-col--end`), gated per collapse
   width in `header-footer-builder.css`. `default` emits no class.
+- **Collapsed-header safety net** (CSS, not an option): below the collapse width the row's columns may shrink, the
+  logo column (`.header-col--start`) and the toggle never do, and any other inline element left in the row (a status
+  chip, a one-line text list) truncates with an ellipsis — so nothing can push the hamburger off-screen.
 - `mobile_bar_bg` — **Type** `color-picker`. Mobile collapsed-bar background, distinct from the desktop
   header and the drawer panel. Emitted as `--mobile-bar-bg`; the CSS applies it only below the collapse
   width (unset ⇒ the `var()` is invalid ⇒ declaration ignored ⇒ desktop background kept). **Convert
@@ -547,7 +552,7 @@ Each header column is an `addable-popup` whose `popup-options` add elements. Per
 
 - **Saved value shape**: `[ 'element' => 'menu_area', '<element>' => {…sub-options…} ]`
 - **Per-element sub-options**:
-  - `cta_button` → `cta_text` (text, default `Get Started`), `cta_link` (text, default `#`), `cta_style` (`button-style-picker`, choices from Theme Settings → Buttons; fallback select `filled`/`outline`/`pill`), `cta_size` (`button-style-picker`, sizes from Theme Settings → Buttons).
+  - `cta_button` → `cta_text` (text, default `Get Started`), `cta_link` (text, default `#`), `cta_style` (`button-style-picker`, choices from Theme Settings → Buttons; fallback select `filled`/`outline`/`pill`), `cta_size` (`button-style-picker`, sizes from Theme Settings → Buttons). **`cta_style` is the full preset CLASS with the `btn-` prefix** — `btn-primary`, `btn-secondary`, `btn-primary-outline`, `btn-gradient`, `btn-link` (`btn-` + the preset name slugged: lower-case, non-alphanumerics → `-`). The renderer adds the value as a class only when it starts with `btn-`, so a bare `primary` / `accent` / `outline` is silently dropped and the CTA renders as the plain `.btn` base. A colour role like accent has no button class unless a Button preset is named for it (a preset named "Accent" → `btn-accent`). Default is `''` (the bare `.btn`). Same rule for `cta_size` (`btn-sm`, `btn-lg`, …).
   - `icon_text` → `icontext_icon` (icon-v2), `icontext_text` (text), `icontext_link_type` (select: `none` No link, `url` Website URL, `email` Email (mailto:), `phone` Phone (tel:); default `none`), `icontext_link` (text).
   - `custom_html` → `custom_html_content` (textarea).
   - `menu` → `menu_id` (select; choices = existing WP nav menus by term_id).

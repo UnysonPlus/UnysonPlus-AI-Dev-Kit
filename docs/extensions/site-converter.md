@@ -168,17 +168,81 @@ target; a `writer` replaces only the page-builder storage (`writer( $post_id, $s
   `Elementor kept N of M elements` when it does. An existing page-builder tree on the post is cleared first.
 - Every container sets `flex_gap` 0 and padding 0 explicitly (the kit's 20px widget gap / 10px container
   padding would add spacing the source never had); every button sets its background, border and radius
-  explicitly (unset button properties fall through to the kit's global button, which Builder Sync fills from the
+  explicitly (unset button properties fall through to the kit's global button, which the Elementor extension's Design Sync fills from the
   theme's primary button preset).
+- A section spaced by its own vertical **margin** (`mb-24 md:mb-32`) keeps that rhythm: on a transparent band the
+  margin folds into the container's padding (the same render, as the native output does); a painted band (colour,
+  image, video, gradient) keeps a real `margin` so the gap stays outside its background. `auto` margins are ignored.
+  Note that a boxed container's padding lands on its `.e-con-inner`, not on the `<section>` itself.
+- A **chip row** (`t:chips` → Site Model `chips`) is a wrapping row container of pill heading widgets (each with its
+  own fill, padding, hairline border and type), aligned like the source row. It tries the `tag_list` widget first;
+  the native build renders chips as Text Blocks, so that rung rarely pairs and the composed row is the usual output.
+- The source `<main>`'s **vertical padding** (often the fixed header's clearance) is page padding, as on the
+  native output's `#main`: Site Model `page.main.padding_top/bottom` → page CSS on
+  `.elementor[data-elementor-type="wp-page"]`. Horizontal padding is not carried (it would inset section
+  backgrounds).
+- A block that is itself **gradient-clipped text** (transparent colour + gradient background clipped to the text)
+  gets a class whose page rule carries the gradient and the clip; Elementor's colour control cannot express it,
+  and without it the heading fell to the kit's global colour.
+- A **no-wrap row whose columns declare no width** (a CTA beside a stat) is `content_sized` in the Site Model: the
+  emitter gives each column `width:auto` + `_flex_size:none`, and the row keeps the source's `justify`
+  (`space-between` keeps its ends apart). A **justified** row (space-between / center / end) is content-sized even
+  when its columns declare spans — the native Mapper's rule: cells shrink (`_flex_size: shrink`), and a cell with a
+  width cap takes `min(100%, cap)` as its width and holds it (`none`), so a heading beside a capped intro wraps at
+  the source's width.
+- **N equal columns where N does not divide 12** (seven cards) are a row of N equal tracks (`tracks` in the Site
+  Model): one line, each column `calc(100%/N - gap·(N-1)/N)` — the 12-span model would wrap them 6 + 1.
+- **Cards** keep their call to action as a styled **button widget** (Site Model `card.button`), on both the composed
+  path and the Unyson+ `up-icon-box` path; a block-level CTA in a card that lets it span is full width
+  (`align: justify`). The column keeps its skin (gradient included) when the widget paints no card of its own.
+- Class settings (`css_classes` / `_css_classes`) are always **appended**, never assigned: a section's gradient class
+  was overwritten by its own section class and the band painted nothing. A gradient section also carries
+  `e-no-lazyload` — Elementor blanks container backgrounds below the fold until they scroll in (gradients included),
+  and a CSS gradient downloads nothing.
+- **Video blocks** (`t:video`): a hero's background video (`bg:true`) is promoted to the section's background video
+  (overlay, `hero_height`, centring; `background_play_on_mobile`), as the native build does; an inline video is
+  Elementor's hosted **Video** widget (autoplay / mute / loop / controls from the source), its height from the
+  source's `h-[…]` utility and its card skin (`card_css`) on the player wrapper.
+- A background video recorded on the section (`sectionBgVideo`) brings its `hero_height`, `valign` and overlay
+  into the Site Model section — the native build makes it a full-viewport, centred hero; the URL alone left a short band.
+- An **image box** (`t:image_box`, a photo card) is Site Model `image_box` (card + overlay). With an overlay it is a
+  container with the photo as a cover background, the scrim layered over it (`::before`) and the caption (title, text,
+  button) placed per `place` / `align` / `inset`, filling its column (`min-height` 280px, `height:100%`); without one,
+  an image above the card's content. It had no handler, so its words were rescued and its PHOTO was lost.
+- **Phones.** The capture runs at one viewport, so `csSm` is usually empty; the Site Model derives a block's phone
+  font size from its own responsive Tailwind classes (`text-7xl md:text-[7rem]` → 72px below md, `phone_style()`),
+  and the emitter scales px letter-spacing with it (`letter_spacing_mobile`). The page root clips horizontal
+  overflow (`overflow-x:clip`, as the native page-builder wrapper does) so a marquee track or an oversized word never
+  makes a phone scroll sideways.
+- **Radius** of 1–4 values (an arch: `160px 160px 40px 40px`) maps corner by corner (`radius()`); a button always
+  writes its radius, zero included, so the kit's button radius cannot leak in.
+- A **verbatim block that is only a flex row of text leaves** (label … number) is a native row of heading widgets
+  (`leaf_row()`): direction / justify / align / gap from its computed style, each leaf's own type. Anything richer
+  (nested elements, SVG, images, forms) stays an HTML widget.
+  The same rung serves raw-HTML **columns** (a ticker item per column); a plain single-child wrapper (`sc-tw`) is
+  unwrapped, an empty decorative leaf (a status dot, whose size the capture does not carry) is dropped, and MIXED
+  inline content ("label <span>value</span>") becomes one rich text widget whose inline spans keep their colour /
+  weight / size / tracking / case as inline styles (`inline_rich()`). Note an HTML widget gets none of the
+  source's computed styles on Elementor, so these rungs are a visual gain, not only an editability one.
+  The rung also builds a small **composed card** from a skinned flex root with an image leaf (an avatar beside a
+  name and a role): image leaves become image widgets at the source's `w-`/`h-` size with their own radius / border;
+  the root's skin (fill, gradient, border, radius, shadow, backdrop, padding) rides the container (`leaf_skin()`);
+  each leaf keeps its own vertical margin and centring. Such a card is skinned ONCE: the column does not add the
+  mapping's card box around it. Images alone or galleries (no text leaf, more than two images) stay verbatim.
+- **Alt text** travels with every image to the media lookup; an imported attachment with no alt gets the source's
+  alt (Elementor renders a library image's alt from the attachment). An alt someone wrote is never overwritten.
+- The **site container** comes from `general_layout/layout_container_width` (Theme Settings' General → Layout group).
+- On the theme's **vertical (side-rail) header layout**, Elementor's full-width template prints `div.elementor`
+  straight into the `.site` grid; `vertical.css` gives it `grid-area: content`, or the page lands in the rail column.
 - Widget font family is left unset when it equals the site's heading / body font, so the widget follows the
   synced global font. Body text placed in a heading widget (overline, link label, pill) uses role `label` and
   always writes its family. The generated child theme's `:is(h1…h6)` heading-font `!important` rule excludes
   `.elementor-heading-title`.
 - Colours equal to a palette colour bind as Elementor globals (`__globals__` → `globals/colors?id=…`), via the
-  Builder Sync identity map (primary / secondary / accent are Elementor system colours; the body ink is `text`).
+  Design Sync identity map (primary / secondary / accent are Elementor system colours; the body ink is `text`).
 - CSS the free controls cannot express (gradients, shadows, backdrop filters, absolute offsets, image skins) is
   stored per page in `_fw_sc_elementor_css` and printed in that page's `<head>`.
-- **First rung — the Unyson+ element itself** as an Elementor widget, when the Elementor Widgets extension
+- **First rung — the Unyson+ element itself** as an Elementor widget, when the Elementor extension
   (`framework/extensions/elementor`, see `elementor.md`) registers `up-<tag>` for it: the target pairs the Nth model
   block of a type with the Nth `[tag]` node of the native build (only when the counts on the page agree) and emits
   `FW_Elementor_Option_Bridge::settings_from_atts( $tag, $atts )`. Type → tag: testimonials→testimonials,
@@ -195,8 +259,8 @@ target; a `writer` replaces only the page-builder storage (`writer( $post_id, $s
 - Runs of buttons sharing one flex-row group (a CTA pair) stay in one row container; gradient text (`.sc-gradtext`)
   carries its clip rule on the page (it ships in a page-builder stylesheet Elementor pages never load); an icon list
   with no measured colour inherits instead of falling to Elementor's global text colour.
-- Kit sync: `after_design_import()` activates **Builder Sync** if needed and pushes Theme Settings into the
-  active Site Kit (see `builder-sync.md`).
+- Kit sync: `after_design_import()` activates the **Elementor** extension if needed and pushes Theme Settings into the
+  active Site Kit through its Design Sync (see `elementor.md` → Design Sync).
 
 **Tests:** `tests/output-snapshot-test.php` (every fixture's mapping + bundle files byte-for-byte —
 `SC_SNAPSHOT=update` to re-record; the build reads the active theme's settings, so record and compare on the same
@@ -378,7 +442,7 @@ analysis half should need to change — if it does, the Site Model is missing a 
 - **Full detail lives in the extension's own `AGENTS.md`** + `docs/site-conversion-playbook.md` (Theme-Settings-first demo conversion) + `docs/stitch-to-unysonplus.md`. Read those before working on conversion logic.
 - **Carried CSS is auto-scoped away from wp-admin (since 2026-08-01) — you no longer have to hand-scope `body`/`html`.** `misc_custom_css` folds into the shared presets stylesheet the page builder also loads in wp-admin (canvas WYSIWYG), so an unscoped global `body`/`html` rule used to repaint the *editor* chrome. `upw_ts_custom_css()` now runs the CSS through **`fw_admin_safe_custom_css()`**, which rewrites top-level `body`→`body:not(.wp-admin)` and `html`→`html:not(:has(.wp-admin))` (leaving `.class`/`#id`/descendant rules untouched so they still skin the canvas; idempotent). This applies to ALL Custom CSS — converter-emitted OR hand-written — so a global rule can't leak into the admin regardless of source. `misc_custom_css` is still a `multi` option (`{ "custom_css": "…" }`, never a raw string).
 - Media import is content-hash de-duped; per-shortcode att keys in emitted `pages.json` are exact (`text_block` → `text`, column `width` is top-level) — clone shapes from a real export.
-- **CSS completeness invariant — the global `util_css` bucket must carry EVERY page-matching utility (fixed capture-service v1.7.78 / site-converter v1.3.36).** The capture categorizer (`capture-extract.mjs` → `walkRules`) buckets a source sheet's rules into `base` / `util` / `header` / `footer`. The bug: it only promoted **global (`:root`/`body`) and header/footer-scoped** selectors to the global buckets, and fed `util` almost entirely from sheets whose **filename matched `VENDOR_RE`** (`tailwind`, `bootstrap`, …). A Tailwind/JIT source that ships utilities from an **inline `<style>` or a hash-named bundle** (e.g. `index-Cd4aA-AH.css`) is classified as first-party, so its **body-section** utilities (`.py-5`, `.feature-card`, card `.shadow`) fell through to per-section CSS only — and when the raw-chrome mirror theme was generated with an empty per-section merge, **every below-the-header section shipped unstyled** (the `freshpaws` "~10% done" conversion: hero styled, feature grid / CTA / footer bare). The fix promotes every **page-matching, non-global, non-chrome** selector into the global `util` bucket too (gated by `matchesPage()` so only used utilities are carried), making stylesheet-**filename** detection non-load-bearing for completeness. **Rule going forward: a section that renders must carry its full CSS at theme-generation time — never let completeness depend on the source's stylesheet filename or on a later per-section merge.** (The PHP upload path already carries the whole reproduced CSS blob, so it was already complete — but the invariant holds on both sides.)
+- **CSS completeness invariant — the global `util_css` bucket must carry EVERY page-matching utility (fixed capture-service v1.7.78 / site-converter v1.3.36).** The capture categorizer (`capture-extract.mjs` → `walkRules`) buckets a source sheet's rules into `base` / `util` / `header` / `footer`. The bug: it only promoted **global (`:root`/`body`) and header/footer-scoped** selectors to the global buckets, and fed `util` almost entirely from sheets whose **filename matched `VENDOR_RE`** (`tailwind`, `bootstrap`, …). A Tailwind/JIT source that ships utilities from an **inline `<style>` or a hash-named bundle** (e.g. `index-Cd4aA-AH.css`) is classified as first-party, so its **body-section** utilities (`.py-5`, `.feature-card`, card `.shadow`) fell through to per-section CSS only — and when the raw-chrome mirror theme was generated with an empty per-section merge, **every below-the-header section shipped unstyled** (the `golden-fixture-1` "~10% done" conversion: hero styled, feature grid / CTA / footer bare). The fix promotes every **page-matching, non-global, non-chrome** selector into the global `util` bucket too (gated by `matchesPage()` so only used utilities are carried), making stylesheet-**filename** detection non-load-bearing for completeness. **Rule going forward: a section that renders must carry its full CSS at theme-generation time — never let completeness depend on the source's stylesheet filename or on a later per-section merge.** (The PHP upload path already carries the whole reproduced CSS blob, so it was already complete — but the invariant holds on both sides.)
 
 ## CSS Class Mapper & box columns (deterministic decompose — rules to keep)
 
@@ -617,7 +681,7 @@ graded by the parity report (below). Implemented in `class-fw-site-converter-sti
 
 **Parity gate (P1).** Every conversion now writes `conversion-parity.json` alongside `theme-settings.json`.
 It re-derives each source signal and compares it to what was emitted, so any new detection rule is
-automatically graded. Use it as the objective "is the base faithful?" check — a scandi-haven-shop convert
+automatically graded. Use it as the objective "is the base faithful?" check — a converted shop-front source
 scores 100 (7/7). A check is only counted when the SOURCE carries that signal (a borderless source doesn't
 fail the border check).
 
@@ -1550,6 +1614,11 @@ general rules, proven live (computed values on the built page) and by golden `[U
 - **A ghost action fell to the grey outline fallback** — a padded, rounded `<button>` with no fill and no border was
   skipped by the preset builder ("nothing to match by colour"). It registers a **Ghost** role now (its ink, no border,
   its type + hover ink); the mapper matches a fill-less, border-less button to it by ink. Live: `btn-ghost`, 0px border.
+- **Footer display sizes stay fluid** (`display_font_size()`, used by `footer_heading_css` and `footer_lead_css`; JS
+  twin `displayFontSize` in to-theme-settings): the computed px is only the size at the 1440px capture width, so a
+  source `text-[18vw]` class (on the element or two ancestors) is kept as `18vw`, a display size ≥ 96px without one
+  becomes `min(px, equivalent vw)`, and a lead title's px line box becomes a ratio. A 259px wordmark frozen in px
+  pushed phones 580px sideways. Test: `footer-heading-keeps-viewport-size-test.php`.
 - **Footer column titles in the theme heading font** — `footer_heading_css` wrote `.footer-links-title{font-family…}`
   but the theme generator's site-wide `:is(h1,…,h6){font-family:… !important}` outranked it. The measured footer type
   is `!important` now and the generator's rule excludes `.hf-heading`. Live: serif → the source's 10px tracked sans.
@@ -3046,7 +3115,7 @@ converter-fix opportunity (not a hand-tune), and each should land with a `tailwi
 - **Image `max-width` / intrinsic sizing** (`max-w-lg`, `w-[420px]` on an `<img>`) as a general rule, not
   only in the WooCommerce card context.
 
-### Fidelity fixes landed 2026-08-02 (FreshPaws / a second AI-page generator pass — JS capture path)
+### Fidelity fixes landed 2026-08-02 (`golden-fixture-1` / a second AI-page generator pass — JS capture path)
 
 A real conversion (a a second AI-page generator pet-boarding SPA) drove these converter-algorithm fixes. Each was diagnosed
 by **measuring source vs. output** (never eyeballing) and fixed in the deterministic pass — listed here
@@ -3297,7 +3366,7 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   CORPUS MEASUREMENT (site-converter 1.8.44, the 8B local model offline, 67 sites / 247 sections vs the deterministic
   ground-truth proxy): **pricing 98.8%, video_role 96.8%, both 95.5%, 0 failures** — a small OFFLINE model
   reproduces the ambiguous structural calls reliably enough to be a useful advisory tier (validator/fallback covers
-  the residual). The residual splits into: 3 pricing over-calls on number-heavy sections (apple-card/lumina-arctic/
+  the residual). The residual splits into: 3 pricing over-calls on number-heavy sections (fixture-ac/lumina-arctic/
   planetary — exactly where the deterministic stat-guard catches it) and a handful of ambiguous bare-video cases.
   SIGNAL ENRICHMENT that lifted it: `structure_summary`'s per-video signals gained `bleed` (a full-viewport inset-0/
   fullscreen backdrop layer on the video OR a positioned ancestor) and a COMPUTED `object-fit:cover` check — the
@@ -3336,13 +3405,13 @@ algorithm in sync" below — these all still need PHP parity where the PHP path 
   cluster that width → the band rendered edge-to-edge; the safety net now guarantees all **eight** standard slugs,
   and the converter seeds the full scale in `build_container_width_presets` so they're registered + labelled.
   (2) `--container-max-desktop` was left EMPTY when a capture carried no `data-sc-content-width` stamp AND no
-  header/footer `.container` chrome (apple-card) — `tokens_to_theme_settings_chrome` now ALWAYS resolves a width:
+  header/footer `.container` chrome (fixture-ac) — `tokens_to_theme_settings_chrome` now ALWAYS resolves a width:
   stamped → header/footer box → the dominant centered content max-width across the body (`detect_dominant_container_width`)
   → 1280 default. (3) A section whose content is a root **flexbox** renders it full-width (the items-corrector skips
   the section's own `.fw-container` for a self-managed flex band), so the cap must live on the flexbox's own
   `content_width`; when the section had no detectable container (full-width flex + px gutters, no `max-w-*`), the
   mapper now falls back to the SITE container width (`Mapper::set_site_container_width`, gated on `!$hero_fullbleed`
-  so bg-media heroes stay full-bleed). Verified: apple-card / build-products went from edge-to-edge to a centred
+  so bg-media heroes stay full-bleed). Verified: fixture-ac / build-products went from edge-to-edge to a centred
   1280px column at 1920px viewport.
 - **Computed `position` is now stamped (capture 1.10.57) so custom-CSS full-bleed media is detectable.** The
   capture's `data-sc-cs` never carried `position`, so the recognizers' `sc_css($el,'position')` calls (video /
@@ -3623,7 +3692,7 @@ side-by-side.
 
 ### Feature section: heading size, icon-box alignment, box padding, backdrop layering (2026-08-02)
 
-Four fixes from the FreshPaws "Why Pets Love" feature section:
+Four fixes from `golden-fixture-1`’s feature section:
 
 - **Heading font-size no longer balloons.** The display-preset snap (`display-1..5` = 96/88/72/56/48px)
   promoted ANY heading ≥30px to the nearest preset — so a 36px SECTION heading snapped up to display-5
@@ -3663,7 +3732,7 @@ counterpart in **`box-presets.mjs`**:
 friendly slug derived from `preset_name` (deduped in order across the whole list — a second "Outline"
 becomes `outline-2`), NOT the preset id. `buildBorderPresets` mirrors `unysonplus_border_preset_slug_map()`
 and returns `boxp-{slug}`; setting `box_style = boxp-{id}` renders NOTHING (the class `.boxp-b000000101`
-has no rule — the rule is `.boxp-outline-2`). Verified: the FreshPaws cards render border 1px + radius 32px
+has no rule — the rule is `.boxp-outline-2`). Verified: the `golden-fixture-1` cards render border 1px + radius 32px
 via the derived "Outline" preset, bg via `bg_color`, padding via custom_css — pixel-matching the source.
 
 **Still PHP-only:** the font-size-preset detection (`build_text_styles` → `font_sizes` + `icon_box.
@@ -3875,7 +3944,7 @@ Re-run the converter for just the header, just the footer, or just specific body
   overwritten if it already exists, and is excluded from the stale-file sweep — so reconverting the header
   never clobbers a hand-edited footer, and vice-versa.
 
-Verified on FreshPaws: `--only-sections=0` re-imported → page still 3 sections (hero merged, others intact,
+Verified on `golden-fixture-1`: `--only-sections=0` re-imported → page still 3 sections (hero merged, others intact,
 chrome untouched); `--only-header` → theme regenerated, body untouched, footer template preserved (md5
 identical); `--only-footer` → header template preserved.
 
@@ -3899,7 +3968,7 @@ identical); `--only-footer` → header template preserved.
   Now `capture.mjs` measures the header at scroll 0 vs. scrolled and, if it changed, stores
   `raw_chrome.header_scroll = { top, scrolled }`. The theme-generator emits a `.sc-tw header.sc-scrolled`
   rule (bg/backdrop/shadow/padding/border) and the interactivity script toggles `.sc-scrolled` past a
-  threshold — the header's own `transition-*` animates it. Reproduces the FreshPaws transparent→white/90
+  threshold — the header's own `transition-*` animates it. Reproduces the `golden-fixture-1` transparent→white/90
   blur-on-scroll header.
 - **Standalone image skin.** A decomposed `media_image` now carries the source `<img>`'s own
   `border-radius` (incl. organic blob `60% 40% …`), `object-fit` and shadow via the shortcode's Advanced
@@ -6677,3 +6746,950 @@ preset is protected from the very conversion that would repair it. Resetting it 
 and its entry in `fw_sc_settings_fingerprint`.
 
 Golden: `button-preset-editable-test.php`.
+
+### The property nobody carried: a line-height audit (2026-10-07)
+
+Five independent emitters carried a source element's family, size, weight, case, tracking and colour — and
+not one of them carried its **line-height**. Not a shared helper with a gap: five separate pieces of code,
+each written at a different time, each reaching for the same list and each stopping one property short.
+
+| where | source | rendered |
+|---|---|---|
+| header nav links | 24px | 26.08px (theme ratio) |
+| footer column titles | 16px | 18px (theme `h3`) |
+| copyright bar | 16px | 19.56px (inherited) |
+| header wordmark | 32px | 24px (theme ratio) |
+| heading subtitle | 20px | 26.08px (theme subtitle) |
+
+Individually each is 2–3px and reads as noise. Together they are eight property deltas on **every page of
+every conversion**, and every band sits slightly wrong. None of them would ever be reported as a bug.
+
+What makes this worth writing down is the shape, not the property. A "never-drop" list is written once
+against the properties that were wrong that day, and then copied. The copy inherits the omission. **When
+adding to one of these lists, check the others** — `nav_style_from`, `detect_menu_styles`,
+`footer_heading_css`, `detect_copyright_typography`, `detect_logo` and `heading_weight_css` are the same
+idea six times over.
+
+Goldens: `nav-links-keep-their-line-height-test.php`, `footer-heading-keeps-its-line-height-test.php`,
+`wordmark-keeps-its-line-height-test.php`, `heading-keeps-its-italic-test.php`.
+
+### Measured correctly, then lost in the cascade (2026-10-07)
+
+A separate failure that looks identical from the outside: the value IS captured, IS emitted, and still does
+not reach the page — because the converter's **own** output outranks it.
+
+- The generated child theme writes `:is(h1,…,h6):not(.hf-heading):not(.elementor-heading-title){font-family:… !important}`
+  at (0,2,1), deliberately, to beat the parent theme. A card title's measured family, scoped to
+  `.uXXXX .icon-box__title`, is (0,2,0). The theme wins, so every card title rendered in the display face.
+- The copyright bar emits `.footer-section--copyright .builder-text-element{color:… !important}` at (0,2,0).
+  The disclaimer's own measured ink, on `.footer-disclaimer`, is (0,1,0). The bar wins.
+
+`!important` does not settle either: both sides have it, so specificity decides. The fix is to emit the
+measured value at a specificity that clears the blanket rule — repeating the element's own class
+(`.icon-box__title.icon-box__title`) rather than inventing a selector.
+
+**Read the cascade, don't reason about it.** CDP's `CSS.getMatchedStylesForNode` names the winning rule in
+one call. Both of these were diagnosed by guessing first and wasted a round each; both were settled in
+seconds once asked properly. The generator already exempts `.hf-heading` for exactly this reason, which is
+the precedent to follow when a third case appears.
+
+### WordPress silently edits what you emit (2026-10-07)
+
+Emitted markup is not delivered markup. `safecss_filter_attr()` runs over any inline `style` that reaches
+builder content and, measured on this install:
+
+- drops **every functional colour notation** — `rgba(…)` and even `rgb(…)`; only hex survives;
+- drops `display`;
+- keeps **one `max-width` per element**, so a second declaration beside a wrapper's `max-width:100%` vanishes.
+
+Each of those produced a fix that looked right in the emitted string, passed its golden, and changed nothing
+on the page. The same goes for structure: `<form>`, `<input>`, `<textarea>` and `<button>` are stripped out
+of builder content entirely, which is why a source form mirrored as verbatim HTML arrives as a stack of bare
+labels.
+
+**Scoped CSS is not filtered; inline styles are.** Anything measured — a colour with alpha, a `display`, a
+second cap — belongs in Custom CSS against a class the converter itself emits. Inline style is for the few
+properties that survive, and the only way to know which is to check rather than assume.
+
+### A cell the verbatim mirror swallowed (2026-10-07)
+
+A contact page converted with no form: four labels as plain text, no fields, no submit. The natural reading
+is that form support is missing. It is not. `is_contact_form()` returned **true** for that very form and
+`contact_form_build()` produced four fields and the submit label when called directly — the recognizer and
+the builder were both complete and both correct.
+
+The cell walker never reached them. A grid cell that no earlier branch claims falls through to the verbatim
+`.sc-tw` mirror, and WordPress then strips the controls out of it. The right cell of that section decomposed
+into six blocks; the left came back as 10,919 bytes of `html`.
+
+The file already stated the principle for media — *"a MEDIA cell that a native recognizer owns → its native
+block, never the verbatim mirror"*. A form is the same case and a more costly one: a contact page without a
+working form has lost the only thing it is for.
+
+**The trap worth naming.** The obvious response is to write a form recognizer. That is what was started, and
+PHP's "cannot redeclare" is what stopped it — a complete `n_contact_form()` already existed. When a whole
+capability appears to be missing, check whether it is present and simply unreachable; the fallthrough that
+hides it is a one-line fix, and a parallel implementation is a permanent one.
+
+Golden: `source-form-becomes-a-contact-form-test.php`.
+
+### A refused request looks exactly like an empty site (2026-10-08)
+
+Page discovery reported **one page** for a source whose nav alone lists five and whose sitemap lists 133.
+The site is behind a bot filter; `discover.mjs` fetched the sitemap and home page with Node's `fetch` and a
+bot-shaped User-Agent, and got 403 for both. `fetchText()` returned `null` on any non-OK response, so a
+refusal and an empty site produced the same answer — and the only entry left was the URL that was pasted,
+which looks exactly like a site that genuinely has one page.
+
+Two things that measurement settled and reasoning would not have:
+
+- **It is not the User-Agent.** curl with an ordinary UA is served; curl with the service's UA is refused;
+  Node's `fetch` is refused **whatever** UA it sends. The filter reads the client, not the string. Swapping
+  the UA would have looked like a fix and changed nothing.
+- **A 2xx is not always content.** Once throttled, the same host answers with a short `202` (192 bytes) that
+  `r.ok` happily accepts. Judge the body by *shape* — a sitemap must carry sitemap elements, a page must
+  carry markup — not by length, since a `robots.txt` is legitimately tiny.
+
+The service already drives a real Chrome for capture, and that browser renders the same site successfully,
+which is why the home page converted. Discovery now falls back to it, fetching **from inside a page** on the
+target origin rather than navigating: a navigation to an XML sitemap lands in Chrome's XML viewer and
+`page.content()` returns the viewer's DOM with no `<loc>` elements, while an in-page fetch also reuses the
+clearance cookie instead of being re-challenged per sub-sitemap. Result on the same source: 1 → 133 pages in
+nine seconds.
+
+**And say so when it fails.** Discovery now returns `blocked: true` with a warning the admin panel shows in
+red. "1 found" must never again stand in for "we were turned away".
+
+**Diagnosing this trips the thing you are diagnosing.** Repeated probing moved the host from 403 to a 202
+throttle, which then blocked verification of the fix. Confirm against a local stub; spend live requests only
+on the one check that needs the real host.
+
+### The fidelity audit failed the fix that improved fidelity (2026-10-08)
+
+A footer address is written as two lines in one element — `123 Example Street<br>Springfield, SP 12345`. The
+contact row used to fold that to a single line (commas for the newlines), which widened the column. Fixed: the
+row now stores the break, and `theme-settings.json` carries
+`"li_text":"123 Example Street<br>Springfield, SP 12345"` — exactly what the source renders.
+
+Text coverage then fell from **100% to 97.1%**, reporting the address as lost content.
+
+It was not lost. `build_text_coverage()` searches the built output after `wp_strip_all_tags()`, and
+`strip_tags` **deletes** a tag without standing anything in its place, so the haystack read
+`…StreetSpringfield…`. The needle is the source element's own direct text — two text nodes with a gap between
+them — so it still read `Street Springfield`, and the match failed on a space that only the instrument had
+removed. The conversion had got better and the instrument said it got worse.
+
+Fix: substitute a space for `<br>` before stripping tags. **Only `<br>`** — it is the one tag whose whole
+meaning is a line break inside a single phrase. Substituting a space for tags in general would split phrases
+the source ran together through an inline `<em>` or `<strong>`, and an audit that silently splits phrases
+starts approving of output that broke one apart. Both negatives are pinned in the golden: text the output
+genuinely does not carry is still reported missing, and an inline tag inside a phrase does not break it apart.
+
+**This is the fourth instance of one class**, and the three before it are already commented inside that same
+function: text carried in a referenced snippet, in the chrome settings, and behind a `{{current_year}}` token
+were each reported as losses. The pattern is worth naming — **an instrument that cannot see where the content
+went does not measure loss, it measures its own blind spot** — and a false miss costs more than a missed one,
+because it is the one that gets acted on. Twice now a "regression" sent the training after a defect that did
+not exist.
+
+**The procedural lesson.** The first golden written for this did not reproduce it: a synthetic footer never
+reached the footer recognizer, so the value was never stored with its break and the test passed against the
+broken code. The reproduction had to drive `build_text_coverage()` directly, because the defect was in how the
+HAYSTACK is normalised, not in any recognizer. **When a golden written for a measured defect comes up green,
+the golden is wrong until proven otherwise** — do not take it as evidence the defect is gone.
+
+### A teaser card is not an article (2026-10-08)
+
+Post import shipped with a golden that passed and an extractor that did not work. Run against a **real
+captured blog index**, `post_from_html()` returned: no title, the site's own tagline as the author, and a
+543-byte "body" that was a teaser card linking to another post. The page held **four `<article>` elements** —
+one per card, each a single paragraph of ~24 words — and its only `<h1>` was a featured headline sitting
+outside all of them. The code took "the first `<article>`". Imported, that is one junk post per card on every
+listing.
+
+Two defects, and the second only showed up because the corpus was swept:
+
+**1. Order, not weight.** The body is now chosen by the prose it contains, scored on blocks and words rather
+than document order. A post page has the same trap one step further in — the body *and* a row of
+related-post cards, also in `<article>` — so order gets it right only by luck.
+
+**2. No refusal floor.** Measured on the three shapes it has to separate:
+
+| shape | blocks | words |
+|---|---|---|
+| a captured post body | 6 | 35 |
+| a captured teaser card | 2 | 21 |
+| a two-paragraph short post | 2 | 110 |
+
+So a body is **structured OR long**: three blocks of real text, or sixty words however arranged. Both halves
+are needed — a length-only rule rejects the short structured body, a structure-only rule rejects the plain
+two-paragraph post. The floor leans toward refusing, because the errors do not cost the same: a false accept
+invents junk posts, a false reject merely leaves the URL to convert as a page, which is what happened before
+any of this existed.
+
+**Then the floor alone was not enough, and the corpus said so.** Two captures still claimed a post: marketing
+landing pages whose whole body sits in one `<article>` — hero copy, a CTA, a logo wall — long enough to clear
+any length floor. What they have not got is a **date**. A post is dated; the date is what orders an archive
+and what a reader looks for, and a page has none. That is now the gate, and it took the corpus from 2 false
+accepts to **0 of 9**.
+
+**`entry-content` is NOT a post signal** — worth writing down because this code treated it as one. *Both*
+false accepts carry `class="entry-content"`: they are captures of WordPress sites, whose theme wraps **every**
+entry in it, a page exactly as much as a post. It marks the editor's output, which is why it is still used to
+locate the body; it says nothing about the post type.
+
+**Two traps in the date check itself.** A trailing `\b` after the year rejected the real thing: `self::text()`
+concatenates without separators, so a date runs straight into the next word (`May 20, 2026Understanding the
+New Wave…`) and digit-to-letter is not a word boundary. And the date often exists only as **text** — builders
+that emit no `<time>` still print it, because a reader wants it — so the text form has to count.
+
+**What this measurement does NOT establish.** The corpus holds no true post-page capture, so `0 of 9` only
+validates the REFUSAL path. The accept path is still backed by synthetic fixtures alone. A real dated post
+capture is the missing evidence, and until there is one the positive side is unproven.
+
+**And the lesson from the week, now twice in two days:** a golden written for a measured defect that comes up
+**green** is wrong until proven otherwise. Here the synthetic post page had one `<article>` containing its own
+body, which is the one arrangement that cannot fail. Run the extractor over the corpus, not just the fixture.
+
+### Every part worked and the feature did nothing (2026-10-08)
+
+Post import shipped with three pieces in place and **nothing joining them**:
+
+- `import_post()` stored a post correctly when handed a spec — golden, passing.
+- `discoverPages()` classified every URL as page / post / archive — tested, passing.
+- `post_from_html()` read an article out of a rendered page — golden, passing.
+
+`post_from_html()` had **no callers**, and `kind` had exactly **one reader** (the import router) and **no
+writer**. The feature could not produce a single post end to end. Three green goldens and a dead feature.
+
+The break was in two places, and the second was further out than expected:
+
+**1. No producer.** Nothing turned a captured post page into a post spec. Fixed with a public
+`post_spec_from_html( $html, $url, $title )` on the stitch — which is also where the **refusal** becomes a
+decision: it returns `null` when the page is not a dated article, and the bundle importer then falls through
+to the page path. Discovery's classification is *evidence, not instruction* — it reads a sitemap, the
+extractor reads the page, and the extractor is allowed to disagree.
+
+**2. The classification was thrown away at the source that produced it.** `discoverPages()` returns
+`{url, kind}` per page, and the capture loop did `.map((p) => p.url)` one line later. So the manifest
+WordPress imports from carried `slug`, `path`, `url`, `front`, `rendered` — and no `kind`. The classification
+was computed, logged in the step line, and dropped before anything could use it.
+
+Keying matters here: discovery reads `<loc>` from a sitemap while the capture navigates whatever the nav
+linked, so the map is keyed on `origin + pathname` with trailing slashes stripped and query/hash ignored.
+Keying on the raw string would lose the kind for exactly the pages a sitemap describes best.
+
+**The default is `page`, deliberately.** An unclassified URL converts the way every URL used to. A page that
+should have been a post is a filing mistake a human fixes in one click; a post invented from a listing is junk
+in the feed.
+
+**The lesson is about what a passing golden proves.** Each test pinned its own unit against a fixture it was
+handed, and no test asked whether anything ever handed it one. A unit golden cannot see a missing call site —
+`grep` for callers can, and it is one command. When a feature lands in parts, the cheapest check is not
+another unit test: it is asking who calls the new function, and pinning the JOIN.
+
+### A training round: the crash, the cascade, and two lenses that lied (2026-10-11)
+
+A six-page conversion of a captured service site. Three findings worth keeping, and two of them are about the
+instruments rather than the converter.
+
+**1. A FATAL that stopped the import halfway.** `n_text_cell()` is typed `array`, and a nested grid cell
+handed it a string:
+
+```
+TypeError: n_text_cell(): Argument #1 ($t) must be of type array, string given
+```
+
+Two producers write the key `text` on a cell with two different shapes — the structured text cell
+(`overline / title / subtitle`) and a role-tagged text block (`role => 'text'` plus raw HTML). **Four**
+consumers read it; two already asked `is_array()` and two tested only that the key was non-empty. One
+question, four places, three private answers. The string shape now routes through `cell_by_role()`, the way
+the column path already routed it, rather than growing a fourth answer.
+
+The shape arrives via the DECOMPOSED-COLUMN path: a panel with an eyebrow label and a list of items is split
+into a single-track nested grid so the label survives, and the cells of that grid come from the producer that
+emits `role => 'text'`. A text-only item inside a decomposed panel was the combination nothing handled.
+
+**2. A heading's measured font-family lost the cascade — and the fix was already written.** Three bands
+rendered their titles in the site's display serif where the source used its body sans. Size, weight and
+line-height all matched, so no size-based lens moved; it reads only as "the card titles look wrong".
+
+The tell: the same page's `icon_box` titles were correct. `heading_family_css()` was **already emitting the
+right family** — at `.uXXXX .heading-title` (0,2,0), which loses to the generated theme's
+`:is(h1..h6):not(.hf-heading):not(…)` (0,2,1) even important-vs-important. Repeating the part's own class
+takes it to (0,3,0). `n_icon_box()` had done this months ago, which is exactly why icon boxes were right.
+
+**The near-miss worth recording:** the first attempt added a *second* emission from `heading_weight_css()`
+instead of upgrading the existing one. Both rules then shipped, and the duplicate also pushed three rules off
+the end of `conversion_map`'s 600-char `conv_cap`. That cap is diagnostic-only — the real CSS in `pages.json`
+was intact, verified by counting `margin-bottom:16px` on both sides (1 → 1) — but for a while it looked like
+adding CSS had silently evicted CSS. **Upgrade the emitter that already exists; a second answer in a second
+place is how this family of defect starts.**
+
+**3. Two lenses reported things that were not true.**
+
+- **`shot.mjs --full` photographs a converted page blank below the fold.** Every band carries an entrance
+  animation starting at `opacity: 0`, and a full-page screenshot never scrolls, so a whole-page pair showed
+  **six bands as "completely empty"**. All six were present, correct and merely unrevealed — the tell was
+  that total page height matched the source to within 4px, so the bands were reserving their space. Fixed in
+  `shot.mjs`: `--full` now walks the page, forces anything still `.sc-anim-pending`, and returns to the top
+  (`--no-settle` opts out). Without this, six phantom defects go on the list.
+- **A leaf-only text probe invented a defect.** Reading stat counters by leaf element returned
+  `10 / 50 / 100 / 24` against the source's `10+ / 50K+ / 100K+ / 24/7`, which looked like dropped suffixes.
+  The suffixes live in sibling spans: settled, both sides read identically. **Read the block that owns the
+  value, not the leaf that holds part of it.**
+
+**And one the lens could not segment at all.** This source ships no `<section>` elements, so `compare.mjs`
+found 1 region in the source against 8 in the build: "section 1" compared the whole source body to one band,
+and sections 2–8 reported **PASS having compared nothing**. `props.mjs` inherited the same split — ~130 of
+its 177 deltas were `mock (none) → dev …`, i.e. no counterpart. Gate 3c: a lens that cannot move is not
+evidence, and a PASS from a lens that compared nothing is worse than a FAIL.
+
+### A form is not a card — and the renderer is the only witness (2026-10-11)
+
+Second round on the same conversion. The worst-scoring page of six (70.9% text coverage) lost **ten strings
+to one contact form**: four field labels, four select options, the band's heading and its intro.
+
+**The form was never unrecognised.** `is_contact_form()` claims it perfectly well. The cell holding it was
+claimed FIRST by `card_from_cell()` — the form panel carries an `<h3>Send an Inquiry</h3>`, and a card is "a
+heading plus whatever is under it". The result was an icon_box with that title and nothing else. A recognizer
+that claims a container never reaches the walker underneath, so nothing downstream could notice.
+
+Three changes, each landing in a different place:
+
+1. **`card_from_cell()` stands down** when a cell holds a form `is_contact_form()` claims. Keyed on the
+   recognizer's verdict, not "does this cell contain an input" — a newsletter card (a heading, a line of copy,
+   one email field) is a real card and must stay one.
+2. **The grid-cell path got the form branch its sibling already had.** With the card out of the way the cell
+   fell through to the verbatim mirror, and WordPress strips `<form>`, `<input>`, `<textarea>` and `<button>`
+   out of builder content — so the page would have rendered a stack of labels with no fields. The cell walker
+   had this branch; `grid_cols()` never did, so a form laid out in a grid column was the one shape nobody
+   handled.
+3. **A select's choices are plain strings.** Fixed only because the rendered page was opened.
+
+**On that third one.** After the first two changes the form converted, and the live page printed **four PHP
+warnings** — `Array to string conversion` in the form-builder select item — one of them rendered *inside the
+select's first option*, where a visitor reads it. The mapper was wrapping each choice as
+`array( 'label' => $c, 'value' => $c )`; the item stores `choices` as an `addable-option` of `type => text`
+and casts with `(string) $choice`. The converter's own block was already right — a flat list of strings — so
+the mapper had invented a richer shape than the option type has. **Coverage, the goldens and the data were
+all green while the page showed PHP warnings to visitors.**
+
+**Result:** resources 70.9% → **83.6%**, corpus total 93.9% → **95.8%**, four field labels and four options
+recovered, and the form renders with its two-column top row, populated select, textarea and submit.
+
+**The trimming lesson, which cost three attempts.** Reducing a capture needs the INVARIANT in the predicate,
+not a proxy for it. Trim one: "the mapping lost `Your Name`" — satisfied by deleting the form. Trim two: kept
+the labels, dropped the controls, so `is_contact_form()` stopped claiming and the fixture exercised nothing.
+Trim three: kept the controls but dropped the submit, same outcome. Only when the predicate asserted
+*`is_contact_form()` still claims it* AND *the swallow still happens* did the fixture pin the defect it was
+written for. **A reduced fixture that still "reproduces" by a different mechanism is worse than no fixture**,
+because it goes green against a fix for the thing it no longer tests.
+
+### One word boundary, one whole layout (2026-10-11)
+
+The pricing_table's **list** layout — a full-width row per plan, name and sub-label left, price right, hairline
+between rows — shipped complete: the partial, the registry entry, `pricing_layout()` in the stitch, the
+mapper's `design_settings.layout` plumbing. It was built because the corpus says list-shaped pricing is **43%
+of the priced groups a conversion meets**. It had never once fired on a real price list.
+
+`cell_price_parts()` tested `…(\d[\d.,]*)(b|m|k|bn|mn)?\b…` against `self::text()`, which concatenates without
+separators, so a row reads `Residential CleaningRegular & DeepFrom$120Flat Rate`. `$120` is followed by `F`;
+digit-to-letter is not a word boundary; the row was not "priced"; the container counted 0 of 3 against a gate
+of 2, and the band fell through to three stacked headings.
+
+**The same `\b` was also hiding a second bug, in the opposite direction.** It let the regex BACKTRACK to a
+shorter number to find a boundary: `$4.2Bprocessed` matched `$4`, saw no magnitude suffix, and returned a plan
+price of **4** for a headline metric — the exact fabrication the suffix guard exists to prevent, unreachable
+for any suffix preceded by a decimal. ($18M and $9K happened to fail outright, which is why it went unnoticed.)
+Greedy digits with no trailing boundary fixes both; ten cases were tabulated against three candidate patterns
+before choosing.
+
+**Then the fix made the page worse, and only the render showed it.** With rows now priced, the *band* also
+cleared the gate: its three columns were a copy column, a phone mock-up quoting "From $120", and the list —
+2 of 3 priced. The walk meets the band first, so it built three junk plans from three unrelated columns while
+the real list underneath never got a chance. Rule: **a container that CONTAINS a pricing table is not itself
+one** — prefer the innermost, with a static guard so the inner check costs one pass, not a recursive sweep.
+
+**And then Gate 6b caught the real cost.** Home-page text coverage went **99% → 97.1%**: now that the table
+claimed the container, the row's sub-label ("Regular & Deep") and its price label ("Flat Rate") belonged to no
+field and were dropped. Structure recovered, content lost. Both now have homes — a short unpunctuated leaf
+*before* the price is the sub-label (the card branch below it only handled a description *after* the price),
+and a short leaf *after* it is the period, which `cell_price_parts()` only ever read when introduced by a
+slash. Coverage returned to 99% / **95.8% total**, with the band now a real pricing table.
+
+**Four probes of mine lied in one session, and that is the lesson worth keeping.** A leaf-only counter read
+"suffix dropped" where the suffix lived in a sibling span. A plan dump read `$plan['name']` where the key is
+`title`, reporting every name empty. A rendered-class count read `fw-pt__plan` where the list layout emits
+`fw-pt__row`, reporting 1 plan instead of 3. And a region screenshot came back as flat navy because the
+settle pass I had just written covered `--full` only, not `--sel`. **Before believing a probe's bad news,
+check that the probe is looking at the thing it names.**
+
+### The same answer, in a fourth place (2026-10-11)
+
+A full source-vs-build comparison after the pricing round. Four defects, and three of them are one defect
+wearing different clothes.
+
+**1. A pill with two backgrounds.** A rating badge converted as a ring around a ring:
+
+| | box | padding | notation |
+|---|---|---|---|
+| source | 258x34 | 8px 16px | one box |
+| build, outer | 292x59 | 8px 16px | `rgba()` + `px` — the skin harvester |
+| build, inner | 258x41 | `.5rem 1rem` | `rgb( / )` + `rem` — the element's own classes |
+
+The two notations are the tell. The column carried BOTH a `cardBox` harvested from the cell by
+`read_card_skin()` AND the cell itself as a verbatim mirror — `saveHTML( $cell )`, box included. One source
+box, translated twice, onto two nested elements; the wrapper's own padding was the visible ring.
+**A cell riding verbatim gets no harvested skin.** The sibling path that emits decomposed BLOCKS keeps its
+skin, because there nothing else paints the box.
+
+**2. Footer links 16px/24px against a source's 14px/20px.** `footer_link_css()` samples one anchor. It took
+the BRAND link — `href="/"`, an `<svg>` logo, nine descendants, text `"ExampleSERVICES"`. Both existing
+guards passed: `str_word_count() <= 4` because `self::text()` concatenates without separators so a wordmark
+and the next column's heading became ONE token, and the social-icon guard is empty for `/`. A nav label's
+anchor is a text LEAF; a link wrapping an `<svg>` or `<img>` is a brand mark.
+
+**The part worth remembering:** there are THREE scans in that function, and the third — a later "prefer a nav
+link over `tel:`/`mailto:`" pass — **overrides** the first two. Guarding the first two changed nothing at all;
+the third quietly re-selected the logo they had just rejected. When a function picks a sample in stages, the
+last stage is the one that decides.
+
+**3. The plan name, in the display serif.** Third element to need the identical fix: an `<h4>` loses to the
+generated theme's `:is(h1..h6):not(…)` at (0,2,1), so `.fw-pt__name` repeats its class for (0,3,0) — exactly
+as `heading_family_css()` and `n_icon_box()` already do. Two-word plan names had been wrapping because the
+serif is wider.
+
+**4. A header alpha that is NOT a defect.** The header reads `rgba(4,21,45,0.95)` at source and
+`color(srgb … / 0.72)` in the build. The RGB is identical (notation); the alpha is not. But the converter
+strips the source alpha ON PURPOSE: the theme's classic glass frosts `--header-bg` to ~72%, so feeding an
+already-translucent fill would double-reduce it, and a prior regression is cited in the code. Carrying 0.95
+would mean making the frost amount settable — a theme change against an explicit earlier decision. **Left
+alone and recorded, not patched.** A lens delta with a documented reason behind it is a design question, not
+a bug.
+
+**Two false deltas the lenses reported, for the running list:** `border-top-color` differed on an edge whose
+width is `0px` on BOTH sides — a colour on an unpainted border is not a difference. And a footer-heading
+delta of `0px` font-size turned out to be the selector matching a wrapper rather than the text node: a
+mismatched element pair, re-probed before filing rather than after.
+
+### A ring is a box; a divider is a rule (2026-10-11)
+
+Converted testimonial avatars were drawn with a SQUARE border around a circular photo. Measured on the
+source:
+
+```
+img     "w-12 h-12 rounded-full object-cover ring-2 ring-blue-500/40 shadow"
+        radius 9999px · border 0px
+        box-shadow rgba(59,130,246,0.4) 0 0 0 2px        <- the ring
+parent  "pt-6 border-t border-white/10 mt-6 flex items-center gap-4"
+        border widths 1px / 0px / 0px / 0px              <- a DIVIDER above the author row
+```
+
+The detector walked up from the photo looking for "a frame with a border" and tested `border-top-width`
+ALONE. The author row's `border-t` answered, so a horizontal rule became the avatar's frame; its radius is 0,
+hence a square around a circle. The code had even anticipated the symptom — "the frame's ROUNDING, or the
+ring draws as a square" — and carried a radius when it found one. The radius was 0 because the element had
+never been a frame.
+
+Two defects, one cause, and the second was invisible until the first was fixed:
+
+1. **A one-sided border is a RULE, not a frame.** Requiring four sides was not enough on its own: the walk
+   then promoted the testimonial CARD (a 1px rounded box around the whole quote) instead — the same mistake
+   one level out. A ring also **wraps only the photo**, so a candidate carrying any words is rejected.
+2. **The real ring was never read.** A Tailwind `ring-*` is a BOX-SHADOW on the image, not a border on
+   anything. Carried on the IMG, where the source puts it, so it follows the circular crop and cannot draw
+   square.
+
+**Parsing that shadow is its own trap.** A computed `box-shadow` is a comma-separated list whose colours
+contain commas, and Tailwind emits several layers at once (`ring` + `shadow`). A split on `"),"` never fires
+(the separator is a bare `", "`), and a split on `","` cuts `rgba(59, 130, 246, 0.4)` into pieces. Match the
+ring layer directly — spread-only: no offset, no blur, positive spread — and take the first non-transparent
+one.
+
+**The corpus check that mattered.** Three fixtures lost an avatar frame. Before accepting that, the old
+emissions were read back: `border-radius:32px`, `border-radius:16px`, and one with no radius at all. Those
+are CARD radii around a 48px photo — the old code had been adopting a card's or a divider's border in every
+case, never a real frame. **A removed rule is only safe once you have read what it used to say.**
+
+### Captured, carried, and dropped at the last step (2026-10-11)
+
+The worst-covered page of a conversion lost six strings to three article cards — a category chip and a read
+time on each ("Eco-Living" / "6 min read"), written by the source as a ROW of two spans above the title.
+Two independent losses, and the second is the more interesting one.
+
+**1. `card_eyebrow()` kept only the LAST qualifying leaf.** It assigned `$best` on every match, so the chip
+was overwritten by the read time and never reached the mapping. Leaves sharing a parent are one line in the
+source, so they are now joined in document order, keeping the first one's stamp; a leaf in a different
+parent is a different line and still replaces, which is what every other test in that function assumes.
+
+**2. The overline reached the mapping and died there.** Measured: all three cards carried
+`overline: "6 min read"` in the mapping, and the built page had none of it — `n_icon_box()` has no overline
+handling, because the icon_box shortcode has no eyebrow slot. A value measured correctly, carried correctly,
+and dropped at the final step is the most expensive kind of loss: every lens upstream says it is fine.
+
+`card_meta_lift()` already existed for this and already places a block ABOVE the card. But it only fired
+when the overline was ALSO repeated as a leading `<p>` in the body — a POST card's author/date shape. An
+article card's meta appears nowhere in the body, so the match found nothing and it returned null. It now
+emits the overline as its own block when there is nothing to lift from.
+
+**And the guard that change needed, which an existing golden caught.** The first version fired whenever the
+body had fewer than two paragraphs — including a card whose ONLY paragraph repeats the overline, which then
+rendered the same words twice. `card-meta-sits-above-the-title-test.php` failed immediately and correctly:
+emptying the body is the case the lift deliberately refuses, and duplicating it is no better. Only text the
+body does NOT carry earns a block of its own.
+
+**Result:** resources 83.6% → **92.7%**, total 95.8% → **97.2%** (15 missing → 10). All five meta strings
+recovered and placed above the title, where the source has them.
+
+**What is recovered is the CONTENT, not yet the presentation.** The source renders the chip as a filled blue
+pill on the left and the read time grey and right-aligned (`justify-between`); the build renders both as one
+blue line, left-aligned. The strings are back and in the right order, which is what coverage measures — the
+chip's fill and the row's split are a separate, smaller defect, recorded rather than claimed as done.
+
+**A longer-bodied card with an un-echoed overline still loses it**, because the fallback only fires under two
+paragraphs. Widening it means changing what an existing golden asserts, which is a contract change worth
+making deliberately rather than in passing.
+
+### The guard I wrote yesterday broke the next source (2026-10-11)
+
+A second training source, converted into a FRESH install. Text coverage opened at **70.9% — 41 of 141
+strings missing**, the worst start recorded. The largest cluster was a membership band's perk lines, and
+the cause was a rule added hours earlier in this same file.
+
+**The over-broad guard.** "A container that CONTAINS a pricing table is not itself one" fixed a real defect
+(a band out-competing the price list inside it). On the next source it fired the wrong way: a membership
+table's CARDS each hold their own price block —
+
+```
+<div class="pb-6 mb-6 border-b">  "$81/MONTH"  +  "Billed annually ($972/year)"
+```
+
+— two priced children, which clears the gate by itself. So every card looked like a nested pricing table,
+the real three-card table was rejected, and the whole band fell through to plain cards.
+
+**The count settles it**, and it separates both measured cases cleanly:
+
+| | outer priced children | best inner | prefer |
+|---|---|---|---|
+| band containing a price list | 1 | 3 | inner |
+| membership table, per-card prices | 3 | 2 | outer |
+
+An inner container only pre-empts its ancestor when it has MORE priced children. A card's price area always
+has fewer than the table of cards around it; a genuine inner table always has more than the band that
+merely contains it. **A guard tested in only one direction is how this defect was introduced**, so the
+golden now asserts both.
+
+**And fixing the detection alone made coverage WORSE: 70.9% → 66.7%.** Claiming the band as a pricing table
+moved its perks into a `features` field that was never populated, because the extractor reads only
+`<ul>/<li>`. These perks — like most a builder emits — are icon+text ROWS:
+`<div class="flex"><svg check/><span>…</span></div>` repeated. Sixteen lines across three plans went from
+"rendered as cards" to "dropped entirely".
+
+A feature run is now collected from the parent holding it: at least two sibling rows, each a short line of
+its own text, longest run in the card wins. **70.9% → 78.7%.**
+
+**The lesson is the pairing.** Detection and extraction are one change, not two. Teaching the converter to
+RECOGNISE a construct without teaching it to READ that construct's parts is a net loss — the old path at
+least rendered the text as something. Gate 6b caught it within one measurement; shipping the detector alone
+would have looked like progress on every structural lens.
+
+### A download list is not a render list (2026-10-11)
+
+A conversion came back with the wrong typeface on every element — 135 of them at 1440px, in every band.
+The per-family leaf census is the measurement that named it:
+
+```
+source   176 of 178 text leaves render in  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                                           Helvetica, Arial, sans-serif      (exactly 1 renders in Inter)
+build    167 of its leaves render in  Inter
+```
+
+The source's `<head>` links three families from a web font service and **displays none of them**. The link
+is there; the CSS never references it. So the source's real typography is the operating system's UI font,
+and the conversion replaced the whole page with a face the source downloaded and ignored.
+
+`detect_computed_fonts()` was already right about this. It reads the `<body>`'s computed family, sees a
+system keyword, and deliberately returns `''` — *the source names no real family*. The defect was what
+happened next:
+
+```php
+$head_font = $gfonts[0];                                        // no system guard at all
+$body_font = $gfonts[1] ?? ( $gfonts[0] when ! $body_system );  // guard on ONE branch only
+```
+
+`$body_system` existed, and was correct, and simply did not cover the branch that fired. With two or more
+families in the URL, `$gfonts[1]` was taken unconditionally — so a measured system body stack lost to
+whatever face happened to be named *second* in a stylesheet link. The heading had no guard in any branch.
+
+**The rule: a font URL is a list of what the page DOWNLOADED, which is not evidence of what it DISPLAYS.**
+It may fill a role only when the measurement left that role *unknown*, never when the measurement says the
+role is the system stack. Those two cases look identical downstream — both arrive as `''` — so they must be
+distinguished at the source: `measured_system_face()` returns true only when at least one element of a role
+carries a font stamp AND not one of the stamped ones resolves to a named family.
+
+#### The same list, in four places, each missing something different
+
+Then the Theme Settings came out wrong too, by a different path — `"font":{"family":"-apple-system"}` — and
+that exposed the real shape of the problem. The generated theme was emitting:
+
+```css
+body { font-family: -apple-system !important; }   /* and nothing after it */
+```
+
+`-apple-system` is a *system keyword*, not a font name. It had been let through as if it were a real family,
+so the element lost Segoe UI, Roboto, Helvetica and Arial and fell back to the browser default everywhere
+except Apple hardware — where it looks perfect, which is why it survived. There were **four** copies of the
+"generic keywords to drop" list:
+
+| Copy | `-apple-system` | `blinkmacsystemfont` | `ui-monospace` |
+|---|---|---|---|
+| stitch `detect_computed_fonts()` | yes | yes | yes |
+| stitch `detect_typography()` | yes | yes | yes |
+| theme-generator `first_family()` | **no** | **no** | **no** |
+| capture `to-design-config.mjs` | **no** | **no** | yes |
+| capture `capture-extract.mjs` | yes | **no** | **no** |
+
+Every copy had been corrected at a different time, so each one was missing a different entry, and which
+spelling of the list a value happened to pass through decided whether the bug appeared. Fixing the detection
+alone would have moved nothing: the theme-settings path would still have written the truncated stack.
+
+**Two lessons, and the second is the durable one.** First, when a fix does not move the measured number,
+look for a second path computing the same answer — this is the fourth time that has been the explanation
+here. Second, a predicate duplicated five times is not five safeguards, it is five chances to be wrong, and
+the drift is invisible because each copy looks reasonable on its own.
+
+#### What the fallback has to be
+
+A guard that declines to name a font is only half a fix; the *fallback* then decides what renders. Checked
+it rather than assumed it: the parent theme's default is
+`system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif` — the source's own stack
+in a different order, resolving to the same face on every OS. So declining to name a face lands on the right
+answer. Had the theme defaulted to a named face, the detection fix would have changed the wrong font to a
+different wrong font and every structural lens would still have shown "improved".
+
+### Both columns were a price table (2026-10-11)
+
+A converted band rendered its service price list **twice**:
+
+```
+y=1255  design-dark     5 rows  names [HAIRCUT, BEARD TRIM, HAIR COLOR, HOT TOWEL SHAVE, STYLING & FINISH]
+                                amounts [75, 40, 120, 60, 35]                            <- correct
+y=1419  design-classic  5 rows  names [Plan, Plan, Plan, Plan, Plan]
+                                amounts [75, 40, 120, 60, 130]                           <- invented
+```
+
+The usual explanation for a duplicate is a responsive twin — the source shipping a mobile copy and a desktop
+copy, one of them hidden. **Checked it, and it was not that**: every price leaf in the source is visible,
+`display:block`, opacity 1, and there is exactly one of each. The amount `130` does not occur in the source
+at all. So this was not a duplicate being carried twice; it was a second table being *invented*.
+
+From the capture, deterministically, the band is a two-column section and both columns are claimed:
+
+```
+sections.1.blocks.0.cols.0.blocks.1   layout=list  5 plans   the real price list
+sections.1.blocks.0.cols.1.blocks.3   layout=list  5 plans   the BOOKING WIDGET
+```
+
+Column 1 is the appointment form. Its dropdowns are flattened to text upstream, and the resulting
+price-bearing lines are numerous enough to clear the pricing gate. **The literal "Plan" was the symptom, not
+the cause** — `$title !== '' ? $title : 'Plan'` in the mapper is simply what a nameless row falls back to.
+Chasing the placeholder would have replaced five visible junk headings with five invisible empty ones and
+left the duplicate table on the page.
+
+The rule: **a region containing real form controls is a form, not a price table.** `select` and `textarea`
+are the discriminator, chosen deliberately — a genuine pricing table may well contain an `<input>`, because
+a monthly/yearly billing switch is routinely a checkbox, so keying on `input` would have disqualified every
+pricing table with a toggle.
+
+**And the guard has to cover the element itself, not only its descendants.** The first attempt tested
+`getElementsByTagName('select')` and the golden stayed red: the misclassified element *was* the `<select>`.
+Its `<option>`s read as widget children and its service options carry the prices, so it cleared the gate —
+and a descendant-only check can never catch that, because a `<select>` contains no `<select>`. Both the tag
+of the element and the tags inside it have to be excluded.
+
+### Told to centre, unable to centre (2026-10-12)
+
+A converted hero rendered its text hard against the top of the band, with ~530px of empty space
+beneath it. The source centres that text vertically. Measured on both pages:
+
+```
+source   inner wrapper 1440x912   display:flex  flex-direction:column  justify-content:center
+build    inner wrapper 1344x900   display:BLOCK  align-items:center
+```
+
+The emitted node said it plainly:
+
+```
+display='block'  direction='row'  align_items='center'  justify_content=''
+custom_css = selector{width:100%} selector{min-height:90vh}
+```
+
+**The measurement and the carry were both correct.** The source's 90vh height survived, and so did
+its centring intent. They were simply written onto a box that cannot act on either — `align-items`
+does nothing on a `display:block` element. The comment directly above the offending branch already
+recorded the symptom ("rendered as `display:block; align-items:normal`"); the min-height had been
+given a home in scoped CSS and the display had not.
+
+The framework cannot rescue it either. The only rule that can give `.fw-flexbox` a display is gated
+on a span-classed child:
+
+```css
+.fw-flexbox:not(.fw-flex):not(.fw-grid):has(> [class*=fw-span-]){display:flex;flex-wrap:wrap}
+```
+
+A hero wrapper has no reason to have a `fw-span-*` child. Measured across one converted page, **44
+of 51 `.fw-flexbox` elements fail that gate**, so every alignment class on them is inert. This is a
+class of defect, not one hero.
+
+#### The axis is the part that is easy to get wrong
+
+On a ROW flex, `align-items:center` *does* centre vertically — so merely flipping `display` to
+`flex` looks correct in isolation, and would have passed a careless golden. But a `display:block`
+wrapper **stacks** its children, and this one holds two (an eyebrow row and the heading). Turning it
+into a row flex puts them side by side.
+
+So mirror the source's own mechanism rather than patching the symptom: `flex-direction:column` with
+`justify-content:center` centres on the column's MAIN axis while leaving children full-width and
+left-aligned exactly as block flow had them. `align_items` must be **cleared**, not kept — on a
+column it is the horizontal axis, and it would centre text the source left-aligns. `wrap:no` as
+well, because `.fw-flex` sets `flex-wrap:wrap`, and a wrapping column with a fixed min-height can
+spill its children into a second column.
+
+#### Why this was not on the audit list
+
+A 169-row discrepancy audit of that page did not contain it. Nothing in the harness compared **where
+content sits inside its band**: the band height matched, the container width matched, every string
+and every font matched. The content was pinned to the top of a correctly-sized box, and no lens
+looked at that.
+
+**A lens that compares properties will never report a property it does not look at.** When the box
+is right and the text is right, the remaining failure mode is placement — and placement needs its
+own measurement: the gap above the first child versus below the last, on both sides, per band. Plus
+the cheap structural check this defect suggests: *an alignment property set on a non-flex wrapper is
+a defect even when its value "matches" the source's intent.*
+
+#### Two fixes, and why the contained one went first
+
+- **Framework**: widen or drop the `:has(> [class*=fw-span-])` gate. One line, fixes all 44 inert
+  wrappers at once — but it changes the computed display of every `.fw-flexbox` on every existing
+  site, which can move layouts that currently rely on them being blocks.
+- **Converter**: emit a real flex container where the converter intends alignment. Contained to
+  converted output; cannot regress a site already built.
+
+The converter fix shipped. The framework one stays open, to be judged on its own evidence with the
+corpus rescored.
+
+### The probe that changed the page it was measuring (2026-10-12)
+
+Two defects on one converted page looked unrelated: an **invented 913px booking band** at the foot
+(13% of the converted page's height) and **three wrong membership prices** ($81/$153/$272 where the
+source shows $95/$180/$320). Both turned out to be the same bug, and neither was in the converter —
+the converter was faithful throughout. It was handed a page the source never shows.
+
+The giveaway was that nothing had been fabricated. "Online Reservation" and "Schedule Your Cut"
+appear in `rendered.html` exactly once each, and not at all in the live source's DOM. Clicking the
+hero CTA on the live source reproduces the capture exactly:
+
+```
+before any interaction    "Online Reservation" x0    <form> 0    <select> 3
+after clicking BOOK NOW   "Online Reservation" x1    <form> 1    <select> 6
+```
+
+`revealTabPanels()` exists so a React tab widget's inactive panels are not lost, and its predicate is
+loose on purpose — 2–5 button-ish children with short labels and nothing else in the bar — because
+real tabs are routinely plain `<button>`s with no ARIA at all. (The tab-stamp fixture is exactly that
+shape, so tightening this to require `role="tab"` / `aria-selected` / `.active` would lose genuine
+tabs. Measured: neither offending bar carried a single one of those markers, so there was no signal
+to discriminate on beforehand.) It then **clicks** each child to see what toggles:
+
+```
+["BOOK NOW", "VIEW SERVICES"]           clicking BOOK NOW mounted a booking modal
+["Monthly Billing", "AnnualSAVE 15%"]   clicking Annual switched every membership price
+```
+
+Both groups were then **correctly rejected** — their "panels" did not differ — and their markers
+stripped. That is precisely why no `data-sc-tab` survived in the output, and why the cause stayed
+hidden through an entire audit: the evidence of the probe erased itself while its side effects
+remained. **The clicks were never undone.**
+
+**A probe that mutates what it measures must restore it.** That is the rule, and it is cheap to state
+and easy to forget, because the detection logic here was right twice over — it found the candidates,
+and it correctly concluded they were not tabs.
+
+#### The undo that cost more than the bug (Gate 6b)
+
+Clicking back to the originally-active index is not a safe undo: on a CTA pair that just clicks the
+other call to action. So the first attempt reloaded the page in place at the end of the pass. It
+removed the modal and restored the monthly prices — and silently destroyed the entire responsive
+tier, because by then `renderPage` has already stamped the page, including the phone/tablet/wide
+passes (`data-sc-sm` / `-md` / `-xl`). Measured at 820px:
+
+| band | before the fix | after the in-place reload |
+|---|---|---|
+| schedule | 2169 (+244) | 1024 (−901) |
+| stylists | 1711 (+16) | 844 (−851) |
+| showreel | 951 (+44) | 526 (−381) |
+
+The build had no tablet data left to respond with. Invisible at 1440px; obvious the moment the other
+two widths were measured — which is the entire argument for auditing three widths rather than one.
+
+The shipped fix reuses a mechanism the file already had for this exact situation. The pass now
+**returns** whether it clicked a bar that turned out not to be tabs, and `renderPage` folds that into
+its existing **route self-check** — the branch that already re-runs `renderPage(p, target, true)` from
+a clean load when an interaction navigates the SPA away. `retry=true` skips the probe the second time,
+so the page ends up both pristine *and* fully stamped.
+
+#### Result
+
+| | 1440px | 820px | 390px |
+|---|---|---|---|
+| page-height error before | +1332px | +1500px | +1731px |
+| page-height error after | **+351px** | **+579px** | **+667px** |
+
+The band list now pairs 8-to-8 at every width with no invented band. The distinct-defect count barely
+moved (165 → 164 at 1440), because removing a whole invented band removes a single presence row — the
+913px it was worth shows up in the height numbers, not the count. Worth remembering when judging a
+fix by a defect tally.
+
+### A column is what has something in it (2026-10-12)
+
+A converted footer came out **526px against the source's 280px** — 88% taller — and the cause was a
+column that does not exist. Measured on both pages:
+
+| | source | build |
+|---|---|---|
+| footer height | 280 | 526 |
+| `<svg>` | 3 | 7 |
+| brand tagline | ×1 | ×2 |
+| column headings | STUDIO · SERVICES · LEGAL | **+ the brand wordmark** |
+
+`detect_footer_columns()` returned four columns for a three-column footer, and the fourth's shape is
+the tell — it carries nothing at all:
+
+```
+{ title: <the brand wordmark>, tag: 'h4', links: [], seq: [], items: [], rows: [],
+  newsletter: null, kind: 'social', append_social: true }
+```
+
+Its only instruction is "put the social row here". `footer_label_heads()` deliberately accepts a
+short uppercase leaf that opens a group of links, so that a column headed by a styled `<div>` rather
+than an `<h4>` is not missed — and a brand wordmark sitting above the social icons is *exactly* that
+shape. The footer then rendered the social row twice, under a heading the source does not have, and
+the duplicate forced the whole footer to stack.
+
+#### The first guard was too broad, and my own negative missed it
+
+The obvious rule — *a column with no links, rows, items or newsletter is not a column* — broke
+another golden. A legitimate column headed by a **real** heading over **icon-only** social links
+("Telemetry" over three icon chips) arrives in precisely the brand block's shape: icon links carry a
+glyph *and* a social href, so they are filtered out of `$links` upstream, leaving `links: []` with
+`append_social: true`.
+
+The negative I wrote did not exercise it, because I used **named** social links ("Instagram",
+"Facebook") — and named links survive that filter and give the column content. The existing suite
+caught it instead, which is the whole argument for running everything rather than just the new test.
+
+**The discriminator is the element the title came from.** A real `<h2>`–`<h6>` means the source marked
+that heading up as a heading; a brand wordmark is a styled `<div>` that only `footer_label_heads()`
+promotes to one. The guard now drops a contentless column *only* when its title came from a label
+head. The missing negative is now in the golden.
+
+#### What it did and did not fix
+
+| | before | after | source |
+|---|---|---|---|
+| headings | 4 | **3** | 3 |
+| `<svg>` | 7 | **4** | 3 |
+| footer height | 526px | **526px** | 280px |
+| tagline | ×2 | ×2 | ×1 |
+
+The invented heading and one duplicate social row are gone and the detector now agrees with the
+source's three columns — but **the height did not move**. The defect that was fixed was not the one
+costing the 246px, and the tagline is still emitted twice. Worth stating plainly: a correct fix to a
+real defect is not evidence that it was *the* defect, and the only way to know is to re-measure the
+number you were trying to move.
+
+### Whose height is it? — and two fixes that cancelled (2026-10-12)
+
+A converted band came out **1742px against the source's 1000px** — +742px, and 86% of that page's
+entire height error. The emitted builder JSON named the culprit immediately:
+
+```
+SECTION  min_height = null, no min-height in its scoped CSS
+  item0  (a small EYEBROW row)   custom_css: min-height:85vh    ← 850px at a 1000px viewport
+  item1  (heading + copy)        (none)
+  item2  (the stats row)         (none)
+```
+
+The hero-height carry walks a band's items, writes the measured height onto the **first** flexbox it
+finds and breaks — *"the hero's own row, not every row in the band"*. That is right when a band HAS
+one row: the row is the band. It is wrong the moment the band has siblings, because "first" is then
+arbitrary. Here it was an eyebrow of a few words, inflated from ~100px to 850px, with the heading
+block and stats row stacking below it instead of inside it.
+
+**The fix:** with more than one sibling row, the height describes the *band* and goes on the section.
+
+#### Two wrong homes, both instructive
+
+- **`$css`, the third argument to `n_section()`** — documented *"the `$css` arg is kept for callers"*
+  and dropped on the floor. Appending to it changed nothing and the golden stayed red. Section CSS
+  is emitted into the child theme's `style.css` via `page_css()`, not through that parameter.
+- **The section's `min_height` OPTION** — setting it renders the section `display:flex`, and that
+  flex container shrinks a full-width flexbox row back to content width. That is precisely why the
+  value had been moved off the section in the first place.
+
+Scoped `custom_css` is the right home: it sets the height without changing what kind of box the
+section is. (This band already carried its border rules there, so it is also the consistent one.)
+
+| | before | after |
+|---|---|---|
+| the band | +742px | **−62px** |
+| page height @1440 | +864px | **+59px** |
+| @820 | +876px | **+72px** |
+| @390 | +1304px | **+517px** |
+
+#### The collision
+
+The full suite came back **125 green, 1 red** — and the red one was the golden written *the previous
+round*, for hero centring. Neither fix was wrong alone:
+
+- **Last round:** a multi-row hero was not centred, because its wrapper computed `display:block` and
+  an alignment property on a block does nothing. The fix turned the **first row** into a centring
+  column.
+- **This round:** the height was landing on that same first row. Moving it to the section skips the
+  per-row pass — and took last round's centring with it.
+
+Both target the same code for the same shape of band. The golden reported `direction='row'` where it
+wanted `column`.
+
+**Resolution:** mirror what such a source does on its own section — the section becomes the centring
+column (`display:flex; flex-direction:column; justify-content:center`). `align-items` stays at its
+default `stretch`, which is what makes this safe where the `min_height` option is not: that option's
+flex container is a **row**, and a row flex shrinks a full-width child. A pre-existing
+`selector > .fw-flexbox{width:100%}` already keeps the rows full width inside the column.
+
+**The golden was rewritten to assert the outcome, not the mechanism.** It used to require the hero
+*row* to be a column flex. That was never the invariant — *"the band centres on a box that can
+centre"* is. It now accepts the section or the row, and still refuses both an alignment set on a
+non-flex box and cross-axis centring.
+
+**The lesson is about process, not CSS: two correct fixes to the same code path, made a round apart,
+can cancel. The only reason this was caught is that the first one left a golden behind.** A fix
+without a golden is a fix the next fix may silently undo.
+
+#### A misdiagnosis worth recording
+
+The first reading of this band was *"the decorative covers are being emitted as content"* — the
+source is a layered composition (two `position:absolute; inset:0` covers over a `z-index:10` content
+column) and the build's three rows look exactly like those three layers. Two changes were made for
+it and the item count went from 3 to **4** — the wrong direction.
+
+Dumping the **mapping** settled it: the covers were already captured in `sectionLayers`, and every
+block was a content block. They were never content. All of it was reverted.
+
+But the instinct was not wrong, only the mechanism: those covers *are* mishandled — captured in
+`sectionLayers` and then never emitted, so the converted band shows its photo at full brightness
+where the source darkens it heavily, and the body copy sits on bright reflections at poor contrast.
+**Read the mapping before theorising about the render; then read the render before believing the
+mapping is enough.**

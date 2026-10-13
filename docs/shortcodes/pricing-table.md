@@ -9,11 +9,14 @@ Comparable pricing plans as cards in a responsive grid — each with an icon, na
 | `plans` | addable-popup | `[]` | array of plan objects (see below) | The pricing columns. |
 | `design_settings` | multi-picker | `{ layout: 'grid' }` | `layout`: `grid` `list` `bars` — plus that layout's own options | **LAYOUT — the plans' STRUCTURE.** `grid` = cards side by side (the default, and what every table rendered before layouts existed). `list` = a price list / service menu: one full-width row per plan, name + description left, price right, **no card**. `bars` = stacked full-width bands that ARE cards — the list's reading order with the grid's card treatment, price and button right. Only `list` takes an option of its own: `row_rule` (`yes`/`no`, default `yes`) for the hairline between rows. |
 | `design` | image-picker | `'classic'` | `classic` `modern` `minimal` `gradient` `dark` `outline` | Card **skin** — paint, not structure. Paints the Grid layout's cards and the Bars layout's bands; a List row has no card to paint. |
+| `plan_title_tag` | select | `'h4'` | `h2` `h3` `h4` `h5` `h6` `div` | Heading level of each plan name (`.fw-pt__name`), so the plans sit at the right level of the page outline. Shortcodes 1.15.70. |
 | `columns` | select | `'3'` | `1` `2` `3` `4` `5` | Plans per row on desktop (Grid layout). `1` gives a single centred plan. |
 | `gap` | select | `'4'` | Gap-Scale preset slug | Spacing between plans. |
 | `featured_style` | multi-select | `['raise','highlight','glow','badge','accent_button']` | any of `raise` `enlarge` `highlight` `glow` `fill` `badge` `accent_button` `emphasize` | How the featured plan stands out (composable). |
 | `button_preset` | button-style-picker | `''` (none) | a Theme Settings Button preset class | Themed button preset for every plan button; None = the accent `.fw-pt__btn`. (Legacy `button_style` `solid`/`outline` still read as a fallback.) |
 | `align` | alignment | `'center'` | `left` `center` `right` | Plan content alignment. |
+| `feature_dividers` | switch | `'yes'` | `yes` \| `no` | Thin hairline between each feature row. `no` = clean spacing-only list. Emits `.fw-pt--no-dividers`. |
+| `feature_block_center` | switch | `'no'` | `yes` \| `no` | Left-aligns each feature's text but centers the whole list on its **widest item** — the list shrink-wraps to the longest feature and that block sits centered in the card (dividers hug the list). Title/price/button still follow `align`. Emits `.fw-pt--feat-center-block`. |
 | `box_style` | box-style picker | see Notes | box-preset picker object | Box Preset applied to each card. |
 | `accent_color` | color-preset | `{predefined:'',custom:''}` | compact color object (`kind:bg`) | Featured highlight, price, button bg. |
 | `bg_color` | color-preset | `{predefined:'',custom:''}` | compact color object (`kind:bg`) | Section background. |

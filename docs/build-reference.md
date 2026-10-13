@@ -70,7 +70,7 @@ Before extracting tokens/sections, capture the source with the established machi
 
 Many modern sources (a second AI-page generator, Framer exports, most React/Next landing pages) are **Tailwind**. Reproducing
 them by *glancing* at a button/card — or even by reading `getComputedStyle` **partially** — silently drops
-styles: the `pinky-bites` primary button was `rounded-full font-bold text-lg shadow-lg` and the **`shadow-lg`
+styles: a converted source's primary button (fixture-01) was `rounded-full font-bold text-lg shadow-lg` and the **`shadow-lg`
 was missed** because the computed `box-shadow` was read truncated and the `class` attribute was never read.
 The class names are the design-token source of truth; do not skip them.
 
@@ -329,6 +329,11 @@ chrome. Don't build a store as static cards. See [extensions/woocommerce.md](ext
 
 ## Part 2 — Fresh builds (nothing to reproduce)
 
+The gates that still apply are listed in [`site-build-protocol.md`](site-build-protocol.md) → "Fresh build
+(no source site)". Setup first (`AGENTS.md` → Phase 0): WordPress + the parent theme + the Unyson+
+plugin, then the extensions the build uses downloaded from **Unyson+ → Extensions** (the release zip is
+core-only) — at least Page Builder; Forms for a contact form, Theme Builder for post/archive templates,
+Custom Fields for structured post data.
 
 ## The order that works (tokens → chrome → pages → motion → verify)
 
@@ -345,8 +350,9 @@ See `docs/theme-settings/` for every tab's options and choices.
 
 ### 2. Lock the chrome (header / footer / container)
 Header, footer, and the container width are **theme chrome**, not page-builder content. Set them from
-Theme Settings (and the header/footer builder) and get them ~right before building bodies — the child-
-theme starter ships polished chrome so this is mostly tuning. **On a fresh build, measure your mockup
+Theme Settings (or a Theme Builder header/footer — [extensions/theme-builder.md](extensions/theme-builder.md))
+and get them ~right before building bodies. The child-theme starter (`samples/sample-child-theme/`) is a
+bare child theme — it ships no chrome, so the header/footer come entirely from these options. **On a fresh build, measure your mockup
 rather than eyeballing** (`tools/measure/`). *(If a source **exists**, you're converting — don't measure
 it; translate its captured classes via the converter. See the gate at the top of this file.)*
 

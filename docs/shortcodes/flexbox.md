@@ -26,7 +26,7 @@ Children sit **directly** in `_items` (no `row`/`column` wrapper). Widths are se
 `fw-flex`/`fw-grid` + `fw-gap{bp}-*`/`fw-justify{bp}-*`/`fw-items{bp}-*` + order/grow/placement classes.
 Gap comes from the spacing-scale `gap` option, **not** Bootstrap `--bs-gutter`.
 
-Every layout/placement att is **responsive**: `{ base, md, lg }`, where a blank device inherits the next smaller one.
+Every layout/placement att is **responsive**: `{ base, md, lg, xl }` (Phone / Tablet ≥768 / Desktop ≥992 / Large Desktop ≥1200), where a blank device inherits the next smaller one. The `xl` layer is additive — values stored before it existed inherit `lg`, no migration.
 
 ## Option layout & conditional visibility
 
@@ -45,8 +45,9 @@ keep their values.
 ## atts — Container (how it arranges children)
 | key | type | default | value shape / choices | what it does |
 |---|---|---|---|---|
-| `html_tag` | select | `div` | pages: `div` `section` `article` `aside`; Theme Builder adds `header` `footer` `nav` `main` | Semantic element. `section` = the Section tile (a full-width band). |
-| `display` | select | `flex` | `flex` `grid` `block` | Layout mode (Flexbox / Grid / Block tiles). |
+| `html_tag` | select | `div` | pages: `div` `section` `article` `aside` `header` `footer` `nav` `figure` `custom`; Theme Builder also adds `main` | Semantic element. `section` = the Section tile (a full-width band). `header`/`footer`/`nav` are valid scoped inside a section/article; `main` is Theme-Builder-only (one per page). `custom` reveals `custom_tag`. |
+| `custom_tag` | text | `''` | a bare tag name | Used only when `html_tag` = `custom`. Sanitized to a safe container whitelist (div, section, article, aside, header, footer, nav, main, figure, figcaption, details, summary, span, p, blockquote, address, ul, ol, li, dl, dt, dd, picture, time, mark, fieldset, hgroup); anything unknown/unsafe (script, iframe, a, …) → `div`. |
+| `display` | select | `flex` | `flex` `inline-flex` `grid` `block` `inline-block` `inline` `none` | Layout mode. `flex`→`fw-flex`, `inline-flex`→`fw-inline-flex` (an inline-level flex container; all flex arrangement controls apply), `grid`→`fw-grid`; `block` is the element default; `inline-block`/`inline`/`none` emit an inline `display:` (direction/justify/align/gap apply only to flex & grid). |
 | `grid_columns` | text | `3` | integer 1–12, `>12`, or a raw track template | Column count when `display:grid`. 1–12 use the cacheable `fw-grid-N` class; else an inline `grid-template-columns`. |
 | `grid_autofit` | switch | `no` | `yes` \| `no` | Auto-fit grid tracks (responsive card grids) instead of a fixed count. |
 | `grid_min` | unit-input | `''` | e.g. `240px` (`px rem em %`) | Min track width when `grid_autofit:yes`. |
@@ -72,7 +73,9 @@ keep their values.
 |---|---|---|---|---|
 | `width` | responsive popover | `{base:{preset:'none'},…}` | `{preset:'none'\|'1'..'12'\|'1_5'..'4_5'\|'fit'\|'max'\|'min'\|'custom', custom?:{width_custom}}` | This box's own width in a parent Flexbox, or its **grid span** in a Grid parent (fractions `1`=1/12 … `12`=1/1; fifths; content keywords; `custom` → unit-input). |
 | `flex_grow` | responsive switch | `{base:'no',…}` | `yes` \| `no` | Grow to absorb free space (flex). |
+| `flex_grow_num` | text | `''` | a number, e.g. `2` | **Advanced** exact `flex-grow` factor; overrides the `flex_grow` switch when set and emits a scoped `flex-grow:N !important` (all breakpoints). Blank = use the switch. |
 | `no_shrink` | responsive switch | `{base:'no',…}` | `yes` \| `no` | Prevent shrinking (`flex-shrink:0`). |
+| `flex_shrink_num` | text | `''` | a number, e.g. `0` | **Advanced** exact `flex-shrink` factor; overrides `no_shrink` when set and emits a scoped `flex-shrink:N !important` (all breakpoints). Blank = use the switch. |
 | `flex_basis` | responsive unit-input | `{base:{value:'',unit:'px'},…}` | units `px rem % vw` | Starting size before grow/shrink (`flex-basis`). Unlike `width` (a hard fixed size) this composes with `flex_grow` — the `flex: 1 1 300px` card pattern (`flex_basis` 300px + `flex_grow` on + a `min_width`). Scoped rule on the box's `fx-*` class. |
 | `min_width` | responsive unit-input | `{base:{value:'',unit:'px'},…}` | units `px rem % vw` | Smallest the box may shrink to (`min-width`). Stops a flexible box collapsing and forces a card grid to wrap. Scoped rule on the box's `fx-*` class. |
 | `align_self` | responsive image-picker | `{base:'',…}` | `''` `start` `center` `end` `stretch` `baseline` | Override the parent's cross-axis align for just this box. |
@@ -100,6 +103,9 @@ keep their values.
 | `backdrop_blur` | unit-input | `{value:'',unit:'px'}` | units `px rem` | **Glass.** Frosted-glass blur of what shows through the box (`backdrop-filter:blur()` + `-webkit-`). Needs a translucent `background` to reveal. Empty/0 = off. Scoped rule on the box's `fx-*` class. Site-wide default lives in the theme `--glass-*` token / `.glass-surface` utility. |
 | `min_height` | responsive unit-input | `{base:{value:'',unit:'vh'},…}` | units `vh px rem %` | Minimum height. Pair with `align_items:center` for a hero band. |
 | `aspect_ratio` | text | `''` | e.g. `16 / 9`, `1` | Lock the box to a width : height ratio (`aspect-ratio`). |
+| `height` | responsive unit-input | `{base:{value:'',unit:'px'},…}` | units `px rem vh %` | Fixed `height` (empty = fit content; prefer `min_height` for bands). Scoped rule on the box's `fx-*` class. |
+| `max_width` | responsive unit-input | `{base:{value:'',unit:'px'},…}` | units `px rem ch % vw` | `max-width` cap (e.g. `65ch` for readable text), independent of the Width Override. Scoped rule. |
+| `max_height` | responsive unit-input | `{base:{value:'',unit:'px'},…}` | units `px rem vh %` | `max-height` cap; pair with Overflow (Advanced tab) = Auto to scroll an over-tall box. Scoped rule. |
 | `text_align` | alignment field | `''` (Inherit) | `''` `left` `center` `right` (+ justify) | Text alignment of inline/text content (`text-*` utility) — applies to **any** tag. |
 | `spacing` | spacing block | see `README.md` | margin/padding scale classes | Per-Div margin/padding (spacing-scale utilities). |
 

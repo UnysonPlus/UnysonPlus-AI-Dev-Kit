@@ -7,6 +7,11 @@ You describe the page as a tree of **Div** layout primitives (`upw_div_section` 
 `upw_flexbox` → elements) — the modern default — or the classic `upw_section`/`upw_column` grid, as a
 PHP array, and call `upw_build_page()`; it stores the value the way the builder itself does.
 
+**Prerequisite:** the **Page Builder** extension (with its parent **Shortcodes**) must be active — it is
+not in the core-only plugin zip; download it from **Unyson+ → Extensions**. Elements that belong to other
+extensions (`contact_form` → Forms, `portfolio` → Portfolio, the Animation Engine's elements, …) need
+those active too, or their nodes render as raw shortcode text.
+
 Helpers live in **`tools/upw-build-pages.php`**. This is the *mechanical* how-to. For the end-to-end
 "turn a prompt into a site" workflow, see **[build-reference.md](build-reference.md)**.
 
@@ -17,7 +22,7 @@ Helpers live in **`tools/upw-build-pages.php`**. This is the *mechanical* how-to
 > factory — re-derives values the captured classes already encode and drifts from the source. If a source
 > exists, run the converter and follow [`site-build-protocol.md`](site-build-protocol.md) Rule 0; the
 > `.mjs` factory is only an *import format* seeded from the converter's output, never a licence to
-> hand-measure. (This is the exact loophole that shipped the pinky-bites heading with a wrong emoji + mis-
+> hand-measure. (This is the exact loophole that shipped a converted heading (fixture-01) with a wrong emoji + mis-
 > measured gaps.)
 
 ## Quick start
@@ -28,18 +33,22 @@ A page spec is ~15 lines:
 <?php
 require __DIR__ . '/upw-build-pages.php'; // spec beside the lib; else an absolute path to your kit clone
 
+$stack = array('direction' => array('base'=>'column','md'=>'','lg'=>''));   // a Flexbox defaults to ROW
+
 $page = array(
   // Modern Div-first: a <section> band (contained), holding a 2-column Grid of cells.
   upw_div_section(array(
     upw_grid(array(
-      upw_flexbox(array(   // left cell (groups its own content)
+      upw_flexbox(array(   // left cell — stacked, so the heading sits ABOVE the text, not beside it
         upw_element('special_heading', array('title'=>'Welcome','heading'=>'h1','alignment'=>'left',
           'scroll_keyframes'=> upw_skf(array('y'=>60,'opacity'=>0), null, array())) ),   // fade-up on scroll
         upw_element('text_block', array('text'=>'<p>Intro copy.</p>')),
-      )),
+      ), $stack),
       upw_flexbox(array(   // right cell
-        upw_element('image', array()),  // fill via Media Library / attachment id
-      )),
+        upw_element('media_image', array(   // the image element's tag is media_image, NOT image
+          'image' => array('attachment_id'=>'', 'url'=>'https://example.com/photo.jpg'),   // or a real attachment id
+        )),
+      ), $stack),
     ), 2),   // 2 equal columns; use '1fr 2fr' for an uneven split
   )),
 );
@@ -64,10 +73,10 @@ curl -s <your-site>/<slug>/ | grep -c  'scroll-keyframes.js' # >0 (the effect ru
 
 | Helper | Builds |
 | --- | --- |
-| `upw_element($shortcode, $atts)` | a leaf node (`special_heading`, `text_block`, `button`, `image`, `counter`, `icon_box`, …), auto `unique_id`. |
+| `upw_element($shortcode, $atts)` | a leaf node (`special_heading`, `text_block`, `button`, `media_image`, `counter`, `icon_box`, …), auto `unique_id`. `$shortcode` is the **registered tag** (the `docs/shortcodes/<file>.md` title) — e.g. the Image element is `media_image`; an unregistered tag such as `image` renders as literal `[image]` text. |
 | **`upw_div_section($items, $atts=[])`** | **(modern default)** a `<section>` band — a Flexbox **Div**, content contained to the site width. Children (elements or nested Divs) go straight in `$items`. The Div-first replacement for `upw_section`. |
 | **`upw_grid($items, $cols=3, $atts=[])`** | **(modern)** a **Grid** Div — columns. `$cols` = a number (equal columns) or a raw `grid-template-columns` value (`'1fr 2fr'` for 1/3 + 2/3). Children flow into the tracks; group a cell's content in a `upw_flexbox`. |
-| **`upw_flexbox($items, $atts=[])`** | **(modern)** a **Flexbox** Div — a 1-D row/stack, or a grid cell. `$atts`: `html_tag` (`div`/`section`/…), `display` (`flex`/`grid`/`block`), `grid_columns`, `content_width`, `width` (a grid-cell span). |
+| **`upw_flexbox($items, $atts=[])`** | **(modern)** a **Flexbox** Div — a 1-D row/stack, or a grid cell. `$atts`: `html_tag` (`div`/`section`/…), `display` (`flex`/`grid`/`block`), `direction` (responsive `{base,md,lg}`, `row` default / `column`), `grid_columns`, `content_width`, `width` (a grid-cell span). **Direction defaults to `row`**, so children sit side by side — pass `'direction'=>array('base'=>'column','md'=>'','lg'=>'')` for a stacked cell (heading above text), or `'display'=>'block'` for plain flow. |
 | `upw_section($columns, $atts=[])` | *classic (Bootstrap grid)* — a section wrapping `upw_column`s. Still fully supported; prefer `upw_div_section` for new pages. |
 | `upw_column($width, $items, $atts=[])` | *classic* — a column inside a `upw_section`; widths `1_1`,`1_2`,`1_3`,`2_3`,`1_4`,`3_4`,`1_5`,`5_6`,… |
 | `upw_spacer($vh)` | a tall empty section — gives scroll-driven effects room to travel. |

@@ -29,7 +29,7 @@
  *         'scroll_keyframes'=> upw_skf(array('y'=>60,'opacity'=>0), null, array())) ),
  *       upw_element('text_block', array('text'=>'<p>Intro copy.</p>')),
  *     )), upw_column('1_2', array(
- *       upw_element('image', array()),  // fill via Media Library / attachment id
+ *       upw_element('media_image', array()),  // the Image element's tag is media_image (not image)
  *     ))),
  *   );
  *   echo upw_build_page('about', 'About Us', $page);   // slug (created if missing) or numeric ID
@@ -40,7 +40,7 @@
 
 if ( ! function_exists( 'upw_element' ) ) :
 
-/** A leaf element. $shortcode e.g. 'special_heading','text_block','button','image','counter','icon_box'. */
+/** A leaf element. $shortcode = the registered tag, e.g. 'special_heading','text_block','button','media_image','counter','icon_box'. */
 function upw_element( $shortcode, $atts = array() ) {
 	if ( ! isset( $atts['unique_id'] ) ) {
 		$atts['unique_id'] = substr( md5( $shortcode . wp_json_encode( $atts ) . mt_rand() ), 0, 13 );

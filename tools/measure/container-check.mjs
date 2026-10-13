@@ -7,7 +7,7 @@
 // element inside inherits the deficit. Content width, not max-width, is what must match the source.
 //
 // Usage:
-//   node container-check.mjs <buildUrl> <expectedPx>            e.g. … http://localhost/demos/pinky-bites/ 1280
+//   node container-check.mjs <buildUrl> <expectedPx>            e.g. … http://localhost/demos/<demo>/ 1280
 //   node container-check.mjs <buildUrl> <sourceUrl>             measures the source's container too
 //   node container-check.mjs <buildUrl> <target> <selector>    override the container selector
 //     (default tries the page-builder section container, then any .fw-container/.container)
@@ -120,13 +120,26 @@ async function measuredContentWidth(page, url) {
 const b = await launchBrowser();
 const page = await b.newPage({ viewport: { width: 1440, height: 1000 } });
 
-let build = await contentWidth(page, buildUrl);
-if (!build) { build = await measuredContentWidth(page, buildUrl); }
 const isUrl = /^https?:\/\//i.test(target);
+
+// COMPARE LIKE WITH LIKE. The class-matched path returns the page's single widest matching container and
+// no per-band breakdown; the measured path returns one row per band. Mixing them is a mismatched pair, and
+// it shipped a false reading: on a source whose bands run 1360/1344/viewport-wide, the build was measured
+// by class -- which finds the HEADER's container, the widest on the page -- and the source per band, and
+// the tool reported "+16px" about two different boxes. When both sides are URLs, both are now measured the
+// SAME way, and the class-matched number is kept only as a footnote.
+let build = isUrl ? await measuredContentWidth(page, buildUrl) : await contentWidth(page, buildUrl);
+let buildByClass = null;
+if (isUrl) {
+  buildByClass = await contentWidth(page, buildUrl);
+  if (!build) { build = buildByClass; }
+} else if (!build) {
+  build = await measuredContentWidth(page, buildUrl);
+}
 let expected, srcInfo = null;
 if (isUrl) {
-  srcInfo = await contentWidth(page, target);
-  if (!srcInfo) { srcInfo = await measuredContentWidth(page, target); }
+  srcInfo = await measuredContentWidth(page, target);
+  if (!srcInfo) { srcInfo = await contentWidth(page, target); }
   expected = srcInfo ? srcInfo.content : null;
 }
 else { expected = Math.round(parseFloat(target)); }
@@ -141,6 +154,9 @@ console.log(`\nContainer content-width check`);
 console.log(`  build   : ${build.content}px content  (outer ${build.outer}px − gutter ${build.pad}px · max-width ${build.maxWidth} · .${build.cls})`);
 if (srcInfo) console.log(`  source  : ${srcInfo.content}px content  (outer ${srcInfo.outer}px − gutter ${srcInfo.pad}px · max-width ${srcInfo.maxWidth})`);
 else console.log(`  expected: ${expected}px content`);
+if (buildByClass && build && buildByClass.content !== build.content) {
+  console.log(`  (the build's named container measures ${buildByClass.content}px content on .${buildByClass.cls} - a PAGE-WIDE widest match, not comparable to a per-band source number)`);
+}
 const showDist = (label, info) => {
   if (!info || !info.dist || info.dist.length < 2) return;
   console.log(`  ${label} widths : ` + info.dist.slice(0, 4).map((d) => d.content + 'px x' + d.sections).join('  ') + (info.dist.length > 4 ? '  ...' : ''));

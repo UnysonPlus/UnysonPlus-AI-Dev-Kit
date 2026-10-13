@@ -1,12 +1,12 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # elementor extension
 
-Unyson+ elements as native Elementor widgets, edited in Elementor's own side panel (Content / Style / Advanced tabs, live preview, undo, global colours). Every widget renders through its shortcode's own view, so the output is the same markup the page builder produces. **Active by default:** no (inert unless Elementor is active). **Requires:** `shortcodes`. Version: 1.0.4. **53 widgets** (35 content + 18 WooCommerce) — the content elements; layout (section / row / column / container) and plain text (text block, heading, button) are left to Elementor's own widgets.
+Unyson+ elements as native Elementor widgets, edited in Elementor's own side panel (Content / Style / Advanced tabs, live preview, undo, global colours). Every widget renders through its shortcode's own view, so the output is the same markup the page builder produces. **Active by default:** no (inert unless Elementor is active). **Requires:** `shortcodes`. Version: 1.0.6. **64 widgets** (35 content + 18 WooCommerce + 11 Animation Engine) — the content elements; layout (section / row / column / container) and plain text (text block, heading, button) are left to Elementor's own widgets.
 
 ## Provides
 
-- **Panel category "Unyson+"** (`unysonplus`) holding the widgets.
-- **Settings** (Unyson+ → Extensions → Elementor Widgets): **Hide locked Pro widgets** (`hide_pro_promos`, default `yes`). With Elementor Pro inactive it removes the locked Pro tiles (strips `pro_widgets` from Elementor's cached remote info via the `transient_elementor_remote_info_api_data_<ver>` filter — the editor re-merges them after its public `localize_settings` filter, so that one is useless), and hides Elementor 4's Atomic Form promotion category, any other locked tile and the "Access all Pro widgets" banner with an editor-only stylesheet. Nothing is unregistered.
+- **Panel category "Unyson+"** (`unysonplus`) holding the widgets — placed FIRST in the panel (after Favorites), with **Unyson+ Shop** right after it. Elementor has no API for category order (`add_category()` appends; the document-config filter merges with `array_replace_recursive()`, which keeps key order), so `_action_order_categories()` reorders the elements manager's private `categories` through reflection at priority 999 on `elementor/elements/categories_registered`; any mismatch leaves Elementor's order.
+- **Settings** (Unyson+ → Extensions → Elementor): **Hide locked Pro widgets** (`hide_pro_promos`, default `yes`). With Elementor Pro inactive it removes the locked Pro tiles (strips `pro_widgets` from Elementor's cached remote info via the `transient_elementor_remote_info_api_data_<ver>` filter — the editor re-merges them after its public `localize_settings` filter, so that one is useless), and hides Elementor 4's Atomic Form promotion category, any other locked tile and both "Access all Pro widgets" banners (`#elementor-panel-get-pro-elements-sticky` under the widget list, `.elementor-panel-editor-sticky-promotion` under a widget's settings) with an editor-only stylesheet. Nothing is unregistered.
 - **Widgets** — name = `'up-' . str_replace( '_', '-', $tag )`. **The name is a stable contract** (the Site Converter writes it into saved documents); renaming one is a breaking change.
 
   | Widget | Shortcode | Exposed (sections) | Not exposed |
@@ -47,6 +47,7 @@ Unyson+ elements as native Elementor widgets, edited in Elementor's own side pan
   | `up-contact-form` | `contact_form` | **Fields** (repeater: type, label / title, sub-title, required, placeholder, choices one per line, width), After Submit (email to, subject, store entry, newsletter subscribe), Button & Messages; form layout, field and button styling. | a field's constraints, help text, conditional logic and type-specific settings (date, rating, file) — kept in the field's residue; mailer settings |
   | `up-wc-products`, `up-wc-product`, `up-wc-product-categories`, `up-wc-add-to-cart`, `up-wc-mini-cart`, `up-wc-cart-link`, `up-wc-account`, `up-wc-product-search`, `up-wc-product-filters`, `up-wc-upsells`, `up-wc-wishlist`, `up-wc-compare`, `up-wc-product-page` | the `wc_*` shortcodes (woocommerce extension) | In the **Unyson+ Shop** category (`unysonplus-shop`, registered only when the woocommerce extension is active). Query / layout / Card Rows / rating / badges / add-to-cart for the product lists; product pick (starts on the first product); menu-cart trigger, panel and empty state; search, filters (repeater), upsells, wishlist / compare empty states. | the card wireframe preview; Add to Cart's hover animation picker |
   | `up-wc-cart`, `up-wc-checkout`, `up-wc-my-account`, `up-wc-order-tracking`, `up-wc-free-shipping` | the `wc_*` page shortcodes | No options of their own — the panel shows a note (`no_options_note()`); they follow the WooCommerce settings. | — |
+  | `up-webgl-object`, `up-svg-draw`, `up-svg-morph`, `up-gallery-3d`, `up-parallax-scene`, `up-image-scroll-choreography`, `up-text-scroll-choreography`, `up-interactive-reveal`, `up-image-sequence`, `up-model-viewer`, `up-rive` | the Animation Engine shortcodes | In the **Unyson+ Motion** category (`unysonplus-motion`, registered only when the animation-engine extension is active). Gallery 3D, Parallax Scene, both Choreographies and Interactive Reveal start with placeholder layers; Image Sequence, 3D Model and Rive need a file and show their editor hint until given one. The choreographies are zero-height anchors with a fixed foreground layer — 0px tall is correct. | Gallery 3D's design preview pane and box shadow (residue) |
   | `up-icon-box` | `icon_box` | Content: icon, title, title tag, content; Layout (icon position, three alignments, mobile stack, full height); Link (URL, new tab, rel). Style: Box & Icon (box preset, icon badge preset, icon size, icon colour), Text & Colors. | — |
 
 - **Public API**
@@ -56,11 +57,56 @@ Unyson+ elements as native Elementor widgets, edited in Elementor's own side pan
 - **Filter** `fw_ext_elementor_widgets` — `tag => [ 'file' => …, 'class' => … ]`, the widget registry.
 - **Test** `tests/settings-round-trip-test.php` — every snapshot node with a widget: atts → settings → atts (strict), shortcode vs widget markup (each side in its own process), and a `Document::save()` page rendering on the front end. Run: `php wp-cli.phar --path=<install with Elementor> eval-file <test>`.
 
+## Design Sync
+
+Keeps Unyson+ Theme Settings and Elementor's Site Settings (the active Site Kit) in step: edit either side and the other follows. Formerly the separate `builder-sync` extension (retired in 1.0.10 of this one). The class names (`FW_Builder_Sync_*`, in `lib/sync/`), the `fw_builder_sync_providers` filter and the `fw_builder_sync_ids_<provider>` identity-map options are unchanged.
+
+- **Setting:** **Design Sync → Sync with Theme Settings** (`sync_mode`): `both` (default, two-way) · `to_builder` (Theme Settings → Elementor only) · `off`.
+- **What syncs** (through the neutral design model `FW_Builder_Sync_Design`):
+
+  | Unyson+ Theme Settings | Elementor Site Kit |
+  |---|---|
+  | Color Presets `theme_colors` — Primary / Secondary / Accent | `system_colors` primary / secondary / accent |
+  | the other Color Presets | `custom_colors` |
+  | body text colour `typography.body.color` | `system_colors` text + `body_color` |
+  | `typography.heading_font.family` | `system_typography` primary (family) |
+  | `typography.body` (family, weight, size, line height, letter spacing) | `system_typography` text + `body_typography_*` |
+  | `typography.h1` … `h6` | `h1_typography_*` … `h6_typography_*`, `h1_color` … |
+  | `typography.body_link` / `body_link_hover` | `link_normal_color` / `link_hover_color` |
+  | `layout_container_width` lg / md | `container_width` / `container_width_tablet` |
+  | `site_background` colour layer | `body_background_background` classic + `body_background_color` |
+  | the primary Button Preset (`role`/slug `primary`, else the first) — text, background, border, hover | `button_text_color`, `button_background_*`, `button_border_*`, `button_hover_*` |
+  | Text Styles `font_sizes` | `custom_typography` |
+
+- **Public API:** `fw_ext( 'elementor' )->sync_push( $slug = '' )` (Theme Settings → builder now), `->sync_pull( $slug )` (builder → Theme Settings now), `->get_sync_providers()`, `->sync_mode()`, and the static `FW_Extension_Elementor::load_sync()` (loads the classes without the extension booted — the Site Converter uses it in the request that activates the extension).
+- **Filter:** `fw_builder_sync_providers` — register a provider (`FW_Builder_Sync_Provider` subclass: `slug`, `label`, `is_available`, `push( $design )`, `pull()`, `listen( $on_saved )`).
+- **Migration from Builder Sync:** `_migrate_builder_sync()` (once, on `admin_init`, flag `fw_elementor_sync_migrated`) copies the old `mode` into `sync_mode` and removes `builder-sync` from `fw_active_extensions`. Until it runs, a still-active Builder Sync owns the sync and this one stands aside (`legacy_sync_active()`), and the sync classes are only loaded when not already declared — both copies define the same class names. The catalogue keeps a hidden (`display => false`) `builder-sync` entry.
+
+### Design Sync notes / gotchas
+
+- **Triggers:** Theme Settings saved (`fw_settings_form_saved`) → push; the active kit saved in Elementor (`elementor/document/after_save`) → pull. A static busy flag blocks the echo; a push writes the kit meta directly and a pull writes Theme Settings directly, so neither fires the other's save event anyway.
+- **The kit is written as one meta update + `files_manager->clear_cache()`** — what `Kit::save()` does — not through `Document::update_settings()`, whose `array_replace_recursive()` merges lists by index and would leave a deleted colour behind.
+- **Renames survive:** Unyson+ derives a colour's slug from its name, Elementor keeps a stable `_id`. The identity map (`fw_builder_sync_ids_elementor` option: slug → kit id, for colours and Text Styles) lets a colour renamed in Elementor rename the Unyson+ preset **in place** and keep its kit id on the next push. New kit ids are `substr( md5( 'upw-c-' . slug ), 0, 7 )`.
+- **Every heading level is written on a push that carries headings:** a level the design does not define is reset
+  to Elementor's default (an earlier site's uppercase h4 otherwise survived and capitalised the footer's link titles
+  until they overflowed a phone). A push without headings (colours only) leaves them alone.
+- **Layout keys live in `general_layout`:** container width (`general_layout/layout_container_width`) and site background
+  (`general_layout/site_background`) are read and written inside the General → Layout group, where the theme reads them
+  (`unysonplus_theme_vars_build_layout()`); a top-level key reads nothing.
+- **A heading / body style replaces its group:** a push writes every field of `hN_typography_*` / `body_typography_*`
+  and `hN_color`, an unset one as empty (Elementor's default). Merging only the set fields let an earlier site's
+  `text_transform: uppercase` survive the next push and capitalise every heading. Test:
+  `tests/sync-push-replaces-typography-test.php` (restores the kit afterwards).
+- **Lossy by design, never destructive:** a field one side cannot express is left untouched on the other (Text Style colour / custom CSS / class have no Elementor equivalent; Elementor's per-device sizes have no Unyson+ field). A colour deleted in Elementor is **not** deleted from Unyson+ (elements reference presets by slug); Elementor colours / typographies the user added themselves (ids not in the map) are kept on push.
+- **Raw reads:** Theme Settings are read straight from `fw_theme_settings_options:<theme>` (like the preset store), so a sync inside a save hook never re-enters the option schema. Colour Presets and Text Styles write through `unysonplus_preset_store_set()`.
+- **Known gap:** both sides may enqueue the same Google font (Elementor for its global typography, the theme for Theme Settings) — a double download, not a visual difference.
+- **Editor caching:** an open Elementor editor shows the old kit until it is reloaded.
+
 ## Adding a widget
 
 One file `widgets/<name>.php` with a class extending `FW_Elementor_Shortcode_Widget`, plus a registry row in `get_widget_files()`:
 
-- `shortcode_tag()`, `get_title()`, `get_icon()` (an `eicon-*`), `get_keywords()`.
+- `shortcode_tag()`, `get_title()`, `fallback_icon()` (an `eicon-*`), `get_keywords()`. Don't override `get_icon()`: the base returns `up-icon up-icon--<widget name>`, which draws the element's own `static/img/page_builder.svg` (its page-builder thumbnail) as a CSS mask in the panel's icon colour. The editor stylesheet (`_action_editor_icons`) emits one `--up-icon` rule per widget. `fallback_icon()` is used only when the element ships no SVG (the Form widget).
 - `sections()` — `[ [ 'id', 'label', 'tab' => 'content'|'style', 'options' => [ option ids ] ], … ]`. Expose option ids from the shortcode's `options.php`; the bridge builds the controls. Leave out the shortcode's Advanced / Animation tabs — Elementor's own Advanced tab covers the wrapper.
 - `control_overrides()` — `path => partial control args` (a starter `default` for a repeater, a `title_field`).
 - If the element has a script, make sure it registers on `window.fwShortcodeInit` (see `../extending.md` → shortcode conventions). `widgets.js` runs every entry on each `up-*` widget Elementor reports ready; there are no per-widget handlers.
@@ -69,9 +115,14 @@ One file `widgets/<name>.php` with a class extending `FW_Elementor_Shortcode_Wid
 
 **Option type → control:** text/short-text → TEXT · textarea → TEXTAREA · wp-editor → WYSIWYG · number/slider → NUMBER · switch → SWITCHER (`return_value` = the right-choice value) · radio/select/short-select/border-style-picker/button-style-picker/table-style-picker/image-style-picker → SELECT · multi-select / checkboxes → SELECT2 multiple (checkboxes stored as `{key: true}` for the ticked keys) · datetime-picker → DATE_TIME (`Y/m/d H:i`, the page builder's format) · popover with one inner option → that option, under the popover's label · image-picker → VISUAL_CHOICE (thumbnails), CHOOSE with align icons (`sc-alignment` pickers), or SELECT (an empty-key choice) · upload → MEDIA · multi-upload → GALLERY (`[{attachment_id, url}]` ↔ `[{id, url}]`) · form-builder → `<name>__fields` REPEATER (see Notes) · table → hidden `<name>__meta` (header options + columns) + `<name>__rows` REPEATER (row type, cells one per line) · color-picker → COLOR · icon → ICONS (font icons both ways; an Elementor SVG pick becomes a `custom-upload` icon; emoji / Lottie / Rive / inline SVG stay in the residue) · unit-input → SLIDER with the option's units (`{value, unit}` ↔ `{size, unit}`) · compact colour → preset SELECT + `<name>__custom` COLOR · multi-inline → one control per part, `<name>__<key>` · addable-popup/box → REPEATER (one level) · multi-picker → picker control + every choice's controls gated by `condition`. Unmapped types (typography, spacing, animation, hidden…) are skipped; they keep the shortcode default, or the value carried in the residue. Control name = option path with `/` → `__`.
 
+## Demo
+
+`/demos/elementor/` (demos network subsite) — Elementor is active on that subsite only. The script is `unysonplus-website/wordpress/demos/4h-elementor-subsite.php` and the homepage builds through `Document::save` in `5i-elementor-content.php`. That build is guarded by `_upw_import_hash`; `UPW_FORCE=1` overwrites. The page is listed as a card on the demos home. When building Elementor documents from code: call `set_is_built_with_elementor(true)`, set a current user under CLI, use container keys `flex_justify_content` / `flex_wrap` / `flex_gap`, and pass empty settings as `[]`, never `stdClass`. Elementor drops a widget that renders empty.
+
 ## Notes / gotchas
 
 - **Residue (`up_extra_atts`, per row `up_item_extra`).** Hidden settings holding whatever the controls cannot carry: unexposed options (unique id, custom CSS, spacing, animations), legacy keys, nested lists, values a control would retype. `build_atts()` = shortcode defaults ← widget id as `unique_id` ← controls ← residue. A `unique_id` carried in from page-builder atts wins, so custom CSS scoped to it keeps matching.
+- **Page CSS.** The page builder writes each element's Custom CSS (scoped to `.u<hash>`) and a rule per off-scale spacing class (`p-[26px]`) into the page stylesheet, built from its saved JSON. An Elementor page has no such JSON, so the `<head>` pass (`_action_document_assets`) builds the same rules from each widget's atts (`FW_Elementor_Shortcode_Widget::page_css()`, reusing `unysonplus_collect_element_css()` + `unysonplus_build_arbitrary_spacing_css()`) and prints them inline in `up-elementor-page`. A widget the pass did not see (the editor, a template, a popup) prints its own `<style>` before its markup. Without this the classes render with no rules behind them.
 - **Never put classes in the extension's `includes/`** — the framework includes every file there at load, before Elementor exists, and `extends \Elementor\Widget_Base` fatals the site. The classes live in `lib/` and load on demand.
 - **A multi-picker's picker needs a default.** It usually declares none (the multi-picker's value carries it); without one no choice's condition is met and Elementor reports every design option as inactive.
 - **Inactive controls come back as `null`** from `get_settings_for_display()`; the bridge leaves them to the shortcode default instead of reading them as "off". For the same reason a compact colour's custom control has no condition.

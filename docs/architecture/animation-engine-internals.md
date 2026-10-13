@@ -5,7 +5,7 @@ Architecture reference for the **Animation Engine** extension — the internals 
 *extending* or *debugging* it, which the per-module docs (hover, scroll-loop, scrollytelling, …)
 don't cover: how modules load, how assets ship on-demand, how a module is gated on/off, how the
 Lenis smooth-scroll instance is shared, and the state the Scrollytelling Stage publishes. The engine
-ships **inactive by default** (the user activates it under Extensions); when active, every symbol
+is not in the core-only plugin zip (the user downloads + activates it under Extensions); when active, every symbol
 below exists.
 
 ## Module loading

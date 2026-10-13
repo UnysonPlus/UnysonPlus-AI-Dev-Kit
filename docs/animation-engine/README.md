@@ -3,8 +3,8 @@
 
 > 📖 **Human manual (live, always current):** [Animation Engine on the UnysonPlus docs](https://unysonplus.github.io/animation-engine) — module pages with live playgrounds. These kit files are the AI-optimized reference; the live manual is the human companion.
 
-The `animation-engine` extension adds motion to elements/sections/site. **It ships INACTIVE** —
-activate it in Unyson+ → Extensions before any of this renders. One file per module here; open the
+The `animation-engine` extension adds motion to elements/sections/site. **It is not in the core-only
+plugin zip** — download + activate it in Unyson+ → Extensions before any of this renders. One file per module here; open the
 one you need.
 
 Most effects ride the shared **`fx` block** on a page-builder node (see `../shortcodes/README.md`):

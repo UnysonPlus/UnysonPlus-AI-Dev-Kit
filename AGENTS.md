@@ -169,10 +169,10 @@ guessing a per-page slug.)
 | `docs/theme-settings/README.md` | **Every** Theme Settings option catalogued (Colors/Typography/Layout/Header/Footer/Site-UX/Misc/Blog/Pages). Configure the design from these — do **not** reach for CSS first. Bespoke CSS goes in Misc → Custom CSS (`misc_custom_css`). |
 | `docs/shortcodes/` | Per-shortcode **atts reference** — the page-builder JSON shape for each shortcode, + the node-model in `README.md` (section/column/leaf, shared wrapper blocks). **Read these instead of plugin source** to generate builder JSON. |
 | `docs/option-types/` | Per-option-type **value shapes** (multi-picker, background-pro, compact color, typography, unit-input, …) — the exact JSON to store for any option/att. |
-| `docs/animation-engine/` | Per-**module** effect shapes (hover, text-effects, scroll-motion, parallax, …) — the `fx`-block JSON to animate a node. Extension ships inactive. |
-| `docs/extensions/` | One **overview** per plugin extension (what it is, active-by-default, what it provides) — cross-links to the granular refs. |
+| `docs/animation-engine/` | Per-**module** effect shapes (hover, text-effects, scroll-motion, parallax, …) — the `fx`-block JSON to animate a node. The extension is not in the core-only zip — download + activate it from Unyson+ → Extensions. |
+| `docs/extensions/` | One **overview** per plugin extension (what it is, how you get it — in the core zip or downloaded from **Unyson+ → Extensions** — and what it provides) — cross-links to the granular refs. |
 | `docs/build-reference.md` | The metric set + the measurement algorithm (mockup ⟷ dev, ±2px tolerance). |
-| `assembled/unysonplus-theme-child/` | The **child-theme starter** you copy + rename per site. Ships a polished-chrome `design/design.json` so header/footer/container are ~90% right on activation. |
+| `samples/sample-child-theme/` | The **child-theme starter** (tracked in this repo) you copy + rename per site: a `style.css` header (`Template: unysonplus-theme`) over an empty stylesheet that loads last, a `functions.php` with a guarded child-style enqueue + commented reference blocks (fonts, shipped shortcodes, template overrides), and an empty `framework-customizations/extensions/shortcodes/shortcodes/` folder for bespoke elements. It ships **no** design file and **no** chrome CSS — the look comes from Theme Settings, which a child theme shares with its parent. (`assembled/unysonplus-theme-child/` is gitignored and empty in a fresh clone — don't look for the starter there.) |
 | `tools/measure/measure.mjs` | The frame-metric harness (container/header/logo/footer/type). Run after every change. |
 | `tools/measure/compare.mjs` | Region-by-region **ensemble** — header↔header, each section↔section, footer↔footer, scored by geometry + pixelmatch + Resemble.js + a DOM-structure diff (fail-loud). |
 | `tools/measure/props.mjs` | Full-body **property diff** — walks both bodies, matches elements by text/region, reports NAMED computed-style deltas (caught the site-wide Inter→Open Sans miss). |
@@ -212,29 +212,31 @@ WordPress with the UnysonPlus plugin AND the unysonplus-theme parent active** �
 - **Verify:** the URL loads; the plugin + parent theme are active (`wp plugin list` / `wp theme list`
   via wp-cli, or the admin). With `wp-env`, use `npx @wordpress/env run cli wp …`.
 - **If nothing is set up:** run the kit's paved path — `pwsh assemble.ps1 -Source github` (fetches the
-  **full plugin** from the latest release + the parent theme) then `npx @wordpress/env start` (boots
+  plugin's **core-only** release zip + the parent theme) then `npx @wordpress/env start` (boots
   WordPress at `http://localhost:8888` with both active). Then use `http://localhost:8888/` as the dev
   URL. If the user already has their own WordPress, point them at **README.md → "First: a WordPress
   to build into" → Option B** to install the plugin + theme, and use their site URL instead.
-- **Classic Editor is required too — ACTIVATE it as a setup step (the plugin only NOTIFIES).** Unyson's
-  page builder + meta boxes need the classic editor, not Gutenberg. The UnysonPlus plugin deliberately
-  does **not** force-disable the block editor (a user may want to run UnysonPlus without Classic Editor) —
-  it just shows an admin *notice* recommending it. So **it is the SETUP's job (yours) to activate it** on
-  every site/demo you provision, up front, before building:
-  - **Single site (BYO / wp-env):** `wp plugin install classic-editor --activate` (or Plugins → Add New).
-    `wp-env` installs it via `.wp-env.json`.
-  - **Multisite / a demo subsite (the demos network):** network-install once, then activate for the
-    subsite — `wp plugin install classic-editor && wp plugin activate classic-editor --url=<subsite-url>`
-    (or `--network`). Do this when you create the subsite, alongside activating the extensions + theme.
-  Skipping it lands the page on Gutenberg and the builder won't work — this is the "classic editor wasn't
-  active" symptom. Never assume a fresh WordPress / new subsite already has it; activate it explicitly.
-- **For a CONVERSION, also activate the Site Converter extension.** It ships **inactive by default**, so
-  enable it under **Unyson+ → Extensions → Site Converter** before you convert — otherwise the
-  "Unyson+ → Convert" screen (the PHP file-upload path) won't exist. A fresh build doesn't need it.
-- **Critical:** the plugin MUST be the **release bundle / assembled `./unysonplus`** (all 22 extensions).
-  A `git clone` of the `UnysonPlus` repo is **core-only** (blog + update) — it activates cleanly but has
-  **no page builder and no shortcodes**, so nothing can be built. Never install the site from a clone of
-  the core repo.
+- **No Classic Editor plugin needed — do NOT install it.** Unyson+ is self-sufficient: the Page Builder's
+  hidden **Page Editor** child extension turns the block editor off (core `use_block_editor_for_post_type`
+  → false) and serves WordPress's own classic edit screen, where the builder mounts, for every post type.
+  It is active whenever the Page Builder is. Post types ticked under Page Builder settings → "Keep the block
+  editor for" stay on Gutenberg. So setup is just WordPress + the Unyson+ plugin + the parent theme
+  + the extensions below.
+- **Critical — the release zip is CORE-ONLY; download the extensions you need.** The public
+  `unysonplus.zip` holds the core framework + only the **`blog`** and **`update`** extensions. **Every
+  other extension** — Page Builder + Shortcodes (nothing can be built without them), Forms, Theme
+  Builder, Custom Fields, SEO, Animation Engine, Site Converter, … — is **downloaded and activated from
+  Unyson+ → Extensions** (the Extensions manager; a download also pulls in its parent and required
+  extensions, e.g. Page Builder brings Shortcodes + Builder). With the parent theme already active,
+  activating the plugin in wp-admin opens an **Install Compatible Extensions** screen for the theme's
+  recommended set (Page Builder, WordPress Shortcodes, Theme Builder, Asset Optimizer, Live Editor,
+  Snippets, SEO) — accept it. When the plugin was activated from the CLI (wp-env) there is no redirect:
+  open Unyson+ → Extensions and install them. **Confirm Page Builder + Shortcodes are active before
+  building.** Install from the release asset `unysonplus.zip`, never from GitHub's "Source code (zip)" /
+  a clone of the core repo (wrong folder name, and it is the same core-only set).
+- **For a CONVERSION, also download + activate the Site Converter extension** under **Unyson+ →
+  Extensions → Site Converter** before you convert — otherwise the "Unyson+ → Convert" screen (the PHP
+  file-upload path) won't exist. A fresh build doesn't need it.
 
 Only once WP + plugin + parent theme are confirmed active do you start the process below.
 
@@ -427,8 +429,8 @@ finished — open the page and look at the thing you changed.
 ## Hard rules
 
 - **Native options before CSS.** If a look is achievable via a Theme Settings
-  option, use it. Only fall back to the child theme's `assets/chrome.css` for
-  things no option covers, and record those as enhancement candidates.
+  option, use it. Only fall back to CSS — Theme Settings → Misc → Custom CSS (`misc_custom_css`) or
+  the child theme's `style.css` — for things no option covers, and record those as enhancement candidates.
 - **Don't hand-edit the assembled folders** (`assembled/unysonplus/`, `assembled/unysonplus-theme/`).
   Edit the working-copy sources (the plugin/theme repos, siblings of this kit — see
   `assemble.ps1 -WorkDevRoot`) and re-`assemble`.
@@ -436,8 +438,8 @@ finished — open the page and look at the thing you changed.
   refresh harness deps) so you build against the latest plugin/theme/playbook, not a
   stale snapshot; `pwsh update.ps1 -Check` reports whether updates exist without changing
   anything.
-- **Per-site work happens in a copy of `assembled/unysonplus-theme-child/`**, renamed to the
-  site slug.
+- **Per-site work happens in a copy of `samples/sample-child-theme/`**, renamed to the
+  site slug (procedure in its `README.md`).
 - Keep this kit's docs and the two conversion repos **in sync** — a standard added
   here should be reflected there and vice-versa.
 - **A converter finding is a MEASURED TUPLE, never a free-text note (ENFORCED).** When the built page
@@ -450,7 +452,7 @@ finished — open the page and look at the thing you changed.
   → "How to report a discrepancy". A symptom ("headings look wrong") without those cannot be reproduced
   and is dropped at triage.
 - **Prove a converter miss in a SANDBOX, then report the repro — never the site patch.** When the built page
-  differs from the source: (1) fix the LOOK for the client in your site copy's child theme (`assets/chrome.css`)
+  differs from the source: (1) fix the LOOK for the client in your site copy's child theme (its `style.css`)
   — that is where a per-site fix belongs and it is never reported; (2) in a scratch folder OUTSIDE this kit
   (the assembled folders are overwritten by `update.ps1`), cut the failing construct out of the capture with
   `node make-fixture.mjs capture-out/<site> "<selector>"` (a stamped, brand-scrubbed `fixture.html`), run it

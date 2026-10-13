@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # update extension
 
-Keeps the framework, extensions, and theme up to date — the update-service backbone for in-place upgrades. **Active by default:** no (not in the theme's `supported_extensions`; it's an infrastructure extension). Version: 1.0.19.
+Keeps the framework, extensions, and theme up to date — the update-service backbone for in-place upgrades. **How you get it:** ships **in the core-only plugin zip** (one of only two extensions that do, with `blog`); not in the theme's `supported_extensions` — an infrastructure extension. Version: 1.0.20.
 
 ## Provides
 
@@ -12,6 +12,6 @@ Keeps the framework, extensions, and theme up to date — the update-service bac
 
 ## Notes / gotchas
 
-- **Distinct from the plugin's own release delivery.** The whole UnysonPlus plugin ships as one GitHub-release ZIP delivered by the **Plugin Update Checker in `unysonplus.php`** (keyed off the **core** `Version:`), not by this extension — per-extension update checking is disabled. This extension is the generic Unyson update framework; the core version gate is what actually ships changes to live sites.
+- **Distinct from the plugin's own release delivery.** The core plugin ships as one **core-only** GitHub-release ZIP (`unysonplus.zip`: framework + `blog` + this `update` extension) delivered by the **Plugin Update Checker in `unysonplus.php`** (keyed off the **core** `Version:`), not by this extension. Every other extension is downloaded through the **Extensions manager** (Unyson+ → Extensions) from its own `UnysonPlus-<Name>-Extension` repo's tagged release. This extension is the generic Unyson update framework; the core version gate is what actually ships changes to live sites.
 - Each extension/theme opts into updates via its manifest `github_update` (`UnysonPlus/UnysonPlus-<Name>-Extension`).
 - Never downgrade a version number — it breaks the auto-updater's cached update state.

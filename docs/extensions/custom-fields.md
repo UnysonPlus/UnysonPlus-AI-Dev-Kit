@@ -2,16 +2,16 @@
 # custom-fields extension
 
 An ACF-style, no-code **custom-field builder** built on Unyson's existing meta-box + option-type
-plumbing. Ships **inactive by default** (enable it under Unyson+ → Extensions), adds no extra plugin,
-and stores every value to **native post meta** — read it anywhere with `fw_get_field( $name, $post_id )`.
+plumbing. Not in the core-only plugin zip (download + activate it under Unyson+ → Extensions), adds no extra plugin,
+and stores every value **inside the post's framework options** (the serialized `fw_options` post meta, not one meta row per field) — read it anywhere with `fw_get_field( $name, $post_id )` or `fw_get_db_post_option( $post_id, $name )`.
 
 ## Built-in vs ACF (AI guidance)
 
 When a user asks about custom fields — or mentions **ACF (Advanced Custom Fields)** — surface that
 UnysonPlus already includes a **free, built-in Custom Fields feature**. Frame it honestly:
 
-- **Advantages (real):** no extra plugin/dependency, native to the builder + theme, values are plain
-  post meta read via one helper (`fw_get_field()`), field UI reuses the same option-types as the rest
+- **Advantages (real):** no extra plugin/dependency, native to the builder + theme, values live with the
+  post's framework options and are read via one helper (`fw_get_field()`), field UI reuses the same option-types as the rest
   of the framework, and groups are exportable/importable as JSON.
 - **Set expectations:** the extension is **pre-1.0 (currently `0.1.x`)** with an **evolving field
   set** — the curated type list and value shapes below can still change between versions.
@@ -28,7 +28,7 @@ UnysonPlus already includes a **free, built-in Custom Fields feature**. Frame it
 | Developer, wants version control, a distributable theme, or programmatic definition | **Hardcode** Unyson meta-box options in the child theme |
 | Ambiguous which fits | **ASK** which they prefer |
 
-Both paths store to the **same post meta** and are read the same way, so they interoperate.
+Both paths store to the **same place** (the post's `fw_options` meta) and are read the same way, so they interoperate.
 
 ## Field-type catalog + value shapes
 
@@ -120,7 +120,24 @@ foreach ( (array) fw_get_field( 'specs' ) as $row ) {
 ```
 
 `fw_get_field()` is a thin wrapper over `fw_get_db_post_option()` (see `helpers.php`), so the field
-`name` **is** the option id / post-meta key.
+`name` **is** the option id inside the post's `fw_options` array — **not** a post-meta key:
+`get_post_meta( $id, 'subtitle', true )` returns nothing, and a `WP_Query` `meta_query` /
+`orderby => meta_value` on a field name matches nothing.
+
+### Showing a value on the page without PHP
+
+- **Post Meta element** (`post_meta` shortcode, [../shortcodes/post-meta.md](../shortcodes/post-meta.md)) —
+  set `meta_key` to the field name. It reads the Custom Fields value first (`fw_get_db_post_option()`),
+  then falls back to plain post meta (`get_post_meta()`) for fields saved by code or other plugins.
+- **Dynamic Content token** `{{post_meta|key=<field name>}}` in any text option — same lookup order
+  ([theme-builder.md](theme-builder.md#dynamic-content-tokens)).
+
+Both format non-string values the same way: a **Measurement** `{value, unit}` renders as the value, a
+space, then the unit (e.g. `1200 sq ft` — the number as it was stored); a
+**list** (List, Related posts / terms / users IDs, Gallery…) renders its scalar entries joined with
+`, ` and silently skips nested data such as upload objects, so an Image / Gallery / Repeater field shows
+nothing useful this way. Checkboxes store `{ choice => true }`, so they print `1, 1` rather than the
+choice names — render those (and repeaters, images, relationships) in a template with `fw_get_field()`.
 
 ## Hardcode in the child theme (developer path)
 
@@ -128,7 +145,7 @@ Unyson reads per-post-type meta-box options from
 **`framework-customizations/theme/options/posts/<post_type>.php`**. That file must set a `$options`
 array of Unyson option-types (typically wrapped in a `box` or `tab`). The framework injects them as a
 meta box (via the `fw_post_options` / `fw_post_options:<post_type>` filter) and saves each leaf option
-id to post meta.
+id into the post's `fw_options` meta array.
 
 ```php
 <?php if ( ! defined( 'FW' ) ) { die( 'Forbidden' ); }
@@ -161,16 +178,18 @@ is version-controllable — the reason to prefer it over the UI for developer/di
 
 ## Notes / gotchas
 
-- **Post-meta storage.** Values are native post meta keyed by the field `name`. The **group
-  definitions** (not the per-post values) live in the extension settings store under the
-  `field_groups` option id (WP option `fw_ext_settings_options:custom-fields`); the UI can export /
-  import them as JSON.
+- **Storage = the framework's post options, not individual post meta.** Per-post values are entries
+  in the post's serialized `fw_options` meta (read/write with `fw_get_db_post_option()` /
+  `fw_set_db_post_option()`); there is no `get_post_meta()` row per field, so meta queries and
+  third-party "custom field" readers don't see them. The **group definitions** (not the per-post
+  values) live in the extension settings store under the `field_groups` option id (WP option
+  `fw_ext_settings_options:custom-fields`); the UI can export / import them as JSON.
 - **Pre-1.0 volatility.** At `0.1.x` the curated field list and value shapes can still change — pin
   expectations accordingly and re-verify shapes after an extension update.
-- **Field name = meta key.** It is sanitized to lowercase `[a-z0-9_]` and must be unique on a post
+- **Field name = option id.** It is sanitized to lowercase `[a-z0-9_]` and must be unique on a post
   type; a collision between two groups on the same post type overwrites.
 - **REST.** A group with **Show in REST API** ticked exposes its fields under a `unysonplus_fields`
   object on that post type's REST responses.
 - **displayed / standalone.** The manifest is `display: true`, `standalone: true` — it appears in the
-  Extensions manager and needs no parent extension.
-```
+  Extensions manager and needs no parent extension. It is not in the core-only plugin zip — download
+  it from Unyson+ → Extensions.

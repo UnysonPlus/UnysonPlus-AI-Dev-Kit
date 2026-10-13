@@ -19,7 +19,7 @@ A data-driven query grid: pulls content from the WordPress post DB (`WP_Query`) 
 | `orderby` | select | `'date'` | `date` `modified` `title` `rand` `comment_count` `menu_order` `meta_value_num` | Sort key. |
 | `meta_key` | text | `''` | string | Required for `meta_value_num` ordering. |
 | `order` | radio | `'DESC'` | `DESC` `ASC` | Sort direction. |
-| `exclude_current` | switch | `'yes'` | `'yes'` \| `'no'` | Hide the post being viewed (for "Related"). |
+| `exclude_current` | switch | `'yes'` | `'yes'` \| `'no'` | Hide the post being viewed (for "Related" / "Similar jobs"). Works inside a Theme Builder single layout too (it excludes the queried post, not the layout). Before Shortcodes 1.15.70 this and the element's other yes/no switches (`equal_height`, `slider_autoplay`, `slider_loop`, `live_filters`, `cache_output`) had no `yes`/`no` choices, so they always read as off; values saved as `true`/`false` back then are now read correctly (`sc_posts_switch_atts()`). |
 | `sticky_handling` | select | `'default'` | `default` `pin_top` `ignore` `only` | Sticky-post strategy. |
 | `layout_mode` | select | `'grid'` | `grid` `list` `masonry` `slider` | Container arrangement. |
 | `card_style` | select | `'standard'` | registry design keys (see Notes) | Per-card design. |

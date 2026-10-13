@@ -76,7 +76,7 @@ unset($s); fw_set_db_settings_option('button_sizes', $bs);
 (`image`,`site_title`,`tagline`,`logo_icon`,…). `update_option('blogname'/'blogdescription')` (they sync).
 ```php
 $hl['logo_type'] = array('logo_type'=>'custom','simple'=>array(),'custom'=>array(
-  'site_title'=>'Pinky Bites','title_weight'=>'700','color'=>array('predefined'=>'','custom'=>'#9d174d'),
+  'site_title'=>'Example Bakery','title_weight'=>'700','color'=>array('predefined'=>'','custom'=>'#9d174d'),
   'tagline_text'=>'Whimsical Cupcake Shop','tagline_color'=>array('predefined'=>'','custom'=>'#c98aa6'),
   'logo_layout'=>'stacked-left', // inline-*/stacked-*/eyebrow-*/icon-only ; stacked = tagline BELOW title
   'logo_icon'=>array('type'=>'svg','svg-source'=>'library','svg-id'=>'lucide/cake'),
@@ -93,7 +93,9 @@ $hl['logo_type'] = array('logo_type'=>'custom','simple'=>array(),'custom'=>array
 ## 6. Header layout — `header_main` (a `multi`) → `main_left`/`main_center`/`main_right`
 Each slot is an **addable-popup element list**. Element item shape:
 `['element_type' => ['element' => '<type>', '<type>' => [...sub]]]`. Common: `logo`; `menu_area`
-(`['menu_location'=>'primary']`); `cta_button` (`cta_text`/`cta_link`/`cta_style`/`cta_size`);
+(`['menu_location'=>'primary']`); `cta_button` (`cta_text`/`cta_link`/`cta_style`/`cta_size` — `cta_style` is the
+preset **class with the `btn-` prefix**, e.g. `'btn-primary'` / `'btn-primary-outline'`; a value without `btn-` is
+dropped and the CTA falls back to bare `.btn`);
 `custom_html` (`custom_html_content` — **runs `do_shortcode()`**, so `[wc_mini_cart …]` rides here).
 ```php
 $hm['main_left']=array(array('element_type'=>array('element'=>'logo')));
@@ -133,6 +135,16 @@ Color, Padding, Borders** — set the source's measured footer text spec here (e
 
 `footer_background` = full shape `{ color:{value:{predefined,custom}}, gradient, image, video, advanced }`.
 `copyright_settings` = multi-picker `{ enabled:'yes', yes:{ copyright_columns:{ count:'1', '1':{ copyright_auto, copyright_split, copyright_col_1:[…text element…] } } } }` (`unysonplus_footer_equal_split($n)` for split).
+
+## 7b. Global Custom CSS — `misc_custom_css` (a `multi`, NOT a string)
+The value is an **object** holding one `custom_css` string — writing a bare string stores nothing usable:
+```php
+$css = (array) fw_get_db_settings_option('misc_custom_css', array());
+$css['custom_css'] = ( isset($css['custom_css']) ? $css['custom_css'] . "\n" : '' ) . '.site-header{backdrop-filter:blur(8px)}';
+fw_set_db_settings_option('misc_custom_css', $css);   // { custom_css: "…" }
+```
+It prints after all theme + plugin styles (so it wins the cascade). Use it only for what no option
+expresses — see [misc.md](misc.md).
 
 ## 8. Section padding (in the page-builder tree, not Theme Settings)
 Section `padding_top`/`padding_bottom` are **responsive spacing-class** controls: value =

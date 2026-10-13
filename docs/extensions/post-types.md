@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # post-types extension
 
-A no-code creator for **custom post types** and **taxonomies** from the WordPress admin (Unyson+ → Post Types). Each row is registered with plain WordPress `register_post_type()` / `register_taxonomy()` on `init`. **Active by default:** no — the extension ships **inactive**; activate it under Unyson+ → Extensions.
+A no-code creator for **custom post types** and **taxonomies** from the WordPress admin (Unyson+ → Post Types). Each row is registered with plain WordPress `register_post_type()` / `register_taxonomy()` on `init`. **Active by default:** no — the extension is not in the core-only plugin zip; download + activate it under Unyson+ → Extensions.
 
 The screen has three tabs: **Post Types** (the two definition lists + a live overview), **Blueprints** (one-click content-type packs), and **Tools** (JSON export/import, PHP code export, key rename).
 
@@ -160,6 +160,14 @@ add_action( 'init', function () {
 Notes:
 - Flush rewrite rules once after adding/changing (e.g. visit **Settings → Permalinks**, or `flush_rewrite_rules()` on theme activation) so archives/permalinks resolve.
 - A hardcoded type is a normal WP post type/taxonomy, so it too can be targeted by the **Custom Fields** extension and displayed with the **`[posts]`** element.
+
+## Downloads on the front end (1.0.21)
+
+A post that has the Downloads blueprint's **`download_file`** field gets a **download box** under its content (`the_content`, priority 20) — keyed on the field, so a renamed Downloads post type still works. The file is served through **`?fw_download=<post id>`**, so the page never prints the file's address; `download_version` / `download_size` show beside the button.
+
+- **`download_gated`** ("Requires an email address") on → the button becomes an email form (posted to `admin-post.php`, action `fw_download_request`, nonce + honeypot). A valid email is kept under **Form Entries** (form title "Download: <post title>", when Forms stores entries), fires **`fw_ext_post_types_download_requested`** (`$post_id, $email`), and redirects to a signed link valid for a day, which streams the file as an attachment. An unsigned or expired link redirects back to the post. The email is NOT added to the newsletter (no consent was asked) — hook the action to do more.
+- **`fw_ext_post_types_download_box`** (`$show, $post_id`) — return false when a Theme Builder layout already places its own download button. A box is also skipped when the content already contains `fw-download-box`.
+- Code: `includes/class-fw-post-types-downloads.php` (`FW_Post_Types_Downloads::link( $post_id, $signed )` builds the URL for a custom button).
 
 ## Storage / notes / gotchas
 

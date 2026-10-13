@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # chat extension
 
-A floating, multi-channel contact button rendered site-wide — WhatsApp, Messenger, Telegram, SMS, Email or any custom link. **Active by default:** no (ships INACTIVE — activate it under Extensions). Version: 1.0.4.
+A floating, multi-channel contact button rendered site-wide — WhatsApp, Messenger, Telegram, SMS, Email or any custom link. **Active by default:** no (not in the core-only plugin zip — download + activate it under Unyson+ → Extensions). Version: 1.0.4.
 
 ## Provides
 
@@ -19,6 +19,6 @@ A floating, multi-channel contact button rendered site-wide — WhatsApp, Messen
 
 ## Notes / gotchas
 
-- **Ships inactive by default** — activate it in Extensions when you want the button to appear.
+- **Not in the core-only plugin zip** — download + activate it in Unyson+ → Extensions when you want the button to appear.
 - **Behavior scales with channel count:** one active channel → the button is a direct deep-link; several → it becomes a launcher the visitor picks from.
 - Standalone, displayed extension card with a `thumbnail.svg` icon.

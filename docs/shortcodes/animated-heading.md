@@ -3,7 +3,7 @@
 
 A **self-contained rotating headline** (no Animation Engine required): static before/after text and a rotating set of words, animated with one of several effects (typewriter / fade / slide / flip / zoom / clip / blur / 3D-rotate). Leaf node: `{ type:'simple', shortcode:'animated_heading', _items:[], atts:{…} }` — plus the shared wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file lists only the **shortcode-specific** atts.
 
-> **When to use this vs. the Animation Engine Text Effects.** This shortcode is the go-to for a *rotating headline* and works with the engine **off** (it's inactive by default). To apply typewriter / scramble / wave / glitch / 30+ effects to **any** text element, use the Animation Engine → Text Effects (`text_effect` on the Animations tab; requires the engine active). Don't apply an Engine text effect to this element too — they'll fight.
+> **When to use this vs. the Animation Engine Text Effects.** This shortcode is the go-to for a *rotating headline* and works with the engine **off** (it's a separate download, off until activated). To apply typewriter / scramble / wave / glitch / 30+ effects to **any** text element, use the Animation Engine → Text Effects (`text_effect` on the Animations tab; requires the engine active). Don't apply an Engine text effect to this element too — they'll fight.
 
 ## atts
 | key | type | default | value shape / choices | what it does |

@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # animated-icons extension
 
-Adds an **"Animated"** tab to the icon picker so any icon option (`icon` / `icon-v2` / `icon-v3`) can use an animated icon alongside font glyphs, SVGs, emoji and images. **Active by default:** no (ships INACTIVE — activate it under Extensions). Version: 1.0.5.
+Adds an **"Animated"** tab to the icon picker so any icon option (`icon` / `icon-v2` / `icon-v3`) can use an animated icon alongside font glyphs, SVGs, emoji and images. **Active by default:** no (not in the core-only plugin zip — download + activate it under Unyson+ → Extensions). Version: 1.0.5.
 
 ## Provides
 

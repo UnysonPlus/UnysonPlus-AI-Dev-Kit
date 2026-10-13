@@ -31,7 +31,7 @@ real misses. Skim this before and during a clone; the detail lives in the linked
     currentColor`; the icon glyph is hidden when the mark carries a background-image, so this only
     colors the ring). *Gap:* the ring width is fixed at 1px — a source with a 2px ring is ~matched, not
     exact; add a dedicated frame-border option if pixel-exactness matters.
-  - Example (Pinky Bites, measured): tile = `background:#fce7f3; border:2px solid #fbcfe8; border-radius:9999px`
+  - Example (fixture-01, measured): tile = `background:#fce7f3; border:2px solid #fbcfe8; border-radius:9999px`
     → `logo_icon_frame:circle`, `logo_icon_frame_bg:#fce7f3`, `logo_icon_color:#fbcfe8`.
 - **Cards / buttons / band tints / rounded media** — belong in **Box / Button / Section-style / Image-
   style presets** (`components-*`), consumed by elements — not hand-rolled `.card{}`/`.btn{}` child CSS.
@@ -57,7 +57,7 @@ asset bug. **Measure it, and don't blame the image first.**
 - **`align-items` and `gap` are silently IGNORED on `display:inline` (or `block`).** A rule like
   `.footer-logo-link--lockup { align-items:center; gap:12px; }` no-ops entirely if the element
   isn't `flex` / `inline-flex`: the title drops to the text baseline (a few px low) and the gap
-  collapses to 0. Fix = add `display:inline-flex`. This exact bug hit the pinky-bites footer — the
+  collapses to 0. Fix = add `display:inline-flex`. This exact bug hit a converted footer (fixture-01) — the
   lockup had `align-items:center; gap:.55rem` but no `display`, so the title sat **11px below** the
   mark centre with a **0px gap**; `inline-flex` restored centred alignment + the 12px gap.
 - **A font-icon glyph does NOT auto-centre in its badge — the icon element itself needs flex.** A
@@ -68,7 +68,7 @@ asset bug. **Measure it, and don't blame the image first.**
   Do **not** swap the icon or the icon set to "fix" this; the glyph is fine, its centring isn't.
 - **A 0,0 bounding-box offset does NOT prove it LOOKS centred — LOOK at a crop.** The glyph's *box*
   can be centred while the *visible* glyph inside it is not (font metrics, a letter-mark's weight).
-  On pinky-bites the social icons measured a perfect 0,0 offset, so I called them fine and chased
+  On fixture-01 the social icons measured a perfect 0,0 offset, so I called them fine and chased
   the wrong things (the logo, the icon set) — the real fix was one line of glyph-centring CSS.
   When something looks off, **capture a high-DPI element crop and view it** before theorising:
   geometry numbers are a starting point, not proof. And for a lockup, check the mark's vertical

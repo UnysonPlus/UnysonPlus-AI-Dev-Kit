@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # snippets extension
 
-Reusable page-builder content — author a block once as a snippet and embed it anywhere, plus Global Sections/Columns that update every page that references them. **Active by default:** yes (listed in the theme's `supported_extensions`). Version: 1.0.13.
+Reusable page-builder content — author a block once as a snippet and embed it anywhere, plus Global Sections/Columns that update every page that references them. **How you get it:** not in the core-only plugin zip; listed in the parent theme's `supported_extensions`, so it is offered on the *Install Compatible Extensions* screen when the plugin is activated with `unysonplus-theme` active (otherwise download it from **Unyson+ → Extensions**). Version: 1.0.13.
 
 ## Provides
 

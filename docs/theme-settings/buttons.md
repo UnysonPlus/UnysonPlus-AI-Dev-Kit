@@ -5,6 +5,8 @@ Authoritative reference for the three Button option groups (Presets, Sizes, Hove
 
 The Button shortcode composes these three: `class="btn btn-primary btn-lg btnfx-c-pulse-ring"` = base `.btn` + one preset (`.btn-{id-slug}`) + one size (`.btn-{size-slug}`) + optionally one custom hover animation (`.btnfx-c-{name-slug}`).
 
+**Base `.btn` rules ship with the theme too** (theme 2.6.47). The Button element's stylesheet only loads on pages that contain a Button element, so theme-rendered buttons (the header CTA, footer buttons) used to lose their padding, font size and border on pages without one. The theme's own stylesheet now carries the same base rules at zero specificity (`:where()`), so presets, the Button stylesheet and child-theme CSS still win; the two copies must be kept in step.
+
 ## button_colors box
 
 ### Button Presets — `button_colors`

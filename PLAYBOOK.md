@@ -14,8 +14,10 @@ let the deterministic Site Converter do the bulk mapping (token-free), then clos
 > [`docs/site-build-protocol.md`](docs/site-build-protocol.md) Rule 0.
 
 Prereq: `pwsh assemble.ps1 -Source github` populates the two conversion repos + the plugin/theme (from the
-release zip); `-Source local` copies them from sibling working copies instead. Then `pwsh update.ps1`
-installs tool deps. Shape references: `docs/` (shortcodes / option-types / theme-settings / animation-engine).
+**core-only** release zip — framework + `blog` + `update`); `-Source local` copies them from sibling
+working copies instead. Then `pwsh update.ps1` installs tool deps. On the WordPress site, download +
+activate the extensions the build needs from **Unyson+ → Extensions** (at least Page Builder, which
+brings Shortcodes + Builder; Site Converter for a conversion) — see `AGENTS.md` → Phase 0. Shape references: `docs/` (shortcodes / option-types / theme-settings / animation-engine).
 Metrics: `docs/build-reference.md`.
 
 > **This is the condensed practical view. The AUTHORITATIVE, complete checklist is
@@ -108,9 +110,10 @@ Do **not** start with the logo or a hero graphic. Start with the frame.
 This is the phase that makes "header and footer already perfect" true. Nothing else
 happens until this passes the parity check.
 
-1. **Child theme**: copy `assembled/unysonplus-theme-child/` → rename to the site slug; activate
-   it. Its `design/design.json` auto-imports a polished-chrome baseline, so you start
-   ~90% there — you're re-skinning, not building from zero.
+1. **Child theme**: copy `samples/sample-child-theme/` → rename to the site slug, fill in its
+   `style.css` header, activate it (procedure in its `README.md`). It is a bare child theme — no
+   design file, no chrome CSS — so the chrome below is built from Theme Settings options, which the
+   child shares with the parent (switching to it keeps every setting).
 2. **Container width** (General → Layout) to match the mockup's `max-width`.
 3. **Header** — from `header-layout.php` / `header-menu.php` / `header-identity.php`:
    set `container`, `min_height`, `header_border`/`header_shadow`/`header_glass`,
@@ -122,8 +125,8 @@ happens until this passes the parity check.
    menu_area, custom_html, text, social_icons). Set `copyright_settings`.
 5. **Measure**: run `node tools/measure/measure.mjs <mockupUrl> <devUrl>`. Fix every
    metric outside ±2px / tolerance. Only after container + header + footer **pass** do
-   you move on. CSS in the child `assets/chrome.css` is a **last resort** for things no
-   option covers — log each as an enhancement candidate.
+   you move on. CSS (Misc → Custom CSS `misc_custom_css`, or the child's `style.css`) is a
+   **last resort** for things no option covers — log each as an enhancement candidate.
 
 ## Phase 4 — Sections: section / row skeleton
 
@@ -144,7 +147,8 @@ Build the page structure before content, in the page builder (or via the builder
 
 ## Phase 4 (cont.) — Fill elements (hard ones as placeholders first)
 
-1. Drop in the simple elements (special_heading, text_block, image, button, accordion).
+1. Drop in the simple elements (special_heading, text_block, media_image, button, accordion).
+   The image element's tag is **`media_image`** — an `image` node renders as literal `[image]` text.
 2. **A hard element** (e.g. a reviews-table, a bespoke comparison grid) goes in as a
    **`code_block` placeholder** — paste the mockup's static HTML for that band with
    `render_as_code=false` so it renders as real markup and the layout keeps moving.

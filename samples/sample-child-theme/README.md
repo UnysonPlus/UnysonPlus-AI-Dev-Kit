@@ -73,11 +73,11 @@ Get these three right or it silently won't load:
 3. **A same-named CORE tag wins** — don't shadow a bundled element (don't name a folder
    `button`, `badge`, etc.).
 
-**Concrete, working example** — the pinky-bites demo ships its configurator exactly here:
+**Concrete, working example** — a demo child theme ships its configurator exactly here:
 
 ```
-wp-content/themes/pinky-bites/framework-customizations/extensions/shortcodes/shortcodes/product-configurator/
-→ appears in the builder as "Product Configurator" whenever pinky-bites is active.
+wp-content/themes/<child-theme>/framework-customizations/extensions/shortcodes/shortcodes/product-configurator/
+→ appears in the builder as "Product Configurator" whenever that child theme is active.
 ```
 
 There is an empty copy of this directory tree in **this template** (see
@@ -96,7 +96,7 @@ works if the plugin is older/absent. Full detail: `docs/extending.md` →
 
 ## Where the folder lives (staging)
 
-- **A demos-network child theme** (coastal, volta, felix-mercer, pinky-bites, …) lives directly
+- **A demos-network child theme** (coastal, volta, felix-mercer, …) lives directly
   in the demos install: `htdocs/demos/wp-content/themes/<slug>/`, network-enabled and activated on
   its subsite. Keep a tracked source copy under `unysonplus-website/wordpress/demos/demo-themes/<slug>/`.
 - **A child theme you are actively building for a standalone site** stages in

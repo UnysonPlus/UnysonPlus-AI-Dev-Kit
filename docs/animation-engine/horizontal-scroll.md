@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # horizontal-scroll — Horizontal Scroll Section (Animation Engine)
 
-Pins a **Section** while the page scrolls and translates its columns (panels) sideways — a gallery / timeline / feature-strip. It is **not** a node `fx` slot — it is injected into the **Section's Animations tab** (inside the animation-stack organizer) as the `horizontal_scroll` att; Section only. Requires the `animation-engine` extension ACTIVE (ships inactive). Pure `position:sticky` + one passive scroll listener, no library. Honours "reduce motion" (panels flow normally). Global on/off: Theme Settings → Animations → Effects.
+Pins a **Section** while the page scrolls and translates its columns (panels) sideways — a gallery / timeline / feature-strip. It is **not** a node `fx` slot — it is injected into the **Section's Animations tab** (inside the animation-stack organizer) as the `horizontal_scroll` att; Section only. Requires the `animation-engine` extension ACTIVE (not in the core-only plugin zip — download + activate it under Unyson+ → Extensions). Pure `position:sticky` + one passive scroll listener, no library. Honours "reduce motion" (panels flow normally). Global on/off: Theme Settings → Animations → Effects.
 
 ## Effects / styles
 One `multi-picker` (picker id **`mode`**, off = `off`). 15 styles, **all sharing the same two options**: `standard` · `reverse` · `snap` · `parallax` · `fade` · `coverflow` (Center Focus) · `blur` (Blur Focus) · `grow` (Grow In) · `arc` · `wave` · `zigzag` · `rotate3d` (3D Carousel) · `wall` (Perspective Wall) · `skew` (Velocity Skew) · `drag` (Drag / Flick).

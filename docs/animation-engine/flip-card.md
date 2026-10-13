@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # flip-card — 3D Flip Card (Animation Engine)
 
-Flips a page-builder node in 3D to reveal a built back face. Rides the shared `fx` block on the **`flip_card`** slot (added to the element's Animations tab). Requires the `animation-engine` extension ACTIVE (ships inactive). Pure CSS 3D transforms, no library; loads only on pages that use it.
+Flips a page-builder node in 3D to reveal a built back face. Rides the shared `fx` block on the **`flip_card`** slot (added to the element's Animations tab). Requires the `animation-engine` extension ACTIVE (not in the core-only plugin zip — download + activate it under Unyson+ → Extensions). Pure CSS 3D transforms, no library; loads only on pages that use it.
 
 ## Effects / styles
 One `multi-picker` (picker id **`mode`**, off = `off`). 7 flip styles, **all sharing the same back-face option group**: `flip` · `cube` · `fold` · `door` · `diagonal` · `pop` · `carousel`.

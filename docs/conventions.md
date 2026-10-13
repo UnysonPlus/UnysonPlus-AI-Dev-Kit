@@ -84,7 +84,7 @@ UnysonPlus sells a clean, un-bloated DOM. Protect it:
 Converted sites, demos, and starter pages exist so a user can swap in their own content **through the
 builder UI**. So:
 
-- Every image/video is an **editable element or option value** (an `image`/`image_box`/`media_video`
+- Every image/video is an **editable element or option value** (a `media_image`/`image_box`/`media_video`
   element, an upload option, or a background layer) — sideload demo media into the Media Library so the
   normal "Replace image" flow works.
 - **Never** bury media in hardcoded theme-asset URLs, `code_block` `<img>` markup, or a text-only URL
