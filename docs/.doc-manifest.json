@@ -290,8 +290,8 @@
       "src": [
         "{plugin}/framework/extensions/ai-assistant/manifest.php"
       ],
-      "hash": "dad91b200bfaebcb7e36b0f941e1d4f6",
-      "synced": "2026-10-13"
+      "hash": "ee2b1da353998010a11f30dd4bab9bba",
+      "synced": "2026-10-15"
     },
     "extensions/animated-icons.md": {
       "kind": "extension",
@@ -2021,6 +2021,86 @@
       ],
       "hash": "14f2e78da0c16d7e05caf31dc91de2d3",
       "synced": "2026-10-13"
+    },
+    "extensions/membership.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/membership/manifest.php"
+      ],
+      "hash": "257ac45f4228a5d12c401630e4d3c247",
+      "synced": "2026-10-15"
+    },
+    "shortcodes/member-login.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/membership/shortcodes/member-login/config.php",
+        "{plugin}/framework/extensions/membership/shortcodes/member-login/options.php"
+      ],
+      "hash": "cd33816110e150f41d7c1e859f05c108",
+      "synced": "2026-10-15"
+    },
+    "shortcodes/member-account.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/membership/shortcodes/member-account/config.php",
+        "{plugin}/framework/extensions/membership/shortcodes/member-account/options.php"
+      ],
+      "hash": "9d8bbc9f27752fe526c7d7d0e01d8d2c",
+      "synced": "2026-10-15"
+    },
+    "shortcodes/pricing-plans.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/membership/shortcodes/pricing-plans/config.php",
+        "{plugin}/framework/extensions/membership/shortcodes/pricing-plans/options.php"
+      ],
+      "hash": "08c67619388b8423f1e6e4eaece5fb7e",
+      "synced": "2026-10-15"
+    },
+    "shortcodes/membership-checkout.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/membership/shortcodes/membership-checkout/config.php",
+        "{plugin}/framework/extensions/membership/shortcodes/membership-checkout/options.php"
+      ],
+      "hash": "8a250fbc874733f90ef77804b4e96f93",
+      "synced": "2026-10-15"
+    },
+    "shortcodes/paywall-prompt.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/membership/shortcodes/paywall-prompt/config.php",
+        "{plugin}/framework/extensions/membership/shortcodes/paywall-prompt/options.php"
+      ],
+      "hash": "6ea1d5d15531a2f4bc6ef802c9685b9c",
+      "synced": "2026-10-15"
+    },
+    "shortcodes/member-download.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/membership/shortcodes/member-download/config.php",
+        "{plugin}/framework/extensions/membership/shortcodes/member-download/options.php"
+      ],
+      "hash": "7061a0d69283816be8477817ac9f21ed",
+      "synced": "2026-10-15"
+    },
+    "shortcodes/member-directory.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/membership/shortcodes/member-directory/config.php",
+        "{plugin}/framework/extensions/membership/shortcodes/member-directory/options.php"
+      ],
+      "hash": "95141b6d2359fa46d3f6b0c98d9eb14b",
+      "synced": "2026-10-15"
+    },
+    "shortcodes/course-outline.md": {
+      "kind": "shortcode",
+      "src": [
+        "{plugin}/framework/extensions/membership/shortcodes/course-outline/config.php",
+        "{plugin}/framework/extensions/membership/shortcodes/course-outline/options.php"
+      ],
+      "hash": "ccfdd04fbb3ff13d395a5e2d6f6cb944",
+      "synced": "2026-10-15"
     }
   }
 }

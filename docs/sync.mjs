@@ -64,6 +64,15 @@ const SC_OVERRIDE = {
   'project-testimonial': EXT && join(EXT, 'portfolio/shortcodes/project-testimonial'),
   'project-nav': EXT && join(EXT, 'portfolio/shortcodes/project-nav'),
   'related-projects': EXT && join(EXT, 'portfolio/shortcodes/related-projects'),
+  // Membership extension elements
+  'member-login': EXT && join(EXT, 'membership/shortcodes/member-login'),
+  'member-account': EXT && join(EXT, 'membership/shortcodes/member-account'),
+  'pricing-plans': EXT && join(EXT, 'membership/shortcodes/pricing-plans'),
+  'membership-checkout': EXT && join(EXT, 'membership/shortcodes/membership-checkout'),
+  'paywall-prompt': EXT && join(EXT, 'membership/shortcodes/paywall-prompt'),
+  'member-download': EXT && join(EXT, 'membership/shortcodes/member-download'),
+  'member-directory': EXT && join(EXT, 'membership/shortcodes/member-directory'),
+  'course-outline': EXT && join(EXT, 'membership/shortcodes/course-outline'),
 };
 
 // Docs that are INTENTIONALLY source-less — prose/workflow guides and AGGREGATE reference docs whose
@@ -75,6 +84,7 @@ const NARRATIVE = new Set([
   'building-pages.md', 'cloning-gotchas.md', 'conventions.md', 'editing-elements.md',
   'extending.md', 'converter-training-prompt.md', 'site-build-protocol.md',
   'converter-fix-my-site-prompt.md', 'build-reference.md', 'conversion-protocol.md',
+  'extensions/membership-building.md',
   // aggregate reference docs (no single source dir)
   'option-types/containers.md', 'option-types/declaring-options.md', 'option-types/icon-v2.md',
   'option-types/icon-v3.md', 'option-types/primitives.md', 'theme-settings/programmatic-setup.md',

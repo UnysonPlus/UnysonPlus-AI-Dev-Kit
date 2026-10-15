@@ -181,7 +181,9 @@ A path may also be `id:<unique_id>`.
   {settings}}` and the field's off value (usually `none`) removes it; site modules are Theme Settings ids
   switched with `update-theme-settings`), **animated-icons** 1.0.6 (`animated-icons-describe`: enabled
   types from `animated_lottie|rive|svg|raster`, icon value `{type:'lottie'|'rive', src, trigger, speed}`,
-  uploaded files from `fw_icon_lottie_dir()` / `fw_icon_rive_dir()`).
+  uploaded files from `fw_icon_lottie_dir()` / `fw_icon_rive_dir()`), **membership** 1.0.22 (15 abilities: set up — describe, save-plan, save-rule, settings, setup-pages,
+  modules, payment-settings (secrets refused), save-coupon, save-course, sell-item, emails, profile-fields;
+  run — find-members, manage-member, report (totals only); see [`membership-building.md`](membership-building.md)).
 - **AI Changes (1.0.18)** — `includes/class-fw-ai-changes.php`, submenu `fw-ai-changes` (edit_pages). `collect()` merges
   page snapshots (`_upw_ai_revision` post meta, newest first per page), `FW_AI_Settings::OPTION_REVISIONS` and
   `FW_AI_Toolkit::OPTION_REVISIONS`; undo records are detected by ability (`unysonplus/undo`, `undo-theme-settings`,

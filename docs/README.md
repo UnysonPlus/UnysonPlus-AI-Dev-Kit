@@ -22,6 +22,7 @@ already know a filename.
 | The copy-paste prompts to hand ANOTHER agent (site owner / maintainer) | [`converter-fix-my-site-prompt.md`](converter-fix-my-site-prompt.md) · [`converter-training-prompt.md`](converter-training-prompt.md) |
 | Cloning gotchas (Tailwind, spacing, emoji vs SVG, wp-emoji…) | [`cloning-gotchas.md`](cloning-gotchas.md) |
 | The deterministic converter (capture service + Site Converter) | [`extensions/site-converter.md`](extensions/site-converter.md) |
+| **A members-only site** (plans, protected content, paid sign-up, courses) — order, AI tools, patterns, traps | [`extensions/membership-building.md`](extensions/membership-building.md) |
 
 ## Reference (shapes & options)
 
