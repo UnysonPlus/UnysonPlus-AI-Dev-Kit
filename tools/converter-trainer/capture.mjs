@@ -39,7 +39,7 @@ const LIMIT = parseInt(getOpt('--limit','0'),10) || 0;
 
 if (!listFile || !existsSync(listFile)) { console.error('usage: node capture.mjs <list-file> [--out dir] [--limit N] [--force]'); process.exit(2); }
 
-// the capture-service capture.mjs — prefer the kit's assembled copy (the one start-converter.bat runs)
+// the capture-service capture.mjs — prefer the kit's assembled copy (the one start.bat runs)
 const CS_KIT = resolve(__dir, '../../assembled/UnysonPlus-Capture-Service/tools/design-capture/capture.mjs');
 const CS = existsSync(CS_KIT) ? CS_KIT : resolve(__dir, '../design-capture/capture.mjs');
 if (!existsSync(CS)) { console.error('capture-service capture.mjs not found near', CS); process.exit(2); }

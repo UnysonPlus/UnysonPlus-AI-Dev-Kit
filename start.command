@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-#  UnysonPlus Converter - START EVERYTHING (macOS / Linux)
+#  Unyson+ AI Dev Kit - START EVERYTHING (macOS / Linux)
 #  Run from the AI Dev Kit root. Boots the capture service + dashboard
 #  (http://localhost:4600 opens automatically) and Ollama if installed.
 #  macOS: double-click this .command file (chmod +x once if needed).

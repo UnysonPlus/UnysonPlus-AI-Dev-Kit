@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================================
-REM  UnysonPlus Converter - START EVERYTHING (double-click this)
+REM  Unyson+ AI Dev Kit - START EVERYTHING (double-click this)
 REM  First run: installs the prerequisites (Node.js + Git) automatically via
 REM  winget if they're missing, then assembles the kit (plugin/theme/services +
 REM  Ollama runtime). After that it just boots the capture service + dashboard
@@ -108,7 +108,7 @@ echo   Node.js was not found - attempting a one-time automatic install via winge
 where winget >nul 2>nul
 if errorlevel 1 (
   echo   winget is not available on this system. Please install Node 20+ from https://nodejs.org/
-  echo   then double-click start-converter.bat again.
+  echo   then double-click start.bat again.
   echo.
   pause
   exit /b 1
@@ -120,7 +120,7 @@ where node >nul 2>nul
 if errorlevel 1 (
   echo.
   echo   Node.js was installed but isn't on this window's PATH yet. Please CLOSE this window,
-  echo   reopen it, and double-click start-converter.bat again. ^(One-time step.^)
+  echo   reopen it, and double-click start.bat again. ^(One-time step.^)
   echo.
   pause
   exit /b 1

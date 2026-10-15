@@ -55,6 +55,7 @@ const SC_OVERRIDE = {
   'model-viewer': EXT && join(EXT, 'animation-engine/shortcodes/model-viewer'),
   'svg-draw': EXT && join(EXT, 'animation-engine/shortcodes/svg-draw'),
   'svg-morph': EXT && join(EXT, 'animation-engine/shortcodes/svg-morph'),
+  'studio-scene': EXT && join(EXT, 'animation-engine/shortcodes/studio-scene'),
   'webgl-object': EXT && join(EXT, 'animation-engine/shortcodes/webgl-object'),
   'contact-form': EXT && join(EXT, 'forms/extensions/contact-forms/shortcodes/contact-form'),
   portfolio: EXT && join(EXT, 'portfolio/shortcodes/portfolio'),
