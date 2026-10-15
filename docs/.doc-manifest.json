@@ -2027,7 +2027,7 @@
       "src": [
         "{plugin}/framework/extensions/membership/manifest.php"
       ],
-      "hash": "257ac45f4228a5d12c401630e4d3c247",
+      "hash": "8747a2e6ec7002417f03dae0cd5da4a9",
       "synced": "2026-10-15"
     },
     "shortcodes/member-login.md": {

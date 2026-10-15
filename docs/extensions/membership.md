@@ -4,7 +4,7 @@
 Members-only content for WordPress: plans, membership records, one access engine that every gate asks
 (pages, archives, REST, elements, menus, files, lessons), a member area designed in the page builder, and
 switchable modules (payments, coupons, tax, CRM, drip, metered paywall, downloads, retention, gifts,
-groups, directory, cards, WooCommerce, reports, account security, importers, courses). **Active by
+groups, directory, cards, WooCommerce, reports, account security, importers, courses, webhooks). **Active by
 default:** no — download + activate it under Unyson+ → Extensions. Design, research and the auto-tracked
 roadmap: docs.unysonplus.com/membership (+ `/crm`, `/roadmap`, `/research`).
 
@@ -317,6 +317,27 @@ when the module is off.
   An error notice shows the detail stored in transient `fw_mbr_notice_{user_id}`.
 - **Payments filters:** `unysonplus_membership_gateways`, `unysonplus_membership_stripe_session`,
   `unysonplus_membership_renewal_grace_days`, `unysonplus_membership_email_catalogue`.
+
+## Webhooks and add-on modules (1.0.23)
+
+- **Webhooks module** (`modules/webhooks/`, `FW_Membership_Webhooks`; tables `fw_mbr_webhooks` { url, secret (40),
+  events csv, active, failures, last_status, last_sent_at } and `fw_mbr_webhook_queue` { webhook_id, event,
+  payload, attempts, next_attempt_at }). Events: `membership.<catalogue event>` (from
+  `unysonplus_membership_changed`), `payment.paid`, `payment.refunded`, `course.enrolled`, `course.completed`,
+  `ping`; more via filter `unysonplus_membership_webhook_events`, sent with `FW_Membership_Webhooks::emit( $event,
+  $data )` (data filter `unysonplus_membership_webhook_data`). Body `{ id (uuid), event, created_at, site, data }`;
+  membership events' data = `{ membership (REST membership_out), member { id, email, name, first_name,
+  last_name }, plan, previous_plan, from, to, by, note }`. Headers `X-Webhook-Event`, `X-Webhook-Id`,
+  `X-Webhook-Signature: t=<unix>,v1=<hex hmac_sha256( secret, "t.body" )>` (same as Short Links). Queue worked by
+  cron `fw_mbr_webhooks_deliver` (every 5 min, `fw_mbr_five_minutes`) and a single `_now` event after each emit;
+  8 s timeout, no redirects, `wp_safe_remote_post` (filter `unysonplus_membership_webhook_allow_local` → plain
+  `wp_remote_post`); backoff 60 / 300 / 1800 / 7200 / 43200 s then dropped; 20 failures in a row → `active = 0` and
+  its queue cleared (also on a manual switch-off). Admin `Membership → Webhooks` (`tab=webhooks`): actions
+  `webhook_add | webhook_events | webhook_test | webhook_on | webhook_off | webhook_secret | webhook_delete`.
+- **Add-on modules**: a registry entry from `unysonplus_membership_modules` may carry `file` (absolute path to a
+  `.php` loader); `loader()` uses it and `is_available()` checks it exists, so a plugin / theme module shows on
+  Modules and loads while on. Entries are normalised (label, description, icon `dashicons-admin-plugins`, phase 0).
+  The public guide with a full example module is docs.unysonplus.com/membership/running-your-site/developers.
 
 ## Courses (phase 11, 1.0.16)
 
