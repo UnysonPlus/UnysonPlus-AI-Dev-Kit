@@ -16,6 +16,8 @@ wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file 
 | `trigger` | select | `'scene'` | `scene` `view` `load` `scroll` | When playback starts. `scroll` makes the page's scroll position the playhead (forwards and back), pinned for `playback.scroll.length` window heights unless the scene sets `pin: false`; pinning sticks below `height_offset`. Visitors with reduced motion always see the scene's still frame (`playback.posterTime`). |
 | `scroll_length` | slider | `0` | 0–6 (window heights, step 0.1) | With `trigger` `scroll` (from this option or the scene): how far the page scrolls while the scene is pinned. `0` keeps the scene's `playback.scroll.length` (default 1.5). |
 | `loop` | select | `'scene'` | `scene` `yes` `no` | Overrides `playback.loop`. |
+| `transcript_headline` | select | `'scene'` | `scene` `h1` `h2` `h3` `p` | (Search tab) What the scene's headline becomes in the transcript written into the page; acts' headlines go one level below. Overrides `transcript.headline` (default `h2`). Use `h1` only when the scene is the page's main title. |
+| `transcript_mode` | select | `'scene'` | `scene` `on` `decorative` | (Search tab) `decorative`: no transcript and the scene is hidden from screen readers; `on`: always include the words. Overrides `transcript.decorative`. |
 
 `studio_tools` is a value-less `html` option (the "Open in Animation Studio" button + live summary); it stores nothing.
 
@@ -55,6 +57,16 @@ the Studio rather than by hand where possible: it validates as you edit.
   `https://animation-studio.unysonplus.com/`) with `?connect=unysonplus`; the Studio says hello, the builder sends the
   field's scene, and "Save to page" in the Studio writes the edited JSON back into the field. Messages are accepted only
   from the Studio's origin **and** the window the builder opened; the Studio replies only to its opener's origin.
+- **Search engines and screen readers (the transcript).** An animation shows its words a few at a time (scrambled, masked
+  or duplicated mid-effect), so a crawler's snapshot of the live stage reads as fragments. `view.php` therefore writes the
+  scene's words into the page HTML once, as a visually hidden `<div class="upw-scene-text">` after the scene JSON: in
+  reading order (by when each layer appears, then top to bottom), the scene's headline as `<h2>` (or `transcript_headline`),
+  each act's (top-level group's) headline one level below, everything else `<p>`; display-sized lines next to a headline
+  merge into it ("Make it" + "MOVE." → "Make it MOVE."), 3D text counts as its act's headline, duplicates are dropped.
+  The player keeps that block, marks the animated stage `aria-hidden`, and gives the scene `role="group"` named by
+  `title`. `upw_studio_scene_transcript_items()` (PHP) is a port of the player's `sceneTranscript()`
+  (`packages/player/src/transcript.ts`): keep them identical (a parity test of 45 cases passed at 0.0.16). Pages without
+  a served transcript (embeds, Studio exports) get one written by the player itself.
 - **Output safety:** the scene is re-encoded with `JSON_HEX_TAG`, so text containing `</script>` cannot close the script
   element.
 - Re-init: pushes `UnysonPlusScene.autoMount(scope)` onto `window.fwShortcodeInit` for markup inserted after load.
