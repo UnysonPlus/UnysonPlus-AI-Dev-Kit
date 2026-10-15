@@ -408,14 +408,14 @@
       "hash": "1f2af13d543e48f75ce88bb6d116d94e",
       "synced": "2026-10-13"
     },
-    "extensions/newsletter-crm.md": {
+    "extensions/crm.md": {
       "kind": "extension",
       "src": [
-        "{plugin}/framework/extensions/newsletter-crm/manifest.php",
-        "{plugin}/framework/extensions/newsletter-crm/settings-options.php"
+        "{plugin}/framework/extensions/crm/manifest.php",
+        "{plugin}/framework/extensions/crm/settings-options.php"
       ],
-      "hash": "db2985061b1de0bdad55fe78fd52664d",
-      "synced": "2026-10-13"
+      "hash": "b69d92d56efd608753c562b1e77a99b0",
+      "synced": "2026-10-15"
     },
     "extensions/portfolio.md": {
       "kind": "extension",
