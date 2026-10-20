@@ -125,6 +125,8 @@ Sources: `manual`, `payment`, `woocommerce`, `group_seat`, `gift`, `import`, `cr
   `fw_mbr_account_action` = profile | password | sessions | cancel with nonce `fw_mbr_account`, handled on
   `template_redirect` (1), PRG with `?fw_mbr_notice=<code>`. Login posts to wp-login.php (`wp_login_form`), so
   Security's throttling / 2FA apply; the element's "plan" redirect sends `admin_url()` so the filter decides.
+  With Forms active (since Membership 1.0.25) the login form is wrapped in `.fw-mbr-login-style .formp-*` and wears the
+  site's default Form Style, so it matches every other form (filter `unysonplus_membership_form_style`: '' = own look).
 - **Elements**: `member_login` (title, remember, lost, redirect plan | here | url, register link),
   `member_account` (show_profile / show_memberships / show_security, join link). Buttons use
   `FW_Membership_Settings::button_class()` (the theme's `.btn` classes from Settings; left at the defaults `btn btn-primary` / `btn btn-outline` and the site has no preset of that name, it picks a Theme Settings button preset — filled for the main button, outlined for the second — via `button_presets()`; `fw-mbr-btn` fallback styling

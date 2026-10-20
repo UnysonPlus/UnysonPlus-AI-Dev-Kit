@@ -17,6 +17,7 @@ what no option covers (and that goes in **Misc → Custom CSS**, see `misc.md`).
 | [colors.md](colors.md) | Color presets (the palette) | `--color-{slug}`, `.text-{slug}`, `.bg-{slug}` |
 | [typography.md](typography.md) | Body/heading fonts, font-size presets | `.font-{slug}`, `--font-size-{slug}` |
 | [buttons.md](buttons.md) | Button color presets, sizes, hover animations | `.btn-{id}`, `.btn-{slug}`, `.btnfx-c-{slug}` |
+| [form-styles.md](form-styles.md) | Form field looks (Forms extension) | `.formp-{slug}` |
 | [boxes.md](boxes.md) | Box / icon-badge / section-style / pattern / table presets | `.boxp-{slug}`, `.iconb-{slug}`, `.section--{slug}`, `.tablep-{slug}` |
 | [spacing.md](spacing.md) | Spacing scale + gap scale | `.pt-{n}`…`.mb-{n}`, `--spacer-{n}`, `.g-{n}` |
 

@@ -273,6 +273,16 @@ analysis half should need to change — if it does, the Site Model is missing a 
 
 ## Notes / gotchas
 
+- **A source form's field + label skin is a FORM STYLE PRESET, never element CSS (Site Converter 1.12.11).** The skin
+  `n_contact_form()` measures (`field_cs`, `field_cls`, `label_cs`) registers `captured('form_style')` through
+  `Mapper::register_form_style()` (key `form-<hash>` of the normalised skin) and the form gets `form_style =
+  formp-form-<hash>`; `Stitch::build_form_style_presets()` emits it into `form_style_presets` beside the shipped
+  library, and the key is exempt from preset reference binding. A class-only underline (`border-b` with only the
+  preflight `border-top-style/color` stamped) is read from the class, its colour from the stamp. Vertical padding and
+  what the preset fields cannot hold (font family, tracking) go in the preset's `{{SELECTOR}}` Custom CSS, written
+  with DESCENDANT selectors (the field strips `>`) at the preset's own label specificity. PHP only — the JS path
+  builds no contact forms. Golden: `tests/form-skin-is-a-form-style-preset-test.php`.
+
 - **A stretched button abstains only when its inset is ABSENT (Site Converter 1.10.91).** The rule that keeps
   a full-width CTA from defining a size's `padding_x` was too blunt: it silenced EVERY stretched sample. On a
   site whose buttons are all `w-full` at their breakpoint but carry a real `px-8`, that left the dominant
@@ -415,6 +425,84 @@ analysis half should need to change — if it does, the Site Model is missing a 
   task graded ready / weak / fail. A one-field task was too easy: a 135M toy model passed it; with the FAQ
   task it grades weak and the recommended 8B model ready. `localAiStatus().custom` = pulled models not on the shortlist.
   The dashboard skips its 8 s redraw while a field in the section has focus (it wiped typing).
+
+- **Which AI runs — a persisted switch (capture service 1.12.13).** `AI_BACKEND` existed, but only as an
+  environment variable, so choosing a backend meant setting a variable and restarting the launcher — and
+  with nothing set the auto-order always picked Claude, which is right as a default and wrong for someone
+  who wants to spend a different quota for a while. The choice is now saved in `local-ai.json` as
+  `backend` and read by `preferredBackend()` (**env still wins**, so scripts/CI/tests keep their
+  override); `aiBackend()` and `microBackend()` both route through it, and `'off'` is a real value that
+  returns no backend at all (deterministic conversion, spends nothing). `aiBackends()` returns every
+  backend with `available` + a `why` for the ones that cannot run — the switch must not offer a choice
+  that silently falls back to Claude — plus `active` (what a job would use now) and `endpointLive`,
+  because the local tier and the endpoint share the internal id `ollama` and the status line has to tell
+  them apart. Routes: `GET`/`POST /local-ai/backend`. Picking `ollama` also disables a saved endpoint,
+  so "Local model" in the UI really means local. **The control lives in the dashboard HEADER**, top
+  right, not in Settings — the point is to change it mid-session without navigating. It is rebuilt only
+  when its payload changes and never while it has focus, because the header polls every 2.5 s and would
+  otherwise destroy an open dropdown; and it prints what Automatic RESOLVED to (`→ Claude`), which is the
+  thing that made the old behaviour look like it was ignoring a configured model.
+
+- **Bring your own endpoint — any OpenAI-compatible API (capture service 1.12.8).** A second source for the
+  non-Claude tier beside the local runner: `ai-endpoint.json` (gitignored) or `AI_ENDPOINT_URL` /
+  `AI_ENDPOINT_KEY` / `AI_ENDPOINT_MODEL` hold a base URL, an optional key (a self-hosted server needs
+  none) and a model id. **One transport, two wires:** every `/api/chat` caller in `to-ai.mjs` now goes
+  through `localChat()`, which either posts the local-runner body as-is or translates it to
+  `POST {baseUrl}/chat/completions` — `options.temperature`/`num_predict` → `temperature`/`max_tokens`,
+  `format` (schema or `'json'`) → `response_format`, assistant `tool_calls` arguments object → JSON string
+  with a generated id, a tool result's `tool_name` → the `tool_call_id` of the call it answers, and the
+  reply back from `choices[0].message` with arguments parsed to an object. So chat, the tool-calling pass
+  and `checkModel()` all work on either wire without a branch at the call site.
+  **The base URL is a CHOICE, not a memory test.** Someone signing up gets a key and a docs page, not a
+  memorised endpoint — and three of the common ones are irregular (`/openai/v1`, `/inference/v1`,
+  `/v1/openai`), so no guess and no normaliser finds them. `ENDPOINT_PRESETS` ships the verified base
+  URLs (grouped Hosted / On this computer, each flagged whether a key is needed, served with
+  `GET /local-ai/endpoint`), and the panel's Provider dropdown fills the field. Typed input still works:
+  `normalizeEndpointUrl()` accepts a bare host (assumes https; an explicit scheme is kept, so a LAN
+  server is not forced to https), strips a query/fragment and a pasted `/chat/completions` or `/models`
+  tail, and appends `/v1` only when **no `/vN` segment appears anywhere** — anchoring that test to the
+  END appends a second `/v1` to `/v1/openai` and produces a dead URL. A test asserts every shipped
+  preset survives normalisation unchanged, which is where that would bite.
+  `listEndpointModels()` reads `GET {baseUrl}/models` and splits it: a catalogue is not a list of chat
+  models, so embedding / reranking / safety / speech / video / image ids are separated out — offering them
+  gives a menu where most entries fail. **`/v1/models` carries no capability metadata**, so whether a model
+  accepts tools is answered by Check, not guessed. **Nor does it carry ENTITLEMENT** — a catalogue covers
+  a provider's whole hub while a key is entitled to a subset, so a picker built from the listing can offer
+  dozens of models that answer `404 … Not found for account` (seen live: 64 "usable" of 80 offered, and
+  the selected one 404ing). Two things follow. The 404 hint distinguishes *your key cannot call this*
+  (matched on `not found for account` / `function '…'` / `no access`) from *the provider does not know
+  this model*, because blaming the base URL for an entitlement error sends people to re-check a setting
+  that is demonstrably fine — `/models` answered, or there would be no list to pick from. And
+  `probeEndpointModels()` ("Test all models") sends a **one-token, no-tools, no-schema** request per
+  listed model through a small worker pool, keeping the ones that answer and narrowing the picker to what
+  the key can really call; the saved model stays listed, marked `— fails`, so the picker never looks like
+  it changed the selection by itself. Three consecutive 429s **abort** the sweep and the remainder report
+  `skipped`, because probing dozens of models is itself the likeliest way to trip a free tier's limit and
+  a rate-limited model must never be recorded as a broken one. **The sweep is PERSISTED**
+  (`endpointProbe()` / `setEndpointProbe()`, stored in `ai-endpoint.json` keyed by the base URL it
+  measured): held only in the page it was lost on refresh, the picker silently reverted to the whole
+  catalogue — indistinguishable from the filter breaking — and the only way back was another sweep,
+  which is itself the thing most likely to trip the rate limit, so the retry returned FEWER models than
+  the first run. Pointing the tier at a different provider drops the stored verdict, because it is not
+  evidence about the new one; an **aborted** sweep is deliberately not stored, since it says nothing
+  about the models it never reached. And the render asks whether a probe EXISTS, not whether it found
+  anything: requiring `ok.length` meant a sweep that found nothing fell through to the unfiltered list,
+  which is the same bug wearing a different hat. "It found none" is reported, with the likely cause
+  (nothing enabled on the key vs. rate limited) and a "show the full list anyway" escape. A failed Check also flips the status line
+  from "In use" to "Selected, but not working" — a green line under a failed check is the panel
+  contradicting itself, and a conversion would fail the same way with no warning.
+  `localAiStatus().transport` says which wire is live. **The switcher names the PROVIDER, not the
+  mechanism**: `endpointProviderLabel()` resolves a saved base URL against `ENDPOINT_PRESETS` to a name
+  ("NVIDIA"), falls back to the bare host for a hand-typed one, and only then to a generic label — "My
+  endpoint" told the reader nothing about which endpoint they were choosing between, and people think of
+  it as the provider they signed up with. The local row likewise reads `Local · <model tag>`.
+  `AI_ENDPOINT_CONFIG` overrides the config path, so a second instance (a verification run, a sandbox)
+  keeps its own instead of writing over the one the live launcher uses — they share a folder otherwise,
+  and a throwaway instance saving a base URL silently re-pointed the real one.
+  An explicit `AI_BACKEND=ollama|local` disables the endpoint (a saved config must not override an
+  override, and a developer's own config must not leak into test runs); `AI_BACKEND=endpoint` forces it.
+  Kept a SEPARATE Settings panel from the local tier on purpose — a hosted endpoint sends the page to
+  someone else's server, so the local tier's privacy promise does not cover it, and the panel says so.
 
 - **Hosted sites: the BROWSER talks to the capture service, never PHP (1.10.15).** A hosted server's
   `localhost` is itself, so any `wp_remote_*` to the service only works when WordPress runs on the same
@@ -2504,10 +2592,10 @@ shows them and they can be flipped back. JS: `page_options` on the page entry fr
 Contact-section pass — a form-LESS signup: a `space-y-3` div holding a paper-pill FIELD wrapper (gradient,
 hairline, blur 26, inset + drop shadow, radius 999, padding 12/16, an `iconify ph:envelope-simple` glyph beside a
 transparent email input) and a full-width silk submit 12px below (54px, 14px sentence-case). The existing
-newsletter path (`newsletter` recognizer → `n_newsletter` → `require_extension('newsletter-crm')`, which the
+newsletter path (`newsletter` recognizer → `n_newsletter` → `require_extension('crm')`, which the
 importer auto-activates) never fired: its gate wanted a `<form>`, a form-named class, or ≥2 controls. The field
 went verbatim and the button became a text line. Now equal to the source (form column 615 × 116 at y=75, field
-615 × 50, button 615 × 54, section 344) and a test submission lands in the Newsletter CRM's subscriber table.
+615 × 50, button 615 × 54, section 344) and a test submission lands in the CRM's subscriber table.
 Rules, both twins; fixtures golden `[N]` (11) ↔ `newsletter-signup-parity.test.mjs` (10):
 
 - **A SIGNUP LOCKUP is a form.** `is_newsletter_form` (JS `signupLockup`) also accepts an anonymous container with

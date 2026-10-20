@@ -8,7 +8,7 @@
 // concludes what's off. This is the "screenshot the header of both and compare, then the footer, then
 // each section" workflow — no pasting screenshots, one image per section.
 //
-//   node section-audit.mjs --source https://modfii.com/ --converted http://localhost/
+//   node section-audit.mjs --source https://source.example/ --converted http://localhost/
 //   node section-audit.mjs --source https://src/ --converted http://localhost/ --only hero,footer
 //   node section-audit.mjs --source https://src/ --converted http://localhost/ --out ./audit --width 1440
 //

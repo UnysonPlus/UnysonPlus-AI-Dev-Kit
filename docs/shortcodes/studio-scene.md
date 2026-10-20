@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # `studio_scene` — Studio Scene
 
-Plays a **timeline motion-graphics scene** made in the Unyson+ Animation Studio (`https://animation-studio.unysonplus.com/`):
+Plays a **timeline motion-graphics scene** made in Unyson+ Kinetic Scenes (`https://kinetic-scenes.unysonplus.com/`):
 text, shapes and images animated by presets on a timeline, rendered as live HTML (real text, not video), with its own
 layout per breakpoint. **Requires the `animation-engine` extension active** (without it the tag is unregistered and saved
 instances render empty). Leaf node: `{ type:'simple', shortcode:'studio_scene', _items:[], atts:{…} }` — plus the shared
@@ -19,7 +19,7 @@ wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file 
 | `transcript_headline` | select | `'scene'` | `scene` `h1` `h2` `h3` `p` | (Search tab) What the scene's headline becomes in the transcript written into the page; acts' headlines go one level below. Overrides `transcript.headline` (default `h2`). Use `h1` only when the scene is the page's main title. |
 | `transcript_mode` | select | `'scene'` | `scene` `on` `decorative` | (Search tab) `decorative`: no transcript and the scene is hidden from screen readers; `on`: always include the words. Overrides `transcript.decorative`. |
 
-`studio_tools` is a value-less `html` option (the "Open in Animation Studio" button + live summary); it stores nothing.
+`studio_tools` is a value-less `html` option (the "Open in Kinetic Scenes" button + live summary); it stores nothing.
 
 ## Ready-to-use example (the atts object)
 ```json
@@ -34,10 +34,10 @@ wrapper blocks (`common`, `fx`, `spacing`) documented in `README.md`. This file 
 
 ## The scene file (summary)
 The full format is the JSON Schema shipped with the Studio (`packages/player/schema/scene.schema.json` in the
-`UnysonPlus-Animation-Studio` repository). In short: `stage` (breakpoints with `minWidth` + `aspect`, `heightMode`,
-`heightOffset`, `background`, `safeArea`, `fonts`), `playback` (`trigger`, `loop`, `repeatDelay`, `posterTime`) and
+`UnysonPlus-Kinetic-Scenes` repository). In short: `stage` (breakpoints with `minWidth` + `aspect`, `heightMode`,
+`heightOffset`, `background`, `safeArea`, `fonts`), `playback` (`trigger`, `loop`, `loopFrom`, `repeatDelay`, `posterTime`) and
 `layers` drawn bottom to top (`text` / `shape` / `image`, and `group`: a layer holding `layers` of its own, whose children keep stage coordinates and whose children's clips run on the group's clock from its `start`), each with a `box` (x/y/w in % of the stage, anchored), optional
-per-breakpoint `overrides`, and `clips` (a preset id, `start`, `duration`, optional `ease` and `params`). Generate scenes in
+per-breakpoint `overrides`, an optional `link` (`href`, `newTab`, `label`), an optional `pin: "stage"` (top-level only: x / y become % of the stage, sizes stay frame units, so corner items sit in the real corner of any box; pinned layers ignore the camera), and `clips` (a preset id, `start`, `duration`, optional `ease` and `params`). Generate scenes in
 the Studio rather than by hand where possible: it validates as you edit.
 
 ## Notes / gotchas
@@ -53,8 +53,8 @@ the Studio rather than by hand where possible: it validates as you edit.
   fits that width (often its mobile layout).
 - **The host fills its container** (`[data-upw-scene]{width:100%}` in the player), so it never collapses inside a centred
   flex column.
-- **Round trip.** "Open in Animation Studio" opens the Studio (`fw_studio_scene_studio_url` filter, default
-  `https://animation-studio.unysonplus.com/`) with `?connect=unysonplus`; the Studio says hello, the builder sends the
+- **Round trip.** "Open in Kinetic Scenes" opens the Studio (`fw_studio_scene_studio_url` filter, default
+  `https://kinetic-scenes.unysonplus.com/`) with `?connect=unysonplus`; the Studio says hello, the builder sends the
   field's scene, and "Save to page" in the Studio writes the edited JSON back into the field. Messages are accepted only
   from the Studio's origin **and** the window the builder opened; the Studio replies only to its opener's origin.
 - **Search engines and screen readers (the transcript).** An animation shows its words a few at a time (scrambled, masked
@@ -67,6 +67,14 @@ the Studio rather than by hand where possible: it validates as you edit.
   `title`. `upw_studio_scene_transcript_items()` (PHP) is a port of the player's `sceneTranscript()`
   (`packages/player/src/transcript.ts`): keep them identical (a parity test of 45 cases passed at 0.0.16). Pages without
   a served transcript (embeds, Studio exports) get one written by the player itself.
+- **Links.** A layer's `link` makes it clickable: on the stage, a click area (`a.upw-link`, out of the tab order, inert in
+  the editor); in the transcript, the real `<a href data-upw-link="<layer id>">` with the layer's words (a linked group: all
+  the words inside it, read as one link, never merged into a heading). Focusing that link rings the layer on the stage
+  (`.upw-layer[data-focus]`). Only `https?://`, same-site paths, `#`, `?`, `mailto:` and `tel:` are kept
+  (`upw_studio_scene_link()` mirrors the player's `SAFE_HREF`); the player's validator drops any other link with a warning.
+  Parity: 49 cases identical at player 0.0.22.
+- **Loop the last part.** `playback.loopFrom` (with `loop: true`): the scene plays once, then repeats only from that
+  moment to the end. The element's `loop` override still turns looping on or off; `loopFrom` comes from the scene.
 - **Output safety:** the scene is re-encoded with `JSON_HEX_TAG`, so text containing `</script>` cannot close the script
   element.
 - Re-init: pushes `UnysonPlusScene.autoMount(scope)` onto `window.fwShortcodeInit` for markup inserted after load.

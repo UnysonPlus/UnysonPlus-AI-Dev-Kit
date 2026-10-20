@@ -125,7 +125,7 @@ php  audit.php  ../../assembled/UnysonPlus-Capture-Service/tools/design-capture/
 bash train.sh sites/corpus-01.txt --audit-only
 
 # a different corpus / arbitrary URLs
-printf 'https://my-website-h3eknqdj.corpus-02.net/\n' > sites/corpus-02.txt
+printf 'https://fixture-02.example/\n' > sites/corpus-02.txt
 bash train.sh sites/corpus-02.txt
 ```
 

@@ -56,6 +56,20 @@ A path may also be `id:<unique_id>`.
   "Connect an agent" (creates an Application Password named `UnysonPlus AI Assistant — <label>` and
   shows URL / user / password / Basic header / `mcpServers` JSON ONCE, never stored), connection list
   with revoke, abilities table.
+- **Connect an AI app (core, not this extension)** — `framework/includes/class-unysonplus-connect-ai.php`,
+  page *Unyson+ → Connect AI* (`admin.php?page=fw-connect-ai`, `manage_options`), heading "Connect an AI
+  app", button **Set up this site for an AI app**. It exists in CORE because on a core-only install the
+  AI Assistant is not there yet. One request per step (live ✓ / ✗ / !, no long request; a no-JS
+  `admin-post.php` fallback runs them all): (1) activate the Unyson+ theme or keep a child of it,
+  installing through `UnysonPlus_Theme_Suggestion::install()`; (2) install + activate the build set
+  through the manager's own `install_extensions()` / `activate_extensions()` (filter
+  `fw_connect_ai_extensions`; default shortcodes, page-builder, ai-assistant, forms, mailer,
+  crm, post-types, custom-fields, seo, theme-builder); (3) Plain permalinks → `/%postname%/`;
+  (4) `upw_ai_mcp_mode` = `write`; (5) a check in a later request: extensions running, `tools/list`
+  answers internally, an unauthenticated loopback gets 401 (404 = REST blocked, 403 = security plugin),
+  both `/.well-known/oauth-*` documents published, public HTTPS (a local address is a warning, not a
+  failure). Idempotent: a second run reports "Already…". Shows the connector address with a copy
+  button and the next steps; an admin notice points to it while the AI Assistant is inactive.
 
 ## Notes / gotchas
 
@@ -159,11 +173,11 @@ A path may also be `id:<unique_id>`.
   builders by reflection), **custom-fields** (group validated against `get_page_options()`; values via
   `fw_set_db_post_option`), **forms** (`forms-add` normalises items via the form-builder item classes like
   the starters; since Forms 2.0.64 it also sets the form's actions: `store`, `subscribe { list, tags,
-  name_field }` → `action_subscribe*` atts, and `failure_message`; no entries ability), **newsletter-crm**
+  name_field }` → `action_subscribe*` atts, and `failure_message`; no entries ability), **crm**
   1.0.37 (`crm-describe` — settings, lists, tags, segments, campaigns with subscriber COUNTS only;
   `crm-save-lists` — lists + tags matched by slug, so repeat calls update; `crm-save-segment` — filters
   status / list / tag / search, list and tag by slug, id or title; `crm-settings` — double opt-in, admin
-  notify, default list, confirmation / welcome emails, snapshots `fw_ext_settings_options:newsletter-crm`,
+  notify, default list, confirmation / welcome emails, snapshots `fw_ext_settings_options:crm`,
   rejects a confirm body without `{{confirm_url}}`; `crm-save-campaign` — DRAFTS only, nothing schedules or
   sends; lists / segments / campaigns live in CRM tables that undo-change cannot restore; no ability returns
   a subscriber), **mailer** 1.2.24 (`mailer-sender` — From name / address, snapshots

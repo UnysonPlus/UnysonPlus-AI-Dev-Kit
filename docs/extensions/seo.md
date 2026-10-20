@@ -463,6 +463,37 @@ screen with 30 template fields does not fire 30 requests at once.
   description" is NOT offered: descriptions resolve at render time, so there is
   nothing stored to query. Adding it means materialising resolved values into an
   index (the site-wide audit), not a cleverer `meta_query`.
+- **The search log aggregates; it does not journal.** One row per normalised
+  phrase with a counter, written with a single `INSERT … ON DUPLICATE KEY UPDATE`
+  so concurrent searches cannot lose counts to a read-then-write race. Recorded
+  on `wp` (not `pre_get_posts`) because the result count is only known after the
+  query runs — and the count is the point. Bots are skipped and rows are pruned
+  on a daily cron; both are privacy/noise controls, not optimisations.
+- **Freshness word counts come from `FW_SEO_Content`,** so a builder page is
+  measured by the prose in its tree. Counting `post_content` would measure
+  rendered markup and every builder page would read as thin. Split on whitespace,
+  not `str_word_count`, which undercounts non-ASCII prose badly.
+- **`FW_SEO_Card` bundles no font — it FINDS one** (settings → theme `/fonts` →
+  system paths) and `fw_seo_card_font` filters the RESULT, so it can supply,
+  replace or return '' to disable. The card sits in `og_image`'s `auto` stage
+  AFTER `FW_SEO_Image::find()` returns nothing, so a page with a picture is never
+  overridden; `social-test.php` pins that.
+- **CrUX 404 means "not enough traffic", NOT an error.** `FW_SEO_Vitals` keeps
+  `nodata` distinct from `badkey`/`network`/`error`, caches the negative result
+  too, and never renders a zero — a zero reads as a result. Nothing is fetched
+  during settings render; refresh is an `admin_post` action behind a 12h transient.
+- **A CSV import is a site-wide write — the fences are the feature.** `FW_SEO_CSV::process()`
+  is ONE method for both preview and apply (`$apply` flag) so a preview can never
+  disagree with what the apply does. Rows match on post ID only; it writes SEO meta
+  and never creates/deletes a post or touches content, title, status or terms; an
+  absent id is not visited; only columns PRESENT in the file are considered; a blank
+  cell in a present column CLEARS (counted separately so it is never silent). All
+  pinned in `tests/csv-test.php` — do not "simplify" any of them away.
+- **`safe_cell()` / `unsafe_cell()` are a security control, not formatting.** A value
+  beginning `=`, `+`, `-` or `@` is a formula in every spreadsheet; the tab prefix is
+  what stops an exported description from executing on the opener's machine.
+- **The export writes a UTF-8 BOM.** Without it Excel reads the file as the system
+  codepage and mangles every accent — and these are multilingual sites.
 - **The importer translates template tags; it does not copy them.** Each source
   in `FW_SEO_Import::sources()` carries a `tags` map, applied longest-key-first
   so `%%category_description%%` is not eaten by `%%category%%`. Adding a source
