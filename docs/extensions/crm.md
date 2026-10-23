@@ -202,8 +202,11 @@ import and export, custom fields, the bin, team roles, settings) plus **modules*
 | `conversations` | sales | `modules/conversations/class-fw-crm-direct-email.php`, `FW_CRM_Admin_Email`, `/contacts/{id}/email` |
 | `email` | marketing | `modules/email/` (campaigns, builder, sender, tracking) |
 | `audit` | workspace | `FW_CRM_Audit::init()` (recording), Audit log nav, `/audit` |
+| `woocommerce` | connect | `modules/integrations/class-fw-crm-woocommerce.php` (available only with WooCommerce) |
 | `webhooks` | connect | `modules/webhooks/` |
-| `automations`, `scoring`, `cases` | | `soon` (listed, cannot be switched on) |
+| `cases` | workspace | `modules/cases/` (`FW_CRM_Cases`, `FW_CRM_Cases_Intake`, `FW_CRM_Admin_Cases`), the Cases nav, the Cases panel on contact/company pages, "A support case" in the form action's Also create. The `fw_crm_cases` table always exists (core schema), so contact delete/merge keep it consistent while the module is off. |
+| `automations` | marketing | `modules/automations/` (see Automations below) |
+| `scoring` | marketing | `modules/scoring/` (see Events, lead scoring, site activity) |
 
 Incoming mail (`modules/conversations/` `FW_CRM_Mime`, `FW_CRM_Imap`, `FW_CRM_Inbound_Email`, `FW_CRM_Admin_Inbound`,
 `FW_CRM_REST_Email`'s `/inbound/{token}`) loads while **conversations OR email** is on: replies need the first,
@@ -566,6 +569,222 @@ date }`), `action_crm_update` (`blank` | `always`), `action_crm_create` (`''` | 
 - Forms rate-limits visitor submissions (`fw_rate_limit_exceeded( 'fw_ext_forms_submit', 10, 600 )`): repeated test
   submissions answer "Too many submissions" — filter `fw_rate_limit` to 0 for that action on a test site.
 
+## AI Assistant tools per module (1.0.77)
+
+Each module that can be set up by an AI app ships `modules/<module>/ai-abilities.php`, required inside that module's
+`enabled()` block in the loader and registered on `fw_ai_assistant_register_abilities`. All of them set things up and
+never read or contact people (counts only). Option-backed changes call `fw_ai_snapshot()` (undoable); table-backed ones
+say what changed.
+
+- `crm-pipelines` / `crm-save-pipeline` (pipeline): matched by name, stages matched by name (renaming = a new stage); a
+  stage left out is removed only if it holds no open deals, otherwise kept and reported (`stages_kept`).
+- `crm-automations` / `crm-save-automation` (automations): describe + recipes + the trigger/action catalogue; save a
+  DRAFT from `recipe` (`FW_CRM_Automations::recipe()`) or `{ trigger_type, trigger_settings, settings, steps }` (ids made
+  when missing; an unknown action slug is refused by name). Matched by id or title; never switches an automation on, and
+  an automation the owner switched on stays on. Recipes moved from the admin class to `FW_CRM_Automations::recipes()`
+  so the abilities (no admin classes loaded) can read them.
+- `crm-scoring` (scoring): no input = read; `scores` / `rules` (whole list, validated: an invalid rule changes nothing) /
+  `decay`; snapshot of `fw_crm_scoring`. Site activity is reported, never switched.
+- `crm-email-templates` / `crm-campaign-from-template` / `crm-sending` (email; `crm-sending` also with conversations):
+  the email file requires `class-fw-crm-email-templates.php` itself (normally loaded only by the builder option type);
+  `FW_CRM_Email_Templates::to_value( $blocks )` turns starter blocks into the builder value `save_campaign()`'s
+  `body_json` takes. Campaign texts replace the template's text blocks in order (extra texts go before the footer),
+  `headings` its headings, `button` its button. `crm-sending` matches senders by name, never sets an email service
+  (API keys are the owner's), and never changes the digest's `on`; snapshot of the senders and digest options.
+- `crm-describe` now returns `modules` (label, on, available) and points the AI to these tools.
+- Forms `forms-add` gained `crm { add_contact, create: deal|task|case, pipeline (name or id), task_type, tags }`, mapped
+  to the "Add to the CRM" action (`action_crm_contact`, `action_crm_create`, `action_crm_pipeline`, …).
+- The Site Creator (create.unysonplus.com, repo `UnysonPlus-Site-Creator`, working copy `d:\Web Dev\crm-generator`)
+  prompts use these: a real pipeline with enquiries as deals, a welcome series and a booking follow-up as draft automations.
+
+## Extension API, events catalogue, integrations, commerce, objects, WooCommerce (1.0.76, schema 2.15.0)
+
+- **`fw_crm()`** (`includes/class-fw-crm-api.php`, `FW_CRM_API::VERSION` = `1.0`): the stable surface for other
+  extensions. Thin wrappers over the classes below; returns arrays/ids/bools or `WP_Error`; no permission checks.
+  `null` while the CRM is inactive. Keep new public methods additive within 1.x; document them in
+  `crm/developers/extension-api.md` (docs site).
+- **Events catalogue** `FW_CRM_Events` (`includes/class-fw-crm-events.php`): `emit( $event, $contact_id, $object_type,
+  $object_id, $data )` → `do_action( 'unysonplus_crm_event', { event, contact_id, object_type, object_id, data,
+  occurred_at } )` plus `unysonplus_crm_event_<event with _>`. `init()` bridges the existing specific hooks (they still
+  fire). Catalogue filter `unysonplus_crm_events_catalogue`. `FW_CRM_Automations_Plain::plain()` (same file) flattens
+  payloads (objects → arrays).
+- **Integrations** `FW_CRM_Integrations`: `register( $id, { label, description, icon, active (bool|callable), triggers,
+  actions, fields, activity_types, events, widgets, objects } )`; merged into the automation triggers/actions filters
+  at priority 8 (`group` defaults to the label; an existing slug wins), activity types, catalogue, dashboard cards,
+  `unysonplus_crm_register_objects`; `fields` become managed contact fields on `admin_init`. Listed on the Modules
+  screen via the new action `unysonplus_crm_modules_after`. Filter `unysonplus_crm_integrations`.
+- **Purchase summaries** `FW_CRM_Commerce` (table `commerce_summaries`, UNIQUE contact+provider): `set()` (partial
+  update), `add_order()`, `get()`, `for_contact()`; keeps `subscribers.lifetime_value` = SUM(total); emits
+  `commerce.updated`. Segment fields `commerce_orders|commerce_total|commerce_last|commerce_product` (all `sql`
+  callbacks), condition fields `commerce_orders|commerce_total`, contact panel `commerce`.
+- **Users** `FW_CRM_Users`: `ensure_for_user()` (link by id, else email, else create, then `link_user`),
+  `user_can_access( $uid, { tags, lists, segment, match } )`, `in_segment( $cid, $id_or_slug )`, `deleted_user` →
+  unlink. **Membership events**: listens to `unysonplus_crm_automation_event` (priority 5) for `membership.*` (the
+  Membership extension already fires these) and records summary (provider `membership`: plan from `plan_name`|`plan`,
+  status, `total` adds an order), event `membership_<event>` and the catalogue event; it writes a timeline entry only
+  when `FW_Membership_CRM_Timeline` does not exist (that extension logs its own). `membership_event()` = fire the
+  automation event. Registers fallback `membership.*` triggers at priority 5 (Membership's richer ones overwrite).
+- **Custom objects** `FW_CRM_Objects` (table `objects`): `register( $type ≤30 chars, { label, plural, icon, statuses,
+  relates: contact|company|deal, capability } )` during `unysonplus_crm_register_objects` (fired on `init` 20);
+  `create/update/get/query/delete/link`; fields via `FW_CRM_Fields` with `object` = type; relations via
+  `FW_CRM_Relations`; timeline via `FW_CRM_Activity`. Panels on related record pages; filter
+  `unysonplus_crm_object_url`. No admin screen yet.
+- **Widgets** `FW_CRM_Widgets` (`includes/admin/`, admin only): `add( $id, { title, callback, column, priority, cap } )`
+  → `unysonplus_crm_dashboard_cards` (priority 20). Built-in: `warmest` (scoring module), `woo_orders`.
+- **WooCommerce** module `woocommerce` (`modules/integrations/class-fw-crm-woocommerce.php`, `available` only with
+  WooCommerce): contact by billing email on checkout (`woocommerce_checkout_order_processed` and the Store API hook;
+  fills empty fields only; links the customer user; status stays `none`); timeline `order` entries; paid status →
+  lifecycle `customer` (setting); `recalculate()` rebuilds the `woocommerce` summary from paid orders net of refunds
+  on every status change and refund; refunds → event `refund` + trigger `crm.order_refunded`; carts of known
+  visitors (logged in or the site-activity cookie) kept in option `fw_crm_woo_carts`, hourly `fw_crm_woo_carts_tick`
+  fires `crm.cart_abandoned` once after `cart_hours`; `sync()` imports past orders 200 at a time (Settings section).
+  Its triggers are registered through the integration (so the Modules list counts them).
+
+## Events, lead scoring, site activity (1.0.75, schema 2.14.0)
+
+- **Events store** `FW_CRM_Events_Store` (`includes/`, core, always on): table `contact_events` (contact_id, event slug,
+  value ≤255, url, props JSON). Sources: `unysonplus_crm_track( $id_or_email, $event, $args )`, `wp_login` (contact by
+  `user_id` then email), WooCommerce completed order (`purchase`, value = total), `unysonplus_crm_form_submitted`
+  (`form_submitted`), counted campaign opens/clicks (`email_open`/`email_click`). `record()` fires
+  `unysonplus_crm_event_recorded( $row )` and the `crm.event` automation trigger (not for `page_view`). Adds the segment
+  field `event` (type `activity`, `sql` callback) and the `crm.event` trigger. Purge deletes events; merge moves them.
+- **Segments**: a field from `unysonplus_crm_segment_fields` may carry `'sql' => callable( $op, $value )` (contact alias
+  `s`); `FW_CRM_Segments::compile_rule()` checks it first.
+- **Scoring** `FW_CRM_Scoring` (module `scoring`): option `fw_crm_scoring` `{ scores: key => label (default implied),
+  rules: [ { id, label, score, event, match, points, limit } ], decay: { on, percent, days } }`. Tables `contact_scores`
+  (UNIQUE contact+score_key; `default` mirrored into `subscribers.score`) and `score_log` (every change + reason;
+  `limit` counts rows per rule). Rule events: page_view (match = URL contains), email_open/click (campaign id),
+  form_submitted (form id), purchase (min total), login, tag_added (slug), field (`field = value`, contact column or
+  `cf:key`), `event:<name>` (value). `clean_rule( $r, $scores )` must get the scores being saved in the same call, or a
+  rule for a brand-new named score falls back to default. Daily `fw_crm_scoring_daily` fades scores whose `updated_at`
+  is older than `days` and not faded in that period (`decayed_at`); the fade leaves `updated_at` at the quiet date.
+  Adds: segment fields `score:<key>`, condition fields `score:<key>`, triggers `crm.score_changed` (fires on crossing
+  the threshold upwards) and `crm.page_visited`, action `crm.add_points`. Deal score = max default score of its contacts.
+- **Site activity** `FW_CRM_Site_Activity` (option `fw_crm_site_activity` `{ on, consent: cookie|always,
+  consent_cookie, exclude }`; `save_settings()` merges with the current values). Identity = cookie `fw_crm_vid`
+  `<id>.<hmac>` (auth salt), set on CRM form submission, campaign click, login, only while on. The footer script
+  (printed for everyone, cache-safe) acts only if the cookie exists and DNT/GPC are off; it beacons to
+  `POST /fw-crm/v1/activity` (`permission_callback` true; the endpoint verifies the signature, consent, same host).
+  `page_view()`: excluded path prefixes, same URL within 5 min ignored, one `visit` timeline entry per 30-min session.
+  `[data-crm-event]` clicks are sent as events.
+- Admin `FW_CRM_Admin_Scoring` (`tab=scoring`, actions `scoring_*`), contact panel `scoring` (scores, history, adjust,
+  recent events), deal panel `scoring`.
+
+## Automations (1.0.74, schema 2.13.0)
+
+Module `automations` (`modules/automations/`). Tables: `automations` (title, status draft|active|paused, `trigger_type`,
+`trigger_settings` JSON, `settings` JSON `{ reentry: once|after_finish|always, exit: condition group }`, `version`),
+`automation_versions` (steps JSON per version), `automation_runs` (one row per contact per run: `step_id`,
+`next_run_at`, `status` active|waiting|completed|exited|failed, `context` JSON, `dedupe`, claim token, `is_test`),
+`automation_log` (pruned after 90 days).
+
+- **Steps tree**: `{ id, type: action|wait|condition|split|goal, action?, settings, branches? }`; condition branches
+  `yes`/`no`, split `a`/`b`. `FW_CRM_Automations::index()` flattens it to id → { step, next }; the end of a branch
+  continues after its parent. `clean_steps()` drops unknown actions and nests at most 8 deep.
+- **Versioning**: `save_steps()` rewrites the current version when nobody is inside it, otherwise inserts a new one;
+  runs keep their `version`. Never edit `automation_versions` rows that have runs.
+- **Entry**: `event( $slug, $contact_id, $context )` (hooked on `unysonplus_crm_automation_event`) → goals first,
+  then `start()` for each active automation whose trigger matches (`trigger_matches()`: the trigger's `match`
+  callable, else every set field equals the context value). `start()` runs the first steps immediately
+  (filter `unysonplus_crm_automation_run_now`); waits are left to the runner.
+- **Runner** `FW_CRM_Runner`: cron `fw_crm_automations_tick` every minute (`fw_crm_minute` schedule, defined here too)
+  and `fw_crm_automations_daily` (date triggers via `FW_CRM_Trigger::scan_dates()`, log prune). Claims with
+  `UPDATE … SET claim_token … LIMIT 50`, releases claims older than 10 min, 20 s budget, max 60 steps per pass,
+  saves `step_id` after every step. A paused automation re-defers its runs by 15 min; a deleted one fails them.
+- **Action contract**: `callback( $contact_id, $settings, $context )` → true | WP_Error (code `skip*` = skipped) |
+  `{ status?, message?, context? }` (context merged into the run, e.g. `deal_id`). Exceptions are caught.
+  `$context['test']` in test runs; `crm.send_email` then mails the current user, `crm.notify` too.
+- **Conditions** `FW_CRM_Conditions` (if/else, exit rules): fields tag, list, status, lifecycle_stage, segment,
+  opened/clicked (during this run, from tracking events), deal_stage (run context), core fields, `cf:<key>`;
+  filter `unysonplus_crm_automation_condition_fields` (a `test` callable for custom ones).
+- **Goals** `FW_CRM_Goals::on_event()`: a goal step `{ trigger, match }` pulls a run forward only if it is ahead of the
+  current step; reached normally it is a no-op. Exit rules are checked before every step.
+- **Guard** `FW_CRM_Automation_Guard`: events raised inside actions at depth ≥ 3 start nothing
+  (`unysonplus_crm_automation_loop_stopped`); a contact cannot re-enter the same automation within 60 s; `dedupe`
+  per automation; re-entry rule. `test_run()` forces entry and skips waits.
+- **Built-in triggers** (`crm.*`, bridged from existing hooks in `FW_CRM_Trigger::init()`): contact_created, subscribed,
+  form_submitted, tag_added/removed (`unysonplus_crm_pivot_changed`), list_joined/left (`unysonplus_crm_list_status_changed`),
+  field_changed (contact columns from `unysonplus_crm_contact_updated` with from/to; custom fields from
+  `unysonplus_crm_fields_updated`, "from" unknown), date_reached (daily scan of `field_values.value_date`, `yearly`
+  matches month-day, dedupe per field/date/contact), task_completed, deal_created/stage_changed/won/lost (every deal
+  contact), email_opened/clicked, email_replied, case_created, purchase_made (`woocommerce_order_status_completed`,
+  contact by billing email, created if missing).
+- **Built-in actions**: send_email, add/remove_tag, add/remove_list, update_field, create_task, notify, webhook,
+  start/end_automation, assign_owner (round robin per automation step, option `fw_crm_round_robin`), create/move_deal.
+- **Recipes** `modules/automations/recipes/index.json` (5), filtered by available triggers/actions; filter
+  `unysonplus_crm_automation_recipes`. Goals at the END of a recipe are fine; anything after a goal runs for everyone.
+- **Health** `FW_CRM_Cron_Check`: heartbeat option `fw_crm_cron_beats`; late after 5 min; gives the wget, WP-CLI and
+  `DISABLE_WP_CRON` lines. **CLI** `includes/class-fw-crm-cli.php`: `wp crm automations run|status|list|test|dates`,
+  `wp crm queue run`. The class is declared inside `if ( ! class_exists( …, false ) )`: a top-level class is
+  hoisted, so a guard before it always saw the class and the command was never registered.
+- Admin `FW_CRM_Admin_Automations` (`tab=automations`, actions `auto_*`), editor `static/js/editor.js` (state → hidden
+  `automation_json`), contact side panel `automations`.
+
+## Senders, email services, smart links, digest, channels (1.0.73, schema 2.12.0)
+
+- **Sender profiles** `FW_CRM_Senders` (`modules/email/class-fw-crm-senders.php`, option `fw_crm_senders`
+  `{ profiles: id => { id, name, from_name, from_email, reply_to, service }, marketing: id, transactional: id }`).
+  Loads with the `email` OR `conversations` module. Every CRM send wraps its `wp_mail()` in
+  `begin( 'marketing'|'transactional', $profile_id )` / `end()`: campaign sender (`campaigns.sender_id`, new column),
+  `FW_CRM_Mail::send` (confirm/welcome), `FW_CRM_Direct_Email::send` (case replies go through it), `FW_CRM_Channels`.
+  Only inside that scope do its filters act: `wp_mail_from`/`_name` @50 (Direct_Email's writer name @999 still wins),
+  `wp_mail` (adds Reply-To if none), `pre_wp_mail` (hands off to the service). **Never hook these globally**: it would
+  reroute WooCommerce receipts and password resets. Decision: `/decisions/crm-senders-wrap-wp-mail`.
+- **Email services** `FW_CRM_Mail_Service` (`modules/email/services/`): SendGrid, Mailgun, Postmark, Brevo, Amazon SES
+  (SigV4, `sign()` is public and tested against an independent computation). Filter `unysonplus_crm_mail_services`
+  (id → class). Settings in option `fw_crm_mail_services`, `password` fields encrypted (`enc:` AES with the auth salt).
+  Not configured, or attachments on Mailgun/SES (`supports_attachments()` false) → returns null and the site mail sends it.
+  A service error → `wp_mail_failed` with its message and `pre_wp_mail` returns false. Message shape:
+  `{ to[], cc[], bcc[], from_email, from_name, reply_to, subject, html, text, headers{}, attachments[], purpose }`.
+  Postmark sends `purpose = marketing` on the configured stream.
+- **Webhooks**: `POST /wp-json/fw-crm/v1/mail-services/{id}/events?token=` (token option `fw_crm_mail_services_token`).
+  `parse_events()` → `{ type: bounce|soft_bounce|complaint|unsubscribe, email, message_id, detail }` →
+  `FW_CRM_Tracking::service_report()` (reuses `apply()`; matches the queue row by our `fwcrm-q<id>-` Message-ID when the
+  service echoes it) or, without the email module, `FW_CRM_Tracking_Bridge::report()` sets the status directly.
+  Mailgun checks the HMAC when a signing key is set; SES confirms the SNS subscription (host must be `sns.*.amazonaws.com`).
+- **Smart links** `FW_CRM_Smart_Links`: marker fragment `#crm-tag=a,b` on any link; Button block option
+  `tag_on_click`. Listens to the existing `unysonplus_crm_email_event( $type, $row, $link_id, $ctx )`, which fires only
+  for counted (non-scanner) events; a click adds the tags (`FW_CRM_Tags::add(…, 'smart_link')`). The marker is stripped before the redirect and from
+  untracked emails (`Sender::send_one`).
+- **Post digest** `FW_CRM_Digest` (option `fw_crm_digest`, hourly cron `fw_crm_digest_tick` while on): weekly on a weekday
+  or monthly on the 1st, after an hour; posts after `last_sent` → `Service::save_campaign()` + `schedule_campaign()`.
+  `last_sent` is recorded even when there is nothing new (no re-check that period).
+- **Channels** `FW_CRM_Channels` (`includes/`, always loaded): filter `unysonplus_crm_channels`
+  `id => { label, icon, address( $contact ), send( $contact, $message ), available }`; `send()` logs a timeline entry
+  (`email` or `message` type). Email is the only built-in channel.
+- Admin: `FW_CRM_Admin_Sending` renders the **Sending** section on Settings (actions `sending_*`); campaign editor
+  has a **From** select when profiles exist. Templates gained a **Follow-up** starter.
+
+## Support cases (1.0.72, schema 2.11.0)
+
+A light support ticket: `fw_crm_cases` (`id`, `title`, `status`, `priority`, `owner_id`, `contact_id`, `company_id`,
+`source` manual|form|email, `due_at`, `position`, `status_changed_at`, `solved_at`, `last_activity_at`, `created_by`,
+`created_at`, `updated_at`). The case number is its `id`, shown as `#12`.
+
+- **Fixed statuses, not the pipeline.** `FW_CRM_Cases::statuses()` = new, open, waiting (on customer), solved (`done`),
+  filter `unysonplus_crm_case_statuses`. Cases do NOT reuse pipelines/stages: those belong to the optional `pipeline`
+  module, and a support status has no value or probability. Priorities: low, normal, high, urgent.
+- **The conversation is the timeline** (`FW_CRM_Activity`, object_type `case`): `created` (with the first message),
+  `stage` (status changes), `owner`, `priority`, `note` (internal), `email` (reply sent), `email_in` (customer reply).
+  The contact's timeline gets one `case` entry when a case opens and when it is solved.
+- **Threading by subject.** `Cases::reply()` sends through `FW_CRM_Direct_Email` (needs the conversations module)
+  with the subject `[Case #12] Title`; `Cases::number_in()` reads it back. `FW_CRM_Cases_Intake::_on_email`
+  (on `unysonplus_crm_email_received`) puts a reply from that case's contact on the case and reopens a waiting or
+  solved case. Any other customer email opens a case only when the manager setting `from_email` is on, and never
+  when it is part of a deal thread or answers a CRM-sent email (`In-Reply-To`/`References` containing `fwcrm-`).
+- **Forms:** the "Add to the CRM" action's **Also create → A support case** calls `Cases_Intake::from_form()`:
+  title from a subject/topic-like field, else the first dropdown, else the start of the longest textarea; the
+  answers become the first timeline entry.
+- **Ownership:** new cases go to the contact's owner, else the `default_owner` setting, else unassigned.
+  `FW_CRM_Capabilities::can_edit_case()`: managers see all; a rep sees their own cases **and unassigned ones**, so
+  a new request is never invisible. "Take it" assigns to the current user.
+- Admin: `tab=cases` board (drag between statuses, `wp_ajax_fw_crm_case_move`, nonce `fw_crm_case_move`; solved
+  column shows the last 14 days) or `&view=list`; filters `owner` (me|none|id), `priority`, `age` (days), `s`
+  (text or `#number`). The board reuses `modules/pipeline/static/css/board.css` (it ships whether or not the
+  pipeline is on) plus `modules/cases/static/css/cases.css`.
+- Hooks: `unysonplus_crm_case_created`, `unysonplus_crm_case_updated`, `unysonplus_crm_case_status_changed`,
+  `unysonplus_crm_case_deleted`; automation event `crm.case_created`.
+
 ## Webhooks (1.0.67, schema 2.10.0)
 
 Module `webhooks` (`modules/webhooks/`): `FW_CRM_Webhooks`, `FW_CRM_REST_Webhooks`, `FW_CRM_Admin_Webhooks`. Tables
@@ -622,7 +841,7 @@ What another extension (Membership first) builds on. Call it only while `fw_ext(
 | filter `unysonplus_crm_nav` | A sidebar item may carry `url` to link to the extension's own screen |
 | action `unysonplus_crm_contact_updated( $contact, $before_row, $changes )` | `$changes` = changed columns as `field => { old, new }` (custom fields not included) |
 
-## Automation registration (agreed shape; the engine is Phase 4, not built yet)
+## Automation registration (the engine is built: see Automations)
 
 Register now; nothing reads these until the Automations module exists, so registering is harmless while it is off.
 Decision log: "How do other extensions plug their own triggers and actions into CRM Automations?"

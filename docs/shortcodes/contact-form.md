@@ -40,6 +40,9 @@ All atts are **flat leaves** — the tabs and groups in the modal (Form Fields /
 | `confirmation_url` | text | `''` | absolute URL or `/path`; answer tags allowed | Address for `url` (validated with `wp_validate_redirect`). |
 | `action_autoresponder` · `_subject` · `_message` · `_answers` | switch · text · textarea · switch | `'no'` · … · `'no'` | | **Actions → Email the sender**: a confirmation email to the first email field. `_answers` adds a copy of the answers. |
 | `success_message` | text | `'Message sent!'` | string (answer tags allowed) | Shown after a successful submit — **also** when the email failed but the entry was stored (see Notes). |
+| `messages_position` | select | `'above'` | `above` · `below` | Where the sent message and the error summary appear: above the form or under the Send button (`data-fw-messages` on the wrapper, read by `submit.js`). |
+| `email_from_name` | text | `''` | string, answer tags allowed | Sender NAME of the notification (e.g. `{your_name} via {site_name}`); empty = the Mailer's. The address is always the site's. |
+| `email_body` | textarea | `''` | text, answer tags allowed | Notification body; `{all_fields}` lists every answer. Empty = the standard answers table (`views/email.php`). |
 | `failure_message` | text | `'Oops something went wrong.'` | string | Shown when the email fails **and** nothing is stored (the mailer error is appended). |
 | `mailer` | mailer | — | mailer option-type value | The **Mailer** tab. It edits the **site-wide** mailer settings (the option type is backed by the `fw_ext_settings_options:mailer` WP option); sending always uses the site-wide settings, never a per-form copy. Omit it in generated JSON. |
 | `form_style` | select | first Form Style preset (`formp-standard`) | `''` (None: plain fields) or a `formp-{slug}` from Theme Settings → Components → Form Styles | Style → **Form Style**: the field look. See `../theme-settings/form-styles.md`. |
@@ -82,7 +85,7 @@ Each item: `{ "type": "<item type>", "shortcode": "<type>_<slug>", "width": "<w>
 
 - `shortcode` must be **unique within the form** — it is the submitted field name and the key in `form_values`. Convention: `<type>_<slug>` (`text_name`, `email_1`, `select_service`). If it is empty the builder generates one.
 - `width`: `1_1` (full), `1_2`, `1_3`, `2_3`, `1_4`, `3_4`, … (`form-header-title` uses `''`).
-- `options`: missing keys take the item's defaults (every item is normalised through its class on save), so a starter-sized item like the ones below is enough. Common to all input items: `label`, `required` (bool), `info` (help text), and the **conditional-visibility** keys `cond_enabled` (`'yes'`/`'no'`), `cond_field` (the controlling field's **label**, exactly), `cond_op` (`is` `is_not` `contains` `not_empty` `empty`), `cond_value`.
+- `options`: missing keys take the item's defaults (every item is normalised through its class on save), so a starter-sized item like the ones below is enough. Common to all input items: `label`, `tag` (the **Field Name**: an answer-tag alias such as `your_name`, letters/numbers/`_`; empty = the `shortcode` is the tag), `required` (bool), `info` (help text), and the **conditional-visibility** keys `cond_enabled` (`'yes'`/`'no'`), `cond_field` (the controlling field's **label**, exactly), `cond_op` (`is` `is_not` `contains` `not_empty` `empty`), `cond_value`.
 
 | `type` | Type-specific `options` |
 |---|---|
