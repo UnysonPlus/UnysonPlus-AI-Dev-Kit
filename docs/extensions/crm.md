@@ -569,6 +569,39 @@ date }`), `action_crm_update` (`blank` | `always`), `action_crm_create` (`''` | 
 - Forms rate-limits visitor submissions (`fw_rate_limit_exceeded( 'fw_ext_forms_submit', 10, 600 )`): repeated test
   submissions answer "Too many submissions" — filter `fw_rate_limit` to 0 for that action on a test site.
 
+## Workspace: run the site as a CRM (1.0.78, core 3.0.55)
+
+The CRM registers a **workspace** (`fw_register_workspace( 'crm', … )` on `fw_workspaces_register`, from the
+extension class, outside `is_admin()`, because the login redirect runs on `wp-login.php`). Core's
+**Unyson+ → Admin Menu** (tabs **Menus** = the editor, default; **Roles** = what each role opens to) (`framework/includes/workspaces/class-fw-workspaces.php`, option `fw_workspaces`)
+then lets the owner choose per role (the old "menus to keep" list is gone; the Menus tab does that now):
+
+- **Opens to** the CRM: login (when no specific page was requested) and Dashboard redirect to `admin.php?page=fw-crm`;
+  the WordPress menu keeps only the CRM, Profile and the menus ticked for that role; the admin bar loses
+  wp-logo / comments / new-content / updates / customize; focus mode is the default (`fw_admin_app_focus_default`)
+  until the person chooses.
+- **Own menu item**: the CRM gets a top-level item (position 3, class `fw-ws-menu`) for everyone who can use
+  it. The page stays registered under Unyson+; that submenu entry is hidden (`fw-ws-moved`) and the top-level
+  item links to the same URL, so the hook suffix `unysonplus_page_fw-crm` and the app shell's `attach()` are
+  unchanged. Current-item highlighting is set in the page, because WordPress re-derives `$parent_file` from the
+  registration after the `parent_file` filter.
+- Administrators get **Switch to WordPress / Switch to CRM** in the admin bar (user meta `fw_workspace_off`).
+
+**Menus tab** (core `FW_Admin_Menu_Editor`, `framework/includes/workspaces/class-fw-admin-menu-editor.php`, option
+`fw_admin_menu` = role => { order, hidden, labels, icons, sub_hidden, map, group_labels, slugs }): per-role drag order,
+rename, dashicon, hide items and sub-items, live preview, copy from role, reset. Applied server-side inside
+`FW_Workspaces::_action_shape_menu()` after promotion and `capture()`; the menu is rebuilt with keys 10, 20… and the
+same order is returned from `menu_order` (PHP_INT_MAX) in case a plugin turns on `custom_menu_order`. Keys = the
+item's `<li>` id; a promoted workspace now uses `toplevel_page_<page>`, the id a real top-level page gets, so one key
+fits admins and reps. A workspace role's menu = workspace + Profile + what the layout shows; items the layout never saw
+stay hidden for it (other roles get them at the end). Hidden top-level slugs are redirected on `admin_init`. The admin
+bar switch shows for a customised role too ("Show the full menu"). **Roles tab extras (CRM 1.0.79, Membership 1.0.27, core 3.0.55):** `fw_register_workspace()` takes optional `roles` (opened to the app), `members` (kept out of wp-admin) and `setup` (button label); **Quick set-up → Apply** (`FW_Workspaces::setup( $id )`, admin-post `fw_workspaces_setup`) applies them and `FW_Admin_Menu_Editor::lift_for_admins()` gives every `manage_options` role the app as a top-level item. The CRM declares roles `fw_crm_manager` + `fw_crm_sales_rep` ("Run the site as a CRM"). **Members:** `fw_workspaces['members'] = { roles[], page }`; `FW_Workspaces::is_kept_out( $user )` = a ticked role, no app role, not `manage_options`. Kept-out users are redirected from any wp-admin request on `admin_init` priority 1 (not admin-ajax / admin-post / async-upload) and from a wp-admin `login_redirect`, to `member_home()` (chosen page → `fw_workspaces_member_home` filter → home; a wp-admin URL is refused), and get `show_admin_bar` false. Membership declares members `subscriber` ("Run a members' site") and answers the filter with its account page. **Sub-item drag** (core 3.0.55): sub-items sort within their own parent (`sub_order` key => slugs; the parent's own first entry is pinned first, because the parent links to it), drag out to a top-level list = lift, a lifted row dropped back into its own parent's list = move back; any other drop is cancelled (jQuery UI `receive` + `cancel`). The old site-wide "own menu item" switches (`fw_workspaces['menu']`) are migrated once on `admin_init` into lifts for every role with `manage_options`, placed after Dashboard (`place_unsaved()`); `promoted()` now only covers the active workspace. A lifted workspace page keeps its app icon and the `fw-ws-menu` class. **Lifted sub-items** (`lifted` = [ { parent, slug } ]): any submenu page (e.g. SEO `fw-seo-settings` under `fw-extensions`, `site-health.php` under `tools.php`) gets a top-level item per role, key/id `fw-lift-<slug>`, href from `sub_url()` (core file as is; plugin page under a core file's menu → `<file>?page=`; else `admin.php?page=`). The submenu entry is only hidden (`fw-ws-moved`), so screen ids, hooks and the access check are unchanged; current-item marking is done in the page (`_action_mark_current`). The parent's own first entry cannot be lifted. It replaces the Admin Skin's skin-only layout
+(`fw_admin_skin_menu_layout`, imported once when `fw_admin_menu` does not exist yet).
+
+Pair it with the CRM roles: a workspace hides menus, the roles limit access. Membership registers
+`membership` the same way. `FW_WORKSPACES_OFF` in `wp-config.php` disables the feature. The Admin Skin maps
+`fw-ws-menu` into its Workspace group.
+
 ## AI Assistant tools per module (1.0.77)
 
 Each module that can be set up by an AI app ships `modules/<module>/ai-abilities.php`, required inside that module's

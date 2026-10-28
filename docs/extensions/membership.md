@@ -53,6 +53,10 @@ quizzes and certificates (phase 11).
   context lookup), `payments`. No ENUMs, NULL for unset dates, no foreign keys. Never dropped on deactivate.
 - **Cron:** `fw_membership_expire_due` (hourly) ends memberships whose `ends_at` has passed.
 
+## Workspace (1.0.26, core 3.0.55)
+
+Membership registers the `membership` workspace (`fw_register_workspace()`, page `fw-membership`, capability `FW_Membership_Service::capability()`), so a staff role can open to Membership instead of the WordPress dashboard, set on core's **Unyson+ → Admin Menu → Roles**, and Membership can be dragged out of the Unyson+ menu to a top-level item on its **Menus** tab. See the CRM doc's "Workspace" section for what a workspace does. Since 1.0.27 it also declares a one-click set-up, **Run a members' site** (members = `subscriber`, kept out of wp-admin), and answers `fw_workspaces_member_home` with `FW_Membership_Settings::account_url()` (unless that is a wp-admin address), so kept-out members land on their account page.
+
 ## PHP API
 
 | Call | Does |

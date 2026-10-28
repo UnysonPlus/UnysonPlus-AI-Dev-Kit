@@ -282,8 +282,8 @@
         "{plugin}/framework/extensions/admin-skin/manifest.php",
         "{plugin}/framework/extensions/admin-skin/settings-options.php"
       ],
-      "hash": "631f3bc7689e49767a433ffa1642b68b",
-      "synced": "2026-10-20"
+      "hash": "e917f3f7dc48b91345379a246cdb75d7",
+      "synced": "2026-10-27"
     },
     "extensions/ai-assistant.md": {
       "kind": "extension",
@@ -366,8 +366,8 @@
         "{plugin}/framework/extensions/crm/manifest.php",
         "{plugin}/framework/extensions/crm/settings-options.php"
       ],
-      "hash": "8ed068683365beba78ab04d4ab89bdd7",
-      "synced": "2026-10-20"
+      "hash": "dba7676c864f5257701bf92137af52df",
+      "synced": "2026-10-28"
     },
     "extensions/custom-fields.md": {
       "kind": "extension",
@@ -437,8 +437,8 @@
       "src": [
         "{plugin}/framework/extensions/membership/manifest.php"
       ],
-      "hash": "f73d60b914a74a50ead1f48391c88c2d",
-      "synced": "2026-10-20"
+      "hash": "fa06c95cedb819c178fa2a3273278d5e",
+      "synced": "2026-10-28"
     },
     "extensions/portfolio.md": {
       "kind": "extension",
