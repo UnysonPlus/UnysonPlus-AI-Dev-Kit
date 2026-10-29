@@ -73,6 +73,8 @@ echo   Logging this run to: %UPWK_LOG%
 echo   ^(the 5 newest run logs are kept in %LOGDIR%^)
 
 cd /d "%SVC%"
+REM Once: offer to connect the AI agents found (Claude Code, Cursor, Codex) to Kinetic Scenes. Never fatal.
+node studio-cli.mjs connect --ask 2>nul
 call start-converter.bat
 exit /b 0
 

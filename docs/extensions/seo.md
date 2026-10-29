@@ -544,3 +544,63 @@ screen with 30 template fields does not fire 30 requests at once.
 `seo-get-page` (panel; effective values via `FW_SEO_Chain::resolve` + `::source`, overrides from
 `FW_SEO_Store`, length hints), `seo-update-page` (panel; `FW_SEO_Store::set_post`, empty string clears,
 snapshot of the `_fw_seo_<field>` meta for `undo-change`), `seo-audit` (≤100 published posts).
+
+---
+
+## Search Console (2.0.25) and index coverage (2.0.29)
+
+Two reports on one OAuth connection. **`FW_SEO_Console`** holds the credential and does the talking;
+**`FW_SEO_Inspect`** borrows it for the URL Inspection API.
+
+### The connection
+
+- The user creates their **own** Google Cloud project and OAuth client — the site talks to Google
+  directly, and no credential of ours is involved. Scope is `webmasters.readonly`.
+- `store_tokens()` writes `fw_seo_console_tokens` with `autoload` **off**: read on two admin screens,
+  not on every front-end request.
+- **A refresh response omits `refresh_token`.** `refresh()` keeps the existing one
+  (`! empty( $body['refresh_token'] ) ? … : $existing['refresh']`); overwriting it with the absent
+  value disconnects the site on the first refresh, which is a bug that only shows up an hour later.
+- **The seven-day trap.** An OAuth app left on "Testing" has its grant cancelled by Google after
+  exactly seven days. `looks_like_testing_expiry()` recognises the signature (6–10 days between
+  connecting and failing) and says *publish the app*, because "connect again" fixes it for another
+  seven days and teaches the wrong lesson.
+- `request( $path, $body )` takes **either** a path under `API_BASE` **or** a full `https://` URL.
+  That is how URL Inspection — on `searchconsole.googleapis.com`, a different host — reuses one
+  token-refresh path instead of growing a second one that forgets to refresh.
+
+### Reporting windows
+
+`LAG_DAYS = 3`: Search Console data is about three days behind, so a window ending today is partly
+empty and reads as a collapse in traffic. `missed_clicks()` drops rows under **100 impressions** —
+below that a click-through rate is noise, and acting on it means rewriting titles on the strength of
+three visitors.
+
+### Index coverage
+
+- **Quota-shaped, not taste-shaped.** Google allows 2,000 inspections per property per day.
+  `DAILY_CAP = 1800` leaves room for the on-demand checks someone makes while working, so a 3am
+  sweep cannot exhaust the day.
+- `spend()` counts **every** call, including failed ones — a refused call still counted at Google's
+  end, and pretending otherwise walks straight into a rate limit.
+- An hourly cron takes `BATCH` URLs, never-checked first then stalest; `_maybe_schedule()` adds the
+  event when connected and removes it when not. The sweep **breaks out** on `revoked`, `noaccess`,
+  `ratelimited` or `nobudget` rather than discovering the same refusal nine more times.
+- `state()` maps a row to `indexed|excluded|missing|unknown`. **Order matters:** the "no verdict"
+  case is checked *before* the exclusion checks, because an absent `indexingState` is not
+  `INDEXING_ALLOWED` either — tested last, a page nothing is known about reports as "excluded on
+  purpose", which tells the user it is deliberately blocked when nothing is known at all. A test
+  pins this.
+- `canonical_mismatch` is the derived fact worth surfacing: Google chose a different canonical, so
+  the URL is reporting on another page. Only a mismatch between **two present** values counts — an
+  empty `userCanonical` has nothing to disagree with.
+- Results live in `_fw_seo_inspect` post meta, re-checked after `STALE_DAYS`.
+
+### Gotchas
+
+- **There is no honest "check everything now" button.** It would either spend a day's quota on one
+  click or queue work and claim to have finished. Per-row re-check is affordable; a sweep is not.
+- **The live API cannot be exercised locally** without a connected property. The suites cover parse,
+  state, staleness and the budget with fixtures; the populated report is verified by seeding
+  `_fw_seo_inspect` meta on a test site and rendering it. Do not report the HTTP path as verified
+  from a green suite.

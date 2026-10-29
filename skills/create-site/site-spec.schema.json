@@ -1,0 +1,160 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://docs.unysonplus.com/schemas/site-spec.schema.json",
+  "title": "Site spec",
+  "description": "The structured description of a site to be built. THE SPEC, NOT A PROSE PROMPT, IS THE SOURCE OF TRUTH: the build reads this, and anything not in it was not asked for. Generalized from the CRM website generator's emitted spec (crm-generator/src/assets/engine.js) — its CRM-only blocks (`crm`, `lead_capture`) survive here as optional vertical extensions rather than as core fields.",
+  "type": "object",
+  "required": ["spec_version", "business", "pages", "brand", "build"],
+  "additionalProperties": true,
+  "properties": {
+    "spec_version": {
+      "type": "integer",
+      "description": "Bumped when a field changes meaning, so an old spec is never silently misread.",
+      "minimum": 1
+    },
+    "source": {
+      "type": "string",
+      "enum": ["brief", "url", "design-reference", "vertical"],
+      "description": "Which intake produced this spec. The build path differs: `url` and `design-reference` go through capture, `brief` and `vertical` do not."
+    },
+    "vertical": {
+      "type": ["string", "null"],
+      "description": "A vertical template id when one was chosen (Phase 6), else null."
+    },
+
+    "business": {
+      "type": "object",
+      "description": "Who the site is for. Every field here is a FACT — if the person did not supply it, it is null and listed in `missing`, never guessed.",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": ["string", "null"], "description": "e.g. 'barbershop', 'law firm'." },
+        "tagline": { "type": ["string", "null"] },
+        "market": { "type": ["string", "null"], "description": "Town, city or region served." },
+        "language": { "type": "string", "default": "English" },
+        "phone": { "type": ["string", "null"] },
+        "email": { "type": ["string", "null"] },
+        "address": { "type": ["string", "null"] },
+        "hours": { "type": ["string", "null"] }
+      }
+    },
+
+    "pages": {
+      "type": "array",
+      "description": "The sitemap. Order is the nav order. A page with no content to put in it does not belong here.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["slug", "title", "purpose"],
+        "properties": {
+          "slug": { "type": "string", "description": "'' for the home page." },
+          "title": { "type": "string" },
+          "purpose": { "type": "string", "description": "One line: what this page is for. The composition guide reads it to pick a page shape." },
+          "shape": {
+            "type": ["string", "null"],
+            "enum": ["home", "about", "services", "pricing", "contact", "custom", null],
+            "description": "A page shape from docs/site-creator/composition.md. null = infer from `purpose`."
+          },
+          "sections": {
+            "type": ["array", "null"],
+            "description": "Optional explicit section list, each an archetype + variant from the recipe catalogue. null = let the page shape decide.",
+            "items": {
+              "type": "object",
+              "required": ["archetype"],
+              "properties": {
+                "archetype": {
+                  "type": "string",
+                  "enum": ["hero", "navbar", "feature-grid", "cta", "footer", "marquee", "pricing", "other"]
+                },
+                "variant": { "type": ["string", "null"], "description": "A variant named in that archetype's recipe file; null = the style's preferred one." },
+                "content": { "type": ["object", "null"], "description": "Slot values for the recipe. A slot absent here is OMITTED, never filled with something plausible." }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "brand": {
+      "type": "object",
+      "description": "The design direction. `style` names a file in docs/site-creator/styles/; the colours override that style's palette where the business owns one.",
+      "required": ["style"],
+      "properties": {
+        "style": { "type": "string", "description": "A style id (e.g. 'monochrome', 'modern-dark'), or 'custom' with `style_notes`." },
+        "style_notes": { "type": ["string", "null"], "description": "The describe-your-own escape hatch, so the curated set is never a cage." },
+        "primary": { "type": ["string", "null"], "description": "Hex. null = the style's own." },
+        "accent": { "type": ["string", "null"] },
+        "logo": {
+          "type": ["string", "null"],
+          "enum": ["supplied", "text", null],
+          "description": "'supplied' = the owner provides a file (sideload it into the target site's Media Library — a hardcoded URL or a foreign attachment id renders nothing). 'text' = a text logo from the business name."
+        }
+      }
+    },
+
+    "content": {
+      "type": ["object", "null"],
+      "description": "Real copy the person supplied, keyed by page slug. The build uses this verbatim where given.",
+      "additionalProperties": true
+    },
+
+    "proof": {
+      "type": ["object", "null"],
+      "description": "Testimonials, logos, metrics, awards — ONLY as supplied. If this is null or empty, the built pages have no proof band. An invented testimonial is not a placeholder, it is a fabricated claim about a real business.",
+      "properties": {
+        "testimonials": { "type": "array", "items": { "type": "object" } },
+        "logos": { "type": "array", "items": { "type": "object" } },
+        "metrics": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+
+    "seo": {
+      "type": ["object", "null"],
+      "description": "Configured against the real business details — never invented locations, hours or service areas.",
+      "properties": {
+        "title_pattern": { "type": ["string", "null"] },
+        "description": { "type": ["string", "null"] },
+        "schema_type": { "type": ["string", "null"], "description": "schema.org type, e.g. LocalBusiness, ProfessionalService." },
+        "local": { "type": ["boolean", "null"] }
+      }
+    },
+
+    "compliance": {
+      "type": ["object", "null"],
+      "description": "Cookie notice, privacy policy, consent wording — jurisdiction-dependent and never assumed.",
+      "additionalProperties": true
+    },
+
+    "build": {
+      "type": "object",
+      "description": "Where and how it is built.",
+      "required": ["target"],
+      "properties": {
+        "target": { "type": "string", "description": "The WordPress install: a localhost slug, or a host the person named." },
+        "publish": {
+          "type": "string",
+          "enum": ["draft", "publish"],
+          "default": "draft",
+          "description": "DEFAULT DRAFT. Pages are not published until the person asks — see build-rules.md."
+        },
+        "extensions": { "type": "array", "items": { "type": "string" }, "description": "Unyson+ extensions to activate." },
+        "theme": { "type": ["string", "null"], "description": "Child theme slug; null = generate one." }
+      }
+    },
+
+    "lead_capture": {
+      "type": ["object", "null"],
+      "description": "OPTIONAL vertical extension (the CRM generator's own block, kept compatible). Forms, notification address, placements."
+    },
+    "crm": {
+      "type": ["object", "null"],
+      "description": "OPTIONAL vertical extension. Pipeline stages, lists, lifecycle emails."
+    },
+
+    "missing": {
+      "type": "array",
+      "description": "THE MOST IMPORTANT FIELD. Every fact the intake could not establish, by id. The build reads it as 'do not invent these': a page whose proof is listed here ships without a proof band, and the person is told what to supply. Carried over from the CRM generator, where it does the same job.",
+      "items": { "type": "string" }
+    }
+  }
+}

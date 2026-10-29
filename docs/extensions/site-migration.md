@@ -155,6 +155,24 @@ these would be the source's values. Preserved: `active_plugins`, `siteurl`,
 prefix-dependent usermeta keys and `user_roles`; skipping that locks every user
 out when prefixes differ.
 
+## Hosts that only write PHP from wp-admin — "Finish migration"
+
+Some managed hosts (WP Engine is the confirmed one) refuse to CREATE `.php` files in a request like the
+migration's background calls, while allowing exactly the same write from wp-admin; the folders still report
+writable. Without handling, the database went live on top of old theme and plugin code.
+
+At finalize the destination probes for real (`FW_SM_Receiver::php_create_allowed()`: a throwaway `.php` in
+the plugins folder; filter `fw_sm_php_create_allowed`). If the migration staged any `.php` and the probe
+fails, **nothing goes live**: files and tables stay staged, the session gets `awaiting_finish`, option
+`fw_sm_awaiting_finish` drives a wp-admin notice ("A site migration is waiting for you to finish it" —
+Finish migration / Discard, class `upa-keep` so Admin Skin leaves it in place), and finalize answers
+`{ queued: true }` — the source logs that the destination's administrator clicks Finish, and closes its run.
+Finish (`admin_post_fw_sm_finish_incoming`) runs the same `complete()` the source's finalize uses; the result
+is stored in `fw_sm_finish_result` and shown once. The admin is usually logged out afterwards (the users
+table is now the source's) — expected. A new migration, or clearing the incoming one, removes a waiting one.
+Tested end to end on two localhost installs with a must-use filter imitating the host rule (123 tables,
+2,152 files held, then live on the click, themes identical to the source).
+
 ## The background runner
 
 - Loopback `POST` to `admin-ajax.php?action=fw_sm_run`, non-blocking.

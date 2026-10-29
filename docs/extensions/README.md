@@ -29,6 +29,7 @@ shapes live in `../shortcodes/`, `../option-types/`, `../theme-settings/README.m
 | `seo` | theme-recommended | Dynamic `%%tag%%` title/description templates with auto-generation, canonical URLs, robots control, XML sitemaps, live SERP preview → `seo.md` |
 | `custom-fields` | download | ACF-style field groups; values stored in the post's framework options (`fw_options`), read with `fw_get_field()` / `fw_get_db_post_option()` → `custom-fields.md` |
 | `post-types` | download | Custom post types / taxonomies |
+| `headless-wordpress` (Headless WordPress) *(0.1, testing)* | not yet listed in the Extensions manager | Ready-to-use images in `unysonplus_fields`, `unysonplus/v1/menus` and `unysonplus/v1/settings` endpoints for headless front ends → `headless-wordpress.md` |
 | `site-converter` | download | URL/HTML → UnysonPlus conversion (the automated pipeline) |
 | `live-editor` | theme-recommended | Front-end inline editing ("Edit Live"); needs `page-builder` |
 | `builder` | download (required by Shortcodes / Forms — pulled in with them) | The base `builder` option type (fifths grid, template AJAX) |

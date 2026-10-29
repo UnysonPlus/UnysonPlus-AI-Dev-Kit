@@ -24,3 +24,13 @@ Thumbs.db
 
 # Local-only training extractor (contains source-site brand content — never ship)
 /tools/training/
+
+# Converter-trainer corpus that names real captured source sites -- NEVER ship.
+# corpus-01.txt is keyed by neutral abstract slugs and is fine; corpus-02 lists
+# the actual URLs that were converted, which must not appear in any artifact.
+/tools/converter-trainer/sites/corpus-02.txt
+/tools/converter-trainer/capture-out/
+
+# Stray capture artifacts from measure runs (regenerable, never shipped)
+/tools/measure/shot.png
+/tools/measure/undefined/

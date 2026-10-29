@@ -87,6 +87,23 @@ const NARRATIVE = new Set([
   'extending.md', 'converter-training-prompt.md', 'site-build-protocol.md',
   'converter-fix-my-site-prompt.md', 'build-reference.md', 'conversion-protocol.md',
   'extensions/membership-building.md',
+  // how-to recipes: a procedure across several sources, not a mirror of one
+  'animation-engine/child-theme-fallback-effect.md', 'animation-engine/motion-gap-findings.md',
+  'animation-engine/scroll-timeline.md', // author tools: spans scroll-timeline-editor + scroll-ruler modules
+  'site-creator/recipes/README.md', 'site-creator/recipes/heroes.md',
+  'site-creator/recipes/navbars.md', 'site-creator/recipes/feature-grids.md',
+  'site-creator/recipes/ctas.md',
+  'site-creator/recipes/footers.md',
+  'site-creator/recipes/marquees.md',
+  'site-creator/styles/README.md', 'site-creator/styles/monochrome.md',
+  'site-creator/styles/brutalist.md', 'site-creator/styles/modern-dark.md',
+  'site-creator/styles/newsprint.md', 'site-creator/styles/swiss.md',
+  'site-creator/styles/terminal.md', 'site-creator/styles/luxury.md',
+  'site-creator/composition.md', 'site-creator/ship-gate.md',
+  'site-creator/gallery.md', 'site-creator/onboarding.md',
+  'site-creator/verticals/README.md', 'site-creator/verticals/catalogue.md',
+  'site-creator/verticals/local-business.md', 'site-creator/verticals/professional-service.md',
+  'site-creator/verticals/ecommerce.md', 'site-creator/verticals/saas.md',
   // aggregate reference docs (no single source dir)
   'option-types/containers.md', 'option-types/declaring-options.md', 'option-types/icon-v2.md',
   'option-types/icon-v3.md', 'option-types/primitives.md', 'theme-settings/programmatic-setup.md',

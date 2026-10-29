@@ -91,6 +91,14 @@ Notes on shapes:
   rather than one-off hexes. Prefer it over the plain Color field for anything that should track
   Theme Settings.
 
+## REST API
+
+A group with **Show in REST API** on puts its values under `unysonplus_fields` on each post of its post types (read-only, stored value shapes, e.g. an Image is `{ attachment_id, url }`).
+
+- **Per field:** each field row has `show_in_rest` (checkbox, default `true`; a missing key counts as on). Off = the field is left out of `unysonplus_fields` and the schema (0.1.23).
+- **Schema:** the REST field publishes a JSON schema, one typed property per exposed field (0.1.23), instead of `null`.
+- **Filter:** `fw_ext_custom_fields_rest_values` (`$values, $post_id, $post_type`, 0.1.22) changes the values; the **Headless WordPress** extension uses it to resolve images (`headless-wordpress.md`).
+
 ## Create a Field Group via the extension
 
 1. Go to **Unyson+ → Custom Fields** and click **Add Field Group**.

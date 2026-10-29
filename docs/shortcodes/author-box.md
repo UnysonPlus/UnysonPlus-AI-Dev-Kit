@@ -12,6 +12,12 @@ An author / profile box — avatar, name, bio, social links and a "view all post
 | `role` | text | `''` | string | Role / tagline shown under the name. |
 | `bio` | textarea | `''` | string | Custom bio, or overrides the user's biographical info. |
 | `avatar` | upload | `''` | WP upload object | Custom avatar, or overrides the user's Gravatar. |
+| `profile_role_key` | text | `''` | profile field key | Role from a user profile field (e.g. `title`) when `role` is empty. |
+| `profile_bio_key` | text | `'description'` | profile field key | Which profile field holds the bio (`description` = Biographical Info; e.g. `full_bio`). |
+| `show_email` | switch | `'no'` | `yes` `no` | Adds a line with the user's email as a `mailto:` link, under the bio. |
+| `email_label` | text | `''` | string | Text before the address on the email line (e.g. `Feedback -`). |
+| `profile_socials` | switch | `'no'` | `yes` `no` | Adds the user's Website and any profile field named after a catalog network (`twitter`, `linkedin` …) as links, before `socials`. |
+| `profile_email_icon` | switch | `'no'` | `yes` `no` | With `profile_socials`: also an email icon for the user's address. |
 | `socials` | addable-popup | `[]` | array of `{ network, url }` | Social / profile links. `network` from the catalog, `url` string. |
 | `design` | image-picker | `'card'` | `card` `centered` `banner` `minimal` | Layout / visual treatment of the box. |
 | `avatar_shape` | select | `'circle'` | `circle` `rounded` `square` | Avatar mask shape. |
@@ -54,5 +60,6 @@ An author / profile box — avatar, name, bio, social links and a "view all post
 - `source` drives resolution: `current` uses the post's `post_author` (or a queried author archive), `user` uses `user_id`, `custom` uses the overrides only. Name/bio/avatar fall back to the user's data; overrides win.
 - `show_posts` uses `'yes'`/`'no'` strings (not booleans). It is skipped entirely for custom authors (there is no author archive to link to).
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, NOT a raw hex string. See `README.md`.
+- **From the user's profile** (shortcodes 1.15.80): for a site that keeps author details in its own profile fields, `profile_role_key` / `profile_bio_key` pick the fields, `show_email` + `email_label` add the email line, and `profile_socials` (+ `profile_email_icon`) turns the profile's Website and network-named fields into links. Typed `role` / `bio` still win; a hand-entered link with the same URL is not repeated.
 - `socials` is an addable-popup array; each item is `{ network, url }` where `network` is a key from the social catalog (email → `mailto:`).
 - `card`/`banner`/`centered` designs are boxed; `minimal` is bare. Responsive stack at ≤576px.

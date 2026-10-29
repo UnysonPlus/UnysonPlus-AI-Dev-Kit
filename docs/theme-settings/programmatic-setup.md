@@ -103,15 +103,28 @@ $hm['main_center']=array(array('element_type'=>array('element'=>'menu_area','men
 $hm['main_right']=array(array('element_type'=>array('element'=>'custom_html','custom_html'=>array('custom_html_content'=>$minicart_shortcode))));
 fw_set_db_settings_option('header_main', $hm);
 ```
-Also **`header_menu`** (`menu_link_color`/`_hover_color`/`_font_size`) and **`header_topbar`**
+Also **`header_menu`** (`menu_link_color` / `menu_link_hover_color` / `menu_link_font_size` — spelled in full because the
+size one is a `unit-input`, `array( 'value' => '0.875', 'unit' => 'rem' )`, not a scalar) and **`header_topbar`**
 (`topbar_center` = an element list, same shape) for an announcement strip.
 
 ## 7. Footer — `main_footer_columns` (multi-picker: count) + `footer_background` + `copyright_settings`
 Nesting: `{ count:'N', 'N':{ main_footer_auto, main_footer_split, main_footer_col_1..N } }`. `split` =
 array of `{w,name}` (widths sum to 100). **Use NATIVE elements per column** (see
-[footer.md](footer.md) for every element's value shape) — `menu` (link columns), `icon_text`
-(`icontext_icon`=`['type'=>'icon-font','icon-class'=>'fas fa-phone']`, `icontext_text`,
-`icontext_link_type`,`icontext_link`), `social_icons` (profiles from Theme Settings → Social),
+[footer.md](footer.md) for every element's value shape). The **current picker** offers: `logo`, `footer_logo`,
+`menu`, `menu_area`, `heading`, `list_item`, `cta_button`, `search`, `social_icons`, `newsletter`,
+`custom_html`, `text`, `widget_area`, `back_to_top`, `builder_section`, `snippet`.
+
+> **`icon_text` is NOT one of them.** This doc used to show an `icon_text` column element with
+> `icontext_icon` / `icontext_text` / `icontext_link_type` / `icontext_link`. The renderer still handles it
+> (`footer-builder.php` has a `case 'icon_text'`) so pages that saved one keep working — but it is not in
+> the element picker, so new work cannot choose it in the UI and should not write it. Its modern
+> equivalent is **`list_item`** (`li_text`, `li_icon`, `li_link_type` = `none`|`url`|`email`|`phone`,
+> `li_link`, `li_target`), which the renderer groups with it. A contact row is a `list_item` with
+> `li_link_type => 'phone'`.
+
+Also note a native **`heading`** element (`heading_text`, `heading_level`, `heading_icon`) and a native
+**`newsletter`** element exist — prefer them over a `text` element containing `<h2>`, and over
+`custom_html` containing a sign-up form.
 `text` (`text_content` WYSIWYG; column title = `<h2>` styled small) — **`custom_html` only for
 bespoke markup** (e.g. a newsletter form).
 ```php

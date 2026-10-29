@@ -107,6 +107,33 @@ Honours reduce-motion (skipped). It's the lossless fallback: styling → Custom 
   effect actually renders. Independent of the core Entrance (Animate.css) animation.
 - Sub-options live under `gsap_motion.choices[<effect>]` inside a `group_gsap_<effect>` wrapper
   (container id only — not stored); switching effects never loses the others' values.
+- **`color_scrub` resolves its colours in ONE batch (runtime 1.4.40).** Each element's A/B colours are
+  raw values (a hex, or `var(--colour-x)`), so the runtime writes the raw value onto the element and
+  reads back the concrete `rgb()` — GSAP can only interpolate real values. That write-then-read is a
+  forced style recalculation, and it used to run **twice per element, interleaved** (write, read,
+  restore, write, read, restore), so N elements cost **2N serialised recalcs** — the thing a page-speed
+  "forced reflow" audit flags, growing linearly. `colorScrub()` now queues the element and a microtask
+  flush resolves the whole batch in phases: write all → read all → write all → read all → restore all,
+  then build the tweens. Two recalculations for any N. Measured against the pre-fix file with the same
+  page: **20 elements 203 → 165, 60 elements 603 → 485, 200 elements 2002 → 1605** JS-forced style
+  events — exactly `2N − 2` removed each time. Each element is still read **in place** rather than
+  cached by raw value, so a section that scopes `var(--colour-x)` differently still resolves correctly.
+  If you add another effect that resolves a value this way, queue it the same way; never write-then-read
+  per element in a loop.
+- **The runtime and its CSS are served minified (1.4.41).** `scroll-motion-render.php` wraps both
+  enqueues in `fw_min_uri()`, which swaps in the `.min` sibling **only when the path is listed in
+  `framework/build-manifest.php`** — the manifest the build writes from what that run actually
+  produced, so a stale or hand-made `.min` can never be served in place of its source. The two GSAP
+  vendor files beside it are excluded on purpose (already minified; `fw_min_uri` would look for
+  `*.min.min.js`). Measured: `upw-gsap.js` 39,738 → 15,490 bytes.
+- **⚠ Rerun `cd unysonplus/build && npm run build` after editing ANY source here.** The `.min`
+  sibling is not regenerated automatically, and `fw_min_uri()` will serve whatever is on disk once
+  the path is in the manifest. This bit us: the batching fix went into `upw-gsap.js` and the stale
+  `.min` — built nine hours earlier — still held the old per-element code. Wiring the enqueue without
+  rebuilding would have silently shipped the unfixed version. Note you cannot verify the build by
+  grepping for a function name: esbuild renames provably-local identifiers, so `flushColorScrub`
+  does not appear in the output. Grep for behaviour-bearing fragments instead (`Promise.resolve`,
+  `splice(0,`, `isConnected`).
 - `counter` goes on a text/number node. `color_scrub` COLORs use the compact `{predefined,custom}`
   shape. The runtime overwrites the node `transform`, so a scroll-motion effect and a physics/parallax
   transform on the SAME element don't compose.

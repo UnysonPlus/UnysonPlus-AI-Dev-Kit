@@ -496,3 +496,48 @@ construct it finds against
 [`tools/chrome-survey/capability-map.json`](../../tools/chrome-survey/capability-map.json), which maps
 each one to the option on this page that reproduces it. Keep that map in sync when an option here
 changes. See [`tools/chrome-survey/README.md`](../../tools/chrome-survey/README.md).
+
+## Watermark Text — `footer_wordmark` (theme 2.6.53+, full option set 2.6.55, own tab 2.6.56)
+
+**Where:** Theme Settings → Footer → **Watermark** tab (after Copyright); options file
+`framework-customizations/theme/options/footer-watermark.php`. Before 2.6.56 it sat under Footer Layout — the
+option ids never changed, so saved values carry over.
+
+An oversized wordmark (usually the site name, or the logo) set edge to edge across the footer — the "giant
+footer text" style. Decorative only: rendered `aria-hidden`, never a heading. Code:
+`inc/includes/footer-wordmark.php` (`unysonplus_footer_wordmark_cfg()`, `unysonplus_footer_wordmark_html( $slot )`);
+slots are printed by `template-parts/footer-builder.php` (before / behind-body / before-copyright) and
+`footer.php` (after / behind-all). The footer gets `footer--has-wordmark` and clips it.
+
+- **Type**: `multi-picker`, picker `enabled` (`yes`/`no`, default `no`); the `yes` branch holds:
+
+| key | type | default | choices / notes |
+|---|---|---|---|
+| `footer_wordmark_source` | multi-picker (2.6.57) | `{source:'text'}` | picker `source` = `text` · `image`; reveals `text.footer_wordmark_text` (text; empty = the Site Title, entities decoded, one line) or `image.footer_wordmark_image` (upload, images only; the text styles do not apply). Shape: `{ source:'text', text:{ footer_wordmark_text:'…' }, image:{ footer_wordmark_image:{…} } }`. The flat 2.6.55 keys are still read |
+| `footer_wordmark_placement` | select | `after` | `before` · `behind-body` (behind Pre/Main/Post-Footer) · `before-copyright` · `after` · `behind-all`. Legacy `below` → `after`, `behind` → `behind-all` |
+| `footer_wordmark_valign` | select | `bottom` | `top` · `center` · `bottom` (the two Behind placements) |
+| `footer_wordmark_crop` | slider 0–60 | `22` | % of the letter height cut off — at the top for `before`, else the bottom / aligned edge |
+| `footer_wordmark_width` | select | `full` | `full` · `container` · `custom` (+ `footer_wordmark_max_width`, px) |
+| `footer_wordmark_style` | select | `fade` | `fade` · `fill` · `gradient` · `outline` · `outline-fade` |
+| `footer_wordmark_color` / `_color_2` | compact colour | empty | start colour (empty = footer TEXT colour, `currentColor`) / gradient end (empty = transparent) |
+| `footer_wordmark_angle` | slider 0–360 | `90` | gradient angle |
+| `footer_wordmark_opacity` | slider 2–100 | `10` | strength % |
+| `footer_wordmark_stroke` | slider 0.5–6 | `1` | outline thickness px |
+| `footer_wordmark_font` / `_weight` | select | `heading` / `800` | `heading`·`body` / 300–900 |
+| `footer_wordmark_tracking` | slider −10–30 | `-2` | letter spacing in hundredths of an em |
+| `footer_wordmark_uppercase` / `_italic` | switch | `yes` / `no` | |
+| `footer_wordmark_effect` | multi-picker | `{effect:'none'}` | picker `effect` = `none` · `reveal` (+ extension choices); each choice reveals its own settings |
+| `footer_wordmark_hide` | checkboxes | `[]` | `hide-xs` · `hide-sm` · `hide-md` (own media rules) |
+| `footer_wordmark_link` | text | `''` | optional URL; the link stays `aria-hidden` / `tabindex=-1` |
+
+- **Extension seam** (the Animation Engine adds image fill, marquee, parallax and sheen through it):
+  `unysonplus_footer_wordmark_effects` (effect id → label, added to the picker), `unysonplus_footer_wordmark_effect_options`
+  (effect id → its option array, revealed under that choice; saved as `footer_wordmark_effect.<id>`),
+  `unysonplus_footer_wordmark_fit` (`( true, $effect, $cfg )` → return false to keep the natural width; prints
+  `data-fwm-fit="no"`), and the action `unysonplus_footer_wordmark_rendered( $cfg )` after the markup (load assets
+  there; `$cfg['effect_settings']` holds the chosen effect's settings). The wrapper carries
+  `footer-wordmark--fx-{id}` and `data-fwm-fx`.
+- **Sizing**: CSS guesses the size from container units and the character count (`--fwm-chars`), then a script fits the
+  real glyphs to the box (minus padding) after the web font loads, and again on resize.
+- **Gotcha**: hide the letter fill with `-webkit-text-fill-color: transparent`, never `color: transparent` —
+  `--fwm-color` defaults to `currentColor`, so a transparent `color` made the Fade style invisible (fixed 2.6.54).

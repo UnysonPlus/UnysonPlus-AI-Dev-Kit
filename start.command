@@ -67,4 +67,6 @@ echo "  Logging this run to: $UPWK_LOG"
 echo "  (the 5 newest run logs are kept in $LOGDIR)"
 
 cd "$SVC" || exit 1
+# Once: offer to connect the AI agents found (Claude Code, Cursor, Codex) to Kinetic Scenes. Never fatal.
+node studio-cli.mjs connect --ask 2>/dev/null || true
 exec bash ./start-converter.sh

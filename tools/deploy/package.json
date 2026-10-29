@@ -1,0 +1,8 @@
+{
+  "name": "unysonplus-kit-deploy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deploy a site to a WordPress install over the Unyson+ AI Assistant MCP connection, with no manual uploads.",
+  "license": "CC-BY-NC-SA-4.0"
+}

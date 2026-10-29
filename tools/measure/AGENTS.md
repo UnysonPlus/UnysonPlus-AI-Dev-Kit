@@ -81,6 +81,31 @@ If either tool returns empty matches or a "This site can't be reached" title, th
 start XAMPP/Apache, not the tool. Reach for a hand-written probe only when you need something these
 genuinely can't express.
 
+## Spacing on ONE page — `layout-audit.mjs` (no source, no mockup)
+
+Every other tool here compares the build against something. A **fresh build** has nothing to compare
+against, so a section label sitting ON a shape divider, text touching the phone's edge or a submit button
+glued to the field above it passed every check and was only found by a person looking at the page. This
+lens checks one page the way that person would, at 1440 and 390px:
+
+```
+node layout-audit.mjs http://localhost/<site>/                 # 1440 + 390, ≥40px clearance
+node layout-audit.mjs <url> --widths 1440,768,390 --clear 48   # stricter / more widths
+```
+
+| finding | meaning | blocking |
+|---|---|---|
+| COLLISION | content (text, buttons, icons, step markers) overlapping or < `--clear` px from a shape divider, or starting under a fixed / sticky header | yes |
+| OVERLAP | two visible content boxes intersecting | yes |
+| GUTTER | content < `--gutter` px (12) from the viewport edge, unless it is deliberately full-bleed | yes |
+| CRAMPED | a heading / paragraph with < `--tight` px (8) to the next block below | review |
+| RHYTHM | a section's top / bottom padding > 40% off the page median | info |
+
+It also prints every section's padding and divider heights, which is usually enough to see the fix: a
+divided section needs padding ≥ divider height + 40px. `--clear` is a **design** threshold — 24px under a
+divider measured as "not touching" and still looked cramped on a real build, hence the 40px default. Exit
+code 1 on any blocking finding. Always follow it with a look at a screenshot of each band edge.
+
 ## Spacing / padding — `spacing-audit.mjs` (the lens the others do not have)
 
 Every other lens here measures **text**: typography compares matched text elements, geometry compares

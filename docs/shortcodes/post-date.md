@@ -6,6 +6,7 @@ A **dynamic post-data element** (used in post / archive templates) that outputs 
 ## atts
 | key | type | default | value shape / choices | what it does |
 |---|---|---|---|---|
+| `date_prefix` | text | `''` | string | Text before the date, e.g. `Last updated:` (shortcodes 1.15.81). Outside the link when `link_to_post` is on. |
 | `date_type` | select | `'published'` | `published` `modified` | Published date or last-modified date. |
 | `date_format` | text | `''` | PHP date format | e.g. `F j, Y`. Blank = the site date format. |
 | `link_to_post` | switch | `'no'` | `'yes'` \| `'no'` | Link the date to the post. |

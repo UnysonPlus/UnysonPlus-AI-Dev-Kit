@@ -11,6 +11,12 @@ Most effects ride the shared **`fx` block** on a page-builder node (see `../shor
 a slot goes from `{effect:'none'}` to `{ <pickerKey>:'<name>', '<name>':{…params…} }`. The picker
 key is usually `effect`, but some modules use `mode` or `role` (noted per file).
 
+> **Nothing here fits the motion you are reproducing?** That is a *gap*, and it has a procedure:
+> write a scoped, labelled child-theme effect ([`child-theme-fallback-effect.md`](child-theme-fallback-effect.md))
+> and report it ([`motion-gap-findings.md`](motion-gap-findings.md)). Reported frequency is what decides
+> which effects get promoted into the engine - an absorbed gap teaches it nothing. Check this map first:
+> hand-rolling an effect that already exists is the motion version of hand-building a converted section.
+
 ## fx-slot → module map (node-level)
 
 | fx slot | picker key | module(s) |
@@ -33,11 +39,12 @@ key is usually `effect`, but some modules use `mode` or `role` (noted per file).
 |---|---|
 | `backgrounds.md` | element **Styling tab** → `bg_effect` |
 | `confetti.md` | Section/element **Animations tab** → `confetti` |
+| `kinetic-preset.md` | element **Animations tab** → `kinetic_preset` (the Kinetic Scenes Studio's presets) |
 | `horizontal-scroll.md`, `scroll-color-shift.md`, `scroll-loop.md` | **Section** options (Animations) |
 | `cursor.md`, `page-transitions.md`, `preloader.md`, `scroll-progress.md` | **Theme Settings** (Site-wide UX / Animations) |
 
 ## All modules
-`backgrounds` · `confetti` · `cursor` · `flip-card` · `horizontal-scroll` · `hover` · `marquee` ·
+`backgrounds` · `confetti` · `cursor` · `flip-card` · `horizontal-scroll` · `hover` · `kinetic-preset` · `marquee` ·
 `motion-path` · `motion-sequence` · `page-transitions` · `parallax` · `physics` · `preloader` · `scroll-color-shift` ·
 `scroll-keyframes` · `scroll-loop` · `scroll-motion` · `scroll-progress` · `scroll-reveal` · `scroll-text-highlight` ·
 `scroll-var` · `scrollytelling` · `smooth-scroll` · `sticky-stack` · `text-effects` · `viewport-units`

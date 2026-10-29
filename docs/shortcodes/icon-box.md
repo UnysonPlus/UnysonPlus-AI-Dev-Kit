@@ -8,6 +8,7 @@ An icon (or emoji/SVG) paired with an optional title and body content — the st
 |---|---|---|---|---|
 | `icon` | icon-v2 | see Notes | icon-v2 object | The icon shown. Lucide SVG, font icon, emoji, or custom SVG. |
 | `custom_icon` | hidden | `''` | legacy string | Retired field; leave `''` (the picker above supersedes it). |
+| `title` | text | `''` | plain string | The headline beside the icon. Empty renders an **icon-only** box. Its level is set by `title_tag`, below. |
 | `title_tag` | select | `'h3'` | `h3` `h4` `h5` `h6` `span` `p` | Semantic tag for the title. |
 | `content` | wp-editor | `''` | HTML string (WYSIWYG) | Optional body text. |
 | `style` | image-picker | `'top-title'` | `top-title` `inline-left` `inline-right` `stack-left` `stack-right` `between-title-content` | Icon position / layout. |

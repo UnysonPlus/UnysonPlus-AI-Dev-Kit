@@ -71,9 +71,27 @@ The rest of this page is written for conversions; a fresh build follows **its ow
 4. **Pages, section by section** — run checklist 5a items 3–6 for every section (native options before CSS,
    real shortcodes not HTML blobs, the six checks against your own design intent, flag residuals).
    Post / archive / CPT layouts → Theme Builder Body templates with dynamic elements and `{{tokens}}`.
-5. **Motion last**, then **verify**: open every page yourself (Gate 4a applies to your own render — write
+5. **Motion last** (Gate 5e applies here too — catalogue first, labelled fallback second, always
+   report), then **verify**: open every page yourself (Gate 4a applies to your own render — write
    a line per band), no PHP notices / console errors, each page opens in the visual builder, heading order,
    contrast, alt text. If you were given a mockup to hit, `tools/measure/` against it is the proof.
+6. **Spacing gate — ALWAYS, on every page, at desktop AND phone width.** Run
+   `node tools/measure/layout-audit.mjs <url>` (defaults to 1440 + 390px) and fix every COLLISION / OVERLAP /
+   GUTTER before calling a page done; read the CRAMPED and RHYTHM lines too. Then **look** at each band edge
+   in a screenshot — the tool finds clearances, your eye finds what merely *looks* tight. A fresh build has no
+   source to compare against, so nothing else catches spacing: a heading jammed under a shape divider, text
+   touching the phone's edge, a submit button glued to the field above it. Spacing rules that follow from it:
+   - **A section with a top / bottom shape divider needs padding ≥ the divider's height + 40px** on that edge.
+     The divider is absolutely positioned *inside* the padding, so the standard section padding no longer
+     leaves any air (a 110px divider over a 96px padding put the section's label ON the divider).
+   - **Keep one top padding for every divided band** so the page has a rhythm; set it in one place (the band
+     helper), not per section.
+   - **Re-run after every decoration change** — adding a pattern, a divider or a taller divider moves content.
+   - **Background patterns must fade out before a band's top and bottom edges** (mask the pattern with a
+     vertical fade, intersected with its own shape mask). A pattern that reaches the edge at full strength is
+     cut off in a hard straight line at the seam, and next to a shape divider the cut shows twice: the
+     pattern stops dead and the divider's fill below it carries no pattern. Check every seam in a screenshot;
+     the layout tool cannot see this.
 
 **Skipped — there is nothing to capture or translate:** Phase 0 (capture + the upstream-consent question),
 Phase 1 (convert), the source-vs-build comparisons of Phases 2–3 and Gate 3d, the converter-side steps
@@ -168,6 +186,7 @@ source shot usually mean "not revealed", not "missing". Confirm against `rendere
 | `measure/probe.mjs` | one element, source vs build, only the props that differ |
 | `measure/probe.mjs --hover` | the same, in the HOVER state — no other lens can see it |
 | `measure/spacing-audit.mjs` | every padding / margin / gap on the CONTAINERS — the only lens that is not about text |
+| `measure/layout-audit.mjs` | ONE page, no source: content colliding with shape dividers / the sticky header, overlapping blocks, text at the screen edge, cramped gaps, section-padding rhythm — at 1440 + 390px. **The spacing gate for fresh builds.** |
 | `measure/section-audit.mjs` | one labelled side-by-side PNG per band — **the Phase 4 tool** |
 | `verify.mjs` → `verifyUrls` / `verifyChrome` / `verifySections` / `verifyPixels` | drift, chrome scope, per-element findings |
 | `converter-trainer/class-coverage.mjs` | source classes consumed vs ignored — defects that rendered *nothing* |
@@ -323,7 +342,8 @@ Cumulative, not a menu. A new procedure never replaces a step below.
 5. **Check all six, in the order they are missed:** content (present *and in order*) · type (size, family,
    weight, style, alignment, colour) · spacing (*and where it comes from* — flex `gap`, margin-on-all-but-first,
    or per-item padding) · layout (count the source's tracks; never infer from item count) · state (current,
-   hover, focus) · the gap **between** regions.
+   hover, focus) · the gap **between** regions — including clearance under shape dividers, sticky headers and
+   overlays (`layout-audit.mjs`, desktop + phone).
 6. **Flag residuals** — recorded, not hidden.
 7. **Reusable fallback? Teach the converter** (converter mode) — recognizer in JS **and** PHP.
 
@@ -381,6 +401,33 @@ For each blind spot from Gate 4c, extend the tool so it *would* have reported it
 tighten it, and add a test for the tool. **The converter can never be more correct than the lens used to
 judge it.**
 
+### Gate 5e — motion follows the same three steps as everything else
+
+Reproducing a source's motion is not a free-for-all, and it is not optional to report what you could not
+do. The order is the same as for any other defect — **native option first, scoped fallback second, and
+the gap always goes upstream**:
+
+1. **Consult the catalogue before writing anything.** The Animation Engine modules and the Motion
+   Gallery designs are listed in [`animation-engine/README.md`](animation-engine/README.md). An effect
+   that already exists and was hand-rolled anyway is the motion version of hand-building a section the
+   converter already produced.
+2. **Only when nothing fits, write a fallback** — scoped, labelled, in the child theme, following
+   [`animation-engine/child-theme-fallback-effect.md`](animation-engine/child-theme-fallback-effect.md).
+   Everything it touches carries one key tied to the report id, so it comes off cleanly on the day the
+   effect ships natively. A fallback with no label is a permanent fixture nobody can find later.
+3. **Always report the gap** — [`animation-engine/motion-gap-findings.md`](animation-engine/motion-gap-findings.md)
+   (`send-finding.mjs --motion-gap`). Reported frequency is what promotes an effect into the engine, so a
+   gap you absorbed silently is one you will meet again, on the next site, and write again.
+
+**Say which step each motion took.** "Motion done" is not a report; "three native, one fallback
+(`upw-fb-01`, reported)" is. The `tried` field exists for the same reason — it is what distinguishes
+*nothing fit* from *nobody looked*.
+
+> **A gallery gap registers differently.** Per-element effects take three hooks; a Motion Gallery
+> design takes **three PHP filters plus `registerDesign`** (Animation Engine 1.4.26+). Miss the render
+> whitelist and the design silently falls back to `carousel_ring` — which looks like a working gallery,
+> so check the one you built is the one on screen. Report it either way.
+
 ## Phase 6 — Prove it on this site
 
 Reconvert (converter mode) or reload (site mode), re-run **every** Phase-3 lens, re-open **every** Phase-4
@@ -436,6 +483,31 @@ a hypothesis to verify, not a patch to apply. Every adopted fixture passes the s
 - No source-site, client or brand name anywhere. Use a neutral id (`fixture-01`).
 - Say which options changed; if scoped CSS, why no option could express it; if a hook, which sandbox entry.
 - End with the `Edited:` line.
+
+---
+
+## Deploying to a live host — no manual uploads
+
+A site built locally reaches its host **over the site's AI Assistant MCP connection only**. Never ask the
+owner to upload a theme, a seed plugin or a content file: that is the gap these tools close. Use
+`tools/deploy/` (thin clients — every write is the plugin's own tool, with its permission checks and undo),
+in this order:
+
+1. Theme Settings + presets (`update_theme_settings`, `save_preset`).
+2. Child theme — `push-theme.mjs <child> --activate` (it registers the custom post types the content needs).
+3. Content — `export-content.php` on the source install, then `push-content.mjs` (files → users → posts →
+   menus → short links; re-runs only fill gaps).
+4. Pages — `create_page`, then `reading_settings {front_page}`.
+5. Motion — activate the Animation Engine (`manage_extension`), then `animation_apply`.
+6. Check the LIVE url with `tools/measure/` (`shot.mjs`, `layout-audit.mjs`) — not the local copy.
+
+**Local services:** an agent running on the person's computer starts the kit itself when a step needs it
+(capture, conversion, visual checks) — `node tools/ensure-kit.mjs` — never "please start the AI Dev Kit".
+An AI connected only through the site (the wp-admin chat, a cloud agent) cannot start programs on the
+person's computer; it says so once and carries on with what the connection can do.
+
+Plugin and parent-theme fixes are never pushed this way: they reach every site through the release
+updater. If a host blocks a step, report the exact tool error — do not fall back to asking for an upload.
 
 ---
 

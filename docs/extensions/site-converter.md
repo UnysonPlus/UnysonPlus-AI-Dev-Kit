@@ -271,6 +271,10 @@ lost, palette colours bound to globals).
 `FW_Site_Converter_Pages::import()` with a `writer`, register through `fw_site_converter_targets`. Nothing in the
 analysis half should need to change — if it does, the Site Model is missing a fact; add it there.
 
+- **A plan feature run must not repeat the plan name.** The feature-list detector claims any container whose children are all short, full-stop-free lines - which is exactly a price LIST row's left block (`<h3>Regular Cleaning</h3>` over `<p>Weekly or fortnightly</p>`). Every converted service-menu row therefore printed its own name and sub-label a second time underneath itself. **The builder data looked correct**; the duplication is only visible once the page is drawn, which is the whole argument for the render-and-look gate. Lines the plan already shows as its title or sub-label are now dropped from the run, and a run left with fewer than two lines is not a feature list. A real card's `<ul>` never repeats its own plan name, so perk lists are untouched. PHP only - the JS twin reads features from `ul`/`ol` exclusively and never had this failure.
+
+- **A plan price must not swallow the next element's first digit.** `cell_price_parts()` matches the amount with a greedy digit run (deliberately: a trailing word boundary had broken a real price list, and let `$4.2B` backtrack to a plan price of 4). But `self::text()` concatenates WITHOUT separators, so a plan card reads `Basic$91 projectEmail support` and the run continued into the feature list: **three of four prices on a rendered four-plan grid were wrong** ($9 -> $91, $29 -> $2910), and wrong in the worst way, since 91 is a plausible price. Text alone cannot settle it, because a real price is written with no space either - only the DOM can. `price_text()` now reads the amount from the **smallest descendant whose own text carries a currency sign and a digit** (the amount span, or the parent of a split `<span>$</span><span>29</span>` pair), falling back to the whole cell's text; the PERIOD still comes from the cell, since `/mo` sits in a sibling. A second suffix check against the whole text was tried and **removed**: after concatenation adjacency means nothing, so it rejected `$120 monthly` and `$45` + `Book now` as stats. Twins: PHP `price_text`; JS `priceText` in `capture-extract.mjs`. Golden: `plan-price-stops-at-its-own-element-test.php` (proved red first).
+
 ## Notes / gotchas
 
 - **A source form's field + label skin is a FORM STYLE PRESET, never element CSS (Site Converter 1.12.11).** The skin
@@ -415,6 +419,53 @@ analysis half should need to change — if it does, the Site Model is missing a 
 - **A step body keeps every paragraph.** `item_body_text()` joins all sibling `<p>` copy with a blank line
   (wpautop turns it back into paragraphs) instead of returning only the first; a paragraph nested deeper (a
   caption) is not joined on. A four-step section had been losing ~1000 characters and rendering 44% short.
+
+- **The capture finished and did not EXIT (capture service 1.12.25).** `capture.mjs` ends with
+  `await browser.close()` and sets `process.exitCode`, with no explicit exit — so any handle the
+  Chrome transport leaves open keeps node alive forever. Observed: a run wrote `full.png`, recorded
+  `status: done` with a full summary and `error: ''`, and was **still alive 36 minutes later**. This is
+  invisible to a person reading the output and fatal to anything that WAITS for the child: the capture
+  tests `execFile` it and kill it at their budget, so a capture that fully succeeded is reported as
+  `Command failed` with nothing to say the work was complete. Fixed with an **unref'd** 500 ms timer
+  after the summary (`process.exit(process.exitCode || 0)`): a healthy run still exits on its own and
+  the timer never fires; a wedged one leaves anyway, with the code it earned, and stdout gets a tick to
+  flush (an immediate `process.exit()` truncates pending writes on Windows).
+
+- **The hydration wait charged every page for an SPA problem (capture service 1.12.25).** The
+  client-rendered guard waits up to 20 s for an app root to fill, then — since 1.10.70 — **re-navigates
+  once** if it did not. The predicate ("a landmark element, or >200 characters") also fails on a small
+  STATIC page, for reasons that have nothing to do with hydration, so such a page paid the whole thing
+  twice. Measured on a two-paragraph local test page: `0.2s navigate → 61.8s "not detected" → 61.7s
+  doing it all again` — **124 s of waiting**, after which it extracted 0 sections exactly as it would
+  have at second one. Now gated on an actually-empty **mount node** (`#root` / `#app` /
+  `[data-reactroot]`), falling back to an empty `<body>`; a page with no mount node is not hydrating.
+  **Judging it by text length was the first attempt and was wrong** — a tiny static page has little text
+  too, so nothing changed and the cost stayed. End to end on that page: **411 s (killed) → 43 s, exit 0**,
+  and `tab-restamp.test.mjs` went from a timeout to passing in 83 s.
+
+- **The JS twin of the footer TEXT column (capture service 1.12.27).** The PHP reader learned to claim a
+  footer column of plain text (an office / address block with no link in it); the JS path still built
+  columns only from a `ul`/`nav` holding ≥2 links, so the same nine runs went missing there. Now mirrored
+  across all three JS stages: `capture-extract` detects the column, `to-design-config` carries its
+  `lines` as children with **no url**, and `to-theme-settings` emits those as `li_link_type: 'none'`
+  rather than inventing a `#` link the source never had. **The two engines read different inputs, and a
+  parity test must respect that** — PHP reads the CAPTURED html (the grid lives in `data-sc-cs` stamps),
+  while the JS detector runs in the LIVE page and needs real CSS. Checking the JS against the PHP golden's
+  fixture reported 0 columns and proved nothing, because a browser cannot see a stamp. Against a live page
+  with a real `display:grid` the detector returns the same three columns PHP does, with the brand block
+  excluded. Titles come from `textContent`, not `innerText`: `innerText` returns the RENDERED string, so a
+  CSS-uppercased label would be stored as `NEW YORK` on one engine and `New York` on the other.
+
+- **A test that read the source instead of the DOM (capture service 1.12.26).** `cta-probe-undo` asserts
+  that a modal opened by the tab-probe is not serialized, with `html.includes('Online Reservation')`. But
+  `rendered.html` serializes `<script>` too, and the fixture's script holds the modal's markup as a STRING
+  (`d.innerHTML = '<h2>Online Reservation</h2><form>…'`) — which is how a real page mounts one. The
+  assertion therefore matched the *recipe* for the modal whether or not it was ever opened, and failed on a
+  capture that had undone the probe perfectly: no modal element, no form, hero and services intact. It was
+  reporting the fixture's own script back at us. The test now strips `script`/`style` first and also asserts
+  the modal ELEMENT is absent. The undo itself was never broken — the re-capture step fires exactly as
+  designed. Worth remembering when a capture assertion fails: ask whether it is looking at the DOM a
+  visitor sees, or at the document's source text.
 
 - **Custom local models (capture service 1.11.68).** `/local-ai/pull` runs every name through
   `normalizeModelRef()` (local-runner library names and URLs, public model-hub GGUF repo references and
@@ -958,7 +1009,7 @@ Eighty-four findings (82 fixtures) from twenty sites; the rules, locked in golde
 - **A React FAQ of toggle-only cards is an accordion** (`plain_toggle_items`): ≥ 2 buttons with a chevron / plus svg,
   their closed panels unmounted (no aria) — six Q/A rows fell to code blocks; the answers come from the FAQ JSON-LD when
   the page carries it. The fixture sanitiser now keeps `aria-expanded` / `aria-controls` / `open` / `required`.
-- **`animate-scroll-fade-up` is a reveal, not a marquee** (three regexes): `` after `animate-scroll` matched the
+- **`animate-scroll-fade-up` is a reveal, not a marquee** (three regexes): a word boundary after `animate-scroll` matched the
   reveal utility and a section's centred heading block became a full-bleed marquee code block (three sites); the
   heading block is a special_heading at its desktop 48px.
 - **Testimonial authors** (`author_candidates`, both the grid and the single card): a quote glyph is never the name, an
