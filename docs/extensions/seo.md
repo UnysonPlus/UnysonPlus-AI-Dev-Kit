@@ -595,6 +595,13 @@ three visitors.
   the URL is reporting on another page. Only a mismatch between **two present** values counts — an
   empty `userCanonical` has nothing to disagree with.
 - Results live in `_fw_seo_inspect` post meta, re-checked after `STALE_DAYS`.
+- **Surfaced where people work (2.0.32).** `badge_html( $post_id, $detail )` feeds an **Index**
+  column on the posts list (`FW_SEO_List::_filter_index_column`, added only while connected) and a
+  line above the SEO metabox (`$detail = true`: Google's phrase plus the canonical it chose). It
+  returns `''` when not connected and when the page has not been checked — a "not known" badge on
+  every row of a fresh site is noise. Badge CSS prints once per request, inline, because neither
+  screen loads the SEO stylesheet; it includes a column width, without which the list clips the
+  longest label.
 
 ### Gotchas
 
@@ -604,3 +611,223 @@ three visitors.
   state, staleness and the budget with fixtures; the populated report is verified by seeding
   `_fw_seo_inspect` meta on a test site and rendering it. Do not report the HTTP path as verified
   from a green suite.
+
+### Where pages rank (2.0.33)
+
+`FW_SEO_Rank` reads Search Console positions — never scrapes.
+
+- `near_page_one_rows()` keeps query+page pairs at **position 8–15** (both edges inclusive) with
+  **≥ 30 impressions**, most-seen first. Pure; tested without a connection.
+- `merge_windows( $now, $then )` gives each query a `change` = previous − current, so **positive is
+  up** (smaller position = better). `null` means new this window; queries only in the previous window
+  are dropped — the list is about now. This direction is the easiest thing here to get backwards; a
+  test pins it.
+- `page_queries( $url )` filters `dimensionFilterGroups` on `page equals <permalink>`; two calls
+  (this and the previous 28 days). Successes cached 6h, failures 10 min so a broken connection does
+  not hammer the API on every editor load.
+- Surfaces: the `rank_tab` report, and a collapsed `<details>` above the SEO metabox
+  (`editor_html()`, published posts only, empty when there is nothing to show).
+- **Gotcha found while staging it:** a URL whose post `url_to_postid()` cannot find renders as the raw
+  URL. On a local install that turned out to be a permalink structure corrupted by Git Bash path
+  conversion (`/%postname%/` stored as `/C:/Program%20Files/Git/%postname%/`). Run `wp rewrite
+  structure` with `MSYS_NO_PATHCONV=1` and a `D:/…` path.
+
+### Page speed diagnostics (2.0.34)
+
+`FW_SEO_Speed` calls the PageSpeed Insights API from a button, renders below the CrUX field data on
+`vitals_tab`, and caches the result for 12h (failures 10 min).
+
+- **Not a `<form>`.** The report renders inside the settings form; a nested form is dropped by the
+  browser and its button would save the settings. It is a nonced `admin-post` link, the inputs
+  carry no `name` (so they never ride on a settings save), and a few lines of script build the URL
+  from the fields. A test asserts the markup contains no `<form`.
+- **Keys.** It reuses `crux_api_key`, retrying once without it on a 403 (the project may not have
+  PSI enabled). Keyless requests share one global daily quota that is usually exhausted — a real
+  run returned 429 — so the UI treats a key as required in practice and says which API to enable.
+- **Parser tolerance.** Savings come from `details.overallSavingsMs`, else the largest of
+  `metricSavings` LCP/FCP/TBT, else `null` = unknown. A failing audit with an unknown saving is
+  KEPT; and with a score below 90 the screen never says "nothing to fix". Both guard against a
+  Lighthouse format change silently becoming a false all-clear.
+- **`clip()`, not `wp_html_excerpt()`** for items: element snippets are nothing but tags, and
+  `wp_html_excerpt` strips them to an empty string.
+- `is_own_url()` restricts runs to this site's host — the button is not an open proxy.
+- **Not verified against a live successful response yet** (no key on any local install). The
+  error path was verified end to end with a real request.
+
+### Settings transfer (2.0.35)
+
+`FW_SEO_Transfer` — the settings half of Import / Export (the CSV is the page half).
+
+- Exports `exportable()` = stored settings ∩ `known_keys()`. **`known_keys()` excludes `html` /
+  `html-full` options**: the settings form stores headings and report panels as empty strings, and
+  without the filter a site's OWN export previewed as "19 settings not known to this version". Found
+  by a real browser round trip, not by the unit tests — `known_keys( true )` returns the display ids
+  so `plan()` skips them silently on import.
+- `SECRETS` (`crux_api_key`, `console_client_id`, `console_client_secret`) are omitted unless the
+  export is requested with them (confirm dialog). OAuth tokens are a separate option and never move.
+- `plan()` writes only known keys, merges over stored values (unmentioned keys keep theirs), and
+  reports unknown keys. `validate()` refuses a newer `version` rather than half-reading it.
+- The upload is held per user in a transient until Apply / Discard; a leftover pending upload shows
+  its preview instead of the upload field.
+- Promise pinned by test: a site's own export, through JSON, plans **zero** changes and zero unknowns.
+
+### Automatic redirects (2.0.36)
+
+`FW_SEO_Redirects` fills the gaps in core's `_wp_old_slug` (non-hierarchical posts only): page slugs,
+parent moves (with every descendant), and term slugs.
+
+- Map is `old path => {type, id}` in the non-autoloaded `fw_seo_redirects` option — ids, not URLs,
+  so the target is always the live permalink and renaming twice never chains.
+- `path()` = URL path, decoded, lower-cased, no trailing slash. Recording the new path removes any
+  entry for it (an address that is live again is not a redirect).
+- `permalink_as( $before )`: `get_permalink( $before )` reads the parent chain from the DB, which
+  already holds the NEW parent, so the old path is rebuilt from the old parent's link + old slug.
+- Serves on `template_redirect` priority 20, after core's own at 10, and only on `is_404()`;
+  preserves the query string; 301. Unpublished targets resolve to '' (no redirect).
+- **Gotcha:** the settings schema can be built before `init`, when `get_term_link()` cannot make
+  pretty links yet and returns `?cat=N` — whose path is the site root. The report was rendering a
+  renamed category as "now goes to /". The schema holds `FW_SEO_Redirects::PLACEHOLDER` and the
+  settings page swaps in `report_html()` at render time. Any report that needs rewrite rules must
+  do the same.
+- **The option-types init trap, fifth time.** `init()` first read the `redirects_auto` switch to decide
+  whether to add hooks. Reading extension settings during extension start-up initialises the option
+  types before `seo-template` is registered, so **every title and description saved from the editor
+  parsed as empty** — caught only because the `prefill` suite regressed. Hooks are now always added
+  and each handler checks `enabled()` itself. Rule: **no `FW_SEO_Settings` / settings read in any
+  `init()`**; read lazily inside the hook.
+- Verified over real HTTP: old page → 301 new; moved child with `?utm_source` → 301 with the query;
+  mixed case → 301; unknown path → untouched 404.
+
+### Attachment pages (2.0.37)
+
+`FW_SEO_Attachments` (`includes/class-fw-seo-attachments.php`), setting `attachment_pages` in the
+General tab's `attachments_box`: `core` (default) / `parent` / `file` / `keep`.
+
+- It **filters** `pre_option_wp_attachment_pages_enabled` (keep → `'1'`, file/parent → `'0'`) and
+  never writes the core option, so `core` restores the site's own behaviour. Core's option is `0` on
+  installs made after 6.4 and `1` on older sites that upgraded; `core_state_text()` says which in the
+  box description.
+- `parent` hooks `template_redirect` at priority **1** (before core's canonical redirect to the file)
+  and sends a 301 to `post_parent` only when that post is **published**; otherwise core's file
+  redirect handles it.
+- Everything is added on `wp`, never `init`: reading SEO settings during `init` is the
+  option-types trap (editor saves parsed as empty).
+- Public doc: `/seo/attachment-pages`. Tests: `tests/attachments-test.php`.
+
+### robots.txt editor (2.0.38)
+
+`FW_SEO_Robots` (`includes/class-fw-seo-robots.php`), tab `robots_tab`. Settings: `robots_block_search`
+(switch), `robots_ai_training` / `robots_ai_search` (checkboxes over the `AI_TRAINING` / `AI_SEARCH`
+constants), `robots_rules` (addable-box of `agent` / `directive` / `path`).
+
+- Filter `robots_txt` at priority **9** (before the sitemap's 10, so `Sitemap:` stays last); skipped when
+  the site is not public. Settings are read inside the filter, never at startup.
+- `build()` is pure (settings → groups + skipped rows); `apply()` merges `*` rules INTO core's
+  `User-agent: *` group (no second `*` group, no duplicate lines) and appends other agents' groups.
+- Paths must start with `/` or `*`; agents match `[A-Za-z0-9*._/-]+`; any whitespace/control char is
+  refused, so a row cannot inject a second line. Invalid rows are skipped and listed in the preview.
+- `partial_groups()` flags agents with their own non-block-all group: a crawler obeys only its most
+  specific group, so it drops every `*` rule (including core's `/wp-admin/`).
+- Preview = `FW_SEO_Robots::PLACEHOLDER` swapped at render by the settings page; it rebuilds core's
+  output and runs `apply_filters('robots_txt')`, and warns about a physical `ABSPATH/robots.txt`,
+  `blog_public` = 0 and a sub-folder install.
+- Public doc: `/seo/robots-txt`. Tests: `tests/robots-test.php`.
+
+### Smaller additions (2.0.39)
+
+`FW_SEO_Additions` (`includes/class-fw-seo-additions.php`) and `FW_SEO_IndexNow`
+(`includes/class-fw-seo-indexnow.php`). All settings are read inside hooks, never at startup.
+
+- **`verify_other`** (Verification tab, textarea): `parse_verification()` keeps only
+  `<meta name content>` with a name matching `[A-Za-z0-9:._-]{1,100}`; merged into
+  `get_verification_tags()` as `verify_other_<n>`.
+- **`paged_titles`** (General, switch, default on): `apply_paged_title()` runs at the end of
+  `_filter_document_title` and appends `<sep> Page N of M` on page 2+, unless the title already
+  contains that label, `Page N`, or ends in the bare number (the `%%page%%` / `%%pagenumber%%` tags).
+  Only the document title; og:title is unchanged.
+- **`rss_after`** (General → RSS feed box, textarea): `wp_kses_post` then `%%post_link%%` /
+  `%%site_link%%` replaced; appended via `the_content_feed` + `the_excerpt_rss`.
+- **`editor_roles`** (General → Access and removal, checkboxes of `wp_roles()`): `can_edit()`; empty =
+  everyone, `manage_options` always. Gated at the top of `FW_SEO_Admin::_action_add_meta_box`,
+  `_action_register_term_fields`, `_action_save_post`, `_action_save_term` and
+  `FW_SEO_List::_action_register`, `_action_save_quick_edit`. (Admin hooks only exist under
+  `is_admin()`; to test under wp-cli call the handler on `new FW_SEO_Admin( fw_ext('seo') )`.)
+- **IndexNow** (`indexnow`, Sitemap tab, default off): key = 32 hex in option `fw_seo_indexnow_key`,
+  served at `/<key>.txt` from `parse_request` priority 0 (only while enabled). `transition_post_status`
+  queues published posts of covered post types; sent once on `shutdown` as a non-blocking POST to
+  `api.indexnow.org/indexnow` with `keyLocation`; 10-minute per-URL throttle in `fw_seo_indexnow_log`
+  (also keeps the last 10 for the status box, `PLACEHOLDER` swapped at render). Skipped when
+  `blog_public` = 0.
+- **`delete_on_uninstall`** (General → Access and removal, default off): the extension's
+  `uninstall.php`, run by core's new `FW_Extensions_Manager::run_extension_uninstall_file()` just
+  before the folder is deleted (`FW_EXTENSION_UNINSTALL` defined). Removes
+  `fw_ext_settings_options:seo`, options/transients `fw_seo_*`, post/term meta `_fw_seo_*`, user meta
+  `fw_seo_*`, the `fw_seo_search_terms` table, both crons, `uploads/unysonplus/social-cards/`, and
+  `rewrite_rules`. Per site on multisite. Self-contained (no extension classes).
+- Public docs: `/seo/indexnow`, `/seo/access-and-removal`, `/seo/settings` (General, Verification),
+  `/developers/extension-uninstall`. Tests: `tests/additions-test.php`.
+
+### Site health (2.0.40)
+
+`FW_SEO_Health` (`includes/class-fw-seo-health.php`), view `health_tab` (Reports group,
+`PLACEHOLDER` swapped at render). Daily cron `fw_seo_health_check` (scheduled on `admin_init`) +
+`admin_post_fw_seo_health_run` ("Check now"); results in option `fw_seo_health` `{time, results[]}`,
+each `{id, status: critical|warning|good, label, fix, link}`.
+
+- Fetches what is SERVED (cache-busting query, `sslverify` off): the homepage (`says_noindex()`:
+  robots/googlebot meta or `X-Robots-Tag`), **`robots_url()` = domain-root robots.txt** (crawlers and
+  WordPress only use the root, even for sub-folder installs; `blocks_everything()` checks the
+  Googlebot group first, then `*`, `Disallow: /` without an Allow), and the sitemap index
+  (`has_entries()`). Plus `blog_public`, a physical `ABSPATH/robots.txt`, and the Search Console
+  token (`access_token()` = '' → expired; `looks_like_testing_expiry()` explains the 7-day case).
+- When `blog_public` = 0 the homepage is not fetched (a warning defers to the visibility result).
+- Shown in: the report; an `admin_notices` error for **critical only** (administrators, hidden on the
+  report itself); WordPress Site Health as direct test `fw_seo_health` reading the stored run (never
+  fetching on that screen).
+- Public doc: `/seo/reports/site-health`. Tests: `tests/health-test.php`.
+
+### Alerts (2.0.41)
+
+`FW_SEO_Alerts` (`includes/class-fw-seo-alerts.php`), view `alerts_tab` (first in Reports).
+Daily cron `fw_seo_alerts_collect` → option `fw_seo_alerts` `{time, alerts[]}`; weekly cron
+`fw_seo_alerts_email` (setting `alerts_email`, default off; `alerts_email_to`, default admin email),
+skipped when the list's `fingerprint()` equals option `fw_seo_alerts_sent`.
+
+- Pure judges with floors as constants: `is_low_ctr` (≥1000 impressions, position ≤10, CTR <1%),
+  `has_dropped` (≥300 before, now ≤50%), `is_stale_with_traffic` (≥ stale months, ≥30 clicks),
+  `is_lost_to_noindex` (noindex + ≥10 clicks over both windows). `build($pages, $near, $searches,
+  $extra, $stale)` → one alert per page (first match wins, in that urgency order), max 3 "near page
+  one" pages, site searches with ≥5 hits, sorted by priority, capped at `CAP` = 8.
+- `collect()` makes two Search Console page queries (28-day windows), maps URLs with
+  `url_to_postid`, adds `FW_SEO_Rank::near_page_one()` and the zero-result search log; a broken token
+  becomes a `connection` alert.
+- **Edit links are built at display time** (`list_html`), and stored as plain
+  `post.php?post=ID&action=edit`: cron has no user, so `get_edit_post_link()` returns '' there.
+- Shown: dashboard widget `fw_seo_alerts` (manage_options), `editor_html()` at the top of the SEO
+  metabox, the report. `FW_SEO_Health::_notice()` also raises the Search Console warning (headline
+  "the reports have stopped updating").
+- Public doc: `/seo/reports/alerts`. Tests: `tests/alerts-test.php`.
+
+### Link report (2.0.42)
+
+`FW_SEO_Links` (`includes/class-fw-seo-links.php`), view `links_tab` (Reports, `PLACEHOLDER`).
+Table `{prefix}fw_seo_links` (source_id, target_id, url, host, kind internal|external|affiliate,
+rel, anchor), DB version option `fw_seo_links_db`.
+
+- Extraction (pure): `from_html()` (`<a href>` with rel + text) and `from_builder()` over the
+  `fw:opt:ext:pb:page-builder:json` tree: string fields named `link`/`url`/`href`/`*_link`/`*_url`
+  (not image/bg/video/icon/logo/src keys), values that `looks_like_link()` (http(s), `//`, `/path`;
+  not `#`, mailto/tel, media files), plus any rich text; a sibling `rel`/`nofollow`/`sponsored` field
+  gives the rel. Header/footer/menus are deliberately NOT read (they would hide every orphan).
+- `classify()`: relative → absolute, `www.` ignored; `is_affiliate()` = setting
+  `links_affiliate_patterns` (folder `/x/` or host incl. subdomains), internal `/go|out|recommends|
+  refer|visit|aff|affiliate|link/…`, or affiliate query params (`aff`, `affid`, `aff_id`, `clickref`…;
+  NOT plain `ref`). An internal non-post address that `fw_ext_short_links_get()` knows → affiliate.
+- Indexing: `save_post` (priority 30) re-indexes one post (unpublished → its rows removed);
+  `deleted_post` forgets. Full build: `start()` truncates + cron chain `fw_seo_links_batch`, 50
+  posts per batch by ID (`fw_seo_links_state`); auto-started on first `admin_init` by an admin;
+  "Rebuild" runs the first batch inline.
+- Questions: `orphans()` (published covered posts with no row targeting them from another post;
+  front page + posts page excluded), `domains()`, `unmarked_affiliates()` (rel without sponsored /
+  nofollow), `totals()`, `inbound($id)` → the line in the SEO metabox (`editor_html`).
+- Uninstall drops the table and the cron. Public doc: `/seo/reports/links`. Tests: `tests/links-test.php`.

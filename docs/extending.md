@@ -309,6 +309,13 @@ end to end.
 - **Public API is deliberate.** Helpers and filters an extension exposes are contracts other
   extensions and themes will depend on. Name them with the extension's prefix, and treat
   renaming one as a breaking change.
+- **Cleanup on delete goes in `uninstall.php`, and only when the owner asked.** The Extensions
+  manager runs `<extension>/uninstall.php` just before it deletes the folder (core 3.0.58+), even
+  when the extension is inactive, with `FW_EXTENSION_UNINSTALL` defined. Return at once without
+  the constant, use no classes of your own (they may not be loaded), delete stored data only when a
+  setting such as `delete_on_uninstall` is on (default off: people delete to reinstall), and loop
+  `get_sites()` on multisite. Deactivating never runs it. Reference: the SEO extension's
+  `uninstall.php`; public doc `/developers/extension-uninstall`.
 
 ---
 
