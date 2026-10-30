@@ -72,3 +72,10 @@ A stack of collapsible title+panel items — the standard FAQ / expandable-list 
 - `numbering` is a multi-picker: the saved shape is `{ style:'<choice>' }`, and for `custom` it adds `{ custom:{ template:'Q{n}' } }` (tokens `{n}` `{0n}` `{a}`/`{A}` `{i}`/`{I}`).
 - Enable `faq_schema` on only ONE genuine Q&A accordion per page to avoid duplicate FAQ schema.
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, NOT a raw hex string. See `README.md`.
+
+## FAQ schema and the SEO extension (shortcodes 1.15.89)
+
+`faq_schema = yes` prints an `FAQPage` `<script>` after the accordion, unless
+`apply_filters( 'fw_sc_accordion_faq_inline', true, $atts )` returns false. The SEO extension returns
+false when it has put the page's FAQ questions in its own graph (read from the builder JSON), so the
+questions are published once. See `docs/extensions/seo.md` → Structured data entities.

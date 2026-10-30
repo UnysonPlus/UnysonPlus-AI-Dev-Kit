@@ -66,3 +66,10 @@ A business card block: opening hours (with a live open/closed status), plus addr
 - The Open/Closed status is computed live from the WordPress site timezone against today's `hours`.
 - `design` choices are registry-driven; `card` is the default (the picker is labeled "Layout").
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, NOT a raw hex string. See `README.md`.
+
+## Site-wide details (shortcodes 1.15.89)
+
+After reading its own fields, the view applies `fw_business_info_site_details` (array with `biz_name`,
+`address`, `phone`, `email`, `hours` in the element's own hours format) and uses those only for fields
+left EMPTY on the element. The SEO extension supplies them from its Local business settings, so the
+element and the LocalBusiness schema agree.

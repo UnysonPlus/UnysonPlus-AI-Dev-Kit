@@ -831,3 +831,199 @@ rel, anchor), DB version option `fw_seo_links_db`.
   front page + posts page excluded), `domains()`, `unmarked_affiliates()` (rel without sponsored /
   nofollow), `totals()`, `inbound($id)` → the line in the SEO metabox (`editor_html`).
 - Uninstall drops the table and the cron. Public doc: `/seo/reports/links`. Tests: `tests/links-test.php`.
+
+### Internal link suggestions (2.0.43)
+
+`FW_SEO_Link_Suggest` (`includes/class-fw-seo-link-suggest.php`), shown collapsed in the SEO metabox
+(`editor_html`, only when the link index is `ready` and the post is published).
+
+- `phrase($title)`: normalise (lower-case, accents kept, punctuation → space), strip a lead ("how to",
+  "a guide to"…) and stop-words at both ends; '' unless ≥2 content words, ≥8 chars, ≤8 words.
+- `sentence($text, $phrase)`: block tags (`</p>`, `</li>`, `</h*>`, `<br>`…) end a sentence; whole-word
+  match with any punctuation between words; a line shorter than phrase+3 words is a heading/card/listing
+  and is skipped.
+- `text($id)`: post content + text-bearing builder strings (keys like link/url/src/class/color skipped).
+- `for_post($id)` → `{in, out, phrase}`, max 5 each; `in` pre-filtered in SQL (content or builder meta
+  LIKE first and last word), skips pages with the same phrase (competitors); `out` dedupes by phrase;
+  already-linked pairs dropped via `fw_seo_links`. Cached 12 h in transient `fw_seo_link_suggest_<id>`,
+  cleared on that post's save. ~150 ms per page uncached on a small site.
+- Public doc: `/seo/reports/links#suggestions-where-links-could-go`. Tests: `tests/link-suggest-test.php`.
+
+### Redirect manager and 404 log (2.0.44)
+
+`FW_SEO_Redirect_Rules` (`includes/class-fw-seo-redirect-rules.php`). Tables
+`{prefix}fw_seo_redirect_rules` (source, source_key = md5 of `key_of()`, is_regex, target, code, grp,
+hits, last_hit) and `{prefix}fw_seo_404` (path_key unique, path, hits, first/last_seen, referrer);
+DB version `fw_seo_redirect_rules_db`. UI: "Your redirects" box on `redirects_tab`
+(`PLACEHOLDER`) and view `notfound_tab` (`PLACEHOLDER_404`, setting `log_404`, default on).
+
+- **Only on 404s** (content wins): `template_redirect` 19 = rules (before the automatic redirects at
+  20), 99 = log. 410 sets `status_header(410)` and lets the theme's 404 template render (not logged).
+  Targets use `wp_redirect` (external domains allowed; admins only write rules).
+- `key_of()`: path via `FW_SEO_Redirects::path()` (lower-case, no trailing slash, decoded) + query
+  lower-cased and key-sorted. `match()` tries path+query, then path alone (then appends the request's
+  query to a target without one), then regex rules in id order against the raw path+query, `#…#i`,
+  `$n` substituted. **`relative()` strips the home path first**, so a sub-folder site's rules and log
+  are site-relative (both runtime paths call it).
+- `validate()`: refuses empty source, missing target (except 410), codes outside 301/302/307/410, bad
+  regex, `/` as source, newline, source = target. `save()` upserts by source_key (or regex source /
+  id) and removes that address from the 404 log.
+- Log: `worth_logging()` skips bots (`FW_SEO_Search_Log::is_bot_agent`), dotfiles, `.php`/backup/asset
+  extensions, `/wp-admin|wp-includes|wp-content…`; upsert with hits+1 and referrer kept; daily prune
+  (`fw_seo_404_prune`) to 90 days / 2000 rows.
+- Import / Export: `to_csv()` (source,target,code,regex,group, BOM) and JSON
+  (`format: unysonplus-seo-redirects`); `parse_import()` reads either, CSV columns by header or a
+  headerless old,new file. The settings page is ONE form, so these controls submit it with
+  `formaction="admin-post.php?action=fw_seo_rules_*"` (+ `formenctype` for the upload); handlers read
+  only their own fields, nonce `fw_seo_rules_nonce`.
+- Public docs: `/seo/redirects#your-own-redirects`, `/seo/not-found`. Tests: `tests/redirect-rules-test.php`.
+
+**Settings-screen padding (2.0.45):** `static/css/settings.css` gives every `html-full` block
+`padding: 0 20px 14px` so reports line up with row labels (26px); only blocks containing a
+`.fw-seo-settings-heading` keep `padding: 0`. Rebuild `settings.min.css` after editing (the admin loads
+the .min).
+
+### Whole-site move (2.0.46)
+
+`FW_SEO_Site_Move` (`includes/class-fw-seo-site-move.php`), box `site_move_box` on `redirects_tab`:
+`site_move_to` (text) + `site_move` (switch, default off), preview via `PLACEHOLDER`.
+
+- Hooked on **`parse_request` priority 0** (not template_redirect): the sitemap and robots.txt are
+  served before templates. Skips `is_admin`, ajax, customizer, users with `manage_options`, and REST by
+  ADDRESS (`rest_get_url_prefix()` / `rest_route=`) since `REST_REQUEST` is not defined yet. wp-login.php
+  never reaches parse_request.
+- `clean_destination()`: http(s) + host required, not the same host (www ignored), no whitespace;
+  keeps scheme://host[:port][/folder]. `target()` strips this site's home path (sub-folder) and appends
+  path + query. `wp_redirect` 301.
+- Admin bar node `fw-seo-site-move` ("Moved to …") for administrators while on.
+- Public doc: `/seo/redirects#moving-the-whole-site-to-a-new-domain`. Tests: `tests/site-move-test.php`.
+
+### Feeds, alt text, archive defaults, HTML sitemap, reset (2.0.47)
+
+- **Archive defaults:** `FW_SEO_Locations::default_noindex($key)` — `date` true; `author` true when
+  fewer than 2 authors have published posts (cached per request). Used as the default of the
+  `robots_noindex__*` field, in `fw_seo_robots()` and in the sitemap providers. A saved value wins
+  (note: `fw_get_db_ext_settings_option()` fills missing keys with schema defaults).
+- **`FW_SEO_Feeds`:** setting `feeds_off` (checkboxes comments|taxonomy|author|search|post_type, in the
+  General → RSS feed box). Head links removed via core `feed_links_*` filters (added on `wp_head` 1);
+  `template_redirect` 1 → `current_kind()` → 301 to `page_of()` (strips `/feed[/type]`, `feed=`;
+  `/comments/` → `/`). The main feed is never offered.
+- **`FW_SEO_Alt`:** setting `image_alt_fallback` none|title|caption|post (General → Images).
+  `wp_get_attachment_image_attributes` + `wp_content_img_tag` fill only a missing alt (an explicit
+  `alt=""` in content is left); camera-file-name titles skipped. Media Library: column `fw_seo_alt`,
+  "Missing alt text" button, `?fw_seo_alt=missing` meta_query filter; `missing_count()` on the box.
+- **`FW_SEO_HTML_Sitemap`:** shortcode `[seo_sitemap types limit exclude]`; per type heading, pages as a
+  tree (orphaned children move up), skips noindex (own or type default), passworded posts and the
+  current page.
+- **Reset:** `FW_SEO_Settings_Page::keys_of($tab_options)` (non-html option ids) and
+  `admin_post_fw_seo_settings_reset&view=` removes those keys only; "Reset this screen to defaults"
+  link beside Save Changes, with a confirm (Search Console warns about the credentials).
+- Public docs: `/seo/settings` (Feeds you don't use, Image alt text, Archive defaults, A sitemap page
+  for visitors, Resetting a screen). Tests: `tests/tidy-test.php`.
+
+### Structured data entities (2.0.48)
+
+`FW_SEO_Entities` (`includes/class-fw-seo-entities.php`), on `fw_seo_schema_graph` (priority 20).
+
+- **Authors:** user meta `fw_seo_author_job|knows|links` (profile section "Author profile for search
+  engines") → Person `jobTitle`, `knowsAbout` (comma list), `sameAs` (http(s) lines).
+- **FAQ:** `faq_from_builder()` walks the page-builder JSON for `accordion` with `faq_schema = yes`
+  (tabs: `tab_title` / `tab_content`, same cleaning as the element, duplicates by question dropped) →
+  page node `@type` gains `FAQPage` + `mainEntity` questions; sets a flag that makes
+  `fw_sc_accordion_faq_inline` return false, so the accordion (shortcodes ≥ 1.15.89) skips its own
+  `<script>`. No page node (type none) → the accordion still prints its own.
+- **Local business:** settings `business_type` (one of `BUSINESS_TYPES`), `business_street|city|region|
+  postcode|country|geo|price_range`, `business_hours_mon…sun` (box on `schema_tab`). The publisher node
+  (Organization only) becomes that type with `address`, `geo`, `priceRange`,
+  `openingHoursSpecification` (`parse_hours()` accepts `09:00-17:00`, breaks with commas, am/pm,
+  `closed`, `24 hours`; equal days merged), `image` = logo. The Business Info element reads
+  `fw_business_info_site_details` for EMPTY fields (name, address, phone, email, hours).
+- **Per page:** meta `_fw_seo_entity` {type: product|event|recipe|location, …} from the "Structured
+  data" metabox (not on WooCommerce `product`; follows `FW_SEO_Additions::can_edit()`). `missing()`
+  gates publishing (product: price or rating; event: start + venue/online; recipe: ingredients + steps;
+  location: address). `node()` → `#entity` node; page `mainEntity` → it (or `about` when the FAQ took
+  `mainEntity`). Location → LocalBusiness subtype with `parentOrganization` = publisher (multiple
+  branches = one page each). Rating only with a review count.
+- Public docs: `/seo/structured-data` (FAQ data, Authors, Local business, Products, events, recipes and
+  branches). Tests: `tests/entities-test.php`.
+
+### Video and news sitemaps (2.0.49)
+
+`FW_SEO_Media_Sitemaps` (`includes/class-fw-seo-media-sitemaps.php`) registers providers `video` and
+`news` on `fw_seo_register_sitemap_providers`. Provider entries may now carry `videos` (each
+`{thumbnail, title, description, content|player}`) and `news` (`{name, language, date, title}`);
+`render_provider()` adds the `video:` / `news:` namespaces only when present. **Use `array_column`, not
+`wp_list_pluck`, on entries**: pluck warns on a missing key and the warning lands inside the XML.
+
+- Video: `from_builder()` (`media_video`, `video_popup`: first YouTube/Vimeo/file URL anywhere in the
+  atts, poster = first image `url`), `from_html()` (YouTube/Vimeo URLs, `<video src poster>`).
+  Thumbnail: poster → `i.ytimg.com/vi/<id>/hqdefault.jpg` → featured image; none → skipped. Description
+  = SEO description chain → trimmed content → title. `video_post_ids()` SQL-narrows (content/builder
+  LIKE), checks, caches 12 h in transient `fw_seo_video_posts` (cleared on save/delete). Setting
+  `sitemap_video` (default on).
+- News: `sitemap_news` (default off), `sitemap_news_name`, `sitemap_news_types` (default `post`);
+  posts with `post_date_gmt` in the last 48 h, max 1000, noindex/password skipped.
+- Public doc: `/seo/settings#video-and-news-sitemaps`. Tests: `tests/media-sitemaps-test.php`.
+
+
+### Content analysis, audit and bulk-page guardrails (2.0.50)
+
+- `FW_SEO_Analysis`: meta `_fw_seo_focus` (field at the top of the SEO metabox, saved with nonce
+  `fw_seo_focus_nonce`). `material($id)` = content + builder text (special/animated heading `title` +
+  `heading` level, any text-bearing string), headings, alts (atts `alt`, content `<img alt>`, featured),
+  resolved title/description, slug. `has_phrase()` = whole-phrase match on `norm()` text (case and
+  punctuation ignored, NOTHING fuzzier). `keyphrase_checks()` ids: title, description, slug, intro,
+  heading, alt, used. `readability()`: avg sentence words, sentences > 25, paragraphs > 150 (no grade).
+  `heading_problems()`: skipped level going down, any H1 in content. `competitors()` = same focus.
+- `FW_SEO_Audit`: per post meta `_fw_seo_audit` {issues, title, description, words} + MinHash
+  `_fw_seo_sig` (64 crc32 seeds over 5-word shingles; < 50 words → none). Batch cron
+  `fw_seo_audit_batch` (25/batch), daily `fw_seo_audit_daily`, re-check on `save_post` 50.
+  `compare_site()` → option `fw_seo_audit_site` {titles, descriptions (dup groups), near (union-find
+  clusters ≥ 0.9 per type, cap 1500/type)}. Report view `audit_tab`.
+- Guardrail: setting `thin_noindex_types` → `fw_seo_robots` filter swaps index→noindex and
+  `fw_seo_sitemap_urls` drops the post when `FW_SEO_Freshness::words() < thin_words()`.
+  `coverage_by_type()` from `_fw_seo_inspect`.
+- Public docs: `/seo/content-analysis`, `/seo/reports/audit`. Tests: `tests/analysis-test.php`.
+
+
+### Search performance, Trends + topic momentum, AI suggestions and answers (2.0.51)
+
+- `FW_SEO_Performance`: two 28-day page queries → `rows()` (floor 50 impressions in either window;
+  `position_d` = before − now, positive = up) → `lists()` gaining / slipping / unclicked (≥ 200
+  impressions, CTR < 1%). Cached 6 h in transient `fw_seo_performance`. View `performance_tab`.
+- `FW_SEO_Trends`: `parse()` reads "Interest over time" (header row starting Day|Week|Month|Time|Date;
+  cells "term: (Geo)"; values "<1"→0.5, "Breakout"→5000, "+250%"→250) and "Related queries" (TOP /
+  RISING blocks). Imports in option `fw_seo_trends` (max 50, with terms, geo, from, to, file).
+  `momentum()`: last quarter (≤ 13 weeks) vs same window a year earlier when the series covers it,
+  else the window before; ±20% = rising/falling; peak month. `classify()` cases refresh / write / gap /
+  unseen / steady / moved. `momentum_rows()` joins Console query impressions (transient
+  `fw_seo_trends_queries`, has_phrase), `page_for()` (title or `_fw_seo_focus`), `search_hits()`.
+  Upload / JSON export / delete via admin-post `fw_seo_trends_*` with `formaction` from the one settings
+  form. View `momentum_tab`.
+- `FW_SEO_AI`: `ready()` = `FW_AI_Panel::wp_backend_ready()`; `ask()` = `wp_ai_client_prompt()` with a
+  system voice from settings `ai_tone` / `ai_audience` (General → AI suggestions; "never invent facts").
+  Ajax `fw_seo_ai_suggest` (kinds title|description|faq|points, from `FW_SEO_Analysis::material()`) and
+  `fw_seo_ai_outline` (momentum rows); results are shown with Copy, never written. AI answers: setting
+  `ai_visibility_questions` (≤ 20), admin-post `fw_seo_ai_visibility` on demand only; samples in
+  option `fw_seo_ai_samples` (last 400) with `mentions()` = domain or site name as whole words. View
+  `ai_tab`.
+- **Box descriptions (2.0.52):** the framework's `box` option type does not print `desc`, so
+  `FW_SEO_Settings_Page::with_box_intros()` turns each box `desc` into a leading html-full
+  `.fw-seo-box-intro` paragraph at render time (kses: a, code, strong, em). The sitemap address in the
+  XML sitemap box is a link opening in a new tab.
+- Public docs: `/seo/reports/search-performance`, `/seo/reports/topic-momentum`, `/seo/ai-suggestions`.
+  Tests: `tests/insights-test.php`.
+
+### AI abilities: settings and redirects (2.0.53)
+
+`includes/ai-abilities.php` adds (permission `manage_options`): `seo-get-settings` (stored values ∩
+`FW_SEO_Transfer::known_keys()` minus `SECRETS`, optional `keys`), `seo-update-settings` (`settings`
+object; unknown and secret keys refused and returned; snapshot of option `fw_ext_settings_options:seo`),
+`seo-list-redirects` (rules + 50 top 404s), `seo-save-redirect` (source, target, code, regex, group →
+`FW_SEO_Redirect_Rules::save()`), `seo-delete-redirect` (id).
+- **Undo for table data:** `fw_ai_snapshot()` only covers options and post data, so redirect writes
+  first `mirror()` all rules into option `fw_seo_redirect_rules_undo`, snapshot THAT, write, and mirror
+  again (flagged so the write does not rebuild). `undo_change` restores the option →
+  `update_option_fw_seo_redirect_rules_undo` → `_restore_from_mirror()` truncates and re-saves the table.
+  Restoring returns the whole list, so later manual edits are undone too (documented).
+- Tests: `tests/ai-abilities-test.php` (skips without the AI Assistant / Abilities API).
