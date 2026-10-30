@@ -539,7 +539,7 @@
         "{plugin}/framework/extensions/seo/manifest.php",
         "{plugin}/framework/extensions/seo/settings-options.php"
       ],
-      "hash": "c79b4bf78bf7415fbd729fb5acced23a",
+      "hash": "d30984ea8be707ce6072e2e352abe868",
       "synced": "2026-10-30"
     },
     "extensions/short-links.md": {
@@ -1148,7 +1148,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/accordion/options.php"
       ],
       "hash": "894fbc1ab6e80d067cd93fa9c7c928b9",
-      "synced": "2026-10-29"
+      "synced": "2026-10-30"
     },
     "shortcodes/animated-heading.md": {
       "kind": "shortcode",
@@ -1229,7 +1229,7 @@
         "{plugin}/framework/extensions/shortcodes/shortcodes/business-info/options.php"
       ],
       "hash": "ebb6e34d70fca26d221faba55aa93a5e",
-      "synced": "2026-10-29"
+      "synced": "2026-10-30"
     },
     "shortcodes/button.md": {
       "kind": "shortcode",
