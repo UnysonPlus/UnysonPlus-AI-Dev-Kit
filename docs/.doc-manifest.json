@@ -539,8 +539,8 @@
         "{plugin}/framework/extensions/seo/manifest.php",
         "{plugin}/framework/extensions/seo/settings-options.php"
       ],
-      "hash": "cf9a9ed2b0258270c042e9ddc506b19d",
-      "synced": "2026-10-29"
+      "hash": "c79b4bf78bf7415fbd729fb5acced23a",
+      "synced": "2026-10-30"
     },
     "extensions/short-links.md": {
       "kind": "extension",
