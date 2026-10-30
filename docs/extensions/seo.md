@@ -918,8 +918,8 @@ the .min).
 - **Reset:** `FW_SEO_Settings_Page::keys_of($tab_options)` (non-html option ids) and
   `admin_post_fw_seo_settings_reset&view=` removes those keys only; "Reset this screen to defaults"
   link beside Save Changes, with a confirm (Search Console warns about the credentials).
-- Public docs: `/seo/settings` (Feeds you don't use, Image alt text, Archive defaults, A sitemap page
-  for visitors, Resetting a screen). Tests: `tests/tidy-test.php`.
+- Public docs: `/seo/feeds`, `/seo/image-alt-text`, `/seo/archive-defaults`, `/seo/html-sitemap`,
+  `/seo/reset-settings`. Tests: `tests/tidy-test.php`.
 
 ### Structured data entities (2.0.48)
 
@@ -963,7 +963,7 @@ the .min).
   `sitemap_video` (default on).
 - News: `sitemap_news` (default off), `sitemap_news_name`, `sitemap_news_types` (default `post`);
   posts with `post_date_gmt` in the last 48 h, max 1000, noindex/password skipped.
-- Public doc: `/seo/settings#video-and-news-sitemaps`. Tests: `tests/media-sitemaps-test.php`.
+- Public doc: `/seo/video-and-news-sitemaps`. Tests: `tests/media-sitemaps-test.php`.
 
 
 ### Content analysis, audit and bulk-page guardrails (2.0.50)
