@@ -142,7 +142,7 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
 - `vertical_side` — **Type** `multi-picker` (popover). **Default** `{ side: 'left' }`. Picker `side` = `image-picker`. **Choices**: `left` (Left), `right` (Right). Read via `unysonplus_header_vertical_side()`.
 - `vertical_width` — **Type** `unit-input` (`rem`,`px`,`em`). **Default** `{value:'16.25',unit:'rem'}`. Width of the fixed side rail.
 
-#### `overlay` reveal → 5 fields
+#### `overlay` reveal → 9 fields
 - `overlay_style` — **Type** `multi-picker` (popover). **Default** `{ style: 'panel' }`. Picker `style` = `image-picker`. **Choices**:
 
   | value | label |
@@ -169,6 +169,12 @@ Authoritative reference for every Header option (Theme Settings → Header). Sub
 - `overlay_duotone_color` — **Type** `predefined-colors-color-picker-compact` (kind `bg`; fallback `color-picker` default `#ec4899`). Inner-ring color for Duotone mode.
 - `overlay_bg_opacity` — **Type** `slider`. **Default** `100`. `min:20, max:100, step:5`. Ring opacity.
 - `overlay_background` — **Type** `background-pro` (video disabled). Overlay menu background (color/gradient/image).
+- `overlay_align` — **Type** `select`. **Default** `center`. **Choices**: `center` Center, `left` Left, `right` Right. Panel-style editorial option: shifts the whole menu list to an edge and indents it from the viewport. Router emits drawer class `primary-navigation-drawer--align-<left|right>` (center = no class).
+- `overlay_numbered` — **Type** `switch`. **Default** `no`. Prefixes each **top-level** item with a two-digit CSS counter (`01`, `02` …) — no markup, submenus excluded. Router emits drawer class `primary-navigation-drawer--numbered`.
+- `overlay_aside_content` — **Type** `textarea`. **Default** `''`. Optional free-form block shown in a corner of the overlay — any text or HTML (a strapline, contact details, links, a shortcode). Rendered through `wpautop( wp_kses_post() )` + `do_shortcode()`; line breaks become paragraphs. Empty = no aside.
+- `overlay_aside_position` — **Type** `select`. **Default** `br`. **Choices**: `br` Bottom Right, `bl` Bottom Left, `tr` Top Right, `tl` Top Left. The aside keeps this corner whatever the menu alignment; emitted as class `overlay-aside--<pos>` on the `<aside>`.
+
+> `overlay_align` / `overlay_numbered` / `overlay_aside_*` are **Panel-style editorial options** (they load with `overlay-panel.css` and the Panel/builder drawer markup; Radial & Concentric ignore them). Read in the header router via `fw_akg('header_mode/overlay/<key>', $chrome, …)`; the aside is rendered by `unysonplus_render_overlay_aside()`, shared by the slot (`overlay-default.php`) and builder-authored overlay. (The aside was two fixed `overlay_aside_tagline` / `overlay_aside_contact` text fields in its first cut; the helper still folds a legacy pair into the content.)
 
 ### Off-Canvas / drawer (always present in `group_header_layout`)
 - `offcanvas_content` — **Type** `addable-popup` (a header column; see "Header column element popup" below). Drawer/mobile panel content. Empty = default Off-Canvas menu (falls back to Primary).

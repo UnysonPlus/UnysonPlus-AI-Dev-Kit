@@ -9,6 +9,11 @@ Combines enqueued frontend CSS and JavaScript into single minified, cached files
 - **Settings/options:** its own settings page under Extensions, three native `tab` containers:
   - **General** — `combine_css`, `combine_js` (master switches), `css_scope` (`site` shared bundle vs `per_page`), `css_delivery` (`file` linked stylesheet, default; `inline` = print the bundle in a head style tag when it is ≤ 50 KB gzipped), `webp_images` (off by default: WebP copy of every uploaded JPG/PNG, its sizes and `fw_image_tag` crops, swapped in on the front end when the copy exists and is smaller; existing images convert a few per page view; `.nowebp` marker for a copy that came out larger), `logged_out_only`, `exclude_urls` (one path/line, `*` wildcard).
   - **General** also carries `purge_css` + `purge_safelist` (see **Unused-CSS purging**), `preload_lcp_image` (see **Hero-image preload**) and `image_quality` (see **Image quality**). The first two are off by default; `image_quality` defaults to 82.
+  - **General** also carries `drop_admin_assets` (off by default; see **Drop admin-only stylesheets**).
+  - **General** also carries `critical_css` and `js_source_map` (both off by default; see **Critical CSS** and **Combined-JS offset map**).
+  - **General** also carries `inline_small_css` (off by default; see **Inlining leftover stylesheets**).
+  - **General** also carries `webp_quality` (slider, default 80; see **WebP quality**).
+  - **General** also carries `speculative_mode`, `speculative_eagerness`, `speculative_skip_sensitive` and `speculative_exclude` (see **Instant navigation**). Both selects default to `auto`, which leaves WP core's own behaviour untouched.
   - **CSS** — `css_handles` (checkboxes; every discovered stylesheet, all checked by default).
   - **JavaScript** — `js_handles` (checkboxes; only first-party checked by default), `js_defer`, `js_minify`.
   - Both handle lists render as **collapsible groups** with a tri-state parent checkbox, per-group counts, Check all / Uncheck all, a filter box and an "Only unchecked" toggle. The group comes from `fw_ao_asset_group( $handle, $src )` in `settings-options.php`, which keys off the asset's **path** (never the handle name) and is emitted onto each input as `data-ao-group` / `data-ao-group-label`; the grouped UI itself is progressive enhancement built in `render_settings_page()`'s inline CSS+JS over the stock `checkboxes` option type, so the inputs, their names and the stored value are unchanged and the list degrades to a flat one with JS off. Rows are moved into groups but **never re-sorted** — the server emits them in `prioritize_css_handles()` cascade order and that order is information. The Animation Engine's effect partials (`/css/animate/`, *not* a path containing `animation-engine`) form their own group, since their classes are applied by JS after load.
@@ -16,8 +21,12 @@ Combines enqueued frontend CSS and JavaScript into single minified, cached files
   - `fw:ext:asset-optimizer:css_exclude_handles` / `:js_exclude_handles` — force-exclude handles from combining (passed the handle→src map).
   - `fw_image_crop_quality` — core filter on the crop encoder quality (default 82); the extension hooks it with the `image_quality` setting.
   - `fw:ext:asset-optimizer:purge_safelist` — the purge safelist (full preg patterns; defaults from `FW_AO_Purger::default_safelist()`).
+  - `fw_ao_inline_small_css_max_bytes` / `fw_ao_inline_small_css_budget` — per-file cap (4096) and per-page budget (20480) for `inline_small_css`.
+  - `fw_ao_critical_css_elements` — how many elements of `<body>` count as the first screen for `critical_css` (default 200).
+  - `fw:ext:asset-optimizer:protected_classes` — plain class names/prefixes to keep through the purge; each is `preg_quote`d and anchored with ``, so `sc-toc` covers `sc-toc__num` and the rest. The ergonomic form of the safelist, for elements that generate their own markup — see **Protecting JS-generated markup**.
   - `fw:ext:asset-optimizer:css_inline_max_bytes` — gzipped-size cap for `css_delivery: inline` (default 51200); a larger bundle stays a linked file.
   - `fw:ext:asset-optimizer:webp_quality` — WebP quality for `webp_images` (default 80).
+  - `fw:ext:asset-optimizer:speculation_sensitive_paths` — this extension's speculative-loading exclusion list, before it is merged into core's. Use it to REMOVE a built-in commerce exclusion; core's own `wp_speculation_rules_href_exclude_paths` can only add.
   - `fw_image_src_url` — core filter on each `fw_image_tag()` crop URL; `webp_images` hooks it to swap in the WebP.
   - `fw:ext:asset-optimizer:preset_css_handles` — the preset-CSS handle list (cascade ordering).
   - `fw:ext:asset-optimizer:settings-options:before` / `:after` — inject settings.
@@ -154,6 +163,48 @@ Two seams, both public:
 
 Verified scoped: a plain visitor request to the same URL still receives the purged bundle.
 
+## Protecting JS-generated markup (`protected_classes`)
+
+`collect_tokens()` scans the **rendered HTML**. A class that only ever appears in an external `.js` file is therefore never seen, every rule naming it reads as unused, and the purge removes it. The failure is **silent** - no warning, no error; the rule is simply absent from the served file, and the symptom is an element that loads unstyled.
+
+Confirmed from a live site: the **TOC** element builds its `<li>`/`<a>`/number spans in `scripts.js`, so `sc-toc__num`, `sc-toc__item`, `sc-toc__link` and `sc-toc__sublist` exist nowhere in `views/view.php`. The served `purged-*.css` contained no `sc-toc__num` at all and had lost `.sc-toc__link{display:inline-flex}`, so the links rendered as plain inline text 21px tall and failed Lighthouse's 24px tap-target audit, with the numbers running into the titles. Reproduced against the real stylesheet: with the defaults only, 4 of those 5 classes were purged; with the prefix registered, all of them survive.
+
+**The fix.** Register the class names from the element's own `static.php`:
+
+```php
+add_filter( 'fw:ext:asset-optimizer:protected_classes', function ( $classes ) {
+	$classes[] = 'sc-toc';   // plain prefix - no delimiters, no regex
+	return $classes;
+} );
+```
+
+Each entry is `preg_quote`d and anchored on a word boundary, so one prefix covers the whole family. Note `preg_quote` escapes the hyphen, so the stored pattern reads `~\bsc\-toc~` - a `strpos( $pattern, 'sc-toc' )` check against the assembled safelist will not find it, though the pattern matches correctly. Use `fw:ext:asset-optimizer:purge_safelist` instead when a genuine pattern is needed.
+
+**Register from `static.php`, not globally.** `static.php` runs only when the element is actually on the page, so the protection is scoped to those pages and the purge stays fully effective everywhere else. It runs at `wp_enqueue_scripts`, comfortably before the purge reads the safelist in the output-buffer pass.
+
+**Scale matters when choosing this vs. the stand-down.** One element's class family → register the prefix. An entire extension's interface drawn by JS (the Live Editor) → stand the optimizer down instead, per **Front-end editors are exempt**; hand-listing a whole extension's CSS is a list nobody maintains.
+
+### Safelist patterns are validated (and failures reported)
+
+`selector_survives()` matches with `@preg_match()`, which treats a malformed pattern as "no match". That is correct there - one bad entry must not warn on every selector of every page - but it meant a typo in `purge_safelist` protected **nothing at all**, with no indication why. That cost real debugging time on a live site.
+
+`validate_safelist()` now compiles each pattern once (memoized per request, keyed by the list's own hash), drops the ones PCRE refuses, records them in a static, and `error_log`s them under `WP_DEBUG`. `_safelist_error_notice()` reports them in wp-admin on every screen - not only the extension's settings page, because the symptom is missing CSS on the **front end** and whoever is chasing that will not think to open the page where the pattern was typed. `FW_Extension_Asset_Optimizer::get_safelist_errors()` exposes the list.
+
+## Drop admin-only stylesheets (`drop_admin_assets`, opt-in)
+
+`is_backend_css_handle()` already recognised `dashicons`, `admin-bar`, `wp-pointer`, `/wp-admin/`, `/includes/option-types/` and the dashicons **path** regardless of registering handle. But it was only ever consulted while **building the combined file**, and excluding a handle from the bundle leaves its own `<link>` in place - so the browser still fetched it as a separate render-blocking request. Measured on a real site: `dashicons.min.css`, 35.6 KB, **100% unused**, downloaded by every logged-out visitor for an icon font only wp-admin draws. Excluding it from the bundle never addressed that; only dequeuing does.
+
+`dequeue_admin_assets()` runs on `wp_enqueue_scripts` at **99998** - deliberately before the combiner at 99999, so the capture sees the list as it will actually be printed.
+
+Two details that matter:
+
+- **It resolves the dependency closure first** (`$styles->all_deps( $styles->queue )`, then walks `$styles->to_do`). `dashicons` normally arrives as a **dependency** of another handle rather than queued directly, so walking `$styles->queue` alone misses it. Verified: the reproduction enqueued it exactly that way and it was still dequeued.
+- **It clears `$styles->to_do` afterwards**, since `all_deps()` populated it as a side effect; the normal print pass then recomputes against the changed queue.
+
+Three stand-downs: the **admin toolbar** showing (it draws its own glyphs from dashicons, and logged-in users are not whose page weight this is about), `request_is_editor()`, and `request_is_excluded()`.
+
+Opt-in because "admin-only" is a judgement about intent - a theme may legitimately use a dashicon on the public site, and this would take those glyphs away. Verified on a staged reproduction: logged out, 1 dashicons `<link>` → 0 with the switch on, page still 200 with its other stylesheets intact and no PHP notices; logged in with the toolbar showing, the font is kept.
+
 ## Generate missing image sizes (`generate_image_sizes`, opt-in)
 
 `FW_AO_Subsizes` (includes/class-fw-ao-subsizes.php) fills in intermediate sizes an import never produced, so a `srcset` has something between the smallest file and the full original.
@@ -190,6 +241,124 @@ Zero computed-style differences across 249 elements: the page renders identicall
 **Cascade safety.** Blocks keep their relative order and are inserted at the very end of `<head>`, after every stylesheet already there, so each rule keeps the priority it had; nothing else in a normal document sits between them and the body. Only `id`'d blocks move (an anonymous `<style>` may be hand-placed in content), `<noscript>` blocks are left alone, and `fw_ao_hoist_styles_skip` exempts an id. Skipped in admin/AJAX/REST and in the Live Editor.
 
 **Gotcha for anyone editing the regex:** the pattern was first written through a Python heredoc, which turned `` and `` into literal control bytes (0x08, 0x01) in the PHP source. It compiled, matched nothing, and failed silently — the feature appeared to do nothing while every step passed when tested in isolation. `sed -n 'Np' file | cat -A` is what found it. Verify any regex written by tooling with `cat -A` before trusting it.
+
+## Critical CSS (`critical_css`, opt-in)
+
+Runs as a `filter_buffer()` pass **after** the purge pass, so the `<link>` it splits is already the purged copy. Gated off for `css_delivery: inline` (the sheet is already in the page — there is no blocking request left to remove), the front-end editor and excluded URLs.
+
+**The gap it fills.** A linked sheet blocks first paint. `css_delivery: inline` removes the block only by moving the whole sheet into every HTML response, and `inline_purged_css()` refuses past `css_inline_max_bytes` (**50 KiB GZIPPED** — note `:1281` measures `gzencode($purged, 6)`, not raw bytes). Reported from a live site: 338 KiB raw / **91 KiB gzipped**, nearly 2× the cap, so inlining was refused and was right to be — it would have added 91 KiB to every navigation to save one blocking request on the first. Per-page purging makes that trade *worse*, because each template's sheet differs so nothing is reused across pages.
+
+**How the subset is chosen.** `FW_AO_Purger::collect_tokens_above_fold( $html, $n )` collects tokens from the `<html>` tag plus the first `$n` opening tags of `<body>` (`PREG_OFFSET_CAPTURE` so the slice lands on a tag boundary), then the ordinary purger runs against those tokens **with an empty safelist**. Empty is deliberate: the safelist protects rules for moments a static scan cannot see (hover, open, in-view), and those are by definition not the first paint — they are in the deferred sheet. Safelisting here would defeat the size reduction that is the whole point.
+
+Document order stands in for viewport position. That is the approximation, and its failure mode is named in the docblock: a layout whose hero sits late in the source (placed by grid/`order`) gets a subset that misses it and flashes for a frame. It errs toward *too little* critical CSS, which costs a flash; the opposite error costs the feature's purpose. Hence a generous default `$n` and the `fw_ao_critical_css_elements` filter.
+
+**Delivery of the remainder:** `media="print"` plus `onload="this.media='all';this.onload=null"`, with a `<noscript>` copy of the original tag. Not `rel=preload`: that needs a polyfill to actually apply the sheet and can double-fetch.
+
+**Bails, leaving the page untouched,** when there is no combined/purged `<link>`, when the scan learned nothing, or when the subset is `< 1%` (scan failed) or `> 60%` (no blocking request worth saving) of the source. The 60% guard is why it correctly does **nothing** on a short page: if the document has fewer elements than the window, the "above the fold" tokens are the whole document, the subset equals the source, and there is no split to make. A short page is not a bug report.
+
+**Verified:** 36 KiB inlined of an 87 KiB purged sheet; the deferred link's `media` confirmed flipping to `all` after load; and **0 differing computed styles across 289 elements × 16 properties** against a control run with the option off (the only DOM delta is the added `<style>` and `<noscript>`, which is why a naive positional diff reports 2 extra elements — filter those two tags before comparing). Zero page errors.
+
+## Combined-JS offset map (`js_source_map`, opt-in)
+
+**Why.** A long-task or forced-reflow report against a combined bundle is unactionable: the line number belongs to a file nobody wrote. `build_combined_js_file()` always wrote a `/* ==== handle ==== *` marker before each source, but `$minify` ran `FW_AO_Minifier::js()` over the **whole concatenation** and strips comments — so the markers disappeared in exactly the case that needed them. Worse, the documented workaround (turn `js_minify` off and re-measure) changes the artifact being measured and means touching a production setting on a live site, which is often simply not available.
+
+**How.** With the flag on, each source is minified **separately**, the marker is added *after* minifying so it survives, and the line count is taken as the bundle is assembled. A sidecar `combined-<hash>.js.offsets.json` records `handle`, `source` (via `path_to_relative()`, so the server layout is not leaked) and inclusive 1-based `first_line`/`last_line`.
+
+Per-source minification is equivalent in effect — the minifier removes comments and whitespace, it does not rename or reorder. Verified by rebuilding both ways and comparing: **identical ignoring whitespace**, the difference being line-break placement plus the markers (41,460 vs 41,162 bytes). The map flag therefore joins the bundle hash signature, since it changes where line breaks fall.
+
+**Not a `.map`.** The combiner concatenates whole files, so a line range per source is all there is to say, it needs no tooling to read, and a real source map would promise column-level mappings into originals we do not have — most sources here are already-minified vendor files carrying maps of their own.
+
+**Verified** against a real bundle: 8 sources; ranges contiguous with no gaps; final `last_line` equal to the bundle's own line count; every `first_line` landing on its handle marker; bundle line 354 resolving to `navigation.js`.
+
+## Inlining leftover stylesheets (`inline_small_css`, opt-in)
+
+**The gap.** The combiner cannot reach every stylesheet, and some it is *forbidden* to touch. The worked example is the Animation Engine: `includes/asset-loader.php` registers `fw:ext:asset-optimizer:css_exclude_handles` to keep every `upw-<module>-*` handle out of the **site-wide** bundle. That is correct, not a workaround — the site-wide bundle is built from every handle ever discovered, so folding in on-demand per-style partials would ship every effect's CSS on every page, the exact bloat its on-demand loader exists to prevent. It then folds the partials a page actually used into its own per-page file via AO's public `combine_files()`.
+
+Right in principle, and still a round trip per leftover. Measured on a real page: four blocking sheets of 1.0, 1.0, 0.8 and 1.1 KiB, estimated 380 ms of render-blocking between them, sitting at the end of `<head>` outside an already-inlined main bundle. **At that size the round trips are the cost, not the bytes** — the exact inverse of the full-bundle case `css_inline_max_bytes` exists to refuse, which is why this is a separate switch rather than a bigger cap.
+
+**Where it runs, and why there.** Last among the `filter_buffer()` passes, on the finished HTML. That is deliberate: it therefore does not care which hook enqueued a sheet or how late, which is precisely what put these beyond the combiner's `wp_enqueue_scripts:99999` capture to begin with.
+
+**Refusals**, each for a reason:
+
+- over `fw_ao_inline_small_css_max_bytes` (4096) per file, or past `fw_ao_inline_small_css_budget` (20480) per page;
+- a media-scoped sheet (`print`, a media query) — not blocking paint, and the condition would be silently lost once the rules are inline;
+- a `<link>` inside `<noscript>` — it would otherwise swallow the fallback copy that critical-CSS delivery puts there, applying it to everyone. Noscript ranges are collected with `PREG_OFFSET_CAPTURE` and matched by offset;
+- anything `url_to_path()` cannot resolve to a readable local file.
+
+Relative `url()` paths go through the existing `rewrite_urls( $css, $source_url )`, since the CSS no longer lives at that path. Edits are applied **from the end backwards** with `substr_replace` so earlier offsets stay valid.
+
+**Does it undo the exclusion it works around?** No. The exclusion protects against *site-wide* bloat; this inlines per page, so a page carries only what that page already linked.
+
+**Verified:** two small sheets inlined and their links gone; a `print`-scoped sheet and an over-cap sheet left as links; `url(dot.png)` rewritten absolute; with `critical_css` also on, the deferred `media="print"` link and its `<noscript>` copy both untouched and the purged CSS not wrongly inlined; stylesheet links 8 → 6; and **0 differing computed styles across 276 elements** against a control with the switch off, no page errors.
+
+## WebP quality (`webp_quality`, default 80)
+
+**The bug this fixes, because it is a trap worth knowing generally.** `FW_AO_Webp::make()` called `$editor->set_quality( $q )` and then `$editor->save( $out, 'image/webp' )`. `WP_Image_Editor::save()` re-derives the quality whenever the **output** format differs from the **source's** — which it always does here, JPEG/PNG in and WebP out — so the value set beforehand was discarded and WordPress's own WebP default of **86** used instead.
+
+Measured on a real 768×512 photo from a live site: **75,944 bytes at every requested quality from 80 down to 60**, with `get_quality()` reporting 86 each time. So `fw:ext:asset-optimizer:webp_quality` had never affected a single image since it was introduced. It failed silently and plausibly: the copies were still smaller than the JPEGs, so the "only keep it if it is smaller" guard passed and nothing looked wrong — they were just 7–19% smaller instead of the 25–40% WebP should manage.
+
+**The fix:** set it through `wp_editor_set_quality`, added immediately before the save and removed immediately after, scoped to `image/webp` so nothing else on the request is affected. Same photo: **59,398 at a genuine 80 (−22%), 46,362 at 70, 41,260 at 60.**
+
+Verify a quality change the way it actually happens — **save the setting in one request and encode in another.** `general_setting()` memoizes the settings store per request, so a script that calls `update_option()` and then `make()` in the same process re-encodes at the *previous* value and looks like an off-by-one bug. It is not; it is the memo.
+
+**Staleness.** A twin is out of date when its mtime is older than `max( source mtime, quality_changed_at )`. `quality_changed_at()` keeps `{quality, changed_at}` in the `fw_ao_webp_quality_state` option and stamps a new time whenever the effective quality differs from the stored one, so copies written at the old quality are redone under the existing `MAX_PER_REQUEST` throttle instead of sitting stale forever. Without this, changing the setting would do nothing to the images already on disk — a silent no-op of exactly the kind this extension keeps producing.
+
+`FW_AO_Webp::quality()` resolves the setting, falls back to 80, then applies the `fw:ext:asset-optimizer:webp_quality` filter (so the filter still wins over the UI) and clamps to 1–100.
+
+## Instant navigation (`speculative_mode`, default `auto`)
+
+Speculative loading via the browser's Speculation Rules API: the browser prefetches, or fully
+prerenders, a likely next page so a click lands on something already in memory. `FW_AO_Speculation`
+(`includes/class-fw-ao-speculation.php`), registered from `_init()` in every context.
+
+**WP core owns the mechanism** (6.8+, `wp-includes/speculative-loading.php`) and this class does not
+reimplement any of it. Core already:
+
+- returns `null` from `wp_get_speculation_rules_configuration()` for **logged-in users** and for
+  sites with no `permalink_structure`, disabling the feature outright;
+- excludes `/wp-*.php`, `/wp-admin/*`, uploads, `wp-content`, plugins, template and stylesheet dirs,
+  and — under pretty permalinks — **every URL with a query string** (`/*\?(.+)`);
+- excludes `a[rel~="nofollow"]` and `.no-prefetch` / `.no-prerender` (plus their descendants);
+- resolves `auto` to `prefetch` / `conservative`, overridable by the host via
+  `WP_SPECULATIVE_LOADING_DEFAULT_MODE` / `_EAGERNESS`.
+
+**What the extension adds:**
+
+| Setting | Values | Effect |
+|---|---|---|
+| `speculative_mode` | `auto` \| `prefetch` \| `prerender` \| `off` | `auto` skips the config filter entirely; `off` returns `null` |
+| `speculative_eagerness` | `auto` \| `conservative` \| `moderate` \| `eager` | core refuses `immediate` for document rules |
+| `speculative_skip_sensitive` | bool, default **true** | adds the commerce/account exclusions below |
+| `speculative_exclude` | one path per line | `#` comments; a pasted full URL is reduced to its path |
+
+Hooks used: `wp_speculation_rules_configuration` (only registered when either select is not `auto`)
+and `wp_speculation_rules_href_exclude_paths`.
+
+**Why `speculative_skip_sensitive` exists.** Core's query-string exclusion covers `?add-to-cart=`
+and nonce'd action links, but **not** a pretty permalink like `/cart/` or `/my-account/orders/` — and
+**WooCommerce registers no exclusions of its own** (verified against the bundled WooCommerce: no
+`wp_speculation_rules*` hook anywhere in it). A prefetch is a real request, so it starts a WC session
+for a visitor who never went there; a prerender also executes the page's JS. The paths are resolved
+from `wc_get_page_id( 'cart' | 'checkout' | 'myaccount' )` and `edd_get_checkout_uri()`, so a renamed
+or translated page is still covered; the hard-coded slugs (`/cart/`, `/checkout/`, `/my-account/`,
+`/account/`) are a fallback used only when neither plugin answers.
+
+**Gotchas:**
+
+- `filter_configuration()` **returns `null` unchanged** when core passes `null`. Forcing a mode there
+  would re-enable speculative loading for logged-in users, which core deliberately disabled.
+- Paths are emitted **site-root-relative**. Core's `WP_URL_Pattern_Prefixer::prefix_path_pattern()`
+  prefixes the site's subdirectory and strips an already-present one, so `/cart/` and
+  `/subdir/cart/` both end up as `/subdir/cart/` — but `relative_path()` normalises anyway so the
+  list is uniform.
+- **Prerender executes the page.** Scroll-triggered motion can run to completion unseen, and
+  analytics can log a phantom view unless the script waits for `prerenderingchange`. Prefetch is the
+  safe default to recommend.
+- **Chromium-only** today. Other browsers ignore the rules; nothing degrades.
+- Verify with DevTools → Application → **Speculative loads**, or over CDP with the `Preload` domain
+  (`Preload.ruleSetUpdated` reports `accepted` or an `errorType` — the authoritative validity check;
+  note that Playwright's bundled Chromium accepts the rule set but does **not** appear to issue the
+  prefetch requests, so a `Sec-Purpose` header count of 0 under automation is not a failure signal).
 
 ## Notes / gotchas
 

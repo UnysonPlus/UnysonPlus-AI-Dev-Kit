@@ -114,6 +114,8 @@ Six options (`h1`,`h2`,`h3`,`h4`,`h5`,`h6`), each built by the `$heading_overrid
 
 Location: `general-fonts.php`. Self-hosted web fonts. `inc/includes/custom-fonts.php` emits `@font-face` into the generated stylesheet AND registers each family name into the typography pickers so it becomes selectable for headings/body/per-section typography.
 
+Every family listed here is also added to the `unysonplus_self_hosted_font_families` filter (theme 2.6.62+), so the theme does NOT also request it from Google Fonts. That matters when you self-host a Google family under its own name (e.g. an OFL font uploaded as `.woff2` to keep fonts off the CDN): before 2.6.62 the theme matched the name against the Google list and loaded the same family a second time from Google, after first paint. To self-host a Google font: subset it to Latin, save one `.woff2` per weight you use, upload them here under the font's exact name, then pick that name in Typography.
+
 - **Type**: `addable-box` (`label => false`, template `{{- family }}`)
 - **Default**: `[]` (empty list)
 - **Saved value shape**: array of rows — `[ { "family": "<Name>", "woff2": <upload>, "woff": <upload>, "weight": "<100..900>", "style": "normal|italic" }, … ]`

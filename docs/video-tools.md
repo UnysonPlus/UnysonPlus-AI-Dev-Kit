@@ -12,6 +12,7 @@ Reference for the Kinetic Scenes tools an agent uses while making a video. Code 
 | `timeline <scene.json> [--from --to --frames 3-16 --out x.png]` | `scene_timeline` | a PNG + pauses found |
 | `cut-check <video> [--scene scene.json]` (also after every `render` of an MP4/WebM; `--no-check` skips) | `video_check`, and inside `scene_render` | issues, cuts, LUFS, voice lines heard |
 | `voice-check <line.wav> --text "…" [--max-gap 0.4]` | — | changed words, pauses mid-phrase |
+| (kit route `POST /studio/voice`) | `voice_over` | a script spoken with the kit's voice engine into one file (`out`), with `<out>.words.json` beside it; the kit must be running |
 | `best-take --text "…" a.wav b.wav …` | `voice_best_take` | takes ranked, problems listed |
 | `cleanup <clip> [--max-pause 0.6 --keep-pause 0.25 --no-fillers --out]` | `footage_cleanup` | cleaned clip + `.edl.json` |
 | `connect [--yes]` / `connect --ask` (start scripts) | — | agents found, what was added |

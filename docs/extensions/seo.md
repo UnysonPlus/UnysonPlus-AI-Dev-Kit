@@ -1027,3 +1027,30 @@ object; unknown and secret keys refused and returned; snapshot of option `fw_ext
   `update_option_fw_seo_redirect_rules_undo` → `_restore_from_mirror()` truncates and re-saves the table.
   Restoring returns the whole list, so later manual edits are undone too (documented).
 - Tests: `tests/ai-abilities-test.php` (skips without the AI Assistant / Abilities API).
+
+### Broken links, backlinks, search volumes, rendered-page checks, crawler import (2.0.54–2.0.57)
+
+Five reports that need data the database does not hold. Public docs: `seo/reports/broken-links.md`,
+`backlinks.md`, `search-volumes.md`, `served-pages.md` and `seo/crawler-import.md`.
+
+- **`FW_SEO_Link_Check`** (`broken_tab`). Table `{prefix}fw_seo_link_status`, keyed by `MD5(url)`, filled from
+  `FW_SEO_Links`. Hourly cron `fw_seo_link_check`: 25 addresses, three per outside host, 40-second budget, each
+  again after a week. `walk()` follows redirects by hand (`redirection => 0`), so every hop goes through
+  `wp_safe_remote_request` (own site exempt). `classify()` is pure: `ok|redirected|chain|loop|broken|unknown`.
+  401/403/405/406/429/451/999 and no answer are `unknown`, never `broken`; a 5xx needs two failures.
+  `rule_chains()` is pure and lists a circle once.
+- **`FW_SEO_Bing`** (`backlinks_tab`, settings `bing_api_key`, `bing_country`, `bing_language`, `opr_api_key`, both
+  keys in `FW_SEO_Transfer::SECRETS`). Table `{prefix}fw_seo_backlinks`. Weekly cron `fw_seo_bing_weekly` starts a
+  run; `fw_seo_bing_batch` does 20 calls a slice: `GetLinkCounts`, then `GetUrlLinks` per page. Answers are read
+  from `d` when wrapped. A run marks links lost only if it saw at least one link and was not capped
+  (`MAX_PAGES`, `MAX_DETAIL`). Open PageRank: `POST …/v1/domains/bulk`, bearer token, 100 domains a call.
+  `volumes_html()` adds the look-up to Topic momentum (`GetKeyword`, `GetRelatedKeywords`); `csv_safe()` guards
+  third-party text in the CSV.
+- **`FW_SEO_Render_Check`** (joins the Audit). Fetches each page; `parse()`, `compare()`, `too_big()` and
+  `unreturned()` are pure. Stored in post meta `_fw_seo_render`; weekly cron `fw_seo_render_weekly`.
+- **`FW_SEO_Crawl_Import`** (box on `audit_tab`). Option `fw_seo_crawl_import`. `parse()` finds columns by alias,
+  `findings()` turns a row into issue ids, `mark_columns()` stops a column the crawler lacks from reading as
+  missing data. CSV and JSON exports import back unchanged.
+- `FW_SEO_Audit::by_issue()` merges the last two, and `issue_labels()` includes their labels.
+- Tests: `tests/outside-data-test.php`. Bing and Open PageRank run against a fake transport
+  (`pre_http_request`); the link checker and page fetcher run against the real site.

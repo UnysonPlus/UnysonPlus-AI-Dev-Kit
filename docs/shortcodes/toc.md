@@ -73,3 +73,9 @@ An auto-generated, clickable outline of the page's headings, built client-side. 
 - `scope: content` auto-detects the main article wrapper (`.entry-content`, `main`, `article`, …). Use `custom` + `scope_selector` when a theme's markup doesn't match. Headings inside the TOC box, `header`, `footer`, or `[data-toc-skip]` are always excluded.
 - Set `scroll_offset` (and `sticky_offset`) to your sticky header's height so clicked headings aren't hidden underneath it.
 - Colors resolve to inline CSS variables on the wrapper. They use the **compact color-preset** shape `{ predefined, custom }`. See `README.md`.
+
+## Purge protection (required, do not remove)
+
+`static.php` registers `sc-toc` on `fw:ext:asset-optimizer:protected_classes`. The list, items, links, numbers and sub-lists are all built by `scripts.js` **after** delivery, so those class names appear nowhere in `views/view.php` and nothing in the rendered HTML the Asset Optimizer scans. Without the registration the purge removes every rule naming them - silently - and the element loads as plain inline links that fail Lighthouse's 24px tap-target audit, with the numbers running into the titles. This was a real live-site regression, so if you touch `static.php`, keep that filter.
+
+See `docs/extensions/asset-optimizer.md` → **Protecting JS-generated markup**.

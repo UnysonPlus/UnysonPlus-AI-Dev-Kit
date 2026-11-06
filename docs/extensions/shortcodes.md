@@ -27,3 +27,24 @@ The core drag-and-drop content-element system — the parent that owns every Uny
 - Colors on elements must use `sc_color_field_compact()` (preset picker), never a raw `color-picker` — see the workspace color-option rule.
 - Its GitHub repo is `UnysonPlus-Shortcodes-Extension`; the nested page-builder maps to the separate `UnysonPlus-PageBuilder-Extension`.
 - The changelog in `manifest.php` is the running record of element features — skim it to see what each element can already do before adding capability.
+
+## Responsive images in hand-built `<img>` tags (`fw_img_responsive_atts`)
+
+An element handed only an image **URL** emits one fixed file at whatever size happens to be stored, with no `srcset` for the browser to choose from and no `width`/`height` to reserve space with. Audited across the bundled set, only `bleed-section`, `carousel`, `featured-image`, `image-box`, `media-image` and `tabs` emitted a srcset; the rest did not. Measured on a real page, a card rendered ~420 CSS px wide was downloading a 768px file.
+
+Use the shared core helper rather than repeating the lookup (it lives in `framework/helpers/general.php`, the sanctioned home per the shortcodes `AGENTS.md` rule 4 — views stay self-contained, genuinely shared helpers go to `framework/helpers/`):
+
+```php
+echo '<img src="' . esc_url( $url ) . '" alt=""'
+   . ( function_exists( 'fw_img_responsive_attr_html' ) ? fw_img_responsive_attr_html( $url ) : '' )
+   . ' loading="lazy">';
+```
+
+- `fw_img_responsive_atts( $url, $att_id = 0, $sizes = '' )` → `width`, `height`, `srcset`, `sizes`, or an **empty array** when the URL is not a local attachment. Empty-on-miss is the important part: a caller merges it unconditionally and an external image or an SVG is simply left alone.
+- `fw_img_responsive_attr_html()` is the same thing pre-escaped, with a leading space, for concatenating into an existing tag.
+- `fw_img_attachment_id_from_url()` resolves the attachment behind a URL. **Memoized** — `attachment_url_to_postid()` is a query and a page may render the same image many times — and it retries the other scheme, since a site that moved to https after uploading stores http URLs that otherwise resolve to nothing.
+- Filter: `fw_img_responsive_atts`.
+
+**Guard with `function_exists()`.** The helper is in core; an element must still render if it is somehow absent.
+
+**Not every image wants this.** The untouched cases in the bundled set are *icon* uploads (`custom-upload` in an icon picker), where a srcset buys nothing. Judge by whether the image is a content photograph.

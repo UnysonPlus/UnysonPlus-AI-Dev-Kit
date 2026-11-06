@@ -14,7 +14,10 @@ block.
 - [Build rules](build-rules.md) — the non-negotiables. **Read these before anything else**; they are
   what separates a site someone can keep from a demo they have to throw away.
 - [The site spec](site-spec.schema.json) — the structured source of truth. The spec is what the build
-  reads; a prose brief is only the thing you turn *into* a spec.
+  reads; a prose brief is only the thing you turn *into* a spec. **Where it comes from:** the
+  [Site Creator](https://create.unysonplus.com/) writes one from a per-industry questionnaire, and is the
+  only thing that does — the kit dashboard's *Create site* tab opens it and receives the result rather
+  than asking the questions a second time. A spec handed to you already has its `missing[]` filled in.
 - [Composition](../../docs/site-creator/composition.md) — the order, and which archetypes each page
   shape wants.
 - [Styles](../../docs/site-creator/styles/README.md) — the design directions and what each one sets.

@@ -14,8 +14,8 @@ Files: `framework/extensions/animation-engine/modules/scroll-timeline-editor/`
 - `static/js/upw-scroll-timeline.js` — the panel (no dependencies; reads `window.ScrollTrigger`).
 - `static/css/upw-scroll-timeline.css` — dark, fixed, very high z-index.
 
-A bottom-docked, video-editor-style timeline. **Toggle: `Shift+T`** or the **Timeline** button
-(bottom-right). Behaviour:
+A bottom-docked, video-editor-style timeline. **Toggle: `Shift+T`** or the admin-bar item
+**Scroll Tools → Timeline** (`#wp-admin-bar-upw-scroll-tools-timeline`). Behaviour:
 - **One track per ScrollTrigger**, sorted by start. Each track's `[start,end]` is a block on a
   **0–100 % scroll axis** (`left = start/maxScroll`, `width = (end-start)/maxScroll`). Blocks carry
   `is-pin` / `is-scrub` classes; labels use the shared `describe(el)` (id, else a telling class).
@@ -31,8 +31,8 @@ A bottom-docked, video-editor-style timeline. **Toggle: `Shift+T`** or the **Tim
 
 ## Scroll Ruler (the compact read-out) — module `scroll-ruler`
 
-Files: `framework/extensions/animation-engine/modules/scroll-ruler/`. **Toggle: `Shift+R`** or the **⟺**
-button (bottom-left). A thin vertical rail down the right edge mapping every trigger's range onto the
+Files: `framework/extensions/animation-engine/modules/scroll-ruler/`. **Toggle: `Shift+R`** or the admin-bar
+item **Scroll Tools → Scroll Ruler** (`#wp-admin-bar-upw-scroll-tools-ruler`). A thin vertical rail down the right edge mapping every trigger's range onto the
 document scroll height, with a live playhead and a list (element, raw `start–end` pixels, pin/scrub).
 Read-only; click a row/bar to jump. Reports **raw scroll pixels**; the Timeline shows the same ranges as
 **percentages**.
@@ -133,5 +133,11 @@ beat positions)** and **Phase 3b (beat states)** all ship — **item 1b is compl
 - Front-end only: these never appear in `wp-admin`, and the Timeline needs a page that actually has
   ScrollTriggers (Scroll Motion / Scroll Keyframes / Motion Sequence / Motion Gallery choreography /
   scrollytelling / pinned sections) — otherwise it shows an empty-state hint.
-- The buttons are intentionally on opposite corners (Timeline bottom-right, Ruler bottom-left) so both
-  can be open at once.
+- Both triggers live in **one admin-bar menu**, "Scroll Tools" (node `upw-scroll-tools`, added
+  idempotently by each module's `admin_bar_menu` hook; the parent carries a `dashicons-chart-bar` icon).
+  This replaced the former fixed floating buttons, which collided with site-side floating chrome (chat
+  FABs, back-to-top) and blocked clicks. The JS (`build()`) prefers the admin-bar link by id and wires its
+  click to `toggle()`; it **falls back to a floating button only when the admin bar is hidden**
+  (`getElementById` miss), so the entry point never disappears. `apply()` toggles `.upw-ab-on` on the
+  `<li>` for the green active mark. Both can still be open at once. (Design Decisions:
+  "scroll-tools-in-admin-bar".)

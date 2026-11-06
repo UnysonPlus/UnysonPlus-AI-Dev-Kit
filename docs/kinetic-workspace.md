@@ -46,7 +46,7 @@ The kit's start scripts ask once (`connect --ask`) and remember the answer (`age
 ## How the Studio behaves
 
 - **File › Projects…** lists projects, opens one, makes a new one from the scene in front of the person, shows the folder.
-  The project name and *saved / saving* show under the logo. The last project reopens on the next visit; `?project=` opens
+  The project name and *saved / saving* show at the top right, beside Undo (click it for the Projects list). The last project reopens on the next visit; `?project=` opens
   one directly.
 - Saves into `scene.json` as the person works (File › Save saves at once; File › Download a copy downloads). Footage kept
   in the browser and large embedded files (music, voice from the add-ons) are written into `media/` on save.
@@ -54,6 +54,7 @@ The kit's start scripts ask once (`connect --ask`) and remember the answer (`age
 - **Conflicts:** a save sends the file version it started from; if the file changed since (an agent wrote it), the kit
   refuses (409) and returns the current version, which the Studio shows. The person's edit is one Undo away.
 - Without the kit running the Studio keeps the scene in the browser, as before.
+- **The start screen** opens with the Studio (File › Start something new opens it again). A `?project=` link or a page-editor connection skips it, so the link you give the person lands on the project. Anything new started from it first closes the open project, so a project is never overwritten by it.
 
 ## Kit routes (the Studio's origin only)
 
@@ -66,12 +67,19 @@ The kit's start scripts ask once (`connect --ask`) and remember the answer (`age
 
 ## AI assist in steps (studio-agent.mjs)
 
-With a project open and the kit's AI being Claude Code, the Studio's AI assist can run the request as an agent in the
-project folder (`/studio/status` lists the `agent` feature when the `claude` command is on PATH).
+With a project open and the `claude` command on PATH, the Studio's AI assist can run the request as an agent in the
+project folder, whichever AI the kit otherwise uses (`/studio/status` lists the `agent` and `agent-create` features). Three
+things start the same run: AI assist in steps, the start screen's **Create**, and the Kit Assistant's `work_on_project`.
 
-- **Routes** (Studio origin only): `POST /studio/agent { project, prompt }` → `{ id }`; `GET /studio/agent/<id>` →
-  `{ state: running|done|error|cancelled, steps: [{ t, text }], summary, error, seconds }`; `POST /studio/agent/<id>/cancel`
-  (kills the process tree).
+- **Routes** (Studio origin only): `POST /studio/agent { project, prompt, create?, url?, voice?, music? }` → `{ id, snapshot }`;
+  `GET /studio/agent/<id>` → `{ state: running|done|error|cancelled, steps: [{ t, text }], summary, error, seconds, snapshot }`;
+  `POST /studio/agent/<id>/cancel` (kills the process tree).
+- **A new scene** (`create`): the brief says to build the whole scene and keep `mode`, `video` and `stage`. `url` reads the
+  website first (`studioQuick`): its facts go to `website.md`, its screenshots to `media/`. `voice` asks for `voice_over`,
+  `music` for `scene_compose` at volume 0.25. An older kit ignores these, so the Studio only sends them when
+  `agent-create` is listed.
+- **Snapshots:** every run first copies `scene.json` to `snapshots/scene-<time>.json` (the last ten stay).
+  `restoreSnapshot(project, name)` puts one back, and a Studio with the project open follows the file.
 - **Run:** `claude -p <brief> --output-format stream-json --verbose --mcp-config <tmp: kinetic-scenes → studio-mcp.mjs>
   --strict-mcp-config --permission-mode acceptEdits`, working directory = the project folder, the full path of `claude`
   (no shell). **Allowed:** `mcp__kinetic-scenes`, Read, Edit, Write, Glob, ToolSearch (MCP tools load lazily).

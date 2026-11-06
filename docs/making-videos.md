@@ -42,6 +42,21 @@ any video; the tools themselves are in [screencasts.md](screencasts.md) (recordi
 
 - **Generate voice when nothing heavy runs.** Voicebox needs several GB; beside a render it failed with Windows' "paging
   file is too small" and its server died (the window stayed open, the API did not). Restart Voicebox, then retry.
+- **Before hand-over, run `studio-cli voice-review lines.json`** (`{ lines, voice }`, the kit running): every line spoken
+  (from the cache) and voice-checked on its own. Never rely on the whole voice-over's transcript: recognition corrects a
+  slip from the words around it ("zitemaps" read as "Site maps" in the full file, "Zit Maps" alone). A failed line is
+  reworded, not retaken: the same text comes out the same. A word that starts a line with a buzzed "s" can be respelt
+  for the voice ("Site maps"); the caption keeps the normal spelling.
+- **A line written as a question must sound like one.** `voice-check` fails a take when the line ends in "?" but the pitch
+  does not rise (6% or more at the end). The transcript's "?" does not save it: recognition adds one to anything worded
+  like a question. It counts only when the pitch cannot be read, and for What / Why / How / When / Where / Who / Which
+  questions, which fall when said well. `intonation.change` in its result gives the rise. Check one line at a time. If it
+  fails, rephrase rather than retry: the same words come out the same. Short questions that end on the point rise best
+  ("Are your WordPress links too long?" +23%, "Are the links on your WordPress site long and ugly?" -10%); "Are you…" helps
+  but is no guarantee ("Are you paying every month for a CRM?" -8%). A flat question is the usual offender in a reel's hook.
+- **Word times are fitted to their lines.** Recognition over a whole voice-over can run half a second late, so
+  `/studio/voice` fits each line's words into that line's real window (`fitWordsToLines`). If the heard word count differs
+  from the script's, the times are left as they came: new overlap or short-display warnings in `check` are the sign.
 - **Run `studio-cli voice-check <line.wav> --text "<script line>"` on every line, and keep only takes that pass.** It
   flags changed words and **pauses mid-phrase** (longer than 0.4 s where the script has no punctuation), which sound
   machine-made. Comparing words alone missed one: "Paying for a page builder … Pro plan" had a 1.3 s break, the words
@@ -98,6 +113,33 @@ any video; the tools themselves are in [screencasts.md](screencasts.md) (recordi
   screencast. Pin only captions and badges.
 - **`stills` can show an empty stage** for a large video that has not loaded yet; confirm with a short render.
 
+## Narration captions (reel style)
+
+The look of most product promos: the sentence being said across the top, each word sharpening as it is spoken, the key
+words in an accent colour, and the visual for that sentence below. Build it from one text layer per sentence (not a
+captions layer):
+
+```json
+{ "id": "line3", "type": "text", "text": "It's *free*, and it runs right in your *browser*.",
+  "box": { "x": 50, "y": 16, "w": 90 }, "start": 8.35, "end": 12.55,
+  "style": { "fontFamily": "Inter", "fontWeight": 800, "fontSize": 7.3, "color": "#1C1E22", "accent": "#00B295" },
+  "clips": [{ "id": "l3in", "preset": "text-blur", "start": 8.4, "duration": 3.5,
+              "params": { "direction": "in", "by": "words", "rhythm": "spoken", "blur": 1.2 } },
+            { "id": "l3out", "preset": "fade", "start": 12.28, "duration": 0.22, "params": { "direction": "out", "blur": 1 } }] }
+```
+
+- `style.accent` + `*asterisks*`: the marked words take the accent colour (several words may share one mark).
+- `rhythm: "spoken"` matches the layer's words, in order, to the voice clip's transcribed `words`, so each word arrives
+  when it is said. Put the clip at the sentence's first word and give it the sentence's length. The layer must sit at
+  the top level (not in a group). A word the transcriber misheard keeps its neighbours' pace.
+- Get the times from the voice job's `segments` (one per script line), plus the voice clip's `start`.
+- Alternate dark and light sections (a full-stage light shape faded in and out) and keep soft glow shapes (ellipses with
+  a `radial-gradient(closest-side, colour, transparent)` fill and a slow `drift`) behind everything: that is the
+  "premium" background of such promos.
+- Keep each caption up about 0.4 s past its last spoken word; `check` warns when a Spoken-rhythm layer leaves too early
+  (the last word then never appears). Lay caption times out from the voice's word times, not its line segments.
+- Give every layer an `end` once its exit has finished, or `check` reports overlaps with layers that are already gone.
+
 ## Effects behind a person
 
 - **Replacing the whole background looks like a bad green screen.** Keep the original footage and put things *behind*
@@ -144,7 +186,7 @@ look"); a client's video uses the client's brand and is never named in Unyson+ m
 - [ ] `timeline` over every voiced stretch: no red pauses, subtitles on screen while their words are said.
 - [ ] The cut check after the render is OK (`render` runs it on every MP4; `studio-cli cut-check <video> --scene <scene>`):
       every voice line heard, no unintended black, about -14 LUFS, true peak under -1 dBTP.
-- [ ] Every voice line passes `voice-check` (no changed words, no mid-phrase pauses); no line sped up.
+- [ ] `voice-review` passes on every line (no changed words, no mid-phrase pauses, questions sound like questions); no line sped up.
 - [ ] **The voice is in the finished video:** transcribe the rendered MP4's own audio (not the separate line files) and
       compare with the script. A wrong voice-file path once dropped every line silently and only the music shipped.
 - [ ] Music covers the whole video, no silent holes, ends after the video (fade out).

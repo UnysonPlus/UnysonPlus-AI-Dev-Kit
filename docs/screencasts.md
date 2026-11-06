@@ -82,6 +82,41 @@ logged in the same way as `record`. Annotations are drawn on the page itself: `h
 nearest edge) and `blur` (a list of targets). An element crop widens to take in its annotations. Optional `steps` (click,
 type, hover, wait) set the page up first.
 
+### Animated screenshots (`rows`)
+
+To make a screenshot come alive (its option rows build in one after another, the one being talked about lifts off the
+screen), give the shot a `rows` selector that matches every row:
+
+```json
+{ "site": "http://localhost/reels-demo", "login": { "user": "admin", "pass": "admin" }, "viewport": [1280, 1700],
+  "shots": [{ "name": "panel", "path": "/wp-admin/themes.php?page=fw-settings",
+              "element": ".postbox:has(.fw-backend-option):visible", "pad": 0,
+              "rows": ".fw-backend-option:not(.fw-backend-option-type-hidden)" }] }
+```
+
+Beside `panel.png` it writes:
+
+- `panel.rows.json`: `{ width, height, empty, rows: [{ x, y, w, h, label, file }] }`, each row's place **in % of the
+  picture** and its label (the option's name). A row that holds other rows (a group) is replaced by its rows; a row
+  mostly outside the picture is left out.
+- `panel.row-N.png`: each row as its own picture.
+- `panel.empty.png`: the same screen with the rows hidden, the real empty panel the rows build onto.
+
+Build the scene from them: the empty panel as an image layer, then each row as an image layer placed by its % inside
+the panel's box (`x = panel.left + row.x/100 × panel.w`, the same for y with the panel's height; `anchor: "top-left"`).
+The panel's height in % of the stage is its width × (stage width ÷ stage height) ÷ (picture width ÷ picture height): on a 9:16
+stage, a panel 92 wide of a 1588×3336 picture is 92 × 0.5625 ÷ 0.476 ≈ 109 tall.
+Then animate:
+
+- **Build in:** `slide` (`from: "bottom"`, `distance: 40`) on each row, 0.12–0.15 s apart; or `stack-in`.
+- **Focus one row:** `spotlight` (dims the rest), `lift` (**Magnify**: it comes forward, larger, on a shadow, with an
+  optional `ring` colour; keep `scale` near 1.08 for a full-width row, up to 1.25 for a small one) and `callout` (a
+  labelled pill). Each stays until its Out clip; give the Out of `lift` the same `scale`.
+- On a phone (9:16), make the panel nearly full width and let it run off the bottom: small rows are unreadable.
+
+The Studio does the same in an image layer's **Animate this screenshot** settings (paste `rows.json` there, or let it
+find the rows in the picture itself).
+
 ## 4. Into a project
 
 `node studio-cli.mjs project rec/screencast-9x16.json --name "Product tour"` copies the scene and every file it uses
