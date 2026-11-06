@@ -5,6 +5,10 @@ narrated villa tour, unboxing and product reels, a lyric reel, a background-effe
 any video; the tools themselves are in [screencasts.md](screencasts.md) (recording, auto-zoom, screenshots),
 [addons-setup.md](addons-setup.md) (voices, music) and [shortcodes/studio-scene.md](shortcodes/studio-scene.md).
 
+## Paper cut-out explainers
+
+The start screen's **A paper cut-out explainer** sets the `paper` style and a story brief (`PAPER_BRIEF` in the Studio's `lib/start.ts`): one physical metaphor, a claim in the first three seconds, about 3.5 to 4 words a second. Build it from shape layers with the `paper` preset running for each layer's whole life, `depth` from -0.8 to 0.6 and two `scene.camera` keys. Keep `rough` near 1 to 1.5 on anything with words, or the letters warp. Change sets with a matched out and in pair of `tr-tear`, `tr-page` or `tr-tape`. Sounds: `paper-rustle`, `paper-tear`, `tape-pull`, `stamp`. Template id: `paper`. Public page: https://docs.unysonplus.com/kinetic-scenes/paper-cut-out
+
 ## The order that works
 
 0. **Read the project's `notes.md` first and keep it up to date** (`studio-cli notes`): an approved line, a reworded take,
@@ -184,6 +188,7 @@ look"); a client's video uses the client's brand and is never named in Unyson+ m
 
 - [ ] Every claim in the narration is what the footage shows (published, not a draft; prices confirmed).
 - [ ] `timeline` over every voiced stretch: no red pauses, subtitles on screen while their words are said.
+- [ ] If the person wants a second opinion on the voice, offer `video_listen` before the render. Ask first: it uploads the sound to Google (`docs/video-tools.md`)
 - [ ] The cut check after the render is OK (`render` runs it on every MP4; `studio-cli cut-check <video> --scene <scene>`):
       every voice line heard, no unintended black, about -14 LUFS, true peak under -1 dBTP.
 - [ ] `voice-review` passes on every line (no changed words, no mid-phrase pauses, questions sound like questions); no line sped up.
