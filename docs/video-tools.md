@@ -83,6 +83,21 @@ ffmpeg 8 has no `-filter_complex_script`: the graph is passed inline.
 `agent-connect` in the kit settings (`addons.json`); after a yes it quietly adds agents installed later; never fatal.
 Test it against a throwaway home (`USERPROFILE=… HOME=… PATH=<node only>`) rather than the person's real settings.
 
+## FFmpeg (`ffmpeg`, `ffmpeg_install`)
+
+FFmpeg isn't bundled. `studio-ffmpeg.mjs` finds it and installs it, and must stay the first import of `serve.mjs`,
+`studio-cli.mjs` and `studio-mcp.mjs`: on load it makes a copy the kit installed usable by setting `FFMPEG` / `FFPROBE`
+(unless already set) and putting its folder first on `PATH`, which also covers code that runs plain `ffmpeg`.
+
+- **Check:** `node studio-cli.mjs ffmpeg`; `GET /studio/ffmpeg` (`{ ffmpeg, ffprobe, version, source, canInstall, by, mb, link, message, install }`).
+- **Install:** `node studio-cli.mjs ffmpeg install`; MCP `ffmpeg_install` (ask the person first); `POST /studio/ffmpeg/install`, then poll the GET. Add-on id `ffmpeg`; `/studio/status` features include `ffmpeg-install`.
+- **Where:** `assembled/ffmpeg/bin`, or `~/.unysonplus/ffmpeg/bin` outside the kit; `KIT_FFMPEG_DIR` overrides it. macOS runs `brew install ffmpeg` when Homebrew is there; otherwise only the link is offered.
+- **Refused downloads:** the file must match the SHA-256 its publisher lists, or nothing is installed.
+- **Say it before starting:** a command or tool that needs FFmpeg checks first (`requireFfmpeg`, the `NEEDS_FFMPEG` sets in the CLI and MCP; HTTP routes answer 424 with `needs: 'ffmpeg'` and `link`). The message says what to do. Add a new FFmpeg feature to those sets.
+- **Don't cache "not found":** it may be installed while the kit is running.
+
+Public page: https://docs.unysonplus.com/kinetic-scenes/ffmpeg
+
 ## Check this computer (`doctor`)
 
 `node studio-cli.mjs doctor [--json]`, the MCP tool `kit_doctor`, and `GET /studio/doctor` (`{ report, text }`, Studio
