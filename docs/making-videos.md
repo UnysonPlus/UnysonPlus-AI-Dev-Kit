@@ -53,13 +53,23 @@ The start screen's **A paper cut-out explainer** sets the `paper` style and a st
   slip from the words around it ("zitemaps" read as "Site maps" in the full file, "Zit Maps" alone). A failed line is
   reworded, not retaken: the same text comes out the same. A word that starts a line with a buzzed "s" can be respelt
   for the voice ("Site maps"); the caption keeps the normal spelling.
-- **A line written as a question must sound like one.** `voice-check` fails a take when the line ends in "?" but the pitch
-  does not rise (6% or more at the end). The transcript's "?" does not save it: recognition adds one to anything worded
-  like a question. It counts only when the pitch cannot be read, and for What / Why / How / When / Where / Who / Which
-  questions, which fall when said well. `intonation.change` in its result gives the rise. Check one line at a time. If it
-  fails, rephrase rather than retry: the same words come out the same. Short questions that end on the point rise best
-  ("Are your WordPress links too long?" +23%, "Are the links on your WordPress site long and ugly?" -10%); "Are you…" helps
-  but is no guarantee ("Are you paying every month for a CRM?" -8%). A flat question is the usual offender in a reel's hook.
+- **A line written as a question must sound like one.** `voice-check` fails a yes/no question ("Are…", "Do…", "Still…?")
+  when the pitch does not rise (6% or more at the end). The transcript's "?" does not save it: recognition adds one to
+  anything worded like a question; it counts only when the pitch cannot be read. What / Why / How / When / Where / Who /
+  Which questions are not judged: they fall when said well (-17% to -24% measured), so their pitch proves nothing either
+  way. (Before capture service 1.13.12 this exemption never fired, because a `\b` in the check had been saved as a raw
+  backspace: well-said wh-questions were flagged.) `intonation.change` in its result gives the rise. Check one line at
+  a time. If it fails, rephrase rather than retry: the same words come out the same.
+- **With the Kokoro voices (the local default and Voicebox's prebuilt ones), don't open with a yes/no question.** They
+  read nearly every yes/no wording as a statement: Sarah (af_sarah) fell 18-38% on 12 wordings; Heart, Isabella and Lily
+  never passed; the default voice fell 48% on "Are your WordPress links too long?", which rose 23% in an earlier test;
+  bending the last two words up with a pitch shift (rubberband, 1.4x) only reached -1%. Use a wh-question, which falls
+  naturally ("When was your last real coffee break?"), or a statement ("Coffee on the run, every morning."). The caption
+  can still show a question.
+- **A measured rise is evidence, not proof.** One take passed at +18% (Bella, af_bella, "Still drinking your coffee on
+  the run?") and still sounded like a statement to a listener: the check reads only the last quarter second of voice, so a
+  small lift on the final word can pass while the line as a whole is flat. When a yes/no question hook matters, have a
+  person listen to it, or use one of the safe forms above.
 - **Word times are fitted to their lines.** Recognition over a whole voice-over can run half a second late, so
   `/studio/voice` fits each line's words into that line's real window (`fitWordsToLines`). If the heard word count differs
   from the script's, the times are left as they came: new overlap or short-display warnings in `check` are the sign.
@@ -68,6 +78,9 @@ The start screen's **A paper cut-out explainer** sets the `paper` style and a st
   machine-made. Comparing words alone missed one: "Paying for a page builder … Pro plan" had a 1.3 s break, the words
   all matched, and the recogniser even stretched "builder" over the silence, so the pause is measured in the sound
   itself. When the same break comes back take after take, reword (here "a Pro page builder plan" fixed it).
+  Numbers count as the same word in digits or spelled out, either way round (the recogniser writes digits): "seven
+  thirty" = 7:30 / 7.30, "twenty twenty-six" = 2026, "seven oh five" = 705, "fifty percent" = 50%, "first" = 1st (since
+  capture service 1.13.12; before, each was flagged as a changed word).
 - **Write for the voice, not the eye.** A question needs a word that announces it ("Still paying…?", not "Paying…?"):
   without one the voice reads it as a statement, falling at the end, whatever the "?" says. Long noun stacks ("a Pro
   page builder plan") make it break before the last noun: shorten them ("a pro page builder?"). Write words in

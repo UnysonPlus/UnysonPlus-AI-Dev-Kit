@@ -69,6 +69,11 @@ Admin notices and the footer are hidden.
 - **Errors name the step** (`Step 15 (waitFor "They install"): …`), and a target that cannot be shown says why (its
   size, display, visibility). A page with a running animation never "holds still" for Playwright's scroll-into-view:
   after 4 s the recorder scrolls the target to the middle itself.
+- **Pages that talk to the kit on this computer** (a Kinetic Scenes project, `?project=<name>`; the AI Assistant's
+  local connection) work in a recording: a person's browser asks once to reach programs on the computer, the
+  recording browser has no one to ask, so it is started with that check off. Without it the Studio fell back to its
+  demo scene ("plays from the AI Dev Kit, which is not running"). In the Studio, target the transport's Play button as
+  `button[title="Play (Space)"]`: a role-and-name "Play" also matches a preset tile.
 - **Admin notices are hidden** (`HIDE`); to keep one on camera, out-rank it in `hide`:
   `.notice:has(#unysonplus-theme-btn){display:block!important}`.
 - **A fresh-install demo** (plugin upload, theme, extensions): a click that loads a new page is followed by a `waitFor`
