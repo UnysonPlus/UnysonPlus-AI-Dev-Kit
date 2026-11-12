@@ -602,6 +602,46 @@ Pair it with the CRM roles: a workspace hides menus, the roles limit access. Mem
 `membership` the same way. `FW_WORKSPACES_OFF` in `wp-config.php` disables the feature. The Admin Skin maps
 `fw-ws-menu` into its Workspace group.
 
+### CRM mode and "No public website" (CRM 1.0.82, SEO 2.0.60, core Workspaces)
+
+**CRM → Settings → CRM mode** (`includes/admin/class-fw-crm-admin-mode.php`, `FW_CRM_Admin_Mode`, rendered first on
+`unysonplus_crm_settings_sections`, actions `crm_mode_on` / `crm_mode_off` through `unysonplus_crm_handle_action`,
+`manage_options` only) is the CRM's front door to Workspaces, not a second mechanism. On =
+`FW_Workspaces::setup( 'crm', $admins ? array( 'administrator' ) : array() )` + `FW_Workspaces::set_private( $no_website )`
++ clearing the current user's `fw_workspace_off`; off = `FW_Workspaces::teardown( 'crm' )` (every role mapped to `crm`
+unmapped, its `members` roles un-kept-out) + `set_private( false )`. "On" is `FW_Workspaces::in_use( 'crm' )`.
+
+In a workspace the app shell (`FW_Admin_App`, `includes/admin-app/class-fw-admin-app.php`) forces focus mode
+(`is_focus()` returns `true`) and drops the sidebar footer (Hide/Show the WordPress menu, Back to WordPress): the menu is
+already trimmed and Dashboard leads back to the app, so the top-bar switch is the only way out. `FW_Admin_App::in_workspace()`
+reports it.
+
+**Dashicons inside the app's buttons carry a `.wp-core-ui` prefix on purpose (1.0.85).** Core ships
+`.wp-core-ui .button .dashicons { vertical-align: middle }` at specificity (0,3,0) -- the same weight as a plain
+`.fw-crm-thing .button .dashicons`, so a nudge written at that weight loses the tie on source order (core's sheet
+loads later) and the glyph sits 1.75px low. The record actions, home tools and calendar arrows therefore share ONE
+rule prefixed with `.wp-core-ui` to reach (0,4,0), carrying the measured `vertical-align: -3px`. The **New** button is
+a different case: it is a `<summary>`, not a `.button`, so core's rule never reaches it and it only needs
+`line-height: 16px` against core's 1.9. Do not merge the two, and do not drop the prefix -- it changes nothing about
+what the rule says, only whether it does anything.
+
+When the Admin Skin is active it makes `.button` a flex container, where `vertical-align` is ignored outright and
+`align-items: center` does the centring; both paths measure an offset of 0, so the rule is correct either way.
+
+Core additions in `class-fw-workspaces.php`:
+
+- `fw_workspaces['private']` (bool; Roles tab → **Website → No public website**). `_action_private_site()` on
+  `template_redirect` priority 0: logged-out → `wp_login_url()`; logged-in → the active workspace URL or `admin_url()`;
+  kept-out members pass through (the front end is their only place). Skipped for `is_robots()`, `is_favicon()`, admin,
+  and when `fw_workspaces_private_allow` returns true. Everything answered before `template_redirect` stays open by
+  design: REST, admin-ajax, admin-post, cron, wp-login.php, and the CRM's confirm / unsubscribe / tracking links (they
+  run on `init`). `wp_robots` gets `noindex, nofollow`; `robots_txt` becomes `Disallow: /`.
+- The SEO health notice returns early when `fw_seo_site_private` is true; Workspaces answers it with `is_private()`.
+- The admin-bar switch (`fw-workspace-switch`) shows a red count of `wp_get_update_data()` totals while the person is
+  in their workspace (the WordPress updates node is removed there), for users with `update_plugins`.
+
+Hiding is not locking: a hidden screen's sub-pages still open by URL for a role that has the capability.
+
 ## AI Assistant tools per module (1.0.77)
 
 Each module that can be set up by an AI app ships `modules/<module>/ai-abilities.php`, required inside that module's
@@ -976,8 +1016,15 @@ list ID to the provider's audience/group ID — mapped, never guessed.
 | `unysonplus_crm_webhook` | action | `( $event, $data )` queue a webhook event (1.0.67) |
 | `unysonplus_crm_webhook_events` / `_payload` / `_request_args` / `_allow_local` / `_log_days` | filter | Webhook events, payload, HTTP args, local addresses, log retention |
 | `unysonplus_crm_webhook_delivered` | action | After each delivery attempt |
+| `fw_crm_show_maps` | filter | `true` (default) shows a Google map (keyless `maps?output=embed&q=`, lazy iframe) of a company's name + address under its About details; `false` hides it (1.0.84) |
 
 ## Notes / gotchas
+
+- **Record details (About) links (1.0.84).** `render_details()` in `class-fw-crm-admin-contacts.php` opens every
+  `http(s)` link outside wp-admin in a new tab (`target="_blank" rel="noopener"`); `mailto:` and admin links stay in place.
+  Custom fields go through `field_pair()`: a `url` field is a link labelled by `link_label()` (host + path, cut at 40
+  characters; a Google Maps URL reads "Open in Google Maps"), an `email` field a `mailto:` link. A company with an
+  address gets `render_map()` under its details (see `fw_crm_show_maps`); contacts never get a map.
 
 - **Unsubscribing never deletes the row** — a forgotten address is silently re-subscribed by the
   next import. The GDPR eraser anonymises in place for the same reason.

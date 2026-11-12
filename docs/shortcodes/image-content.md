@@ -60,3 +60,8 @@ An image and a WYSIWYG content block side by side (or stacked) — the classic z
 - `content` is WYSIWYG and accepts nested shortcodes — keep it clean semantic HTML with no classes on `<p>`/`<li>`.
 - `content_bg` + `content_padding` turn the text side into a tinted card panel.
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, NOT a raw hex string. See `README.md`.
+
+## Per-device images (shortcodes 1.16.6+)
+
+`img_focal`, `img_crops`, `img_images` (same shapes as Image Box). Only with `image_fit: 'cover'`; `image_ratio` (`'16x9'` …) stays the desktop shape. Media Library images now carry a responsive srcset (`sizes` `(max-width: 767.98px) 100vw, 50vw`).
+Shared fields/renderer: `docs/architecture/responsive-images.md`.

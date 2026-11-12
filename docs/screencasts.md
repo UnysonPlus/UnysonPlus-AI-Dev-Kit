@@ -39,7 +39,12 @@ Admin notices and the footer are hidden.
 - **Plain steps:** `click`, `dblclick`, `hover` (`target`), `type` (`text`, optional `target`, `clear`), `select` (`target`
   plus `option`, the visible text, or `value`: the cursor goes to the dropdown and the choice is made; a native list does
   not show in a recording), `press` (`key`),
-  `drag` (`from`, `to`), `scroll` (`by`), `wait` (`ms`), `goto` (`path`, loading cut), `mark` (a labelled moment).
+  `drag` (`from`, `to`), `scroll` (`by`), `wait` (`ms`), `goto` (`path`, loading cut), `mark` (a labelled moment),
+  `waitFor` (`target`, `state` visible|hidden|attached|detached, `keep` s kept on screen (default 2), `timeout` ms
+  (default 600000): something slow, such as the AI panel building a page (`.upw-aip__undo` appears when it is done),
+  shown for `keep` seconds and the rest cut), `upload` (`target` file input, default `input[type=file]`, `file` a path
+  on this computer, optional `click` for the visible button the cursor goes to: a system file dialog never shows in a
+  recording, so the file is set directly).
 - **Targets:** a Playwright selector string, `{ "text" }`, `{ "role", "name" }`, `{ "label" }`, or a page-builder target
   `{ "pb": "tile" | "tab" | "item" | "field" | "save" | "first-field", … }`.
 - **Unyson+ actions:** `wp.title`, `wp.saveDraft`, `wp.preview` (a draft's preview; admin bar hidden), `wp.publish` (publishes and waits for the confirmation), `wp.view` (the published page through its real link). Say "live" only after `wp.publish`: a draft preview is not live; `pb.tab` (`name`),
@@ -55,7 +60,22 @@ Admin notices and the footer are hidden.
   is looked for inside it. `le.select` (`text`: click an element on the page), `le.edit` (its toolbar's edit button: the
   same settings as the builder, then `pb.set` / `pb.save`), `le.device` (`name`: Desktop, Tablet, Mobile; the switch gets no
   caption), `le.save` (the editor's Save). Start at `/?page_id=<id>&fw-live-editor=1`.
-- `label` names the step in the reel's captions. Each step can set `pause` (ms after it).
+- `label` names the step in the reel's captions; `about` (a sentence on what it does and why) is carried into
+  `actions.json` for `narrate`. Each step can set `pause` (ms after it).
+- **Timing:** Chrome's screencast sends no frames while the screen is still; each frame is held until the next (no cap:
+  a 2 s cap once made the video seconds shorter than `actions.json`, every later zoom late), and the encode is cut at the
+  true length with `-t` (the concat list repeats the last image, which otherwise took the previous duration again).
+  `wp.publish` waits for its confirmation off camera.
+- **Errors name the step** (`Step 15 (waitFor "They install"): …`), and a target that cannot be shown says why (its
+  size, display, visibility). A page with a running animation never "holds still" for Playwright's scroll-into-view:
+  after 4 s the recorder scrolls the target to the middle itself.
+- **Admin notices are hidden** (`HIDE`); to keep one on camera, out-rank it in `hide`:
+  `.notice:has(#unysonplus-theme-btn){display:block!important}`.
+- **A fresh-install demo** (plugin upload, theme, extensions): a click that loads a new page is followed by a `waitFor`
+  on something of the next page (it restarts the frame stream). Extensions download from GitHub; when GitHub is slow,
+  a test-only mu-plugin answering `pre_http_request` for `github.com/UnysonPlus/<repo>/archive/…` with a zip of the
+  working copy keeps the take short. Several takes join into one recording folder (videos end to end, later actions
+  shifted); look at Claude's reply in the AI panel before publishing: it can contain the account's email.
 
 `actions.json`: `{ video, width, height, seconds, actions: [{ kind, label, t, end, rect }] }`, with times in the video
 and `rect` in video pixels (where the click, typing or drag happened).
@@ -73,6 +93,36 @@ leaves the video. Each step label becomes a numbered caption pinned to the stage
   hides the screencast (this cost an evening). It is a large unpinned shape instead.
 - `stills` can show a blank stage for a big screencast: it may take the picture before the video has loaded. Check
   with a short `render`.
+
+## 2b. Voice-over and a written guide (`narrate`, `voice`, `guide`)
+
+Code: `studio-narrate.mjs`. MCP: `screencast_narrate`, `screencast_voice`, `screencast_guide`.
+
+```
+node studio-cli.mjs narrate rec [--lang es] [--audience "…"] [--context "…"] [--intro "…"] [--outro "…"] [--out f.json] [--no-ai]
+node studio-cli.mjs voice rec [--voice <id>] [--file narration.json]
+node studio-cli.mjs guide rec [--title "…"] [--file narration.json] [--accent #00B295]
+```
+
+- **Steps** (`recordingSteps`): each labelled action once, in order (the caption skip list: tabs, Save, devices…), each
+  with its window until the next step. **Budget** = floor((window − 0.4 s) × 2.5) words, minimum 3.
+- **narrate:** frames at each step's moment (end + 0.4 s, before the next) with the target ringed → `askWithImages`
+  (Claude Code reads them; the API inlines them) → `{ lines: [{ step, text }] }`; a second `askText` pass shortens lines
+  over budget; any still over get `long: true` (the CLI says shorten it or lengthen that step's `pause`). Output
+  `narration.json` (`narration.<lang>.json` with `--lang`): `{ lang, by, looked, lines: [{ step, label, at, until, text,
+  say, words, budget }] }`; `at` = seconds in the recording, `"intro"`, or `"end"`; `say` = `spoken(text)` (Unyson+ →
+  "Unisonplus"). No AI → the labels / `about` notes. **Hand the file to the person before voicing.** For a reel, rewrite
+  it as the reel script (hook, brand only at the end) in the same shape.
+- **voice:** each line through the running kit's `/studio/voice` alone (cached by text: unchanged lines are instant),
+  `voiceCheck` on each (English only), writes `voice/line-NN.mp3` + `voice.json` (`[{ at, file, seconds, text }]`, the
+  shape `screencast --voice` takes; `"end"` → the recording's length). `overruns` = lines past the next line's `at` (the
+  last step's line: past the recording + 3 s, the screencast end card; the `"end"` line is not limited). Exit 1 on a
+  failed check or an overrun. The recogniser transcribes "Claude" as "cloud" (respellings too): a name-only mismatch, so
+  listen rather than reword.
+- **guide:** `guide/step-NN.jpg` (1600 wide, ringed) + `guide.md` + `guide.html` (self-contained, light/dark, accent
+  numbers); the narration's lines as step text. Frames are taken at least 0.5 s before the video's end (a seek into the
+  last fraction returns no frame and no error); a missing frame is an error.
+- Public page: `/kinetic-scenes/screencasts` (section "The voice-over and a written guide").
 
 ## 3. Screenshots (`shot`)
 

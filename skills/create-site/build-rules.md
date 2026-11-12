@@ -130,3 +130,53 @@ them before trusting its palette table.
 If a style the person asked for cannot carry the contrast, **say so and propose the nearest value that
 can** — usually the same hue a step or two darker, which keeps the look. Do not ship it failing and do
 not silently substitute a different style.
+
+## 11 · Name the theatre level, and default to Measured
+
+A created site is scored against the [design jury](../../docs/site-creator/design-jury.md), and the
+first decision that rubric asks for is **how much spectacle this brief has earned**. The bar does not
+move between levels; the moves available to reach it do.
+
+**Say the level and the reason in one line before building**, the way the build protocol makes you
+name a stack:
+
+> *Measured — a car-loan comparison is a trust purchase, so the budget goes into the rate explainer,
+> not the hero.*
+
+| Signal in the brief | Level |
+| --- | --- |
+| "Simple", "basic", "minimal", "nothing fancy" | **Quiet** |
+| "Premium", "stunning", "blow me away", a brand launch, a portfolio, hospitality | **Full** |
+| Everything else — and every brief that gives no signal | **Measured** |
+
+**The failure this rule exists to prevent is enthusiasm**, not laziness. A generator that reads
+"award-grade" as "every module at once" puts a cinematic hero over a loan application, and the result
+scores *worse* than the plain version: Usability is 30% on its own, and a finance page drowning in
+motion reads as a site that is not serious about money. Full is a level you are *given*, not one you
+take.
+
+Quiet is a real answer too. A person who asked for simple and got a scroll-choreographed home page did
+not get a better site than they asked for; they got one they now have to strip, in a builder they are
+still learning.
+
+## 12 · One signature moment, and everything else stays quiet
+
+Every site above Quiet gets **exactly one** idea a visitor would describe out loud — one per site, not
+per page — and the rest of the build stays deliberately still around it. Twenty effects read as noise
+and lose points in Design and Usability at the same time; this is the rule that converts a generated
+page from competent into memorable.
+
+It qualifies only when all four hold — the full definition and its failure modes are in
+[`design-jury.md`](../../docs/site-creator/design-jury.md) § The signature moment:
+
+1. **It belongs to this business** — moved to a competitor, it should break.
+2. **It is on the path the visitor already takes** — a moment nobody scrolls to did not happen.
+3. **It survives its own failure** — reduced motion, keyboard, slow phone, all specified *with* the
+   effect, never after.
+4. **It is built from the framework's own machinery** — an Animation Engine module, a Kinetic Scene,
+   the Motion Gallery, Scroll Motion, a page transition. Never a bespoke script bolted beside the page
+   builder: rule 1 applies, and an output the person cannot edit is not done.
+
+Each [style](../../docs/site-creator/styles/README.md) names the moves its own direction wants. Pick
+from that list rather than inventing one — a cinematic reveal on a Swiss grid is not a brave choice, it
+is a style error.

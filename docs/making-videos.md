@@ -18,7 +18,9 @@ The start screen's **A paper cut-out explainer** sets the `paper` style and a st
    open in the Studio, not a rendered MP4. Do not render until the person asks for the file (they can also export it
    themselves); a render takes 7-15 minutes and is wasted if they want changes. Your own checks use `stills` and short
    test cuts, not the full render.
-1. **Script first, as lines tied to moments.** One short line per step or shot; write the brand as "Unisonplus" in
+1. **Script first, as lines tied to moments.** For a screencast, `studio-cli narrate <rec>` drafts them from the
+   recording (a line per step, within its word budget) and `voice` speaks and checks them; `guide` writes the matching
+   step-by-step page ([screencasts.md](screencasts.md) § 2b). One short line per step or shot; write the brand as "Unisonplus" in
    anything a voice reads.
 2. **Pictures:** a screencast (`studio-cli record`), the source's own photos or footage, or both. Real product footage
    reads as genuine; generated text and shapes alone read as "AI-made".
@@ -159,6 +161,10 @@ captions layer):
 
 - **Files are looked for in the recording's folder too, and a missing one is an error.** A background passed as a bare
   name was looked for in the folder the command ran from, not found, and replaced by a plain purple shape without a word.
+- **An AI building on camera:** record the AI Assistant panel with a `waitFor` on `.upw-aip__undo` (`keep: 3`) so the wait
+  is cut. Reset the demo site and re-activate `ai-assistant` before each take (the snapshot does not hold it), hide the
+  site's branded header (`#masthead`) and the admin bar's site name with `hide` until the reveal, and look at the live
+  page closely: a take once showed PHP warnings and dark-on-dark headings that only the full-size frame revealed.
 - **A recording that saves changes the site.** After a take that edits and saves a page, put the page back before the next
   take (the second take could not find "Summer is here": the first had saved "Edit right on the page").
 
@@ -170,6 +176,24 @@ captions layer):
 - **Keep subtitles off the action.** A bottom subtitle covered the very element being clicked. `screencast --voice`
   places each line's subtitle at the bottom, or at the top when the action at that moment is in the lower part of the view.
 - **Fill long silences** (a 15 s stretch with no narration felt dead): add a line, or speed that part up.
+
+## Long videos (over a reel)
+
+- **One scene is at most 600 s** (the format's limit). The renderer covers the whole scene at any frame rate (it used to
+  stop at 10,800 frames, which cut a 10-minute scene at 30 fps to 6 minutes without a word); a longer scene is refused
+  with a message, never trimmed.
+- **Build long videos as chapters:** one scene per part (intro, chapters, outro), same size and fps, rendered one by one
+  (only when the person asks), then `studio-cli join 01-intro.mp4 02-….mp4 … --out video.mp4` (`video_join`). Matching
+  parts join losslessly in seconds; the chapter list for the YouTube description lands in `video-chapters.txt`. Name the
+  files after the chapters (`02-setting-up`) or pass `--titles`.
+- **Music for a long scene:** set `"loop": true` on the music clip (role `music`): the file repeats from `offset` to its
+  end until `duration`, or to the end of the scene when `duration` is unset. The player, the Studio's browser export and
+  the kit renderer (`aloop`) all honour it; one shared rule, `audioClipLength` in the player's `audio.ts`. Add a
+  `fadeOut`. Beats and the React-to-music envelope cover the first pass only.
+- **Keep a chapter to a few hundred layers.** Measured in the Studio (production build): a 187-layer reel plays at full
+  speed, ~1,500 layers at ~26 fps, ~3,000 at ~17 fps. In the player, mounting and the FIRST far seek grow with the
+  square of the layer count (GSAP reads computed styles as each tween first renders, and every layer stays in the
+  style tree while hidden): ~1.6 s at 750 layers, ~6 s at 1,500, ~23 s at 3,000. Renders are exact at any size.
 
 ## Rendering on this machine
 
@@ -199,6 +223,17 @@ look"); a client's video uses the client's brand and is never named in Unyson+ m
 - [ ] Frames looked at across the whole video (not one): framing, words readable on a phone, nothing hidden that matters.
 - [ ] Loudness about −14 LUFS; length as asked.
 - [ ] Anything uncertain told to the person in plain words.
+
+## Effects on a person (talking head)
+
+Presets for a person on camera, all best on a person cut out of the footage (`/studio/matte`, the cut-out keeps its
+see-through background): `ascii` (Code body), `engrave` (banknote engraving; `oval: true` inside the Banknote piece),
+`manga` (impact frame with speed lines; slam a word on top), `blow-away` (over a still of the empty room, so the room
+stays), `clone-row`, `ring-text` (two copies of the text: `half: "back"` under the cut-out, `half: "front"` over it),
+`rack-focus` (on the footage behind the cut-out) and `explode-3d` (on a group of a frame's parts). Pieces: Voice note,
+Predict keys, Newspaper front page, Banknote, Day dial. The redrawn looks read the frame's pixels: footage from another
+address must allow it (CORS); the kit's own server does. Clip times are in scene time, like every clip. Public page:
+`/kinetic-scenes/video-effects#effects-on-a-person`.
 
 ## Wide footage in a tall video (reframe)
 

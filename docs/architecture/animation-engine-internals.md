@@ -53,6 +53,53 @@ Modules never hand-roll a `wp_footer` enqueue and never ship a single `<mod>.css
 Continuous loops subscribe to the shared scheduler `window.upwAnimRaf` (set `'needs_raf' => true` in
 the registration) rather than starting a private `requestAnimationFrame`.
 
+### Never read geometry after writing to the DOM (forced reflow)
+
+The browser answers `getBoundingClientRect()`, `clientWidth`, `scrollHeight`, `window.pageYOffset`
+and friends from its layout. If anything has written to the DOM or to a style since the last layout,
+it must **redo the layout synchronously before it can answer** - a "forced reflow". One is cheap; one
+per element in a loop is not. Three shapes to avoid, all of which were real bugs in this extension
+(fixed in Animation Engine 1.4.87 / Shortcodes 1.16.10), and all of which Lighthouse reports under
+*Forced reflow* while attributing the cost to whichever function happened to read:
+
+```js
+// BAD - append, measure, append, measure: one full page layout per iteration
+do { addUnit(); } while (track.scrollWidth < span);
+
+// BAD - write a class, then read the next element: one layout per element
+items.forEach(el => { el.classList.add('is-in'); const r = el.getBoundingClientRect(); });
+
+// BAD - measure a container immediately after inserting a child into it
+host.insertBefore(canvas, host.firstChild);
+const r = host.getBoundingClientRect();
+```
+
+The fixes, in order of preference:
+
+1. **Take the measurement first**, before the write, when the write cannot change what you are
+   measuring (inserting an absolutely-positioned layer does not change its host's box).
+2. **Split into read and write passes.** Read every element into an array, then apply every change.
+   Only the first read pays for a layout; the rest are free because nothing was written in between.
+3. **Compute instead of re-measuring.** Measure one unit, work out arithmetically how many are
+   needed, append them in one go, then confirm with a single read.
+4. **Let the browser hand you the box.** `ResizeObserver` entries carry `contentRect` and
+   `IntersectionObserver` entries carry `boundingClientRect` - both produced during the browser's own
+   layout pass, so reading them costs nothing. Prefer them over measuring by hand.
+
+**For scroll position and viewport height, use the scheduler's cached values rather than reading the
+window.** `upw-raf.js` reads both once at the top of every tick, while the layout is still clean, and
+publishes them:
+
+```js
+var raf = window.upwAnimRaf;
+var y  = (raf && typeof raf.scrollY === 'number') ? raf.scrollY : (window.pageYOffset || 0);
+var vh = (raf && raf.vh) || window.innerHeight;
+```
+
+Reading `window.pageYOffset` inside your own callback instead lands *after* other subscribers have
+written styles, which forces a layout for a number the scheduler already has. Always keep the
+fallback: a module can be loaded on a page where the scheduler is not present.
+
 ## Effects control (`includes/effects-control.php`)
 
 Every module carries a programmatic choke point:

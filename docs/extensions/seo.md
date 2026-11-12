@@ -32,7 +32,7 @@ Four objects, each replacing a pattern the pre-2.0 extension repeated per locati
 | `FW_SEO_Tags` | The `%%tag%%` registry: lazy resolvers, prefix-matched families, modifiers, and the empty-tag collapsing. |
 | `FW_SEO_Chain` | The one `override → template → auto → fallback` ladder every field shares. |
 | `FW_SEO_Head` | The single collector everything in `<head>` goes through. Keyed, so a second writer replaces rather than duplicates. |
-| `FW_SEO_Sitemap` | The sitemap provider registry + index, chunking, XSL and rewrite rules. |
+| `FW_SEO_Sitemap` | The sitemap provider registry + index, chunking and rewrite rules. No XSL stylesheet since 2.0.59 (browsers are dropping XSLT); people use the `[seo_sitemap]` HTML sitemap. |
 
 Supporting: `FW_SEO_Store` (discrete `_fw_seo_*` post/term meta), `FW_SEO_Settings`
 (one keyless read of the settings), `FW_SEO_Locations` (the set of places a template
@@ -180,7 +180,6 @@ Supports `noindex` `nofollow` `noarchive` `nosnippet` `noimageindex`
 |---|---|
 | `/sitemap.xml` | The index. Advertised in robots.txt. |
 | `/sitemap-<provider>-<page>.xml` | One provider's page of URLs. |
-| `/sitemap.xsl` | The stylesheet browsers apply; crawlers ignore it. |
 
 Built-in providers: `home`, `pt-<post_type>` for every public post type, and
 `tax-<taxonomy>` for every public taxonomy. Chunked at 1,000 URLs

@@ -7,12 +7,13 @@ Combines enqueued frontend CSS and JavaScript into single minified, cached files
 
 - **Shortcodes:** none.
 - **Settings/options:** its own settings page under Extensions, three native `tab` containers:
-  - **General** — `combine_css`, `combine_js` (master switches), `css_scope` (`site` shared bundle vs `per_page`), `css_delivery` (`file` linked stylesheet, default; `inline` = print the bundle in a head style tag when it is ≤ 50 KB gzipped), `webp_images` (off by default: WebP copy of every uploaded JPG/PNG, its sizes and `fw_image_tag` crops, swapped in on the front end when the copy exists and is smaller; existing images convert a few per page view; `.nowebp` marker for a copy that came out larger), `logged_out_only`, `exclude_urls` (one path/line, `*` wildcard).
+  - **General** — `combine_css`, `combine_js` (master switches), `css_scope` (`site` shared bundle, DEFAULT since 1.1.76, vs `per_page`; per-page scores better only because a one-page audit cannot observe a shared bundle's cross-page cache win - prefer per-page only for single-landing-page sites), `css_delivery` (`file` linked stylesheet, default; `inline` = print the bundle in a head style tag when it is ≤ 50 KB gzipped), `webp_images` (off by default: WebP copy of every uploaded JPG/PNG, its sizes and `fw_image_tag` crops, swapped in on the front end when the copy exists and is smaller; existing images convert a few per page view; `.nowebp` marker for a copy that came out larger), `logged_out_only`, `exclude_urls` (one path/line, `*` wildcard).
   - **General** also carries `purge_css` + `purge_safelist` (see **Unused-CSS purging**), `preload_lcp_image` (see **Hero-image preload**) and `image_quality` (see **Image quality**). The first two are off by default; `image_quality` defaults to 82.
   - **General** also carries `drop_admin_assets` (off by default; see **Drop admin-only stylesheets**).
   - **General** also carries `critical_css` and `js_source_map` (both off by default; see **Critical CSS** and **Combined-JS offset map**).
   - **General** also carries `inline_small_css` (off by default; see **Inlining leftover stylesheets**).
   - **General** also carries `webp_quality` (slider, default 80; see **WebP quality**).
+  - **General** also carries `warm_images` (off by default; see **Below-the-fold image warming**).
   - **General** also carries `speculative_mode`, `speculative_eagerness`, `speculative_skip_sensitive` and `speculative_exclude` (see **Instant navigation**). Both selects default to `auto`, which leaves WP core's own behaviour untouched.
   - **CSS** — `css_handles` (checkboxes; every discovered stylesheet, all checked by default).
   - **JavaScript** — `js_handles` (checkboxes; only first-party checked by default), `js_defer`, `js_minify`.
@@ -26,6 +27,7 @@ Combines enqueued frontend CSS and JavaScript into single minified, cached files
   - `fw:ext:asset-optimizer:protected_classes` — plain class names/prefixes to keep through the purge; each is `preg_quote`d and anchored with ``, so `sc-toc` covers `sc-toc__num` and the rest. The ergonomic form of the safelist, for elements that generate their own markup — see **Protecting JS-generated markup**.
   - `fw:ext:asset-optimizer:css_inline_max_bytes` — gzipped-size cap for `css_delivery: inline` (default 51200); a larger bundle stays a linked file.
   - `fw:ext:asset-optimizer:webp_quality` — WebP quality for `webp_images` (default 80).
+  - `fw:ext:asset-optimizer:warm_images_max` — how many below-the-fold images `warm_images` fetches (default 24).
   - `fw:ext:asset-optimizer:speculation_sensitive_paths` — this extension's speculative-loading exclusion list, before it is merged into core's. Use it to REMOVE a built-in commerce exclusion; core's own `wp_speculation_rules_href_exclude_paths` can only add.
   - `fw_image_src_url` — core filter on each `fw_image_tag()` crop URL; `webp_images` hooks it to swap in the WebP.
   - `fw:ext:asset-optimizer:preset_css_handles` — the preset-CSS handle list (cascade ordering).
@@ -97,7 +99,7 @@ PNG sources are lossless, so quality is a no-op there. When testing this, note t
 
 ## Crop width ladder
 
-`fw_image_crop_widths` (core, `image-crops.php`) offers 320 / 400 / 480 / 560 / 640 / 768 / 900 / 1024 / 1280 / 1600, filtered to those below 90% of the crop's own width plus the crop width itself.
+`fw_image_crop_widths` (core, `image-crops.php`) offers 320 / 400 / 480 / 560 / 640 / 736 / 768 / 900 / 1024 / 1280 / 1600, filtered to those below 90% of the crop's own width plus the crop width itself.
 
 The ladder is dense at the small/middle end on purpose. `srcset` makes the browser take the first candidate at or above the slot it needs, so the wasted bytes are the gap to the next rung - on the old 320/480/640/768 ladder a 540px slot pulled the 640 file and threw ~12 KiB away, because 480 to 640 is a 1.33x step. No step now exceeds ~1.25x below 1024. Measured: a 540px slot picks 560w (13.3 KiB) instead of 640w (15.5 KiB), 14% less. Renditions are written on demand, so a width nothing asks for costs nothing; a typical crop gains about two extra files.
 
@@ -305,6 +307,57 @@ Verify a quality change the way it actually happens — **save the setting in on
 
 `FW_AO_Webp::quality()` resolves the setting, falls back to 80, then applies the `fw:ext:asset-optimizer:webp_quality` filter (so the filter still wins over the UI) and clamps to 1–100.
 
+## Below-the-fold image warming (`warm_images`, opt-in)
+
+After `load`, fetch the remaining lazy images into cache so a scroll finds them already there.
+`print_image_warmer()` on `wp_footer:99`, front end only; emits a ~1.3 KB inline script
+(`id="fw-ao-warm-images"`), no extra request.
+
+**The problem it solves is request TIMING, not image size.** Measured on a real page, throttled
+and scrolled at reading pace: the first content image was not REQUESTED until 13.9 s, and then
+took 175 ms to arrive. Four content images, 9-36 KB each, under 200 ms apiece. The reader was
+never waiting on bytes; nothing had asked for them yet.
+
+**Do NOT "fix" this by flipping the images to `loading="eager"`.** WP emits `sizes="auto"`, which
+is only valid alongside `loading="lazy"`. Drop the lazy and `sizes` becomes invalid -> the browser
+falls back to `100vw` and fetches the LARGEST srcset candidate for what may be a 240px slot.
+Strictly worse than doing nothing. The warmer therefore touches no attributes: it re-implements
+the candidate pick (smallest `w` >= `getBoundingClientRect().width * devicePixelRatio`, else the
+largest; a DPR-descriptor srcset falls back to the first candidate) and fetches that URL via
+`new Image()`. The element is untouched and resolves from cache later.
+
+**Trigger:** `load` OR a `setTimeout` of `fw:ext:asset-optimizer:warm_images_delay` (2500 ms),
+whichever fires first, then one `requestIdleCallback`. **Do not gate this on `load` alone** - that
+was the original implementation and it effectively disabled the feature on exactly the pages that
+need it: measured on a real site `load` did not fire until **12.6 s**, because a hero carousel kept
+fetching 2048px slides, so warming started after the reader had already scrolled.
+
+**Guards** (it is spending bandwidth nobody asked for): every warm request sets
+`fetchPriority = 'low'`, which is what keeps it from competing now that it can start before `load`;
+returns early on `navigator.connection.saveData` or an `effectiveType` matching `/(^|-)2g$/`;
+**4 lanes** (`fw:ext:asset-optimizer:warm_images_concurrency`), each lane chaining off its
+previous load/error - NOT strictly serial, which was the pre-`fetchPriority` design and only made
+warming finish after the reader had scrolled; caps at `fw:ext:asset-optimizer:warm_images_max`
+(24); skips `img.complete`. Trigger delay is now 1200 ms, not 2500.
+
+Verified against a page whose `load` was held open indefinitely: all images warmed by 3.9 s, a
+scroll at 6 s triggered 0 requests, every image painted in 27 ms.
+
+**Tuning is the whole game here, so measure it the same way.** On a real 11-image page, median
+on-demand requests caused by scrolling (3 runs each): scroll at 2 s = 11 serial/2500 vs 3 for
+4-lane/1200; scroll at 3 s = 10 vs 0. Variant selection is exact and was re-verified: 11/11 warmed
+URLs matched the file the element went on to use, so a miss here is a timing problem, never a
+wrong-URL problem. Known floor: a scroll inside the first second beats any warming.
+
+**It LOWERS Lighthouse slightly and is not meant to raise it.** Lighthouse never scrolls, but that
+does not keep these images out of the audit: warming starts from the `load` event regardless of
+scrolling, so the audit downloads them inside its own measurement window. Measured on a live site it
+took a phone page load from ~0.7 MB to ~2 MB. Field CWV (LCP/INP/CLS) is unaffected either way. This
+is a reader-experience feature - say so when recommending it, never sell it as a score win, and
+advise against it on pages whose images are large. (An earlier version of this doc and of the
+setting's own description claimed the images "do not load during an audit either way"; that was
+wrong.)
+
 ## Instant navigation (`speculative_mode`, default `auto`)
 
 Speculative loading via the browser's Speculation Rules API: the browser prefetches, or fully
@@ -359,6 +412,47 @@ or translated page is still covered; the hard-coded slugs (`/cart/`, `/checkout/
   (`Preload.ruleSetUpdated` reports `accepted` or an `errorType` — the authoritative validity check;
   note that Playwright's bundled Chromium accepts the rule set but does **not** appear to issue the
   prefetch requests, so a `Sec-Purpose` header count of 0 under automation is not a failure signal).
+
+## Deferring (`js_defer`) covers the leftovers too
+
+`js_defer` marks the combined bundle AND every script the combiner refused. The refusals are the
+point: `can_absorb_js()` rejects anything with inline/localized data, so without this a page keeps a
+pile of render-blocking leftovers around one deferred bundle (measured: 8/11 deferred before,
+11/11 after).
+
+**Marking is `wp_script_add_data( $handle, 'strategy', 'defer' )`, never a string injection into the
+tag.** WP then arbitrates per handle. Measured truth table for what WP will and will not defer —
+useful, because the obvious guess is wrong:
+
+| inline on the handle | result |
+|---|---|
+| none | defers |
+| `before` inline (e.g. a `window.upw*Cfg` config) | **defers** |
+| `wp_localize_script` | **defers** |
+| `after` inline | blocking — AND its dependencies are held blocking too |
+
+So a `before` config does NOT prevent deferring. (A refactor to move the Animation Engine's
+`before` configs out of their handles was built on the opposite assumption, measured, and reverted —
+don't repeat it.) Only an `after` inline script blocks, and it poisons the chain below it because a
+dependency may not be delayed past its dependents.
+
+Implementation: `_defer_leftover_js()` on `wp_print_footer_scripts:0`, registered from
+`enqueue_combined_js()` before its early returns. **It must run that late** — scripts a shortcode
+enqueues during content rendering do not exist at `wp_enqueue_scripts:99999`, and those are exactly
+the leftovers worth deferring (two shortcode scripts on a test page were invisible to an earlier
+pass). Scope: footer group, local `url_to_path()`, not `is_backend_js_handle()`, no existing
+strategy. Opt out per handle with `fw:ext:asset-optimizer:js_no_defer_handles`.
+
+## Keyframe pruning in the purge
+
+`FW_AO_Purger::prune_keyframes()` runs after `purge_block()`. Keeps a name if a surviving
+declaration references it, if it is in `$tokens` (classes/ids/tags — `fa-beat` stays when a
+`.fa-beat` element exists), or if the safelist matches. Drops the rest. Measured on a real page:
+16 of 40 blocks, 1.9 KB. Off switch: `fw:ext:asset-optimizer:prune_keyframes`.
+
+Two traps that cost a test cycle each: the early-exit needle must be `keyframes`, not `@keyframes`,
+or `@-webkit-keyframes` is silently skipped; and the name-usage scan runs against the sheet with all
+keyframes blocks blanked, so a name is not counted as "used" by its own prelude.
 
 ## Notes / gotchas
 

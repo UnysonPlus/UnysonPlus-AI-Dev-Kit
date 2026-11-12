@@ -56,6 +56,23 @@ The kit's start scripts ask once (`connect --ask`) and remember the answer (`age
 - Without the kit running the Studio keeps the scene in the browser, as before.
 - **The start screen** opens with the Studio (File › Start something new opens it again). A `?project=` link or a page-editor connection skips it, so the link you give the person lands on the project. Anything new started from it first closes the open project, so a project is never overwritten by it.
 
+## Scene links: handing a project to someone else (Studio 0.1.39)
+
+`https://kinetic-scenes.unysonplus.com/?scene=<https URL of a scene.json>` opens a COPY of a published scene in the
+Studio, for someone without the kit (a client who should be able to change their reel). To publish one:
+
+- Upload the project folder's `scene.json` + `media/` unchanged into one web folder on a `unysonplus.com` host (the Studio
+  refuses any other host). Relative media paths (`media/p02.jpg`) resolve next to the scene file.
+- The folder must send `Access-Control-Allow-Origin: https://kinetic-scenes.unysonplus.com` for json/picture/sound/video
+  files (an `.htaccess` `FilesMatch` + `Header set`; the exact block is on docs.unysonplus.com → Kinetic Scenes → Export
+  → Scene links). Check with `curl -sI -H "Origin: https://kinetic-scenes.unysonplus.com" <url>`.
+- Custom `code` clips are stripped on open (`stripCode` in `apps/studio/src/lib/share.ts`); the `?scene=` parameter is
+  removed from the address after reading (`lib/sceneLink.ts`).
+- In Chrome 157+ the person can export the MP4 with nothing installed (HTML-in-Canvas, `content="drawable"`); remote
+  pictures are fetched to blob copies first so they are drawn. Other browsers need the kit for video.
+
+The Unyson+ outreach share pages (`share.unysonplus.com/<lead>/`) use this for their "Change the words or photos" button.
+
 ## Kit routes (the Studio's origin only)
 
 `GET/POST /studio/workspace` (list / create), `GET/POST /studio/workspace/<id>` (read / save with `base`),

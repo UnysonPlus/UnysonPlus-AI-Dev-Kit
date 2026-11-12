@@ -144,6 +144,25 @@ Which recipe variants this style prefers — the personality lives here, not in 
 The CTA is the one place the style raises its voice: a Dark band amid Light ones, which after several
 inversions reads as emphasis rather than decoration.
 
+## The signature moment
+
+With no colour to carry emphasis, **type and pacing are the only instruments**, so the moment is almost
+always typographic. That constraint is an advantage: a single headline doing something deliberate reads
+far louder on a monochrome page than it ever could in colour.
+
+| Reach for | Why it fits |
+| --- | --- |
+| [Scroll text highlight](../../animation-engine/scroll-text-highlight.md) | Emphasis arriving as you read it, which is the one thing a grey page cannot do statically |
+| [Text effects](../../animation-engine/text-effects.md) | One headline, one treatment, once per site |
+| [Horizontal scroll](../../animation-engine/horizontal-scroll.md) | An image sequence read sideways - pacing as the idea |
+| [Page transitions](../../animation-engine/page-transitions.md) | Continuity between editorial pages, where a hard cut feels cheap |
+
+**Never:** [scroll colour shift](../../animation-engine/scroll-color-shift.md) or any accent-driven effect. There is no
+accent - reaching for one means the style was the wrong choice, not that it needs an exception.
+
+**Reduced motion:** the highlight renders filled, the horizontal sequence becomes a vertical one. An
+image that only exists inside the sideways scroll must still be reachable.
+
 ## Where it comes from
 
 Closest existing skill: **`minimalist`** (clean editorial, warm monochrome, typographic contrast, no

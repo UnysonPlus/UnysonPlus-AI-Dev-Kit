@@ -12,8 +12,13 @@ skip to "write sections" than a careful human build is.
 ## The order, and why it is not negotiable
 
 ```
-design system  →  chrome  →  sections, region by region  →  motion  →  ship gate
+theatre level  →  design system  →  chrome  →  sections, region by region  →  motion  →  ship gate
 ```
+
+**The theatre level comes before everything**, because it decides what the rest of the order is allowed
+to spend. Full, Measured or Quiet, named in one line with its reason — the table and the routing are in
+[`design-jury.md`](design-jury.md), and the default when a brief gives no signal is **Measured**. Decide
+it late and you have already built a hero that the brief never earned.
 
 **Design system first.** The style writes Theme Settings — palette, type, buttons, shape, surfaces,
 rhythm — *before* a single section exists. Build sections first and every one of them acquires values
@@ -28,10 +33,17 @@ page may look like. See [`recipes/navbars.md`](recipes/navbars.md) and
 **Sections third, one region at a time.** Finish a band before starting the next. A generator that
 emits all nine sections and then fixes them is doing the thing the protocol exists to prevent.
 
-**Motion fourth, and sparingly.** One idea per section, and the style's register decides how much.
-Motion added while composing becomes motion nobody chose.
+**Motion fourth, and sparingly.** At most one idea per section, and the style's register decides how
+much. Motion added while composing becomes motion nobody chose.
 
-**The ship gate last** — [`ship-gate.md`](ship-gate.md). It is a gate, not a report.
+Within that, **one section carries the site's signature moment** and the rest stay deliberately quiet
+around it — see [`design-jury.md`](design-jury.md). The two rules are not in tension: per-section motion
+is the restrained background that makes a single loud thing legible. A page where every band animates
+has no signature moment, it has wallpaper.
+
+**The ship gate last** — [`ship-gate.md`](ship-gate.md). It is a gate, not a report, and it now ends
+in a scored pass: a page that measures clean but scores below the [design jury's](design-jury.md) floor
+is not finished either.
 
 ## Page shapes
 

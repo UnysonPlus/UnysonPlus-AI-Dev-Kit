@@ -80,6 +80,8 @@ has no such limit.)
   parallax:{effect:'none'}, marquee:{effect:'none'}, text_effect:{effect:'none'},
   scroll_reveal:{effect:'none'}, flip_card:{effect:'none'}, scroll_text_highlight:{effect:'none'} }
 ```
+**Entrance + Exit (core, current shape).** The Entrance is `animation:{effect:'animate__zoomIn'}` + `animation_settings:{speed_preset,delay,custom_duration,repeat_count,loop_forever,replay_on_scroll,easing,trigger:['view'|'load'|'click'|'hover'],sequence:'yes'|'no',sequence_stagger:90}` (the `{enable,yes}` shape above is the legacy default the generators still emit; both render). The **Exit Animation** is its own card: `exit_animation:{effect:'reverse'|'animate__<exit>'}` + `exit_animation_settings:{when:'both'|'top'|'bottom', duration:0, delay:0, order:'reverse'|'same'}` — `reverse` mirrors the entrance; the 43 exits (`animate__fadeOutDown`, `animate__zoomOut`, `animate__backOutUp`, `animate__hinge`, … — the table is `sc_exit_effects()` in `shortcodes/includes/shortcode-animation-helper.php`) are each an ENTRANCE keyframe played backwards (`.sc-anim-exit` = `animation-direction:reverse`; Up/Down swap, Left/Right keep), so no extra CSS ships. It plays as the element's MIDDLE crosses 30% / 80% of the screen (`when` picks the edge), hides it (`.sc-anim-gone`), and the entrance plays again when the middle is back in the central band (or, with no entrance, the exit forwards). On a collection (`sc_anim_collection_items()` + the Motion Gallery) it runs item by item, `order` choosing who leaves first; it supersedes `replay_on_scroll`. `duration:0` = the entrance's length (0.8 s with no entrance). Runtime: `shortcodes/static/js/sc-animations.js` (`roundTrip`). Also fixed there: the entrance's `delay` and each item's stagger now apply as a real `animation-delay` (Animate.css reads `--animate-delay` only through its delay classes, so they never did).
+
 Animation Engine effects ride these slots — e.g. `gsap_motion:{effect:'reveal',reveal:{direction,style,distance,delay,start,once,run_on_mobile}}`, `interaction:{effect:'spotlight',spotlight:{…}}`, `interaction__2:{effect:'lift'}` (requires the `animation-engine` extension active).
 
 **`spacing`** — margin/padding (on leaf & column; section uses its own):
@@ -149,6 +151,7 @@ renders as literal `[image]` text).
 **CTA / actions:** `button` · `call-to-action` · `badge` · `newsletter`
 **Cards / features:** `icon-box` · `feature-list` · `image-box` · `image-content` · `flip-box` · `pricing-table` · `team-member` · `testimonials` · `comparison-table` · `table`
 **Media:** `image` (tag `media_image`) · `media-video` · `gallery` · `carousel` · `before-after` · `image-hotspots` · `lottie` · `video-popup` · `audio-player` · `logo-grid` · `avatar` · `featured-image`
+**Shortcodes Library elements (not bundled — Unyson+ → Shortcodes → Shortcodes Library → Install; source `UnysonPlus-Library/shortcodes/`):** `instagram` (Instagram Feed)
 **Data / display:** `counter` · `countdown` · `progress` · `star-rating` · `calendar` · `map` · `business-info` · `tag-list`
 **Interactive:** `accordion` · `tabs` · `tooltip` · `modal-popup` · `scroll-indicator` · `scroll-to-top` · `menu-toggle`
 **Icons / social:** `icon` · `social-icons` · `social-share` · `notification`

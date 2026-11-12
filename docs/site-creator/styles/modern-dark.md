@@ -49,6 +49,26 @@ Palette and button code follow the shapes in
 | [Footer](../recipes/footers.md) | **Link columns** on Ground, hairline in the lifted grey | Minimal bar |
 | [Marquee](../recipes/marquees.md) | **Logo strip**, `grayscale: yes` — coloured logos on dark are noise | Word strip |
 
+## The signature moment
+
+A dark product site earns its moment by **explaining the product** - the register is precision, so the
+one memorable interaction should make something clearer, not merely prettier.
+
+| Reach for | Why it fits |
+| --- | --- |
+| [Scroll keyframes](../../animation-engine/scroll-keyframes.md) / [scroll timeline](../../animation-engine/scroll-timeline.md) | A product or diagram that assembles as you read - the strongest Creativity move this style has |
+| [Sticky stack](../../animation-engine/sticky-stack.md) | Features that hold and replace rather than scrolling past |
+| [Backgrounds](../../animation-engine/backgrounds.md) | A slow gradient or noise field, far enough back that type stays at full contrast |
+| [Scroll var](../../animation-engine/scroll-var.md) | Drives a glow or accent from scroll position without a second animation system |
+
+**Never:** glow used *as* contrast. The palette trap in
+[build rule 10](../../../skills/create-site/build-rules.md) bites hardest here - a halo reads as
+brightness to the eye and as nothing to a contrast meter, so every pairing must pass before the glow
+goes on.
+
+**Reduced motion:** the assembly renders at its final frame, the sticky stack becomes a plain stacked
+sequence, the background holds one still state.
+
 ## Where it comes from
 
 **No existing skill matches**, which is why this is a full entry rather than a mapping. `impeccable` is

@@ -31,6 +31,7 @@ Theme Settings → Animations → Effects.
 | `top_offset` | slider | `40` (0–200) | Pin offset px — gap from top of viewport where each card pins. |
 | `gap` | slider | `18` (0–80) | Stagger px — how much each stacked card peeks below the one above. |
 | `intensity` | slider | `0.5` (0–1) | Strength of the chosen style — scale / dim / blur / tilt angle / fan spread / offset. |
+| `heading_first` | switch | `'no'` | `'yes'` keeps the Section's FIRST column out of the stack (→ `data-ss-skip-first="1"`) so it can hold a heading above the cards. Any column carrying the class `upw-ss-skip` (on the column or its direct wrapper) is left out too. The deck still needs 2+ cards after that. |
 
 ## Notes
 

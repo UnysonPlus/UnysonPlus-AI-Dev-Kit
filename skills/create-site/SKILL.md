@@ -22,6 +22,9 @@ block.
   shape wants.
 - [Styles](../../docs/site-creator/styles/README.md) — the design directions and what each one sets.
 - [Recipes](../../docs/site-creator/recipes/README.md) — what each section archetype is.
+- [The design jury](../../docs/site-creator/design-jury.md) — **how good it has to be**: the rubric,
+  the theatre levels (Full / Measured / Quiet, defaulting to Measured) and the one signature moment.
+  Read it with the build rules, not after building — it decides what the build is allowed to spend.
 - [The ship gate](../../docs/site-creator/ship-gate.md) — whether it may ship.
 - [The build protocol](../../docs/site-build-protocol.md) — the phases and gates this flow runs inside.
 

@@ -5,7 +5,7 @@ Registers UnysonPlus **abilities** with the WordPress Abilities API so an AI mod
 the (planned) builder panel, or anything calling the REST abilities endpoints — can read the site and
 build / edit page-builder pages through **validated, undoable** actions. **Active by default:** no
 (not in the core-only plugin zip — download + activate it under Unyson+ → Extensions). Requires WordPress **6.9+** (on older WP it loads but registers nothing) and the
-`shortcodes` + `page-builder` extensions. Version: 1.0.36. Human manual:
+`shortcodes` + `page-builder` extensions. Version: 1.0.51. Human manual:
 [AI Assistant](https://unysonplus.github.io/docs/extensions/ai-assistant/).
 
 ## Provides
@@ -175,6 +175,20 @@ A path may also be `id:<unique_id>`.
   `upw_ai_settings_fingerprint` or the converter's `fw_sc_settings_fingerprint`; a mismatch = hand edit
   → skipped (`skipped[]`) unless `force`. The AI never writes the converter's fingerprints, so a
   re-conversion treats AI changes as hand edits. Granularity is the top-level settings id.
+- **Typography colour** (1.0.51): `check_deep()` rejects a non-string `color` inside a `typography*` value (an AI saved
+  `{ predefined: "Espresso" }`; the theme's `css-tokens.php` / `theme-vars.php` now also resolve that shape through
+  `unysonplus_preset_color_to_css()` instead of printing "Array to string conversion").
+- **Onboarding from a fresh site** (core): Download on the AI Assistant installs its requirements down the tree (a
+  requirement that arrives inside its parent, Page Builder inside Shortcodes, is skipped instead of cancelling the queue,
+  which left Forms uninstalled and activation failing); the card is never folded under "Show other extensions" (filter
+  `fw_extensions_always_shown`, default `['ai-assistant']`), and the "Build this site with an AI app?" notice links to
+  `#fw-ext-ai-assistant`.
+- **Privacy:** through the kit's Claude Code backend the agent may quote the account's email in a reply (it did, as an
+  example inbox). Check replies before screen-recording or sharing them.
+- **Spacing values** (1.0.51): `check_deep()` requires every `spacing` slot (base and `advanced.md|lg`, margin /
+  padding) to be a string class (`pt-5`, scale 0-5, 5 ≈ 48px) or `""`; a `{ value, unit }` size is rejected with a pointer
+  to Custom CSS (it once saved, and `sc_flatten_spacing_value()` printed "Array to string conversion" on the page; the
+  helper now skips non-scalar slots too).
 - **Deep validation** (1.0.6): `FW_AI_Schema::check_deep()` recurses into `inner-options` /
   `popup-options` / `box-options` (addable-popup rows must use exactly the inner keys — e.g. accordion
   `tabs[]` = `tab_title`, `tab_content`, `is_open`), choice types reject objects, and a scalar-default
@@ -379,7 +393,8 @@ A path may also be `id:<unique_id>`.
   `lottie.lottie_file`; filter `fw_ai_assistant_visual_atts`), a Content-tab text default that
   actually appears in the render ("Submit"), `href` `#`/empty, an empty layout item with no styling
   (background/border/height/css/class leaves all empty), >1 h1, skipped heading level. Issues deduped.
-  Text-only markup (a styled dot) counts as decoration, not "nothing". The panel runs it after every
+  Text-only markup (a styled dot) counts as decoration, not "nothing". Warning (1.0.51): an element with a text `title`
+  option that renders only an icon / picture and no words (an AI once left three icon boxes with icons only). The panel runs it after every
   changed reply (`check` in the response); panel + MCP instructions tell the model to run it and fix.
   Acceptance: the Phase-2 failure (icon_box without icons) now ends with icons set + a clean check.
 - Class files: `includes/class-fw-ai-schema.php` (catalog + validator), `class-fw-ai-store.php`

@@ -48,6 +48,26 @@ Media-backed is the one hero this style actually wants — and it is also where 
 [hero recipe's](../recipes/heroes.md) warning applies doubly here: a busy photograph with text over it
 is not luxurious, it is unreadable.
 
+## The signature moment
+
+Luxury's moment is **slow, continuous and almost unnoticed** - the register is restraint, so anything
+that announces itself has already broken the style. The budget goes into the photography and the
+transition between states, not into an effect sitting on top of them.
+
+| Reach for | Why it fits |
+| --- | --- |
+| [Page transitions](../../animation-engine/page-transitions.md) | A slow cross-dissolve between pages is the most expensive-feeling move in the framework, and the quietest |
+| [Parallax](../../animation-engine/parallax.md), very low amplitude | Photography that breathes behind its frame. If you can see it move, halve it |
+| [Scroll colour shift](../../animation-engine/scroll-color-shift.md) | Stone into ink across a long section - the page changing temperature as you read |
+| [Scroll reveal](../../animation-engine/scroll-reveal.md), one per band | Long duration, minimal travel. The air is doing the work |
+
+**Never:** [marquees](../../animation-engine/marquee.md), [confetti](../../animation-engine/confetti.md), [physics](../../animation-engine/physics.md),
+counters, bouncing easings, anything that reads as a sale. A brand that does not raise its voice does
+not bounce.
+
+**Reduced motion:** the transition becomes an instant cut, the colour shift lands on its end state. The
+page loses nothing it needed.
+
 ## Where it comes from
 
 Closest existing skill: **`soft`** (the high-end "expensive agency" look). This entry is the Unyson+

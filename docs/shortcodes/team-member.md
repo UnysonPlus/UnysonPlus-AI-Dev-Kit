@@ -36,3 +36,8 @@ A single team-member card: photo + name + job title + short description. Leaf no
 - The card layout is now driven by the shared **Card Rows** designer on the **Card tab** (`card_rows`) — a drag-sortable list of rows, each picking & ordering slots (`media`, `name`, `job`, `desc`) with Direction (inline / stacked) + Distribute + Align, above a **live wireframe card preview**. The default rows reproduce the classic image-on-top / name / job / desc stack, so leaving it untouched keeps the old look. To build a team grid, wrap several cards in a multi-column row.
 - No built-in social links — put icons inline in `desc` (raw HTML) or compose adjacent icon elements.
 - `box_style` is a Box Preset picker (Theme Settings → Components → Box Presets). Colors use the **compact color-preset** shape `{ predefined, custom }`, not a raw hex string. See `README.md`.
+
+## Per-device images (shortcodes 1.16.6+)
+
+`img_focal`, `img_crops`, `img_images`. The photo keeps its own shape on desktop; e.g. `img_crops: { base:'1/1', md:'1/1', lg:'1/1', xl:'' }` squares a landscape photo below large desktops. Media Library photos now carry a responsive srcset.
+Shared fields/renderer: `docs/architecture/responsive-images.md`.

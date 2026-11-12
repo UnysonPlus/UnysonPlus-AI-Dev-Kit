@@ -46,6 +46,26 @@ decision that turns a Swiss grid into an ordinary page with a red accent.
 The bento exclusion is the one to respect: a deliberately irregular tile layout is the opposite of this
 style's argument.
 
+## The signature moment
+
+Swiss motion is **systematic** - it demonstrates the grid rather than decorating it. The moment should
+look like the layout was always going to do that, which is a harder brief than it sounds and the reason
+this style is the one most often spoiled by a borrowed effect.
+
+| Reach for | Why it fits |
+| --- | --- |
+| [Motion sequence](../../animation-engine/motion-sequence.md) | Elements entering on the grid's own rhythm, identical timing, no randomness |
+| [Scroll reveal](../../animation-engine/scroll-reveal.md), stagger by column | The structure declaring itself as you arrive |
+| [Scroll progress](../../animation-engine/scroll-progress.md) | A rule that fills - information, drawn as a line |
+| [Scroll var](../../animation-engine/scroll-var.md) | One measured value driving one property. Nothing compound |
+
+**Never:** a [preloader](../../animation-engine/preloader.md), a cinematic reveal, drifting [parallax](../../animation-engine/parallax.md).
+This is the style error named in [`design-jury.md`](../design-jury.md): spectacle on a Swiss grid does
+not read as ambitious, it reads as a different designer having been let in halfway through.
+
+**Reduced motion:** everything lands at its final position. A grid that is correct at rest loses nothing
+at all - which is the clearest sign the style is working.
+
 ## Where it comes from
 
 **No existing skill matches.** `minimalist` shares the restraint but not the grid discipline, and

@@ -60,3 +60,8 @@ A two-image comparison: either the classic draggable before/after slider or a cu
 - Use two images with the SAME dimensions/framing so they line up pixel-for-pixel; `ratio` crops both.
 - `as_background` fills the parent Section — give the Section a min-height; the Ratio / Max Width / Radius options are then ignored.
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, NOT a raw hex string. Divider/handle/label colors apply to Comparison only. See `README.md`.
+
+## Per-device images (shortcodes 1.16.6+)
+
+`img_focal` (9 positions, default `'center center'`) and `img_crops` (responsive select, devices `lg` `md` `base`; `{ base:'3/4', md:'1/1', lg:'', xl:'' }`, values `''` = same as larger, `original`, `16/9` `3/2` `4/3` `1/1` `4/5` `3/4` `2/3` `9/16`). `ratio` stays the desktop shape; BOTH photos are cut with the same shape + focal point (no per-device photos — a mismatched pair breaks the comparison). The box shape per device comes from `--bac-ar-lg/-md/-base` (written only when a device differs). Ignored with `as_background`.
+Shared fields/renderer: `docs/architecture/responsive-images.md`.

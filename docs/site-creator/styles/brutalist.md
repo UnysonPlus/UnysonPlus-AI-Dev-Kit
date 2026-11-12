@@ -49,6 +49,25 @@ three times it stops meaning anything and the page is just loud.
 | [Footer](../recipes/footers.md) | **Link columns**, many of them, hairline-ruled | Minimal bar |
 | [Marquee](../recipes/marquees.md) | **Word strip** — fits the style better than anywhere else | Logo strip |
 
+## The signature moment
+
+Brutalism's motion is **mechanical, never easing into place** - things snap, scroll at speed, or report
+a value. The moment should look like a machine doing its job, not a designer being gentle.
+
+| Reach for | Why it fits |
+| --- | --- |
+| [Marquee](../../animation-engine/marquee.md), velocity-reactive | A word strip that speeds and skews with the scroll is the most on-register move this style has |
+| [Scroll text highlight](../../animation-engine/scroll-text-highlight.md) | A statement filling in word by word, hard-edged, no fade |
+| [Cursor](../../animation-engine/cursor.md) | A blunt block or crosshair that inverts over targets - a readout, not a flourish |
+| [Scroll progress](../../animation-engine/scroll-progress.md) | Exposed instrumentation, which is the whole aesthetic |
+
+**Never:** slow cross-dissolves, drifting [parallax](../../animation-engine/parallax.md), anything that eases in softly.
+Gentle motion on hard type reads as indecision - the type says one thing and the movement apologises
+for it.
+
+**Reduced motion:** the marquee holds still at a legible frame and the highlight renders fully filled.
+Neither is allowed to end at `opacity: 0`.
+
 ## Where it comes from
 
 Closest existing skill: **`brutalist`** (rigid grids, extreme type-scale contrast, utilitarian colour,

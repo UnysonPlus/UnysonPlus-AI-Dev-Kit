@@ -24,7 +24,8 @@ quizzes and certificates (phase 11).
 - **Admin screen:** Unyson+ → **Membership** (slug `fw-membership`) — an app frame built to work exactly
   like the CRM app (`FW_Membership_App`, `includes/admin/class-fw-membership-app.php`, a deliberate copy of
   `FW_CRM_App` with `fw-crm-` → `fw-mbr-`): its own sidebar (Home `home`, Members `members`, Plans `plans`,
-  Access rules / Payments / Coupons / Reports / Emails / Settings marked **Soon**, Modules `modules`), a top
+  Access rules, then Payments / Coupons / Reports greyed with an **Off** badge (nav `soon` + `badge`) while their
+  module is off, Modules `modules`), a top
   bar (member search → `tab=members&q=`, "/" focuses it; **New** menu: member, plan), the WP menu folded on
   its screens (body classes `fw-mbr-screen folded`), per-user focus mode (user meta `fw_mbr_focus`,
   admin-ajax `fw_mbr_focus`) hiding `#adminmenumain`, and **Open the CRM** in the sidebar foot while the CRM
@@ -385,9 +386,11 @@ when the module is off.
 - **Core:** action `unysonplus_membership_access_denied( $denied, $post_id )` (Protect::act), member page hooks
   `unysonplus_membership_member_panels( $user_id )` / `_member_side_panels`, login form filter
   `unysonplus_membership_login_form_after( '', $redirect )`, `unysonplus_membership_login_method` (log label).
-  `FW_Membership_Health` (admin): `jobs()` (core hourly + drip / retention daily while on: ok | late | never | off),
+  `FW_Membership_Health` (admin): `jobs()` (core hourly + drip / retention daily while on + whatever filter
+  `unysonplus_membership_jobs` adds — hook => [ label, seconds ]; Webhooks adds its 5-minute job: ok | late | never | off),
   `cron_line()`, Home card (replaced "Coming next"), Site Health test `fw_membership_jobs`. Last runs: option
-  `fw_ext_membership_cron_last` (recorded by the service for every hook in `unysonplus_membership_cron_hooks`).
+  `fw_ext_membership_cron_last` (recorded by `FW_Membership_Service::track_jobs()`, run after the modules load, for
+  every hook in `unysonplus_membership_cron_hooks` — so a module's own job is tracked too).
   `includes/class-fw-membership-cli.php`: `wp membership list|plans|grant|extend|expire|reconcile` (reconcile =
   expire_due + each Stripe / PayPal subscription's remote status → ended / past_due / cancelled / reactivated).
 - **Security module** (`modules/security/`): `FW_Membership_Log` (table `fw_mbr_log`: user_id, type login |
@@ -409,7 +412,21 @@ when the module is off.
   = + - @ prefixed with '). Admin action `export_members` (Members list button, keeps status / plan_id / q);
   `wp membership export [file] [--plan] [--status]`. Filters `unysonplus_membership_export_columns`,
   `unysonplus_membership_export_row( $row, $m )`. A re-import on the same site skips every row.
-- **Importers module** (`modules/importers/`): `read_csv()` (comma or semicolon, BOM), `import_rows( $rows, {
+- **Set-up transfer (core, 1.0.29):** `includes/class-fw-membership-setup.php` — `FW_Membership_Setup::export()`
+  returns { format `unysonplus-membership-setup`, version 1, exported_at, plans[] (slug, name, description, status,
+  priority, includes = parent slug, duration_value/unit, fixed_end_date, signup_limit, settings with `switch_to` as
+  slugs, prices[] without ids), rules[] (name, status, priority, drip_days/date, who with plans as slugs, denied,
+  targets[] with `object` = "posttype:path" or "taxonomy:slug"), options{ settings, emails, profile_fields, modules,
+  payments (gateway keys matching /secret|key|token|password|signing/ stripped), paywall, retention, directory,
+  cards, crm } with page ids (account/login/join/checkout page) as "page:path" }. `import( $data, $dry_run )`:
+  plans by slug and rules by name (update or add, never delete), two passes so `includes` / `switch_to` resolve;
+  an unchanged price is passed with its id so `replace_prices()` keeps the row; refs not found are skipped and
+  listed in `notes`; options replaced, the site's own payment secrets kept. Same-site round trip is a no-op
+  (verified: re-export identical). Admin actions `export_setup` (JSON download) and `import_setup` (POST file
+  `setup`, `dry_run`) on the Import / Export view.
+- **Import / Export module** (slug still `importers`, `modules/importers/`; view `import`, labelled **Import /
+  Export**): an Export panel (Download members (CSV) = `export_members` with no filter; Download set-up (JSON) =
+  `export_setup`), From a set-up file (JSON), then the CSV / role / user-field importers: `read_csv()` (comma or semicolon, BOM), `import_rows( $rows, {
   dry_run, create_users, notify, default_plan (used when the plan cell is empty) } )` (columns email, first_name, last_name, plan, status,
   started_at, ends_at, renews_at, gateway, subscription_id, customer_id; source `import`; skips what is already
   there), `import_from_users( role|meta, $map, $meta_key, $dry )`. View `import` (upload → match → dry run → run).

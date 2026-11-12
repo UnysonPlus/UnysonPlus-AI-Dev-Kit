@@ -48,6 +48,24 @@ structurally as in [`monochrome.md`](monochrome.md); the regen step applies.
 | [Footer](../recipes/footers.md) | **Minimal bar** | Link columns |
 | [Marquee](../recipes/marquees.md) | None | — |
 
+## The signature moment
+
+The terminal register is **discrete, monospaced and stateful** - characters, cursors and readouts.
+Nothing here should move continuously; a terminal updates, it does not glide.
+
+| Reach for | Why it fits |
+| --- | --- |
+| [Text effects](../../animation-engine/text-effects.md), typed | Type arriving character by character is the style's native gesture |
+| [Cursor](../../animation-engine/cursor.md) | A block cursor that blinks and inverts over targets |
+| [Scroll progress](../../animation-engine/scroll-progress.md) | A status bar along an edge, as instrumentation |
+| [Scroll var](../../animation-engine/scroll-var.md) | Values that step rather than tween - quantise the output |
+
+**Never:** smooth [parallax](../../animation-engine/parallax.md), soft shadows, easing curves with overshoot. A terminal
+has no inertia, and borrowed smoothness turns the style into a dark theme with a monospace font.
+
+**Reduced motion:** typed text renders complete immediately, the cursor stops blinking but stays
+visible, the status bar still reports position.
+
 ## Where it comes from
 
 **No existing skill matches.** `brutalist` is the nearest in hardness but is print-derived and light-ground;

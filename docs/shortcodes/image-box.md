@@ -90,3 +90,8 @@ Verified that the attributes do not fight the layout: with `width="1440" height=
 - The media frame's corners are **square by default** (`--imgbox-radius: 0`, since shortcodes 1.15.18). Corners belong to the Image Style preset: the preset renders inside the frame, so an earlier implicit 6px frame radius could never be removed by a sharp-cornered preset. The `card` / `badge` designs still read `--imgbox-radius`, and a theme can set it in Custom CSS.
 - `icon` uses the **icon-v2** shape (see `icon-box.md`). `text` is WYSIWYG — keep it clean semantic HTML with no classes on `<p>`/`<li>`.
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, NOT a raw hex string. See `README.md`.
+
+## Per-device images (shortcodes 1.16.6+)
+
+`img_focal`, `img_crops` (responsive select; devices `lg` `md` `base`) and `img_images` (responsive upload; devices `md` `base`: `{ base: {attachment_id,url}|'', md: …, lg:'', xl:'' }`). `image_ratio` stays the desktop shape; the box takes each device's shape via `--ib-ar-lg/-md/-base`. Media Library images now render through `fw_image_tag()` (pre-cropped files at `image_ratio`).
+Shared fields/renderer: `docs/architecture/responsive-images.md`.

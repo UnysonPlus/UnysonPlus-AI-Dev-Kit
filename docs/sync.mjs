@@ -86,6 +86,7 @@ const NARRATIVE = new Set([
   'building-pages.md', 'cloning-gotchas.md', 'conventions.md', 'editing-elements.md',
   'extending.md', 'converter-training-prompt.md', 'site-build-protocol.md',
   'converter-fix-my-site-prompt.md', 'build-reference.md', 'conversion-protocol.md',
+  'seo-check.md', // its source is the capture service's seo-check.mjs, not the plugin
   'extensions/membership-building.md',
   // how-to recipes: a procedure across several sources, not a mirror of one
   'animation-engine/child-theme-fallback-effect.md', 'animation-engine/motion-gap-findings.md',

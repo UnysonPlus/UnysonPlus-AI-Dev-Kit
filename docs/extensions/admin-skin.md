@@ -1,12 +1,13 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # admin-skin extension
 
-A token-driven skin over the **real** wp-admin: grouped sidebar, slim top bar, card tables, quiet notices, light / dark / system modes with a per-user accent, and a skin package format the Skin Library installs into. It is **not** a replacement admin app — every screen (core, UnysonPlus, WooCommerce, any plugin) keeps its own markup and is restyled at once, so nothing needs an adapter. **Active by default:** only when it is present in the plugin build — the public plugin zip is core-only, so on a normal install you download it from **Unyson+ → Extensions** first (the seed skips any extension whose folder is missing). When present, it is seeded once on a fresh install by `fw_upw_seed_default_extensions()` (`framework/includes/default-extensions.php`, guarded by the `unysonplus_default_extensions_v1` option). The seed runs **once** on purpose: an "always ensure active" version could never be switched off, because the next admin page load would turn it back on. After the seed the user owns the setting, and deactivating sticks. It only seeds what is present on disk, so the core-only public zip is a no-op until the extension is installed from the Extensions manager. Version: 1.1.51. Repo: `UnysonPlus-Admin-Skin-Extension`.
+A token-driven skin over the **real** wp-admin: grouped sidebar, slim top bar, card tables, quiet notices, light / dark / system modes with a per-user accent, and a skin package format the Skin Library installs into. It is **not** a replacement admin app — every screen (core, UnysonPlus, WooCommerce, any plugin) keeps its own markup and is restyled at once, so nothing needs an adapter. **Active by default:** only when it is present in the plugin build — the public plugin zip is core-only, so on a normal install you download it from **Unyson+ → Extensions** first (the seed skips any extension whose folder is missing). When present, it is seeded once on a fresh install by `fw_upw_seed_default_extensions()` (`framework/includes/default-extensions.php`, guarded by the `unysonplus_default_extensions_v1` option). The seed runs **once** on purpose: an "always ensure active" version could never be switched off, because the next admin page load would turn it back on. After the seed the user owns the setting, and deactivating sticks. It only seeds what is present on disk, so the core-only public zip is a no-op until the extension is installed from the Extensions manager. Version: 1.1.64. Repo: `UnysonPlus-Admin-Skin-Extension`.
 
 ## Provides
 
 - **Settings/options:** its own settings page (Unyson+ → Extensions → Admin Skin → Settings), two boxes:
   - **Skin** — `skin` (select, from the registry), `default_mode` (`light` / `dark` / `system`), `density` (`comfortable` / `compact`), `accent` (colour-picker; empty = the skin's own), `allow_user_prefs` (switch).
+  - **Background** — `bg` (a **multi-picker** since 1.1.67; picker `type` = `none` / `preset` / `color` / `image`, revealing `preset` → `preset` (select, from `FW_Extension_Admin_Skin::bg_presets()`), `color` → `color` (colour-picker), `image` → `image` (upload, `images_only`) + `behind` (colour-picker)), plus `bg_scrim` (slider 0-80), `bg_blur` (slider 0-40), `allow_user_bg` (switch). See **The background canvas** below.
   - **Layout** — `group_menu`, `sidebar_search`, `notice_tray`, `apply_to_editor`, `skin_customizer`, `skin_login`, `dark_canvas`, `show_wp_logo` (switches), `hide_design` / `hide_fonts` (selects: `auto` / `yes` / `no`) and `account_placement`.
 
 **`account_placement`** (select, default `sidebar`) decides where the account avatar and its menu — profile,
@@ -95,6 +96,123 @@ A recurring decision, applied consistently: anything that **previews front-end o
   - AJAX `fw_admin_skin_prefs` (nonce `fw_admin_skin_prefs`): POST `mode` / `accent` / `off`; GET with `off=0&redirect=1` restores and redirects back.
 - **Colour scheme:** registers `unysonplus` with `wp_admin_css_color()` and, while the skin applies, filters `get_user_option_admin_color` to it, so core's scheme-aware chrome (Gutenberg's `--wp-admin-theme-color`, the framework's `--u-accent`) follows the skin. The user's stored scheme is untouched.
 
+### Bundled skins
+
+Six packages in `skins/`. All but `default` set `base: "default"`, so they inherit its two bundled
+typefaces (Hanken Grotesk / JetBrains Mono) and override only what differs — **no new skin ships a
+webfont**, which is why four of them cost a few KB each rather than a font payload apiece.
+
+| Slug | What it is | `canvas` | Has `skin.css` |
+|---|---|---|---|
+| `default` | The modern UnysonPlus admin. 14px / 52px rows / 248px rail, 9px radii. | (unset = accepts) | no |
+| `classic` | The modern structure at WordPress density and the core blue. | `false` | no |
+| `console` | Dense instrument panel: 12.5px / 34px rows / 2px radii, ruled cells, monospace figures, green signal. | `false` | yes |
+| `aurora` | Dark analytics dashboard: detached rail, content on an inset canvas, indigo accent. 13px / 46px rows. | `optional` | yes |
+| `soft` | Light product admin: warm ground, borderless cards, pill controls, floating rail. 13.5px / 54px rows. | `optional` | yes |
+| `glass` | Frosted chrome over a background: floating rail, `backdrop-filter` panels. 13.5px / 50px rows. | `required` | yes |
+
+**`skin.css` now loads genuinely last.** It used to depend on `fw-admin-skin-primitives` alone, which
+let `surfaces.css` and the plugin partials load after it and win — a skin that only recoloured never
+noticed, but a skin that restructures the admin half-applied. The dependency array is now built from
+whatever was actually enqueued (`surfaces`, every plugin partial, `canvas` when present). A bundled
+skin is enqueued as `skin.min.css` when the build produced one, falling back to `skin.css` for a skin
+installed from the Library that was never built.
+
+**The structural lever that makes a non-recolour skin possible is small.** Because every panel in
+`primitives.css` already paints with `--upa-panel`, a skin whose `panel` token is an `rgba()` goes
+translucent with no CSS at all. Glass's stylesheet does not implement translucency; it adds the blur,
+the floating chrome and the readability rules.
+
+**Float the rail by moving `#adminmenuwrap`'s insets, not `#adminmenu`'s margin.** The wrap is what
+holds the brand block, the search field, the menu *and* the account row; rounding `#adminmenu` alone
+strands the search box and the account row outside the card. The wrap is
+`position: fixed !important; top: 0 !important; bottom: 0; left: 0` from `structure.css`, so a skin
+detaches it with `top/bottom/left` (and must repeat `!important` on `top`) — a margin on a
+full-height fixed element simply overflows the viewport.
+
+### The background canvas
+
+A background is **not a skin token**. It is the surface a skin sits on, set per site and switchable
+off per user, so one skin can look like several things and every skin that accepts one can use it.
+Baking an image into a skin would give you one skin that looks like five and four that cannot use the
+feature at all.
+
+`FW_Extension_Admin_Skin::get_background()` resolves it, returning
+`[ active, image, solid, scrim, blur ]`. Four things switch it off, in order:
+
+1. the chosen `bg` type is `none`;
+2. the active skin's `skin.json` declares `"canvas": false` (Console and Classic do — they are opaque
+   by design, and a photograph behind them only makes them worse);
+3. the viewer set `plainbg` in their own prefs (`allow_user_bg` must be on);
+4. the chosen type has nothing to show — an `image` type with no image is not a background.
+
+**The setting is one `multi-picker`, not four rows (1.1.67).** A preset, a colour and an image are
+alternatives, never combined, so four always-visible rows asked the reader to work out which of them
+the `Background` select would actually use — the screen showed a Preset *and* a Colour *and* an Image
+while the type said `None`. The picker reveals only the chosen one, and the `image` choice carries its
+own `behind` colour (what shows while the image loads) instead of borrowing the standalone colour field.
+
+That changes the stored shape to the multi-picker's own — `{ type: 'image', image: { image: …, behind: … } }`,
+**only the selected branch kept**. `bg_choice()` normalises it back to a flat
+`{ type, preset, color, image }` for the rest of the class, and `bg_read_flat()` still understands the
+pre-1.1.67 `bg_type` / `bg_preset` / `bg_color` / `bg_image`, so an existing background survives the
+upgrade. **Which shape is on disk cannot be decided by asking whether `bg` is set**:
+`fw_get_db_ext_settings_option()` merges the option definitions' defaults into what it returns, so `bg`
+is *always* present, reading `{ type: 'none' }` even on a site that never saved one. The reader decides
+by meaning instead — the new shape wins whenever it names a background, and only a silent one falls
+back. After the settings screen is saved once the legacy keys are gone (the form submits only the
+options it defines), so the fallback retires itself.
+
+`canvas_css()` emits the tokens inline on the `fw-admin-skin-tokens` handle, so they can never land
+before the skin's own:
+
+| Token | What it carries |
+|---|---|
+| `--upa-canvas-image` | a finished CSS `<image>` — the preset's gradient list or `url("…")` |
+| `--upa-canvas-solid` | the flat colour behind it, and the whole background for the `color` choice |
+| `--upa-canvas-veil` | the scrim as a **finished `rgba()`**, per mode |
+| `--upa-canvas-ink` | the veil's base colour, for a skin mixing its own opaque surfaces |
+| `--upa-canvas-blur` | px; what a frosted skin passes to `backdrop-filter` |
+
+The veil is emitted per mode rather than as a bare number the stylesheet assembles: a light admin
+needs a **light** veil and a dark one a **dark** veil, and the alternative (one colour plus a `calc()`
+inside `color-mix`) is both harder to read and less portable.
+
+`static/css/canvas.css` paints on **`html.wp-toolbar.upa-canvas`**, not on `body`: `<html>` is the
+only element that reliably covers the full viewport including the strip behind the fixed admin bar,
+and `background-attachment: fixed` on the root resolves against the viewport, so the canvas holds
+still while the page scrolls. The stylesheet then stands `body`, `#wpwrap`, `#wpcontent`, `#wpbody`
+and `#wpfooter` down to `transparent`.
+
+**Two classes, two different questions.** `html.upa-canvas` is added in the pre-paint script (the
+canvas paints on `<html>`, so the class has to be there before first paint or the admin flashes its
+flat background and repaints). `body.upa-has-canvas` is added by the body-class filter and is what a
+skin reads to decide whether to go translucent — Glass's solid fallback is
+`body.upa.upa-skin-glass:not(.upa-has-canvas)`.
+
+### Readability over an arbitrary background
+
+This is the whole design risk, and the rule Glass is built on:
+
+> **The surface you read on is more opaque than the surface you navigate on.**
+
+Chrome (rail, top bar) is `rgba(255,255,255,.07)` plus blur. Reading surfaces — list tables,
+postboxes, the builder, every form field — get
+`color-mix(in srgb, var(--upa-canvas-ink) 62-70%, transparent)`, which tracks a light or dark
+background without a second rule. The `bg_scrim` slider is the guard rail: at 0 the background comes
+through at full strength, which almost no photograph survives.
+
+Glass carries **three** fallbacks, all of which render solid panels:
+
+- `:not(.upa-has-canvas)` — no background configured, so there is nothing to blur;
+- `@media (prefers-reduced-transparency: reduce)` — an accessibility setting, not a taste: someone
+  has told their OS that layered translucency is hard to read;
+- `@supports not (backdrop-filter: blur(1px))` — without this the panels are merely transparent and
+  the admin is unreadable.
+
+`backdrop-filter` is composited on every scroll, so `bg_blur` is a setting and 0 leaves the panels
+simply translucent.
+
 ## How it is built (for anyone extending it)
 
 | Layer | File | Job |
@@ -115,6 +233,21 @@ Selector prefix: **`upa-`** (classes) / **`--upa-`** (tokens). `body.upa` is pre
 - **Hidden notices stay hidden.** Core and plugins ship `.notice.hidden` templates (e.g. the plugins list's auto-update error slot); the primitives layer must never force `display` on `.notice`. Tray adoption skips `.inline`, `.below-h2`, `.hidden`, `.notice-alt` and anything inside a postbox / table / modal.
 - **`table-layout: fixed` starves the title column** when several plugin columns declare widths; the JS guard sets `width: 28%` on a primary column measured under 180px and `80px` on any zero-width plugin column. Do not fix this in CSS with a blanket width.
 - **Preference saves send the whole state** (`mode` + `accent`) on every change: two quick clicks would otherwise race each other's read-modify-write in `_ajax_save_prefs`.
+- **`wp-core-ui` is on `<body>`, so scope it as a COMPOUND, not a descendant.** `wp-admin/admin-header.php` puts `wp-core-ui` on the same element that carries `upa`, so `body.upa .wp-core-ui .button` asks for a `.wp-core-ui` *inside* the body and matches nothing. All 33 button rules were written that way and were dead until 1.1.66: disabled states, `button-small/large/hero`, button-group radii, `button-link` hover/delete and the dashicons sizing had never applied. Use `body.upa.wp-core-ui` — identical specificity (0,3,1), and it still reaches a `.button` nested anywhere, so the descendant form was never buying anything.
+- **`display: inline-flex` on `.button` silently kills every `vertical-align`.** A flex item ignores `vertical-align`, so core's `vertical-align: middle` and any extension's nudge (the CRM used `-3px`) stop working the moment the skin is on. Icon alignment under the skin is `align-items: center` plus `line-height: 1` on the icon, and nothing else. Leave the extensions' nudges alone — they are still correct for unskinned wp-admin, where the same icon needs ~3px of downward nudge to sit on the text's optical centre.
+- **A skin that restructures must load last.** `skin.css` is enqueued after `surfaces.css` and every plugin partial. If you add a new stylesheet layer to the enqueue, add its handle to the `$after` array too, or structural skins will silently half-apply again.
+- **Float the rail on `#adminmenuwrap`, never on `#adminmenu`** — see above. And give a folded rail a *smaller* inset: at 48px wide, a 12px inset eats a quarter of it.
+- **The admin bar does not float.** `#wpadminbar` is `position: fixed` across the whole viewport with the sidebar card overlapping its left end; insetting it fights both, and a radius on it renders off-screen. Glass frosts it edge to edge instead.
+- **A canvas is decoration and must not cost legibility.** A skin only goes translucent when `body.upa-has-canvas` is present, so a new skin that forgets the guard will render transparent panels over a flat colour. Ship the `:not(.upa-has-canvas)` fallback with the skin, not after it.
 - **Skin values are CSS fragments:** the registry strips `{ } ;` and newlines but does not otherwise validate them; a skin from the Library is trusted content like a preset.
 - **Excluded screens:** Customizer, Site Editor, the framework live editor, Elementor / Bricks canvases. The block editor chrome is skinned (sidebar + bar offsets on `.interface-interface-skeleton`); the editing canvas is never touched. Turn the editor chrome off with `apply_to_editor`.
-- Planned (not in 1.0.0): Overview dashboard cards, ⌘K command palette, the Skin Library screen + `admin-skins/` catalog in `UnysonPlus-Library`, a CSSOM dark engine for third-party dark mode. (The skinned login page shipped in 1.1.45. A custom login address was moved out of this extension on purpose: it changes behaviour, and the Admin Skin is on by default — it lives in the off-by-default `security` extension, whose login step the skin styles automatically.)
+- Planned (not in 1.0.0): Overview dashboard cards, ⌘K command palette, the Skin Library screen + `admin-skins/` catalog in `UnysonPlus-Library`, a CSSOM dark engine for third-party dark mode. (The skinned login page shipped in 1.1.45; Console / Aurora / Soft / Glass and the background canvas shipped in 1.1.64. A custom login address was moved out of this extension on purpose: it changes behaviour, and the Admin Skin is on by default — it lives in the off-by-default `security` extension, whose login step the skin styles automatically.)
+
+- **`#wpbody-content` keeps core's `width: 100%` unless you take it off.** Core ships
+  `#wpbody-content { float: left; width: 100% }` — the width is there only to make the float fill its
+  line. The skin drops the float, so the width has to go with it: left at `100%` it resolves against
+  the FULL containing block, and any margin a skin adds is laid OUTSIDE that width rather than being
+  absorbed, pushing the box past the viewport. Aurora's `margin: 0 10px` did exactly that and put a
+  horizontal scrollbar on every screen of the site. `width: auto` on the base `body.upa #wpbody-content`
+  fixes it for every skin at once, and is a no-op for the skins that take no margin — verified: all
+  five still measure an overflow of 0 and still run to the right edge.

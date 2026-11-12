@@ -45,6 +45,26 @@ warmth is what makes it read as paper rather than as screen.
 | [Footer](../recipes/footers.md) | **Link columns**, many, dense | Minimal bar |
 | [Marquee](../recipes/marquees.md) | None — a moving strip breaks the conceit | — |
 
+## The signature moment
+
+Print has no depth, so **the moment is about arrival and sequence, never about space** - type setting
+itself, a ticker running, a column locking into place. Anything three-dimensional contradicts the
+premise.
+
+| Reach for | Why it fits |
+| --- | --- |
+| [Marquee](../../animation-engine/marquee.md) as a ticker | A headline strip is native to the form rather than borrowed |
+| [Scroll reveal](../../animation-engine/scroll-reveal.md), staggered by line | Text arriving the way it is set, line after line |
+| [Sticky stack](../../animation-engine/sticky-stack.md) | A standfirst or byline holding while the column moves past it |
+| [Scroll progress](../../animation-engine/scroll-progress.md) | A read-time indicator, which a long article genuinely wants |
+
+**Never:** [parallax](../../animation-engine/parallax.md), [physics](../../animation-engine/physics.md), perspective, floating cards. Paper
+does not have a z-axis, and faking one turns an editorial page into a template with a newspaper
+texture.
+
+**Reduced motion:** the ticker stops at a readable position, reveals render complete, the progress
+indicator still reports position because it is a readout rather than an animation.
+
 ## Where it comes from
 
 **No existing skill matches.** `minimalist` is close in restraint but cool and sparse where this is warm

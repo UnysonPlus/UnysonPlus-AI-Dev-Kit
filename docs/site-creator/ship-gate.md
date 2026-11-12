@@ -86,6 +86,24 @@ reload:
 
 Test it in the OS setting, not by reading the code.
 
+### 5 · It is scored, not just measured
+
+Checks 1–4 and the standards run tell you the page is real, consistent and reachable. None of them
+tells you it is any **good** — a created page can pass every number here and still be a forgettable
+template, and nothing else in the pipeline will ever say so.
+
+So the gate ends with a scored pass against [`design-jury.md`](design-jury.md): Design 40, Usability 30,
+Creativity 20, Content 10, each 0–10, each with one line of evidence naming what cost the points.
+
+- **The floor is 7.0 weighted, with no single criterion below 6.**
+- **Score the whole site, not the home hero.** Design is weighted on *every* page, and the inner pages
+  are where a generated site comes apart.
+- **Score it as its own step**, not as a sentence added to the build summary. The number written by
+  whoever just finished building is the least honest one available.
+
+This is the check that turns the instruction at the bottom of this file — *open the page and look at
+it* — from an aspiration into something with a pass mark.
+
 ## Running it
 
 ```bash
@@ -99,12 +117,15 @@ node tools/measure/container-check.mjs <url>
 node tools/measure/shot.mjs <url> --full
 ```
 
-Then the standards document's own §0 run (Lighthouse mobile, the three targets above).
+Then the standards document's own §0 run (Lighthouse mobile, the three targets above), and the
+scored pass from check 5 — [`design-jury.md`](design-jury.md) has the rubric and the worked example.
 
 ## The bar
 
 A page that fails the gate does not ship. Not "ships with a note" — a created page has no source to
-excuse a gap against, so a failure here is simply a page that is not finished.
+excuse a gap against, so a failure here is simply a page that is not finished. **A page under the
+design-jury floor fails for the same reason**: an unremarkable page is not a different category of
+outcome from a slow one, it is the same page not being finished.
 
 And the last step is the one that cannot be automated, same as everywhere else in this kit: **open the
 page and look at it**, at desktop and at phone width, with the real content in it.

@@ -50,3 +50,8 @@ A split section: content on one side and a full-bleed image on the other that ex
 - `bleed_min_height` makes it a hero; combine with `bleed_vertical_align` to position the content within the taller section.
 - `bleed_overlay_color` + `bleed_overlay_opacity` darken/tint the image (e.g. for a caption or brand wash over it).
 ```
+
+## Per-device images (shortcodes 1.16.6+)
+
+`img_crops`, `img_images` (no separate focal field — `bleed_image_position` is the focal point of every crop). Stacked on small screens the image is a short wide strip, so e.g. `{ base:'4/3', md:'16/9', lg:'', xl:'' }`. Rendered through `fw_image_tag()`; eager images get `fetchpriority="high"`.
+Shared fields/renderer: `docs/architecture/responsive-images.md`.

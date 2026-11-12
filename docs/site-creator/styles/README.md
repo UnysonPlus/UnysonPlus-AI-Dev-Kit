@@ -33,7 +33,7 @@ Seven slots. A style that needs an eighth is describing a *section treatment*, w
 Each style file states all seven. A style that leaves one unstated inherits the theme default, which
 is a decision made by absence — so say it, even when the answer is "unchanged".
 
-## The five sections of a style file
+## The six sections of a style file
 
 | Section | Answers |
 | --- | --- |
@@ -41,6 +41,7 @@ is a decision made by absence — so say it, even when the answer is "unchanged"
 | **The system** | the seven slots above, as concrete values |
 | **Section treatments** | how the archetypes change under this style — which recipe variants it prefers |
 | **The motion register** | one sentence, plus the reduced-motion answer |
+| **The signature moment** | the two or three moves this direction actually wants, and the one it must never use |
 | **Where it comes from** | the existing skill it maps to, or why it needs its own entry |
 
 ### 1 · The idea

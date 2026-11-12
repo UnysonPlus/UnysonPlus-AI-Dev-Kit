@@ -29,8 +29,11 @@ key is usually `effect`, but some modules use `mode` or `role` (noted per file).
 | `marquee` | `effect` | `marquee.md` |
 | `motion_path` | — | `motion-path.md` |
 | `flip_card` | — | `flip-card.md` |
+| `upw_interactions`, `upw_interactions__2` | `mode` | `interactions.md` (a trigger animates this node AND other nodes: hover / click / load / view / past, 3 steps with targets) |
+| `upw_states` | `mode` | `interactions.md` → States (named looks on a target, switched by Interactions steps; groups for tabs) |
 | `scroll_reveal` | `mode` | `scroll-reveal.md` |
 | `scroll_text_highlight` | `mode` | `scroll-text-highlight.md` |
+| `painted` | `mode` | `painted.md` (wash / frame / highlight / underline / circle / hatch, real brushes) |
 | `scrollytelling` / `sticky_stack` / `motion_sequence` | `mode` | `scrollytelling.md`, `sticky-stack.md`, `motion-sequence.md` (Section only) |
 
 ## Not on the fx block (configured elsewhere — see each file)
@@ -44,8 +47,8 @@ key is usually `effect`, but some modules use `mode` or `role` (noted per file).
 | `cursor.md`, `page-transitions.md`, `preloader.md`, `scroll-progress.md` | **Theme Settings** (Site-wide UX / Animations) |
 
 ## All modules
-`backgrounds` · `confetti` · `cursor` · `flip-card` · `horizontal-scroll` · `hover` · `kinetic-preset` · `marquee` ·
-`motion-path` · `motion-sequence` · `page-transitions` · `parallax` · `physics` · `preloader` · `scroll-color-shift` ·
+`backgrounds` · `confetti` · `cursor` · `flip-card` · `horizontal-scroll` · `hover` · `interactions` · `kinetic-preset` · `marquee` ·
+`motion-path` · `motion-sequence` · `page-transitions` · `painted` · `parallax` · `physics` · `preloader` · `scroll-color-shift` ·
 `scroll-keyframes` · `scroll-loop` · `scroll-motion` · `scroll-progress` · `scroll-reveal` · `scroll-text-highlight` ·
 `scroll-var` · `scrollytelling` · `smooth-scroll` · `sticky-stack` · `text-effects` · `viewport-units`
 
