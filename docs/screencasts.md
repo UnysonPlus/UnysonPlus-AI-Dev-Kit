@@ -74,6 +74,13 @@ Admin notices and the footer are hidden.
   recording browser has no one to ask, so it is started with that check off. Without it the Studio fell back to its
   demo scene ("plays from the AI Dev Kit, which is not running"). In the Studio, target the transport's Play button as
   `button[title="Play (Space)"]`: a role-and-name "Play" also matches a preset tile.
+- **Confirm and alert boxes are answered OK** ("Apply this preset?", "Are you sure?"), as the person in the demo would;
+  `"dialogs": "dismiss"` in the steps file cancels them instead. They are the browser's own boxes, so they never show in
+  the recording: say what was confirmed in the voice-over if it matters.
+- **A settings field's id is its option id** (`pb.set` `field: "title"`, `"label"`), not the label shown. In the Live
+  Editor, an element's settings can take several seconds to load on a busy server: put a `waitFor` on
+  `[name="fw_edit_options_modal[<id>]"]` with `timeout: 60000` before `pb.set`. A picture field opens WordPress's
+  media window on its **Upload files** tab: click `{ role: "tab", name: "Media Library" }` before picking.
 - **Admin notices are hidden** (`HIDE`); to keep one on camera, out-rank it in `hide`:
   `.notice:has(#unysonplus-theme-btn){display:block!important}`.
 - **A fresh-install demo** (plugin upload, theme, extensions): a click that loads a new page is followed by a `waitFor`
