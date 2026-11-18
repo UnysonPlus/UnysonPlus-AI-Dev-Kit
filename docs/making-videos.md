@@ -126,6 +126,10 @@ The start screen's **A paper cut-out explainer** sets the `paper` style and a st
   centred text ≤ 70 % wide). `studio-cli check` reports both.
 - **Photos:** match each line to a photo by *looking* at a labelled contact sheet of the exact files you chose; a sheet
   with labels under the images led to a bathroom sink on "the Pacific on the horizon".
+- **Photos only (most small businesses): cut the subject out, or it reads as a slideshow.** Run
+  `studio-cli cutout` (MCP `image_cutout`) on every photo you plan to use; use the `good` ones as hero shots on brand
+  colour, with words behind them or lifting off their own photo, and the rest whole as backgrounds. When to and when
+  not to, and the recipes: [photo-cutouts.md](photo-cutouts.md).
 - **Footage in a scene must come from an address that allows seeking** (the renderer serves local files itself now);
   a plain Python server froze every video on its first frame.
 - **Pinned layers sit above everything**, including the camera's layers: a pinned full-stage background hid a whole
@@ -335,3 +339,25 @@ simple parts, measures it (parts touch, none buried, none paper-thin, stands on 
 times and looks at it from four sides. Put the GLB in a model layer (`model: { kind: "gltf", src }`,
 `material.original: true`). Good for products, icons and props; not for organic shapes.
 
+
+## Mascots that talk
+
+A **Mascot layer** (`type: "mascot"`) is a character that talks on the voice-over: it shows one pose at a time, opens
+and closes its mouth on the sounds of the words being said (timed from the voice clip's `words`, so it needs a voice with
+words), blinks now and then and breathes a little. People make one in the Studio with **Insert › Mascot…**, from one
+picture, a picture per pose, or a six-pose sheet drawn by their own image AI (the Studio gives the prompt and cuts the
+sheet into poses). Full reference: `kinetic-scenes/mascots` on the docs site; the format is in the skill's
+`reference/scene-format.md`.
+
+- **Reuse what the person made.** A mascot's poses are pictures in the project's `media/` with face boxes; copy the layer
+  from another project rather than inventing face boxes. Face boxes are fractions (0-1) of each pose picture: `mouth` the
+  closed lips, `eyes` each eye (the eyelid is the skin just above the box, slid down over it).
+- **Poses on words.** Add a `mascot-pose` clip `{ "preset": "mascot-pose", "params": { "pose": "<id>" } }` for each
+  gesture and pin it to the word it belongs to (`at`), e.g. thumbs up on "free", waving on "hello". Hold a pose 1-2.5 s;
+  between them it goes back to its main pose (`pose`, else the first).
+- **Size and place it** like any layer (`box`); the picture keeps its shape inside the box. Give the voice room: a
+  mascot beside the words on screen, not behind captions.
+- **It needs a voice-over with words** (`audio[].words`): without one it stays quiet (Check scene says so). A Voicebox
+  or Kokoro voice made by the kit already has its words.
+- **Lip sync and drawn mouths:** the Studio measures the voice's loudness when a mascot goes in (`levels` on the voice clip), so the mouth shuts in the pauses; drawn mouths (`mouths`, nine shapes) replace the pose's own mouth. Both are optional; without them the pose's own mouth opens and closes on the words.
+- **Tools:** `mascot_list`, `mascot_copy`, `mascot_direct`; the full agent guide is `docs/mascots.md` (scene_guide topic "mascots").

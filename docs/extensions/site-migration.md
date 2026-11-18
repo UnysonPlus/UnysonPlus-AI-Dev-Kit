@@ -487,6 +487,7 @@ the whole network, and even a single-site one reads the shared users table.
 | `fw_ext_site_migration_excludes` | filter | Per-stage glob excludes (`$excludes, $stage`) |
 | `fw_ext_site_migration_preserved_options` | filter | Options that survive |
 | `fw_ext_site_migration_sslverify` | filter | TLS verification on outbound calls |
+| `fw_ext_site_migration_default_streams` | filter | Parallel connections the file stages use before the connection test refines it (default `3`, clamped 1–8) |
 | `fw_ext_site_migration_finished` | action | `$status, $state` |
 
 ## Compatibility mu-plugin

@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
-# Container types — `box`, `group`, `tab`, `popup`
+# Container types — `box`, `group`, `tab`, `column`, `popup`
 
 Containers hold other options. They are **layout only**: with one exception noted below, a
 container does **not** appear in the saved value, so the stored options are **flat**.
@@ -140,6 +140,50 @@ its own CSS. The rule applies to pages built from option arrays, not to every ad
 
 ---
 
+## `column`
+
+Lays options out side by side. **Adjacent** `column` containers render as ONE row (the renderer hands
+same-type containers that sit next to each other to one render call, as it does for `box`). Still flat:
+wrapping options in columns, or unwrapping them, never changes the saved value.
+
+```php
+'design_main' => [
+	'type'    => 'column',
+	'width'   => '3/5',
+	'options' => [ /* the controls */ ],
+],
+'design_side' => [
+	'type'        => 'column',
+	'width'       => '2/5',
+	'sticky'      => true,
+	'stack_first' => true,
+	'options'     => [ /* e.g. a live preview */ ],
+],
+```
+
+| Config | Default | Notes |
+|---|---|---|
+| `width` | `''` | `"n/d"` share of the row (the `column-split` fraction strings). Empty = share the rest equally. |
+| `sticky` | `false` | Pinned while the row scrolls; side by side only unless also `stack_first`. |
+| `stack_first` | `false` | First when stacked (and pinned there if `sticky`). |
+| `stack_below` | `960` | Read from the row's FIRST column: the row's own width (px) under which it stacks. |
+| `attr` | `[]` | Wrapper attributes; `class` is appended. |
+
+How it renders: `.fw-backend-columns` (a CSS container, `container: fw-columns / inline-size`) →
+`.fw-backend-columns__row` (flex, stacked by default) → one `.fw-backend-column` per column, its share in
+`--fw-col-flex`. Each row emits a small scoped `<style>` with `@container fw-columns (min-width: <stack_below>px)`
+that turns it into side-by-side columns and pins the sticky one — scoped per row because a container query
+can't read a CSS variable. Because it measures the row, not the window, the same form stacks in a narrow
+modal or the Live Editor's side panel and splits in the `full` popup. Class:
+`framework/includes/container-types/column/class-fw-container-type-column.php`; styles at the end of
+`framework/static/css/backend-options.css`.
+
+Use it with the **`full`** shortcode popup size (`config.php` → `'popup_size' => 'full'`), which otherwise
+stretches every option across the window. Reference use: the Motion Gallery's Design tab
+(`animation-engine/shortcodes/gallery-3d/options.php` → `design_main` / `design_side`).
+
+---
+
 ## `popup`
 
 Puts its options behind a button that opens a modal. Use it to keep an advanced or rarely-touched
@@ -149,7 +193,7 @@ cluster out of the main form.
 'advanced_popup' => [
 	'type'       => 'popup',
 	'title'      => __( 'Advanced', 'fw' ),
-	'modal-size' => 'medium',      // small | medium | large
+	'modal-size' => 'medium',      // small | medium | large | full
 	'desc'       => __( 'Rarely-needed settings.', 'fw' ),
 	'options'    => [ /* fields */ ],
 ],

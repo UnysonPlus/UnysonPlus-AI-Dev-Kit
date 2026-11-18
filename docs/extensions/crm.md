@@ -17,7 +17,7 @@ Without it, a `[newsletter]` signup is only emailed to the site admin and is nev
 
 - **Admin screen:** Unyson+ → **CRM** (slug `fw-crm`) — **the CRM app (1.0.40)**: one admin page whose
   `tab` picks the view, drawn inside an app frame (`FW_CRM_App`, `includes/admin/class-fw-crm-app.php`):
-  its own sidebar (Home `home`, Contacts `subscribers`, Companies `companies`, Deals / Tasks / Calendar /
+  its own sidebar (Home `home`, Companies `companies`, Contacts `subscribers`, Deals / Tasks / Calendar /
   Reports marked **Soon**, Campaigns, Lists & segments `lists`, Import / Export `tools`, Settings), a top
   bar (search across contacts and companies → `tab=search&q=`, "/" focuses it; a **New** menu), the WP
   menu folded on CRM screens (body classes `fw-crm-screen folded`), and per-user focus mode (user meta
@@ -402,7 +402,7 @@ unlinks it everywhere; purging a record unlinks its files but keeps them.
 
 `FW_CRM_Direct_Email::send( $contact_id, { subject, body, cc, deal_id } )` → `true|WP_Error`. Placeholders through
 `FW_CRM_Mail::replace()`, the body through `FW_CRM_Mail::render_body()` (kses + the email shell), sent with
-`wp_mail()` (the Mailer governs transport and the From address). The writer's address is the `Reply-To` and
+`wp_mail()`: the default transactional sender sets the From address (else the Mailer's From address, else WordPress's), and transport is the sender's email service, else the Mailer's SMTP (Mailer 1.2.26+), else the host's mail. User tutorial: docs.unysonplus.com/crm/sales/email-from-your-own-address. The writer's address is the `Reply-To` and
 "Name at Site" the From name (a `wp_mail_from_name` filter added and removed around the one send). **Personal mail:**
 no unsubscribe footer, no tracking, and it goes to contacts who unsubscribed from lists (they opted out of
 campaigns). Refused: no email address, empty subject/body, a bad Cc. A failed send returns the `wp_mail_failed`
@@ -669,6 +669,32 @@ say what changed.
   to the "Add to the CRM" action (`action_crm_contact`, `action_crm_create`, `action_crm_pipeline`, …).
 - The Site Creator (create.unysonplus.com, repo `UnysonPlus-Site-Creator`, working copy `d:\Web Dev\crm-generator`)
   prompts use these: a real pipeline with enquiries as deals, a welcome series and a booking follow-up as draft automations.
+
+## Company logos (1.0.87, schema 2.16.0)
+
+Public guide: docs.unysonplus.com/crm/contacts/companies#company-logos.
+
+- **Column** `companies.logo` (varchar 255): the logo's URL, `''` (none yet / none found) or `'none'` (removed on
+  purpose: never fetched automatically again). Set it through `FW_CRM_Companies::update( $id, array( 'logo' => … ) )`
+  or REST `PATCH /companies/{id}` `{ "logo": "<https URL>" }`; REST and webhook payloads include `logo`.
+- **`FW_CRM_Company_Logos`** (`includes/class-fw-crm-company-logos.php`):
+  - `fetch( $id )` reads the company's own website (`website`, else `https://<domain>/`) with `wp_safe_remote_get`,
+    tries the page's `apple-touch-icon`, then its largest `rel="icon"`, then `/apple-touch-icon.png` and
+    `/favicon.ico`; keeps the first real picture ≥ 32 px (PNG/JPG/GIF/WebP, or an .ico whose largest image is
+    ≥ 32 px; SVG is never stored). Returns `true` or a `WP_Error` with a sentence for the person.
+  - `upload( $id, $_FILES['logo'] )`, `remove( $id )`, `url( $company )` (`''` when none), `store()`.
+  - Files: `fw_upw_uploads_dir( 'crm-logos' )` → `uploads/unysonplus/crm-logos/<id>-a-<hash>.<ext>` (fetched) or
+    `<id>-m-<hash>.<ext>` (uploaded; `is_manual()`), scaled to ≤ 128 px. Deleted with the company on purge.
+  - Background: `unysonplus_crm_company_created` (with a domain) and a **domain change** (fetched logo dropped
+    first; uploaded or `'none'` logos are left alone) add the id to option `fw_crm_logo_queue`; WP-Cron hook
+    `fw_crm_company_logos_batch` handles 5 per run, 20 s apart, only companies whose `logo` is still `''`.
+    `queue_missing()` queues every company with a domain and no logo (the **Get missing logos** button).
+- **Never a third-party logo service** (it would receive the whole company list). Keep it that way.
+- **UI:** `FW_CRM_App::company_avatar( $company, $size )` draws the logo on a white tile, else the initials;
+  `FW_CRM_App::avatar()` takes an optional 4th `$image` argument. Admin actions (`fw_crm_action`):
+  `company_logo_upload` (multipart, field `logo`), `company_logo_fetch`, `company_logo_remove` (all owner-checked
+  as company actions), `company_logos_missing` (managers).
+- Sites that block bots (a 403 challenge page) give no logo: upload one.
 
 ## Extension API, events catalogue, integrations, commerce, objects, WooCommerce (1.0.76, schema 2.15.0)
 

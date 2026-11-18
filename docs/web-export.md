@@ -58,7 +58,9 @@ change to the project or a site move.
 
 ## Limits
 
-- Media still loads when the page opens (the player creates every `img`/`video` up front, `preload="auto"`). Loading
-  near the playhead is planned (a player version + the element).
+- Pictures and footage load when the scene comes within about one screen of the window (player 0.0.65+; the element's
+  `media_loading` option or `data-upw-load="page"` loads them with the page). A scene near the top of a page still loads
+  them as the page opens. CSS background pictures, Lottie files and 3D models load at mount. Loading footage near the
+  playhead (only the next seconds of a long scene) is planned.
 - Footage is muted in the live player, so its sound track is always dropped; sound that matters belongs on an audio clip.
 - One run measures at full HD; a scene shown far bigger than 1920 px wide gets soft pictures (raise `--dpr`).

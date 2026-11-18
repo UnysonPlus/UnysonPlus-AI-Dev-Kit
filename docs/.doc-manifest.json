@@ -354,16 +354,16 @@
         "{plugin}/framework/extensions/admin-skin/manifest.php",
         "{plugin}/framework/extensions/admin-skin/settings-options.php"
       ],
-      "hash": "c6756376ad2a8f9a0d4d6302ee624c91",
-      "synced": "2026-11-11"
+      "hash": "c8f928bedb19b6c63cff99f6396ae809",
+      "synced": "2026-11-12"
     },
     "extensions/ai-assistant.md": {
       "kind": "extension",
       "src": [
         "{plugin}/framework/extensions/ai-assistant/manifest.php"
       ],
-      "hash": "b65aea8994cef6b740f5507d78cdb8b5",
-      "synced": "2026-11-11"
+      "hash": "55e3996d488aed1f5a1bd2c2e6458b05",
+      "synced": "2026-11-15"
     },
     "extensions/animated-icons.md": {
       "kind": "extension",
@@ -378,8 +378,8 @@
       "src": [
         "{plugin}/framework/extensions/animation-engine/manifest.php"
       ],
-      "hash": "81f31791f467603455bbb0969f7bd780",
-      "synced": "2026-11-11"
+      "hash": "cef3e003c7e6b7fc99e61efb6d7c9d20",
+      "synced": "2026-11-13"
     },
     "extensions/asset-optimizer.md": {
       "kind": "extension",
@@ -387,8 +387,8 @@
         "{plugin}/framework/extensions/asset-optimizer/manifest.php",
         "{plugin}/framework/extensions/asset-optimizer/settings-options.php"
       ],
-      "hash": "275c2dbb64cba7f36b6ab5c59c55c26d",
-      "synced": "2026-11-11"
+      "hash": "81e538b7efb7e95349354b87b67bcd27",
+      "synced": "2026-11-12"
     },
     "extensions/blog.md": {
       "kind": "extension",
@@ -427,10 +427,11 @@
     "extensions/chat.md": {
       "kind": "extension",
       "src": [
-        "{plugin}/framework/extensions/chat/manifest.php"
+        "{plugin}/framework/extensions/chat/manifest.php",
+        "{plugin}/framework/extensions/chat/settings-options.php"
       ],
-      "hash": "94a43dd363879215f05794f296c8ef78",
-      "synced": "2026-11-11"
+      "hash": "1a1b4bae07733115a8dd6f4f054566f7",
+      "synced": "2026-11-15"
     },
     "extensions/crm.md": {
       "kind": "extension",
@@ -438,8 +439,8 @@
         "{plugin}/framework/extensions/crm/manifest.php",
         "{plugin}/framework/extensions/crm/settings-options.php"
       ],
-      "hash": "e054098d037a368a14eebcedf79e61f2",
-      "synced": "2026-11-11"
+      "hash": "63670d5d3617477b913948e22f0f75b1",
+      "synced": "2026-11-12"
     },
     "extensions/custom-fields.md": {
       "kind": "extension",
@@ -488,10 +489,11 @@
     "extensions/mailer.md": {
       "kind": "extension",
       "src": [
-        "{plugin}/framework/extensions/mailer/manifest.php"
+        "{plugin}/framework/extensions/mailer/manifest.php",
+        "{plugin}/framework/extensions/mailer/settings-options.php"
       ],
-      "hash": "bc6f8b55bbd391aa713590fa52c5c663",
-      "synced": "2026-11-11"
+      "hash": "861efecece1e0d908f592d7f04281c39",
+      "synced": "2026-11-12"
     },
     "extensions/megamenu.md": {
       "kind": "extension",
@@ -518,8 +520,8 @@
       "src": [
         "{plugin}/framework/extensions/membership/manifest.php"
       ],
-      "hash": "c7b911ac3afbcaad422f477856f642ce",
-      "synced": "2026-11-12"
+      "hash": "1fd998ebd6f0b7d4c3b76dc9b6c13930",
+      "synced": "2026-11-13"
     },
     "extensions/portfolio.md": {
       "kind": "extension",
@@ -554,8 +556,8 @@
         "{plugin}/framework/extensions/seo/manifest.php",
         "{plugin}/framework/extensions/seo/settings-options.php"
       ],
-      "hash": "8ceeadf967c183ee546db7dcb1b48b41",
-      "synced": "2026-11-11"
+      "hash": "5ad48e240baeaa2af73c890bcb34bbf7",
+      "synced": "2026-11-16"
     },
     "extensions/short-links.md": {
       "kind": "extension",
@@ -599,8 +601,8 @@
         "{plugin}/framework/extensions/site-migration/manifest.php",
         "{plugin}/framework/extensions/site-migration/settings-options.php"
       ],
-      "hash": "8406bae0a4e29d522c69ed3a19b200ff",
-      "synced": "2026-11-11"
+      "hash": "1e76bcd1b3f426d517b983f5e35dd28a",
+      "synced": "2026-11-13"
     },
     "extensions/snippets.md": {
       "kind": "extension",
@@ -1428,8 +1430,8 @@
         "{plugin}/framework/extensions/animation-engine/shortcodes/gallery-3d/config.php",
         "{plugin}/framework/extensions/animation-engine/shortcodes/gallery-3d/options.php"
       ],
-      "hash": "d62a800046aaefae603d6e4eabdfe392",
-      "synced": "2026-11-12"
+      "hash": "f23b8fc0d74241e4f8cecae412fb9470",
+      "synced": "2026-11-13"
     },
     "shortcodes/gallery.md": {
       "kind": "shortcode",
@@ -1938,8 +1940,8 @@
         "{plugin}/framework/extensions/animation-engine/shortcodes/studio-scene/config.php",
         "{plugin}/framework/extensions/animation-engine/shortcodes/studio-scene/options.php"
       ],
-      "hash": "e01f4fb0cb31bb6027327d255da8ea6a",
-      "synced": "2026-11-11"
+      "hash": "91a838865fe7e847565e1bfe5bdda013",
+      "synced": "2026-11-14"
     },
     "shortcodes/svg-draw.md": {
       "kind": "shortcode",
@@ -2318,6 +2320,14 @@
       ],
       "hash": "5251ad07e728709f46e4798f40c5cde0",
       "synced": "2026-11-11"
+    },
+    "extensions/payments.md": {
+      "kind": "extension",
+      "src": [
+        "{plugin}/framework/extensions/payments/manifest.php"
+      ],
+      "hash": "343cf5498bec9e5d36d5620d88ef96f1",
+      "synced": "2026-11-18"
     }
   }
 }

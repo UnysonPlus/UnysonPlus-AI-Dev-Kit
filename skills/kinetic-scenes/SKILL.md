@@ -8,7 +8,7 @@ description: Make motion-graphics scenes for Unyson+ Kinetic Scenes (animated we
 Kinetic Scenes (https://kinetic-scenes.unysonplus.com/) plays **scene files**: JSON data with a stage, layers and
 clips (presets placed on a timeline). You write data, never code, so whatever you make lands in the Studio as
 ordinary layers and clips the person can keep editing. This skill is generated from the Studio's own code
-(version 0.1.48), so the presets, settings and rules here are exactly what the player understands.
+(version 0.1.62), so the presets, settings and rules here are exactly what the player understands.
 
 ## Read first
 
@@ -16,7 +16,7 @@ ordinary layers and clips the person can keep editing. This skill is generated f
 - [Presets](reference/presets.md): every preset, what it does, what it applies to and its settings.
 - [Motion rules](reference/motion-rules.md): timing, layout, sound and craft rules the Studio's own AI follows.
 - [Styles](reference/styles.md): the built-in looks (colours, fonts, motion) a scene can be made in, including about twenty
-  named motion-design styles (synthwave, line art, Swiss grid, risograph, VHS, pixel art…) with what makes each recognisable
+  named motion-design styles (synthwave, line art, Swiss grid, risograph, VHS, pixel art, newsreel, whiteboard, blueprint, woodcut, neon sign, rhythm game show, chalkboard, ink wash, stained glass, rubber-hose cartoon, CRT terminal, transit map, radar, thermal camera, X-ray, sketchnote, ukiyo-e, silent film, exploded view…) with what makes each recognisable
   and how to build it.
 - [Sounds](reference/sounds.md): the built-in sound effects.
 
@@ -58,6 +58,8 @@ ordinary layers and clips the person can keep editing. This skill is generated f
    black frames, loudness, clipping; `video_check`): fix what it reports and render again before handing it over.
    To speak a script with the kit's voice engine use `voice_over`; for several takes of a line, `voice_best_take`; for
    recorded speech, `footage_cleanup`.
+   When a scene is made from photos only (no footage), read `scene_guide` topic `cutouts` and cut the subject out of the
+   photos with `image_cutout`, so they move as layers (lift, depth, a camera push) instead of reading as a slideshow.
 5. **Time to the voice with word pins.** With a voice-over, pin what belongs to a spoken word (`at` / `until` on a
    layer, `at` on a clip: { `audio`, `text` }) instead of typing its seconds, and keep the voice clip's `script` and
    `voiceId`. Then a better take, a reworded line, a spreadsheet row's own narration ({{placeholders}} in the script)

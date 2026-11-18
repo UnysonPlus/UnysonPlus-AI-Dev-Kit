@@ -7,12 +7,12 @@ Combines enqueued frontend CSS and JavaScript into single minified, cached files
 
 - **Shortcodes:** none.
 - **Settings/options:** its own settings page under Extensions, three native `tab` containers:
-  - **General** — `combine_css`, `combine_js` (master switches), `css_scope` (`site` shared bundle, DEFAULT since 1.1.76, vs `per_page`; per-page scores better only because a one-page audit cannot observe a shared bundle's cross-page cache win - prefer per-page only for single-landing-page sites), `css_delivery` (`file` linked stylesheet, default; `inline` = print the bundle in a head style tag when it is ≤ 50 KB gzipped), `webp_images` (off by default: WebP copy of every uploaded JPG/PNG, its sizes and `fw_image_tag` crops, swapped in on the front end when the copy exists and is smaller; existing images convert a few per page view; `.nowebp` marker for a copy that came out larger), `logged_out_only`, `exclude_urls` (one path/line, `*` wildcard).
+  - **General** — `combine_css`, `combine_js` (master switches), `css_scope` (`site` shared bundle, DEFAULT since 1.1.76, vs `per_page`; per-page scores better only because a one-page audit cannot observe a shared bundle's cross-page cache win - prefer per-page only for single-landing-page sites), `css_delivery` (`file` linked stylesheet, default; `inline` = print the bundle in a head style tag when it is ≤ 50 KB gzipped), `webp_images` (off by default: WebP copy of every uploaded JPG/PNG, its sizes and `fw_image_tag` crops, swapped in on the front end when the copy exists and is smaller; existing images convert a few per page view; `.nowebp` marker for a copy that came out larger), `avif_images` (off by default: AVIF copies, offered via `<picture>`; converts on cron, NEVER during a request - see **AVIF**), `logged_out_only`, `exclude_urls` (one path/line, `*` wildcard).
   - **General** also carries `purge_css` + `purge_safelist` (see **Unused-CSS purging**), `preload_lcp_image` (see **Hero-image preload**) and `image_quality` (see **Image quality**). The first two are off by default; `image_quality` defaults to 82.
   - **General** also carries `drop_admin_assets` (off by default; see **Drop admin-only stylesheets**).
   - **General** also carries `critical_css` and `js_source_map` (both off by default; see **Critical CSS** and **Combined-JS offset map**).
   - **General** also carries `inline_small_css` (off by default; see **Inlining leftover stylesheets**).
-  - **General** also carries `webp_quality` (slider, default 80; see **WebP quality**).
+  - **General** also carries `webp_quality` (slider, default 80; see **WebP quality**) and `avif_quality` (slider, default 60; see **AVIF**).
   - **General** also carries `warm_images` (off by default; see **Below-the-fold image warming**).
   - **General** also carries `speculative_mode`, `speculative_eagerness`, `speculative_skip_sensitive` and `speculative_exclude` (see **Instant navigation**). Both selects default to `auto`, which leaves WP core's own behaviour untouched.
   - **CSS** — `css_handles` (checkboxes; every discovered stylesheet, all checked by default).
@@ -27,6 +27,8 @@ Combines enqueued frontend CSS and JavaScript into single minified, cached files
   - `fw:ext:asset-optimizer:protected_classes` — plain class names/prefixes to keep through the purge; each is `preg_quote`d and anchored with ``, so `sc-toc` covers `sc-toc__num` and the rest. The ergonomic form of the safelist, for elements that generate their own markup — see **Protecting JS-generated markup**.
   - `fw:ext:asset-optimizer:css_inline_max_bytes` — gzipped-size cap for `css_delivery: inline` (default 51200); a larger bundle stays a linked file.
   - `fw:ext:asset-optimizer:webp_quality` — WebP quality for `webp_images` (default 80).
+  - `fw:ext:asset-optimizer:avif_quality` — AVIF quality for `avif_images` (default 60).
+  - `fw:ext:asset-optimizer:avif_budget_seconds` — seconds one AVIF cron run may spend encoding (default 12).
   - `fw:ext:asset-optimizer:warm_images_max` — how many below-the-fold images `warm_images` fetches (default 24).
   - `fw:ext:asset-optimizer:speculation_sensitive_paths` — this extension's speculative-loading exclusion list, before it is merged into core's. Use it to REMOVE a built-in commerce exclusion; core's own `wp_speculation_rules_href_exclude_paths` can only add.
   - `fw_image_src_url` — core filter on each `fw_image_tag()` crop URL; `webp_images` hooks it to swap in the WebP.
@@ -306,6 +308,45 @@ Verify a quality change the way it actually happens — **save the setting in on
 **Staleness.** A twin is out of date when its mtime is older than `max( source mtime, quality_changed_at )`. `quality_changed_at()` keeps `{quality, changed_at}` in the `fw_ao_webp_quality_state` option and stamps a new time whenever the effective quality differs from the stored one, so copies written at the old quality are redone under the existing `MAX_PER_REQUEST` throttle instead of sitting stale forever. Without this, changing the setting would do nothing to the images already on disk — a silent no-op of exactly the kind this extension keeps producing.
 
 `FW_AO_Webp::quality()` resolves the setting, falls back to 80, then applies the `fw:ext:asset-optimizer:webp_quality` filter (so the filter still wins over the UI) and clamps to 1–100.
+
+## AVIF (`avif_images`, opt-in; `avif_quality`, default 60)
+
+`FW_AO_Avif`, in `includes/class-fw-ao-avif.php`. Reads like a sibling of `FW_AO_Webp` and is **architecturally the opposite of it** in two ways, both forced by measurement. Don't "simplify" it into the WebP shape.
+
+**1. It never encodes during a request.** Measured on one 1024×683 photo with GD on PHP 8.2:
+
+| | file | encode |
+|---|---|---|
+| JPEG q82 | 100.8 KB | 4.0 ms |
+| WebP q80 | 61.0 KB | 64.7 ms |
+| **AVIF q60** | **43.9 KB** | **1,786.9 ms** |
+
+AVIF is **27.6× WebP's encode cost**. `FW_AO_Webp` converts up to `MAX_PER_REQUEST = 8` images inside a page render because 8 × 65 ms is tolerable; 8 × 1,787 ms is fourteen seconds. So every write path here only **enqueues**:
+
+- `wp_generate_attachment_metadata` → `enqueue( $id )` (uploads stay fast)
+- `fw_image_rendition_saved` → `enqueue_path( $path )`
+- cron `fw_ao_avif_tick`, every five minutes → `run_cron()` → `run_queue()`, default budget **12 s** (`fw:ext:asset-optimizer:avif_budget_seconds`)
+- `wp fw-ao avif` (`--status`, `--limit`, `--restart`) for a library you want done now
+
+`run_cron()` returns unless `wp_doing_cron()` or WP-CLI, so the encoder cannot run from a page view even if something else fires the hook. `init()` only calls `wp_schedule_event()` from admin/cron/CLI, so a front-end request never writes an option to arm the timer.
+
+**Queue order matters and is not obvious:** path queue → attachment queue → **crops sweep** → library walk. The theme's responsive crops live in `uploads/unysonplus/image-crops/`, belong to **no attachment**, and on a builder-built page are most of what is on screen — the first version walked attachments only and produced a page with zero `<picture>` elements despite converting 56 files. The sweep uses a filename cursor (`fw_ao_avif_sweep`) and resets when it reaches the end.
+
+**2. It serves through `<picture>`, not by swapping the URL.** WebP support is universal so `FW_AO_Webp::url()` can rewrite `photo.jpg` → `photo.webp` in place. AVIF is not — Safari only added it in 16.4 — so a swapped URL would hand an AVIF to a browser that cannot decode it. `filter_buffer()` runs last in the extension's existing output buffer and wraps each eligible `<img>`:
+
+```html
+<picture><source type="image/avif" srcset="…" sizes="…"><img …></picture>
+```
+
+The regex alternates `<picture>…</picture>|<img …>` so a block the author wrote is consumed whole and left alone. A srcset where **any** candidate lacks a twin returns the tag untouched rather than offering a partial width set.
+
+**Why not the `Accept` header.** Deciding server-side from `Accept: image/avif` would let the URL swap stay, but it produces **different HTML for different browsers** — which a page cache or CDN in front of the site will happily serve to the wrong one. `<picture>` is identical for everyone and so stays cacheable. Measured cost of the buffer pass: **+17 ms** per render (1,291 → 1,308 ms median of 5).
+
+**Quality.** `avif_quality` defaults to **60**, deliberately lower than WebP's 80 — AVIF numbers are not WebP numbers, and 60 is roughly WebP 80 to look at. Set through `wp_editor_set_quality` scoped to `image/avif`, for exactly the reason documented under **WebP quality** above: `save()` re-derives quality when the output format differs from the source's, so `set_quality()` beforehand is discarded. Staleness works as WebP's does, via `fw_ao_avif_quality_state`.
+
+**The "keep only if smaller" test compares against what would otherwise be served** — with `webp_images` also on that is the WebP copy, not the original, so `make()` takes `min(source, webp)` as the bar. A loser gets a `.noavif` marker.
+
+Measured end to end on a real builder page: six images, **737 KB → 355 KB (52% smaller)**, render +17 ms.
 
 ## Below-the-fold image warming (`warm_images`, opt-in)
 

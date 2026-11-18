@@ -201,6 +201,18 @@ the gift link), `current_text`, `change_text`, `monthly_text`, `yearly_text`; fu
 `thanks_text`, `no_plan_text`, `plans_link`) elements live in the extension's `shortcodes/` and tell admins
 when the module is off.
 
+- **Optional password for one-time prices (1.0.31):** `FW_Membership_Checkout::password_optional( $price )` is
+  true for a non-repeating price (`once` / `lifetime` / `free`) and for a gift; filter
+  `unysonplus_membership_checkout_password_optional` ( $optional, $price ). Then the form's field is "Choose a
+  password (optional)" (not `required`), and a blank password makes the account with a random one and sends
+  `wp_new_user_notification( $user_id, null, 'user' )` (the set-password link). Repeating prices still require
+  8+ characters, checked on the server too.
+- **PayPal + cards:** one-time prices use Orders, whose page offers "Pay with a Bank Account or Credit Card"
+  (no PayPal account). Subscriptions use Billing Subscriptions, whose page requires a PayPal login or a new
+  PayPal account. PayPal's rule, not ours.
+- **PayPal subscriber name (1.0.30 fix):** `subscriber.name` is sent only when the user has a first or last
+  name; an empty `array_filter()` encoded as `"name":[]` and PayPal answered "The request JSON is not well formed".
+
 - **Layers:** `FW_Membership_Gateways` (registry + settings, option `fw_ext_membership_payments`: currency,
   checkout_page, terms_url, gateways[id] { enabled, …fields }; a blank password field keeps the stored secret;
   `available_for( $price )` = enabled + `is_ready()` + recurring support; `checkout_url( [plan, price] )`) →
@@ -302,6 +314,51 @@ when the module is off.
   placeholders `{amount}`, `{payment_date}`, `{payment_ref}`. Account page: payment list + "Update your payment
   method" (via `unysonplus_membership_account_sections`). A deleted user's pending payments become `cancelled`;
   paid ones stay on record.
+
+## Checkout extras (1.0.32, sliders 1.0.33, Payments module)
+
+Optional add-ons a buyer ticks at the checkout, each with its own price (an order bump / upsell). Docs page:
+`membership/selling/checkout-extras.md` on the docs site.
+
+- **Where they live:** the plan's settings, `settings.extras` = list of `{ id, label, description, amount,
+  billing }`, `billing` = `once` (first payment only) or `each` (every billing period). Edited in **Plans → edit →
+  Checkout extras** (a panel added on the new action `unysonplus_membership_plan_main_panels( $plan )`, saved
+  through the existing `unysonplus_membership_plan_settings` filter). Max 12 per plan; rows without a label are
+  dropped; ids are made from the label (`Longer videos` → `longer-videos`) and kept unique. Because they are plan
+  settings, the Import / Export set-up file carries them unchanged.
+- **How they are charged:** `FW_Membership_Checkout::requested()` applies the request's choice
+  (`extras[]=<id>` or `extras=<id>,<id>`; none for a gift or a free price) through
+  `FW_Membership_Extras::apply( $plan, $price, $chosen )`: on a repeating price `each` extras are added to
+  `amount` and `once` extras to `setup_fee`; on a one-time price both are added to `amount`. The original price
+  stays under `$price['base']`, the chosen extras under `$price['extras']`. Everything downstream (the quote,
+  coupons, tax, `FW_Membership_Payments_Flow::start()`, the PayPal / Stripe / offline gateways) therefore sees
+  the real amounts without knowing about extras. PayPal makes one billing plan per combination (its plan cache
+  key hashes amount + setup fee) and reuses it.
+- **Recorded:** payment meta `extras` and membership meta `extras` (`{ id, label, amount, billing }` each, via
+  `FW_Membership_Extras::record()`); the invoice adds a line per extra (a renewal invoice lists the membership's
+  `each` extras; with a trial, the first invoice lists only `once` ones); the admin member card shows
+  **Extras**.
+- **Checkout UI:** the summary shows the base price; a line per ticked extra
+  (`FW_Membership_Extras::price_label()`: "+ USD 12.00 a month" / "+ USD 4.00 once"); an **Add to your order**
+  fieldset (`.fw-mbr-checkout__extras`) in the GET price form, each checkbox submitting the form on change (the
+  **Update the price** button covers no-JS); the POST form carries `extras[]` hidden inputs. The element's
+  `extras_title` text option (via `$t`) may rename the legend.
+- **API:** `FW_Membership_Extras::for_plan( $plan )`, `normalize( $rows )`, `chosen( $plan )`, `apply()`,
+  `price_label( $extra, $price )`, `record( $chosen )`, `summary( $stored )`.
+- **Limits:** extras are bought at checkout only (no adding one to a running membership); a plan change moves to
+  the new price without extras; editing an extra changes new purchases only (running subscriptions keep the
+  amount they were made with).
+- **Slider extras (1.0.33):** `type` = `range` (default `fixed` = tick-box) adds `start` (included, free),
+  `max`, `step` (numbers; seconds when `format` = `time`, shown m:ss; `count` shows the number + `unit`), and
+  `amount` is the price **per step**. Request: `extras_qty[<id>]=<value>` (`3:00` or `180`), snapped to the
+  step and clamped by `snap()`; a value at `start` is not chosen. `chosen()` returns it with `value`, `steps`,
+  `unit_amount`, `amount` = per step × steps and `label` "Video length (3:00)", so `apply()`, the quote,
+  gateways, invoice and `record()` (which adds `value`) work unchanged. Checkout: an `input[type=range]` with
+  real min/max/step values (works without JS), live value + price while dragging, a debounced (700 ms)
+  submit on `change` that reloads at `#fw-mbr-co-extras`; the POST form carries `extras_qty[id]` hidden inputs.
+  Plan editor: a **Kind** column (Tick-box / Slider) whose slider settings appear under the description.
+  Helpers: `parse_value()`, `snap()`, `format_value()`, `step_label()`. Docs: `checkout-extras.md` → "Slider
+  extras". The checkout also hides "No end date" for a one-time price without a duration.
 
 ## Hooks
 

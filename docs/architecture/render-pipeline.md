@@ -19,7 +19,7 @@ files that matter to the render pipeline:
 - **`views/view.php`** — the **frontend render** template. `$atts` (resolved values) and `$content`
   (already-rendered inner items) are in scope. Outputs the semantic HTML.
 - **`static.php`** — frontend CSS/JS enqueues (cache-busted with the extension version).
-- **`config.php`** — page-builder config (tab, title, icon, `popup_size`).
+- **`config.php`** — page-builder config (tab, title, icon, `popup_size`: `small` | `medium` | `large` | `full`; `full` fills the window less 30 px, is not draggable, and is meant for forms laid out with the [`column`](../option-types/containers.md) container).
 - **`static/`** — frontend assets: `static/css/<name>.css`, `static/js/<name>.js`, and the builder icon
   `static/img/page_builder.svg`.
 - **`includes/page-builder-<name>-item/`** — the editor-side item class

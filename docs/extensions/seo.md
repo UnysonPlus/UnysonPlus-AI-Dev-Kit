@@ -13,7 +13,8 @@ indexing control, sharing cards, and a live search-result preview in the editor.
   **list columns / inline editing** · **import from Yoast / Rank Math /
   SEOPress / AIOSEO** · site-verification tags ·
   two option types (`seo-template`, `seo-preview`)
-- **Does not provide (yet):** a redirect manager, per-page schema overrides,
+- **Pasted JSON-LD:** site-wide and per page, merged into the graph by `@id` ([Custom schema](#custom-schema-pasted-json-ld-2067)).
+- **Does not provide (yet):** a redirect manager,
   Product/Event/Recipe types, and **no `LocalBusiness` (or subtype: `Dentist`, `MedicalClinic`,
   `LegalService`, `Restaurant`, …) node** — the site identity is only `Organization` or `Person`. Add one
   with the `fw_seo_schema_graph` filter ([JSON-LD graph](#json-ld-graph--adding-localbusiness-and-other-types)). `BreadcrumbList` lives in the separate
@@ -946,6 +947,36 @@ the .min).
 - Public docs: `/seo/structured-data` (FAQ data, Authors, Local business, Products, events, recipes and
   branches). Tests: `tests/entities-test.php`.
 
+### Custom schema: pasted JSON-LD (2.0.67)
+
+`FW_SEO_Custom_Schema` (`includes/class-fw-seo-custom-schema.php`), on `fw_seo_schema_graph` (priority 30,
+after `FW_SEO_Entities`).
+
+- **Where:** settings `custom_schema` (textarea) + `custom_schema_identity` (switch) in the
+  `custom_schema_box` on `schema_tab`; per page / term: store field `schema` (sanitiser `jsonld`,
+  meta `_fw_seo_schema`), option `seo_schema` on the SEO box's Advanced tab, with an `html` readout
+  `seo_schema_status`. CSV column `custom_schema`; AI: `seo-update-page` `schema`, `seo-update-settings`
+  `custom_schema` / `custom_schema_identity`; settings export carries both keys (known-keys based).
+- **Input:** bare JSON (object, list or `@graph`), or `<script type="application/ld+json">` blocks; HTML
+  comments are blanked (line numbers kept). Any other `<script>` is refused. `parse()` returns
+  `{ok, nodes, error, line, warnings}`; `error_at()` is a small JSON scanner that gives the line
+  `json_decode()` will not. Broken input is stored as typed but not published.
+- **Merge (`merge()`, pure):** pasted node with a built-in `@id` replaces it in place; others are appended;
+  page nodes after site nodes (page wins on a shared `@id`). With the identity switch, the first site node
+  for which `is_identity_candidate()` is true (its `@type` is not in `NOT_IDENTITY`: pages, WebSite,
+  BreadcrumbList, ImageObject, Article, Product, Event…) replaces `FW_SEO_Schema::publisher_id()`: the
+  built-in publisher is removed and every `{"@id": publisher}` reference is repointed (`repoint()`). An
+  identity without `@id` takes the publisher's.
+- **Gotchas:** `update_post_meta()` unslashes, so `set_post` / `set_term` `wp_slash()` a `jsonld` value
+  (JSON keeps `\"` and `
+`). `FW_SEO_Schema::markup()` now escapes `</` as `<\/` (pasted text could hold
+  `</script>`). A setting `desc` is printed as HTML: write `&lt;script&gt;`, not `<script>`.
+- **`hentry` (2.0.68):** `_filter_post_class` (post_class, 20, front end, only while `schema_enabled` and
+  `FW_SEO_Conflict::should_emit()`) drops WordPress's hAtom class, which validators report as a broken
+  non-schema.org item. No shipped CSS keys off `.hentry`.
+- Public docs: `/seo/custom-schema`. Tests: `tests/custom-schema-test.php` (set `FW_SEO_CS_FIXTURES` to a
+  folder with a real hand-over pair to also check those parse).
+
 ### Video and news sitemaps (2.0.49)
 
 `FW_SEO_Media_Sitemaps` (`includes/class-fw-seo-media-sitemaps.php`) registers providers `video` and
@@ -1053,3 +1084,33 @@ Five reports that need data the database does not hold. Public docs: `seo/report
 - `FW_SEO_Audit::by_issue()` merges the last two, and `issue_labels()` includes their labels.
 - Tests: `tests/outside-data-test.php`. Bing and Open PageRank run against a fake transport
   (`pre_http_request`); the link checker and page fetcher run against the real site.
+
+### Filtered pages, server errors, language versions, crawler visits (2.0.62-2.0.65)
+
+The technical-SEO checklist gaps. Public docs: `seo/filtered-pages.md`, `seo/reports/server-errors.md`,
+`seo/language-versions.md`, `seo/reports/crawler-visits.md`.
+
+- **`FW_SEO_Facets`** (box `facets_box` on `robots_tab`; settings `facets_noindex` default on, `facets_params`,
+  `facets_block_crawl` default off). Hooks `fw_seo_robots` at 20: a request whose query keys match `params()`
+  gets `noindex, follow` (`apply()`; nofollow kept). `BUILTIN` lists the parameters, `*` = prefix; `paged`,
+  `page`, `p`, `page_id`, `s` are never filters. The canonical needs no change: `fw_seo_canonical_url()` builds
+  from the page address, never the query string. `robots_lines()` adds two Disallow lines per parameter
+  (`?name=` and `&name=`) through `FW_SEO_Robots::build()`.
+- **`FW_SEO_Uptime`** (box `uptime_box` on `alerts_tab`; settings `uptime_on`, `uptime_email`, both default on).
+  Hourly cron `fw_seo_uptime_check` fetches `watched()` (home + internal menu items, max 10; filter
+  `fw_seo_uptime_urls`). `classify()`: 5xx or a timeout = fail, no connection = unknown (loopback blocked), anything
+  else ok. `step()` is pure: two fails in a row = failing (one `down` event), first ok after = `up` event. Option
+  `fw_seo_uptime` holds pages + the last 40 events. `alerts()` feeds `FW_SEO_Alerts::collect()` at priority -2,
+  type `server`. One email per change. Cannot see a server that is fully down (it runs on the site).
+- **`FW_SEO_Hreflang`**. Store field `hreflang` (sanitiser `alternates` → `clean_rows()`), metabox option
+  `seo_hreflang` (addable box, added to the Advanced tab through `fw_seo_object_tabs`). `clean_code()` normalises
+  codes (`pt_br` → `pt-BR`, `x-default`). Head links through `fw_seo_collect_head` at 25, page itself first with
+  `get_locale()`. Steps aside when a translation plugin is active (`plugin_handles_it()`). Posts only.
+- **`FW_SEO_Crawl_Log`** (tab `crawl_log_tab`, sidebar "Crawler visits"). Upload of an Apache/Nginx combined log
+  (plain or .gz, read with `gzopen` line by line) or a JSON export; only totals are stored (option
+  `fw_seo_crawl_log`, max 5,000 paths). `parse_line()`, `bot_of()` (`BOTS`: search engines and AI crawlers),
+  `ip_in()` (IPv4/IPv6 CIDR), `add()`, `merge()`, `never_crawled()` and `to_csv()` are pure. Googlebot and
+  Bingbot claims are checked against the published ranges (`ranges()`, cached a week); outside ones go to
+  `fake`. JSON export `{format: unysonplus-seo-crawl-log, analysis}` imports back unchanged (`from_json()`).
+- Tests: `tests/checklist-gaps-test.php` (70 checks; the uptime check fetches the real home page, crawler ranges
+  come from a fake transport).

@@ -251,3 +251,19 @@ Selector prefix: **`upa-`** (classes) / **`--upa-`** (tokens). `body.upa` is pre
   horizontal scrollbar on every screen of the site. `width: auto` on the base `body.upa #wpbody-content`
   fixes it for every skin at once, and is a no-op for the skins that take no margin — verified: all
   five still measure an overflow of 0 and still run to the right edge.
+
+- **A skin that insets the rail MUST offset `#wpcontent` by the same amount.** The base sets
+  `#wpcontent { margin-left: var(--upa-sidebar-w) }`, which assumes a rail flush against the window
+  edge. `#adminmenuwrap` is `position: fixed`, so a skin floats it by moving its `left` inset — and the
+  content offset does not follow. The content then sits UNDER the rail: measured at **-2px** on Aurora
+  (10px inset), **-14px** on Glass and **-12px** on Soft (12px insets, Glass's border adding 2 more).
+  It reads as "no spacing against the menu", which is exactly what it is. Each floating skin now sets
+  `margin-left: calc(var(--upa-sidebar-w) + <inset>)` (and the `--upa-rail-w` equivalent when folded,
+  plus `margin-left: 0` under 782px where the rail goes full-bleed), with `box-sizing: border-box` on
+  the wrap so a border cannot add to the footprint. Measure the gap, do not eyeball it:
+  `content.getBoundingClientRect().left - rail.getBoundingClientRect().right` should be positive.
+- **Aurora paints its inner panel only with a canvas (`body.upa-has-canvas`).** Without one the panel
+  was a second surface behind content that already has its own — `rgb(247,248,252)` against a page of
+  `rgb(238,240,247)`, a ~9/255 step nobody can see — and, being only as tall as the content, it ended
+  in a slab edge partway down a short screen. With a canvas it has real work (keeping headings and bare
+  text off the gradient or photograph) and takes a `min-height` so it reaches the bottom of the viewport.

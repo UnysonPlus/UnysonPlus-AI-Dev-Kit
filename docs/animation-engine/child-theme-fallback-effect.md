@@ -159,6 +159,16 @@ The view emits `.tdg--<dashed-key>` generically (underscores become hyphens), so
 needed** — the key is the whole binding. The asset bundle from step 3 auto-depends on
 `fw-shortcode-gallery-3d`, so `registerDesign` always exists by the time your file runs.
 
+**Always pass a `'tile'`.** With a plain label string the picker builds the tile URL from the key inside the
+Animation Engine's own `static/img/designs/` folder, which has no file for a custom key: the tile shows as a
+broken image (404). Supply a 3:2 SVG (`viewBox="0 0 96 64"`, shown 62 px tall in the grid, 130 px in the hover
+preview) drawn like the built-ins: rounded-rect cards, the focused one in the `#cfe2ff → #2f74e6` gradient,
+transparent background. Public how-to with a full example: docs site → *Extending the engine* → Motion Gallery designs.
+
+**Limits of a custom design today:** no design-specific controls appear in the Design tab (the shared options
+still apply), and the Design tab's live preview (`gallery-3d-preview` / `preview.js`) knows only the built-in
+designs, so it shows the default for a custom key. Verify a custom design on the page or in the Live Editor.
+
 `build(ctx)` drives **one** instance. `ctx` carries `el`, `stage`, `cards`, `reduce`, `IN_EDITOR`,
 `clamp`, `num`, `attr`, `progress`, `attachDrag`, `raf`, `loop` and `onResize` — so you read options
 through `ctx.num()` / `ctx.attr()`, drive from `ctx.progress()` (0..1, already honouring a pinned stage
