@@ -346,8 +346,9 @@ A **Mascot layer** (`type: "mascot"`) is a character that talks on the voice-ove
 and closes its mouth on the sounds of the words being said (timed from the voice clip's `words`, so it needs a voice with
 words), blinks now and then and breathes a little. People make one in the Studio with **Insert › Mascot…**, from one
 picture, a picture per pose, or a six-pose sheet drawn by their own image AI (the Studio gives the prompt and cuts the
-sheet into poses). Full reference: `kinetic-scenes/mascots` on the docs site; the format is in the skill's
-`reference/scene-format.md`.
+sheet into poses), or pick one of ten sample mascots (people in business or casual clothes, a chef, a robot, a cat, a
+water drop, an owl, Pip). Agents use them with `mascot_list`, `mascot_copy` and `mascot_direct` (`docs/mascots.md`). Full
+reference: `kinetic-scenes/mascots` on the docs site; the format is in the skill's `reference/scene-format.md`.
 
 - **Reuse what the person made.** A mascot's poses are pictures in the project's `media/` with face boxes; copy the layer
   from another project rather than inventing face boxes. Face boxes are fractions (0-1) of each pose picture: `mouth` the
