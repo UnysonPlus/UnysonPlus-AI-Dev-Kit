@@ -458,7 +458,14 @@ finished — open the page and look at the thing you changed.
 - **Taking money goes through Payments, never a new gateway.** A feature that charges a customer calls the shared
   `payments` extension (`FW_Payments::charge()`, then the `unysonplus_payments_paid` hook) and switches it on with
   `fw_ext_ensure_active( 'payments' )` from the admin action that turns the feature on. Do not add Stripe / PayPal code
-  to another extension, and do not list `payments` under `requirements` (`docs/extensions/payments.md`).
+  to another extension, and do not list `payments` under `requirements` (`docs/extensions/payments.md`). Discount
+  codes, tax rates and invoices come from it too (`FW_Payments_Coupons`, `FW_Payments_Tax`, `FW_Payments_Invoices`):
+  do not add another coupon list, tax table or invoice numbering.
+- **Products for sale or for show go in the `shop` extension, never a hand-made post type.** A catalogue, a price list with
+  enquiries, a product range: `FW_Shop_Products::create()`, the `shop_products` element and catalog mode
+  (`docs/extensions/shop.md`). To sell online: `FW_Shop_Checkout::start_selling()`, then a cart, a one-page
+  checkout and orders, paid through `payments` (no payment code in the shop). Stock changes only through
+  `FW_Shop_Stock`, an order's status only through `FW_Shop_Orders::move()`.
 - **Native options before CSS.** If a look is achievable via a Theme Settings
   option, use it. Only fall back to CSS — Theme Settings → Misc → Custom CSS (`misc_custom_css`) or
   the child theme's `style.css` — for things no option covers, and record those as enhancement candidates.

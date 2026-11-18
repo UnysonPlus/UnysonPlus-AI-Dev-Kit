@@ -670,6 +670,17 @@ and ignore your own echoes on `unysonplus_crm_tag_added / _removed` by checking 
 
 ## Notes / gotchas
 
+- **Payment system (since 1.0.34).** `fw_ext_membership_payments['engine']` = `own` (default) | `payments`;
+  `FW_Membership_Gateways::uses_shared()`. While the shared `payments` extension is active every built-in
+  gateway is wrapped in `FW_Membership_Gateway_Bridge`: NEW purchases follow the setting; existing records stay
+  on the side they were made on (a membership's `gateway_subscription_id` starting `ps_` = a shared
+  subscription; a payment row with `meta.pay_charge` = a shared charge). Code outside the bridge keeps using
+  the `FW_Membership_Gateway` interface and `FW_Membership_Payments_Flow`. See `payments.md`.
+  Since 1.0.35 a NEW install starts on `payments` (`FW_Membership_Gateways::maybe_default_engine()`, decided once
+  when the payment settings are first opened; filter `unysonplus_membership_new_install_shared`), and while on
+  the shared system `FW_Membership_Coupons::get_by_code()` also returns codes from `FW_Payments_Coupons`
+  (`shared => true`, id 0; item rule `plan:<id>`).
+
 - **Content leaks through the head, not only the body.** The SEO extension builds the meta description,
   social tags and structured data from the post text on `wp` (before `template_redirect`); Membership hands it
   the teaser through `fw_seo_post_text` (empty for not_found / redirect / login denials). A "not found" denial
