@@ -196,9 +196,11 @@ captions layer):
 
 ## Long videos (over a reel)
 
-- **One scene is at most 600 s** (the format's limit). The renderer covers the whole scene at any frame rate (it used to
-  stop at 10,800 frames, which cut a 10-minute scene at 30 fps to 6 minutes without a word); a longer scene is refused
-  with a message, never trimmed.
+- **One scene is at most 3,600 s** (the format's limit, raised from 600 s in Studio 0.1.77: it was a guard written when
+  the Studio was for heroes and short reels, and it made a long-form explainer impossible to hold in one scene). What
+  actually costs a long scene is its layer count, not its length. The renderer covers the whole scene at any frame rate
+  (it used to stop at 10,800 frames, which cut a 10-minute scene at 30 fps to 6 minutes without a word); a longer scene
+  is refused with a message, never trimmed.
 - **Build long videos as chapters:** one scene per part (intro, chapters, outro), same size and fps, rendered one by one
   (only when the person asks), then `studio-cli join 01-intro.mp4 02-….mp4 … --out video.mp4` (`video_join`). Matching
   parts join losslessly in seconds; the chapter list for the YouTube description lands in `video-chapters.txt`. Name the
@@ -338,6 +340,22 @@ fits; for Unyson+'s own reels, the brand music library still comes first.
 simple parts, measures it (parts touch, none buried, none paper-thin, stands on the ground), fixes it up to three
 times and looks at it from four sides. Put the GLB in a model layer (`model: { kind: "gltf", src }`,
 `material.original: true`). Good for products, icons and props; not for organic shapes.
+
+## 3D devices with a screen recording
+
+For an app or website demo, put the recording **on a 3D device** instead of a flat frame: a model layer with
+`model: { kind: "device", device: "phone" | "tablet" | "laptop" | "monitor", screen: "<picture or video>" }`.
+The screen video plays on the scene's clock (it scrubs and renders frame-exact), unlit so it keeps its colours.
+Options: `fit` (`cover` crops to fill, `contain` shows all of it), `landscape` (phone, tablet), `open` (laptop lid,
+0-135°, default 105), and for the video `offset`, `rate`, `loop` (default true). Move it with `tumble-in`, `spin-3d`,
+`orbit-3d`, `camera-push` and the resting `pose`; `open-lid` opens a laptop on the timeline. Give the layer an `alt`.
+The devices are generic and unbranded, built by the player (nothing to download). Screen shapes: phone about 9:19.5,
+tablet 3:4, laptop 16:10, monitor 16:9, so record or crop to match (`cover` crops the rest). A box of about
+`w: 24, ratio: 0.55` fits an upright phone. Full reference: docs.unysonplus.com/kinetic-scenes/layers#3d-devices.
+
+**3D budget for a web scene** (the Studio's Check scene warns past it, reading the GLB files): under 300,000 triangles for
+all 3D layers, 150,000 for one model, 96 MB of texture memory, 12 MB of model files, textures 2,048 px at most. Lines
+thinner than 0.15 units shimmer under a moving camera: use 0.2 or more.
 
 
 ## Mascots that talk
