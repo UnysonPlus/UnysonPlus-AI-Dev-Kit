@@ -60,3 +60,10 @@ Every default preset, in order (name → hex → derived slug):
 | Blue Gray | `#607d8b` | `blue-gray` |
 
 Defaults are filterable via `unysonplus_default_color_presets`; the live palette via `unysonplus_color_presets`.
+
+**Wide-gamut colour (roadmap 7d).** Two optional keys per row: `wide_gamut` (`''` off / `subtle` / `vivid` / `custom`)
+and `p3` (for `custom`: `color(display-p3 r g b)` or `oklch(L C H)`, validated). `unysonplus_p3_color( $hex, $mode,
+$custom )` (`framework/includes/css-tokens.php`) keeps the colour's OKLCH lightness + hue and raises chroma to the P3
+gamut edge (`vivid`) or half way (`subtle`); chroma < 0.02 (greys) returns ''. Emitted as a second `--color-{slug}` in
+`@media (color-gamut:p3){@supports (color:color(display-p3 1 1 1)){:root{…}}}`, so every `var(--color-*)` consumer
+follows and sRGB screens keep the hex. Public docs: `/theme/components/color-presets#wide-gamut`.

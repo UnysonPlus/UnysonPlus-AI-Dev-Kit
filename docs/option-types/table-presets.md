@@ -42,6 +42,7 @@ Default: `[]` (empty preset list).
 | `id` | string | unique id (`unique` option type), stable across renames. |
 | `preset_name` | string | label; produces the CSS class `.tbl-<slug>`. |
 | `cell_padding_y` / `cell_padding_x` / `grid_width` / `outer_border_width` / `border_radius` / `cell_font_size` | object | `unit-input` values `{value,unit}`. |
+| `corner_smoothing` | string | `''`\|`soft`\|`squircle`\|`strong` (default `''` = a plain round corner). Corner Smoothing: adds `corner-shape:superellipse(1.5\|2\|2.5)` beside the radius; browsers without `corner-shape` keep the plain radius. Needs a radius. On the frame. |
 | `grid_lines` | string | `none`\|`horizontal`\|`vertical`\|`both` (default `horizontal`). |
 | `grid_style` / `outer_border_style` | string | `''`\|`solid`\|`dashed`\|`dotted`\|`double`. |
 | `grid_color` / `outer_border_color` | object | compact color-preset picker `{predefined,custom}`. |

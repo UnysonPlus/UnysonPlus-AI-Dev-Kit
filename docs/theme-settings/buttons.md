@@ -97,6 +97,7 @@ immediately. It is non-destructive: it only ever appends, and it never runs twic
 | `padding_y` | unit-input | units `px` / `em` / `rem`, min 0 | — |
 | `padding_x` | unit-input | units `px` / `em` / `rem`, min 0 | — |
 | `border_radius` | unit-input | units `px` / `%` / `em` / `rem`, min 0 | — |
+| `corner_smoothing` | short-select | `''` / `soft` / `squircle` / `strong` | `''` (round). Adds `corner-shape:superellipse(…)` to `.btn-{slug}`. |
 | `min_height` | unit-input | units `px` / `em` / `rem`, min 0 (optional). A FIXED button height (a source `h-11` = 44px, `.btn{height:58px}`); the button centres its content to it (`display:inline-flex`) — used instead of Padding Y when the source sizes by height. The admin row preview honours it too. | — |
 | `min_width` | unit-input | units `px` / `%` / `rem` / `em`, min 0 (optional) | — |
 | `max_width` | unit-input | units `px` / `%` / `rem` / `em`, min 0 (optional) | — |

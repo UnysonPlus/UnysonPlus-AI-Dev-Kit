@@ -2,7 +2,7 @@
 # motion-sequence — Motion Sequence (Animation Engine)
 
 Choreography **without code**. Turn a Section into a Motion Sequence and its child elements' Scroll
-Motion **Reveal / Stagger** animations play as ONE `gsap.timeline()` on a single trigger, in
+Motion **Reveal / Stagger** animations play as ONE timeline (`upwScroll.timeline()`, the engine's scroll core) on a single trigger, in
 document order — instead of each firing independently as it scrolls into view. The timeline concept
 translated into a builder option: the *steps are the children*, and one **Overlap** knob tunes how
 they flow one into the next. Rides the Section's **`fx.motion_sequence`** slot (picker key **`mode`**;

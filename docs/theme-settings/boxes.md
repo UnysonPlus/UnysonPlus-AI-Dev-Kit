@@ -17,6 +17,7 @@ Reusable, palette-linked presets defined in Theme Settings → Components; each 
 | `preset_name` | text | free text → slug | `''` |
 | `border_sides` | select | `all`, `top`, `right`, `bottom`, `left` (and combinations per the option type) | `all` |
 | `border_radius` | unit-input | units `px` / `em` / `rem` / `%` | `{value:'',unit:'px'}` |
+| `corner_smoothing` | short-select | `''` / `soft` / `squircle` / `strong` | `''` (round corner) |
 | `padding` | spacing (mode `padding`) | Spacing-scale class in `padding.all` (e.g. `p-4`) | empty |
 | `transition` | ms | e.g. `200`, `250` | — |
 | `hover_animation` | button-hover-animation | ONE effect from the shared Hover Animations library — the built-in `.btnfx-*` effects plus the entries in Theme Settings → Components → Hover Animations (`btnfx-c-{slug}`), the same list the Button shortcode offers. Emitted onto `.boxp-{slug}` by the presets stylesheet (no extra class on the element); see [`hover-animations.md`](hover-animations.md). | `''` |
@@ -125,6 +126,7 @@ Seeded presets → slugs: `Circle` → `.iconb-circle`, `Soft Tile` → `.iconb-
 | `border_extent` | multi-picker (inline) | `mode`: `full`, `container`, `custom` | `{mode:"full"}` |
 | `border_extent_width` | unit-input (shown when `mode`=`custom`) | units `px`/`rem`/`em`/`%` | `{value:'',unit:'px'}` |
 | `border_radius` | unit-input | units `px`/`em`/`rem`/`%` | `{value:'',unit:'px'}` |
+| `corner_smoothing` | short-select | `''` / `soft` / `squircle` / `strong` | `''` (round corner) |
 | `padding` | spacing (mode `padding`) | Spacing scale | empty |
 
 - `border.width`: unit-input, units `px` / `em` / `rem`.
@@ -230,6 +232,7 @@ Seeded presets → slugs: pattern named "Dots" → `.pattern-dots`, etc. (slug f
 | `outer_border_width` | unit-input | `px` | per preset |
 | `outer_border_color` | compact color-preset | `{predefined,custom}` | per preset |
 | `border_radius` | unit-input | `px` | per preset |
+| `corner_smoothing` | short-select | `''` / `soft` / `squircle` / `strong` | `''` (round corner) |
 | `outer_shadow` | box-shadow | `{x,y,blur,spread,color,inset}` | `{x:0,y:0,blur:0,spread:0,color:'',inset:false}` (all defaults) |
 | `cell_font_size` | unit-input | `px` | `{value:'',unit:'px'}` (all defaults) |
 | `transition` | ms | e.g. `150` | `150` (all) |
@@ -269,3 +272,15 @@ All color leaves are compact-preset shape `{predefined:'', custom:'#hex'}` (buil
 Seeded presets → slugs: `Clean Lines` → `.tablep-clean-lines`, `Bordered Grid` → `.tablep-bordered-grid`, `Minimal` → `.tablep-minimal`, `Striped` → `.tablep-striped`, `Dark Header` → `.tablep-dark-header`.
 
 - **Notes**: each preset emits a `.tablep-{slug}` class (also referenced as `.tbl-{slug}` in the source getters — the wrapper class from `preset_name`; collisions get `-2`/`-3`; empty name → the id). Consumed on a **Table** via Table Options → Table Preset. `outer_shadow` = `{x,y,blur,spread,color,inset}`; every built-in leaves it at zero.
+
+## Corner Smoothing (every preset with a corner radius)
+
+Roadmap 7c. One key, `corner_smoothing`, on **Box Presets**, **Section Styles**, **Table Presets** (frame), **Icon
+Badges** (`rounded` / `square` only), **Button Sizes** (`theme-settings/buttons.md`) and **Image Styles** (each
+`image_styles` row, next to `radius`). Values: `''` (default, a plain quarter-circle corner), `soft`, `squircle` (the
+app-icon curve), `strong`. The preset CSS adds `corner-shape:superellipse(1.5|2|2.5)` to the same rule as the radius
+(with `!important` where the radius has it); Image Styles carry it as `--imgs-corner`, read by `.imgs-wrap`, its `img`,
+`::before` and `::after`. Browsers without `corner-shape` (everything before Chrome / Edge 139) keep the plain radius.
+The curve sits inside the radius, so a smoothed corner reads tighter: raise the radius a few px when switching it on.
+PHP: `unysonplus_corner_smoothing_field()` (the field) and `unysonplus_corner_shape_decl( $value, $important )` (the
+declaration) in `framework/includes/css-tokens.php`. Public docs: `/theme/components/smooth-corners`.

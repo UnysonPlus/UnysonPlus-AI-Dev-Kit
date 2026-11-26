@@ -36,6 +36,7 @@ An **array of preset entries**, one per box preset:
 | `preset_name` | string | label → slugified into the `.boxp-<slug>` class. |
 | `border_sides` | string | `all`\|`top`\|`end`\|`bottom`\|`start` (default `all`). |
 | `border_radius` | object | `unit-input` `{ value, unit }`. |
+| `corner_smoothing` | string | `''`\|`soft`\|`squircle`\|`strong` (default `''` = a plain round corner). Corner Smoothing: adds `corner-shape:superellipse(1.5\|2\|2.5)` beside the radius; browsers without `corner-shape` keep the plain radius. Needs a radius. |
 | `padding` | object | `spacing` value (mode `padding`) — per-side Bootstrap-style class map under `padding`. |
 | `transition` | string | milliseconds (default `"200"`). |
 | `hover_animation` | string | `button-hover-animation` picker — one effect from the shared Hover Animations library (built-in `btnfx-*` or a custom `btnfx-c-{slug}`), or `""`. The presets stylesheet re-emits it onto `.boxp-<slug>` (`unysonplus_hover_fx_css_for()`); no class is added to the element. |

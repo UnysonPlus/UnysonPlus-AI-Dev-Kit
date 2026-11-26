@@ -27,9 +27,10 @@ Theme Settings → Animations → **Smooth Scroll** → *Smooth (inertia) scroll
 - **Single Lenis instance.** Shares the `window.__upwLenis` singleton with the Scroll Loop module —
   whichever boots first owns the one instance; enabling both never spawns two. The vendored Lenis lib
   loads once under the shared `upw-lenis` script handle. Config is passed as `window.upwSmoothScrollCfg`.
-- **Drive bridge.** When GSAP is present its ticker drives `lenis.raf` and
-  `lenis.on('scroll', ScrollTrigger.update)` keeps ScrollTrigger in lockstep (Scroll Motion pages stay
-  synced); otherwise a private rAF loop drives it (flagged once by `window.__upwLenisBridged`).
+- **Drive bridge.** A private rAF loop drives `lenis.raf` (flagged once by `window.__upwLenisBridged`); the
+  engine's scroll core (`scroll-core.md`) reads the smoothed position from the native scroll events Lenis
+  produces, so Scroll Motion stays in lockstep. On a page that also loads GSAP (a Motion Snippet), GSAP's ticker
+  drives Lenis instead and `lenis.on('scroll', ScrollTrigger.update)` keeps the snippet's triggers in step.
 - **Scrollytelling Stage rides it for free.** Lenis moves the *real* scroll position, so pinned Stages
   and scroll-scrubbed effects — which read `getBoundingClientRect()` each frame — follow the smoothed
   scroll automatically; programmatic scene jumps route through `__upwLenis.scrollTo`.

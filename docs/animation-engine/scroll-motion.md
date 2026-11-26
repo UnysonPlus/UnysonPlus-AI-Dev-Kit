@@ -1,7 +1,8 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # scroll-motion — Scroll Motion (Animation Engine)
 
-GSAP entrance + scroll-scrubbed motion on any page-builder node (section, column, leaf). Rides the
+Entrance + scroll-scrubbed motion on any page-builder node (section, column, leaf), on the engine's own
+scroll core (`scroll-core.md`; no GSAP since Animation Engine 1.5.34). Rides the
 node `fx` **`gsap_motion`** slot (picker key `effect`, off = `none`). Requires the `animation-engine`
 extension to be **ACTIVE** — the `fx` block is always present, but effects are ignored when inactive.
 
@@ -32,7 +33,10 @@ Shared 9-way `direction`: `up`/`down`/`left`/`right`/`up_left`/`up_right`/`down_
 ```json
 "advanced": { "mode": "custom", "custom": {
   "ease": "expo.out",          // curated GSAP ease, or "custom" → use ease_custom
-  "ease_custom": "",           // free-text GSAP ease; regex-validated, invalid = ignored
+  "ease_custom": "",           // free-text GSAP ease or CSS cubic-bezier(…); validated, invalid = ignored
+  // "ease" may also be a shared easing key (Motion design / Spring optgroups, e.g. "pop_over"): rendered as its
+  // CSS timing function in data-upw-g-ease; upw-gsap.js turns linear()/cubic-bezier()/steps() into a function
+  // with window.upwEase (upw-raf.js is a dependency of upw-gsap-init).
   "scrub_smooth": 0.4,         // scrub-family only. 0 = scrub:true; >0 = scrub:<seconds>
   "markers": "no"              // ScrollTrigger markers; only stamped for edit_theme_options users
 } }
@@ -103,8 +107,11 @@ Honours reduce-motion (skipped). It's the lossless fallback: styling → Custom 
 
 ## Notes
 
-- Powered by GSAP + ScrollTrigger (+ SplitText for `splittext`); enqueued only when a `gsap_motion`
-  effect actually renders. Independent of the core Entrance (Animate.css) animation.
+- Runs on the engine's scroll core (`window.upwScroll`, handle `upw-scroll-core`) and, for `splittext`, its text
+  splitter (`window.upwSplit`, handle `upw-split`), via `upw_anim_scroll_handle()`; enqueued only when a
+  `gsap_motion` effect actually renders. The runtime file keeps its old name `upw-gsap.js` (handle `upw-gsap-init`)
+  and the `gsap_motion` slot / `data-upw-g*` attributes keep theirs. **GSAP + ScrollTrigger load only for a
+  `custom` (Motion Snippet) effect**: that is the author's own GSAP code. Independent of the core Entrance (Animate.css) animation.
 - Sub-options live under `gsap_motion.choices[<effect>]` inside a `group_gsap_<effect>` wrapper
   (container id only — not stored); switching effects never loses the others' values.
 - **`color_scrub` resolves its colours in ONE batch (runtime 1.4.40).** Each element's A/B colours are

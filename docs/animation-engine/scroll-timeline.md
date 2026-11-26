@@ -1,21 +1,22 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # scroll-timeline — Scroll Timeline & Ruler (Animation Engine author tools)
 
-Two **admin-only, front-end author tools** that visualise every GSAP **ScrollTrigger** on the rendered
-page — the page-level view of "what pins / scrubs where" when composing scroll choreography. Both load
-**only** for logged-in admins (`current_user_can('manage_options')`), on the front end (`! is_admin()`),
-and stay hidden until toggled, so a visitor never loads or sees them. Neither persists anything — they
-read the live `ScrollTrigger.getAll()`. Requires the `animation-engine` extension **ACTIVE**.
+Two **author tools** that visualise every **scroll trigger** on the rendered page (the engine's scroll core,
+`upwScroll.getAll()`, plus GSAP's `ScrollTrigger.getAll()` on a page with a Motion Snippet) — the page-level view
+of "what pins / scrubs where" when composing scroll choreography. Since Animation Creator A5 both load **only in
+the Live Editor's Preview opened with Animate › Scroll tools** (`fw_live_editor_scroll_tools()`, plus
+`manage_options`): never on the public site, for anyone. They stay hidden until toggled. Neither persists anything — they
+read the live trigger lists. Requires the `animation-engine` extension **ACTIVE**.
 
 ## Scroll Timeline (the visual editor) — module `scroll-timeline-editor`
 
 Files: `framework/extensions/animation-engine/modules/scroll-timeline-editor/`
 - `scroll-timeline-editor.php` — enqueues on `wp_enqueue_scripts` (priority 31) for front-end admins only.
-- `static/js/upw-scroll-timeline.js` — the panel (no dependencies; reads `window.ScrollTrigger`).
+- `static/js/upw-scroll-timeline.js` — the panel (no dependencies; reads `window.upwScroll`, and `window.ScrollTrigger` when present).
 - `static/css/upw-scroll-timeline.css` — dark, fixed, very high z-index.
 
-A bottom-docked, video-editor-style timeline. **Toggle: `Shift+T`** or the admin-bar item
-**Scroll Tools → Timeline** (`#wp-admin-bar-upw-scroll-tools-timeline`). Behaviour:
+A bottom-docked, video-editor-style timeline. **Toggle: `Shift+T`** or its floating **Timeline** button
+(bottom right of the Scroll tools preview). Behaviour:
 - **One track per ScrollTrigger**, sorted by start. Each track's `[start,end]` is a block on a
   **0–100 % scroll axis** (`left = start/maxScroll`, `width = (end-start)/maxScroll`). Blocks carry
   `is-pin` / `is-scrub` classes; labels use the shared `describe(el)` (id, else a telling class).
@@ -31,8 +32,8 @@ A bottom-docked, video-editor-style timeline. **Toggle: `Shift+T`** or the admin
 
 ## Scroll Ruler (the compact read-out) — module `scroll-ruler`
 
-Files: `framework/extensions/animation-engine/modules/scroll-ruler/`. **Toggle: `Shift+R`** or the admin-bar
-item **Scroll Tools → Scroll Ruler** (`#wp-admin-bar-upw-scroll-tools-ruler`). A thin vertical rail down the right edge mapping every trigger's range onto the
+Files: `framework/extensions/animation-engine/modules/scroll-ruler/`. **Toggle: `Shift+R`** or its floating
+button (bottom left of the Scroll tools preview). A thin vertical rail down the right edge mapping every trigger's range onto the
 document scroll height, with a live playhead and a list (element, raw `start–end` pixels, pin/scrub).
 Read-only; click a row/bar to jump. Reports **raw scroll pixels**; the Timeline shows the same ranges as
 **percentages**.
@@ -126,18 +127,14 @@ surface for full scenes.
 
 Phase 1 (timeline surface + live scrub), **Phase 2 (drag-to-retime start/end)**, **Phase 3a (keyframe lanes —
 beat positions)** and **Phase 3b (beat states)** all ship — **item 1b is complete**. See the public docs
-`3d-motion-roadmap/roadmap.md` and `animation-engine/scroll-timeline`.
+`animation-engine/scroll-timeline` (what is planned next: `animation-engine/roadmap`).
 
 ## Gotchas
 
 - Front-end only: these never appear in `wp-admin`, and the Timeline needs a page that actually has
   ScrollTriggers (Scroll Motion / Scroll Keyframes / Motion Sequence / Motion Gallery choreography /
   scrollytelling / pinned sections) — otherwise it shows an empty-state hint.
-- Both triggers live in **one admin-bar menu**, "Scroll Tools" (node `upw-scroll-tools`, added
-  idempotently by each module's `admin_bar_menu` hook; the parent carries a `dashicons-chart-bar` icon).
-  This replaced the former fixed floating buttons, which collided with site-side floating chrome (chat
-  FABs, back-to-top) and blocked clicks. The JS (`build()`) prefers the admin-bar link by id and wires its
-  click to `toggle()`; it **falls back to a floating button only when the admin bar is hidden**
-  (`getElementById` miss), so the entry point never disappears. `apply()` toggles `.upw-ab-on` on the
-  `<li>` for the green active mark. Both can still be open at once. (Design Decisions:
-  "scroll-tools-in-admin-bar".)
+- **Where they open (A5):** Live Editor › Animate › **Scroll tools** posts the Preview with `scroll_tools=1`; that
+  request is the only one where the two modules enqueue. Their admin-bar entries (`admin_bar_menu`) were removed;
+  the JS's floating-button fallback (used when its admin-bar item is missing) is now the way in. (This supersedes the
+  Design Decision "scroll-tools-in-admin-bar"; see "page-timelines-in-the-live-editor".)

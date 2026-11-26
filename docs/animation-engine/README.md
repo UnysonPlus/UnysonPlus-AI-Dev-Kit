@@ -21,7 +21,7 @@ key is usually `effect`, but some modules use `mode` or `role` (noted per file).
 
 | fx slot | picker key | module(s) |
 |---|---|---|
-| `gsap_motion` | `effect` | `scroll-motion.md` |
+| `gsap_motion` | `effect` | `scroll-motion.md` (runtime: `scroll-core.md`) |
 | `interaction`, `interaction__2..4` | `effect` | `hover.md` (spotlight/lift/shine/glow/tilt/magnet/border) |
 | `text_effect` | `effect` | `text-effects.md` (shimmer/gradient/typewriter/scramble/wave/split/reveal/glitch) |
 | `parallax` | `role` | `parallax.md` |
@@ -31,6 +31,7 @@ key is usually `effect`, but some modules use `mode` or `role` (noted per file).
 | `flip_card` | — | `flip-card.md` |
 | `upw_interactions`, `upw_interactions__2` | `mode` | `interactions.md` (a trigger animates this node AND other nodes: hover / click / load / view / past, 3 steps with targets) |
 | `upw_states` | `mode` | `interactions.md` → States (named looks on a target, switched by Interactions steps; groups for tabs) |
+| `upw_layout` | `mode` | `layout-animation.md` (items glide to their new places when the layout changes; own height glide) |
 | `scroll_reveal` | `mode` | `scroll-reveal.md` |
 | `scroll_text_highlight` | `mode` | `scroll-text-highlight.md` |
 | `painted` | `mode` | `painted.md` (wash / frame / highlight / underline / circle / hatch, real brushes) |
@@ -47,8 +48,8 @@ key is usually `effect`, but some modules use `mode` or `role` (noted per file).
 | `cursor.md`, `page-transitions.md`, `preloader.md`, `scroll-progress.md` | **Theme Settings** (Site-wide UX / Animations) |
 
 ## All modules
-`backgrounds` · `confetti` · `cursor` · `flip-card` · `horizontal-scroll` · `hover` · `interactions` · `kinetic-preset` · `marquee` ·
-`motion-path` · `motion-sequence` · `page-transitions` · `painted` · `parallax` · `physics` · `preloader` · `scroll-color-shift` ·
+`backgrounds` · `confetti` · `cursor` · `flip-card` · `horizontal-scroll` · `hover` · `interactions` · `kinetic-preset` · `layout-animation` · `marquee` ·
+`motion-path` · `motion-sequence` · `page-timelines` (saved per page as post meta, runtime on pages that have one; authored in Kinetic Scenes page mode: `../extensions/live-editor.md` → Page timelines) · `page-transitions` · `painted` · `parallax` · `physics` · `preloader` · `scroll-color-shift` ·
 `scroll-keyframes` · `scroll-loop` · `scroll-motion` · `scroll-progress` · `scroll-reveal` · `scroll-text-highlight` ·
 `scroll-var` · `scrollytelling` · `smooth-scroll` · `sticky-stack` · `text-effects` · `viewport-units`
 

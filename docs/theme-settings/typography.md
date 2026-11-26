@@ -226,3 +226,28 @@ Blank keeps the heading/tag weight.
 - **Type**: `textarea` · **Default**: `''` · Optional freeform CSS for anything the fields above don't cover (text-shadow, gradient text, pseudo-states). Use `selector` (or the button-style `{{SELECTOR}}`) to target the style — e.g. `selector{ text-shadow:0 1px 2px rgba(0,0,0,.3) }`. A bare declaration block (no braces) is wrapped in the style's own rule; a block with braces is emitted verbatim with `selector` replaced by the style's `:root .font-{slug}` (or literal class) selector, into the raw CSS sink so full rules / pseudo-states work.
 
 - **Notes**: Each style becomes a `.font-{slug}` utility (or the literal `class` you set). Only filled properties are emitted, scoped to that class; blank properties inherit from the element's tag token. Mobile sizes are auto-reduced by `unysonplus_mobile_font_size_scale()` (tiered: ≥60px → ×0.60, ≥32px → ×0.75, ≥20px → ×0.85, else ×1.00; floor 14px; body-size text stays desktop-size). Live presets are read via `unysonplus_get_font_size_presets()` (saved rows override the defaults).
+
+### Text Style typography controls (roadmap 7b)
+
+Extra optional keys on each `font_sizes` row (all blank by default; blank emits nothing). Written by
+`unysonplus_text_style_type_decls( $entry )` in `framework/includes/css-tokens.php` into the same `:root .font-{slug}`
+rule; `unysonplus_text_style_is_set( $entry )` decides whether a style is offered in the Text Style dropdown (any field,
+new ones included). `weight` choices now run 100-900.
+
+| Key | Type | Values → CSS |
+| --- | --- | --- |
+| `weight_exact` | short-text | 1-1000 → `font-weight` (beats `weight`) |
+| `font_width` | short-text | 50-200 → `font-stretch: N%` |
+| `font_style` | short-select | `''` / `normal` / `italic` → `font-style` |
+| `slant` | short-text | -90..90 → `font-style: oblique Ndeg` (beats `font_style`; 0 = ignored) |
+| `optical_size` | short-select | `''` / `auto` / `none` → `font-optical-sizing` |
+| `opentype` | checkboxes | keys `tnum pnum onum lnum zero frac ordn` → `font-variant-numeric`; `smcp` / `c2sc` → `font-variant-caps` (c2sc wins); `noliga` / `dlig` → `font-variant-ligatures`; `ss01`-`ss05` `swsh` `salt` → `font-feature-settings` |
+| `decoration_line` | short-select | `none` / `underline` / `overline` / `line-through` |
+| `decoration_style` | short-select | `solid` / `double` / `dotted` / `dashed` / `wavy` |
+| `decoration_color` | compact colour | `{ predefined, custom }` → `text-decoration-color` |
+| `decoration_thickness` | unit-input px/em | → `text-decoration-thickness` |
+| `underline_offset` | unit-input px/em | → `text-underline-offset` |
+| `truncate` | short-select | `''`; `1` = one line + ellipsis (`white-space:nowrap; text-overflow:ellipsis`); `2`-`6` = line clamp (`-webkit-line-clamp` + `line-clamp`, `display:-webkit-box`) |
+
+Example: `{ "name": "Price", "weight_exact": "450", "opentype": { "tnum": true, "zero": true }, "truncate": "2" }`.
+Public docs: `/theme/components/text-styles#typography-controls`.

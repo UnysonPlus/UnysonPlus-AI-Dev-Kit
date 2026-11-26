@@ -41,6 +41,7 @@ An **array of preset entries**, one per icon badge:
 | `badge_size` | object | `unit-input` `{ value, unit }` — the tile's width & height (default `{value:'48',unit:'px'}`). |
 | `icon_size` | object | `unit-input` `{ value, unit }` — the glyph inside the tile (default `{value:'24',unit:'px'}`). |
 | `border_radius` | object | `unit-input` `{ value, unit }` — corner radius for the `rounded`/`square` shapes (ignored for circle/hexagon). |
+| `corner_smoothing` | string | `''`\|`soft`\|`squircle`\|`strong` (default `''` = a plain round corner). Corner Smoothing: adds `corner-shape:superellipse(1.5\|2\|2.5)` beside the radius; browsers without `corner-shape` keep the plain radius. Needs a radius. Only for the `rounded`/`square` shapes. |
 | `transition` | string | milliseconds (default `"200"`). |
 | `hover_fx` | array | `multi-select` of `lift`\|`pop`\|`glow`\|`shine` (default `[]`). (Note: differs from Box Presets, which offer `zoom`/`tilt` — badges use `pop` instead.) |
 | `custom_css` | string | `code-editor` CSS, `{{SELECTOR}}`-aware (→ `.iconb-<slug>`). |

@@ -104,7 +104,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/motion-sequence/motion-sequence.php"
       ],
       "hash": "d8229faf2bdb0e5b445c7a1327f42bfe",
-      "synced": "2026-11-11"
+      "synced": "2026-11-18"
     },
     "animation-engine/page-transitions.md": {
       "kind": "ae-module",
@@ -175,8 +175,8 @@
       "src": [
         "{plugin}/framework/extensions/animation-engine/modules/scroll-motion/includes/scroll-motion-settings.php"
       ],
-      "hash": "068049f65ae58e1d5aeb42d86327aca4",
-      "synced": "2026-11-11"
+      "hash": "f70c84bd6930272d3fa67394aa94a95e",
+      "synced": "2026-11-19"
     },
     "animation-engine/scroll-progress.md": {
       "kind": "ae-module",
@@ -206,7 +206,7 @@
       "kind": "narrative",
       "src": [],
       "hash": null,
-      "synced": "2026-11-11",
+      "synced": "2026-11-18",
       "note": "narrative — intentionally source-less (aggregate/how-to); review by hand"
     },
     "animation-engine/scroll-var.md": {
@@ -231,7 +231,7 @@
         "{plugin}/framework/extensions/animation-engine/modules/smooth-scroll/smooth-scroll.php"
       ],
       "hash": "f7ea64309f9920db254bf5e024aea3e8",
-      "synced": "2026-11-11"
+      "synced": "2026-11-18"
     },
     "animation-engine/sticky-stack.md": {
       "kind": "ae-module",
@@ -574,8 +574,8 @@
         "{plugin}/framework/extensions/shortcodes/manifest.php",
         "{plugin}/framework/extensions/shortcodes/settings-options.php"
       ],
-      "hash": "5c69f31323af272c98f5d67845441d1a",
-      "synced": "2026-11-11"
+      "hash": "259e07f31b5d0cad4df0dca84d59dc46",
+      "synced": "2026-11-25"
     },
     "extensions/sidebars.md": {
       "kind": "extension",
@@ -728,8 +728,8 @@
       "src": [
         "{plugin}/framework/includes/option-types/border-presets/class-fw-option-type-border-presets.php"
       ],
-      "hash": "894c689809bbf791fd3a55fa4e0ddb7a",
-      "synced": "2026-11-11"
+      "hash": "42c7f5830d2c1bcab5cc74231577c4ff",
+      "synced": "2026-11-25"
     },
     "option-types/border-style-picker.md": {
       "kind": "option-type",
@@ -870,8 +870,8 @@
       "src": [
         "{plugin}/framework/includes/option-types/icon-badge-presets/class-fw-option-type-icon-badge-presets.php"
       ],
-      "hash": "ad579274fd1d3f1cfa8fe53dfbdd626f",
-      "synced": "2026-11-11"
+      "hash": "d877e12b74adbdbad0711091586d7955",
+      "synced": "2026-11-25"
     },
     "option-types/icon-v2.md": {
       "kind": "narrative",
@@ -1084,8 +1084,8 @@
       "src": [
         "{plugin}/framework/includes/option-types/table-presets/class-fw-option-type-table-presets.php"
       ],
-      "hash": "5de2a1ec548b075018869e0264be0199",
-      "synced": "2026-11-11"
+      "hash": "33c20afc8380caf8e7e5e005e4b466c1",
+      "synced": "2026-11-25"
     },
     "option-types/table-style-picker.md": {
       "kind": "option-type",
@@ -2114,8 +2114,8 @@
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/components-patterns.php",
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/components-table.php"
       ],
-      "hash": "6f6299332f3c4ac078fedba5132be704",
-      "synced": "2026-11-11"
+      "hash": "7e64cdce6d07bb4e15f0a415685f03df",
+      "synced": "2026-11-25"
     },
     "theme-settings/buttons.md": {
       "kind": "theme-settings",
@@ -2123,8 +2123,8 @@
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/components-buttons.php",
         "{plugin}/framework/includes/presets/button-presets.php"
       ],
-      "hash": "8592873d5c589fad6156cea7e99ac418",
-      "synced": "2026-11-11"
+      "hash": "9cf63ca3f6593c7bb1ac37558fe9ec81",
+      "synced": "2026-11-25"
     },
     "theme-settings/colors.md": {
       "kind": "theme-settings",
@@ -2132,8 +2132,8 @@
         "{plugin}/framework/extensions/shortcodes/includes/theme-settings/components-color.php",
         "{plugin}/framework/includes/presets/color-presets.php"
       ],
-      "hash": "a40894358156119fb142e7d6f7285529",
-      "synced": "2026-11-11"
+      "hash": "d85ca7a562e146d1b3d0d54861cb65f9",
+      "synced": "2026-11-25"
     },
     "theme-settings/footer.md": {
       "kind": "theme-settings",
@@ -2278,8 +2278,8 @@
         "{plugin}-theme/framework-customizations/theme/options/general-typography.php",
         "{plugin}-theme/framework-customizations/theme/options/general-fonts.php"
       ],
-      "hash": "0f2c957e29ed1fab7612582f617e9621",
-      "synced": "2026-11-11"
+      "hash": "36098cb4d6ccfb6819a8d1fb71799a4e",
+      "synced": "2026-11-25"
     },
     "theme-settings/woocommerce.md": {
       "kind": "theme-settings",
@@ -2310,8 +2310,8 @@
         "{plugin}/framework/extensions/animation-engine/modules/interactions/includes/interactions-settings.php",
         "{plugin}/framework/extensions/animation-engine/modules/interactions/includes/states-settings.php"
       ],
-      "hash": "48b84160d92838722718e5313401b37a",
-      "synced": "2026-11-11"
+      "hash": "812ea6a5b9506d45361144bff692d1f3",
+      "synced": "2026-11-25"
     },
     "extensions/live-editor": {
       "kind": "extension",
@@ -2328,6 +2328,14 @@
       ],
       "hash": "343cf5498bec9e5d36d5620d88ef96f1",
       "synced": "2026-11-18"
+    },
+    "animation-engine/layout-animation.md": {
+      "kind": "ae-module",
+      "src": [
+        "{plugin}/framework/extensions/animation-engine/modules/layout-animation/layout-animation.php"
+      ],
+      "hash": "0d590ea3fe491c130921d5547eabfd4d",
+      "synced": "2026-11-19"
     }
   }
 }
