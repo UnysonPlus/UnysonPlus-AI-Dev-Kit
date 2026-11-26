@@ -63,7 +63,7 @@ has no such limit.)
 
 **`common`** — identity + advanced (on section/column/leaf):
 ```js
-{ unique_id: '<32-hex>', css_id: '', css_class: '', custom_css: '', element_position: '',
+{ unique_id: '<32-hex>', free_box: '' /* freeform box JSON, see flexbox.md */, css_id: '', css_class: '', custom_css: '', element_position: '',
   element_overflow: '', responsive_hide: [], dc_logged: '', dc_roles: [], dc_start: '',
   dc_end: '', custom_attrs: [] }
 ```
@@ -154,7 +154,7 @@ renders as literal `[image]` text).
 **Shortcodes Library elements (not bundled — Unyson+ → Shortcodes → Shortcodes Library → Install; source `UnysonPlus-Library/shortcodes/`):** `instagram` (Instagram Feed)
 **Data / display:** `counter` · `countdown` · `progress` · `star-rating` · `calendar` · `map` · `business-info` · `tag-list`
 **Interactive:** `accordion` · `tabs` · `tooltip` · `modal-popup` · `scroll-indicator` · `scroll-to-top` · `menu-toggle`
-**Icons / social:** `icon` · `social-icons` · `social-share` · `notification`
+**Icons / social:** `icon` · `vector-shape` (tag `vector_shape`) · `social-icons` · `social-share` · `notification`
 **Site / dynamic:** `site-logo` · `nav-menu` · `site-search` · `widget-area` · `code-block` · `posts` · `post-title` · `post-content` · `post-excerpt` · `post-meta` · `post-author` · `post-date` · `post-terms` · `author-box`
 **Extension-sourced (portfolio / forms / shop / animation-engine):** `contact-form` · `portfolio` · `project-details` · `project-gallery` · `project-nav` · `project-results` · `project-testimonial` · `related-projects` · `shop-products` · `shop-cart` · `shop-checkout` · `gallery-3d` · `model-viewer` · `webgl-object` · `image-sequence` · `svg-draw` · `svg-morph` · `studio-scene`  *(WooCommerce elements — `wc_products`, `wc_mini_cart`, `wc_cart_link`, … — are in [`../extensions/woocommerce.md`](../extensions/woocommerce.md).)*
 **Membership (extension-sourced — `membership`):** `member-login` · `member-account` · `pricing-plans` · `membership-checkout` · `paywall-prompt` · `member-download` · `member-directory` · `course-outline`  *(palette tab "Membership"; module needs, Settings pages and the Membership visibility tab are in [`../extensions/membership.md`](../extensions/membership.md) and [`../extensions/membership-building.md`](../extensions/membership-building.md).)*

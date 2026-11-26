@@ -47,7 +47,10 @@ keep their values.
 |---|---|---|---|---|
 | `html_tag` | select | `div` | pages: `div` `section` `article` `aside` `header` `footer` `nav` `figure` `custom`; Theme Builder also adds `main` | Semantic element. `section` = the Section tile (a full-width band). `header`/`footer`/`nav` are valid scoped inside a section/article; `main` is Theme-Builder-only (one per page). `custom` reveals `custom_tag`. |
 | `custom_tag` | text | `''` | a bare tag name | Used only when `html_tag` = `custom`. Sanitized to a safe container whitelist (div, section, article, aside, header, footer, nav, main, figure, figcaption, details, summary, span, p, blockquote, address, ul, ol, li, dl, dt, dd, picture, time, mark, fieldset, hgroup); anything unknown/unsafe (script, iframe, a, …) → `div`. |
-| `display` | select | `flex` | `flex` `inline-flex` `grid` `block` `inline-block` `inline` `none` | Layout mode. `flex`→`fw-flex`, `inline-flex`→`fw-inline-flex` (an inline-level flex container; all flex arrangement controls apply), `grid`→`fw-grid`; `block` is the element default; `inline-block`/`inline`/`none` emit an inline `display:` (direction/justify/align/gap apply only to flex & grid). |
+| `display` | select | `flex` | `flex` `inline-flex` `grid` `block` `inline-block` `inline` `none` `free` | Layout mode. `flex`→`fw-flex`, `inline-flex`→`fw-inline-flex` (an inline-level flex container; all flex arrangement controls apply), `grid`→`fw-grid`; `block` is the element default; `inline-block`/`inline`/`none` emit an inline `display:` (direction/justify/align/gap apply only to flex & grid). |
+| `free_height` | unit-input | `{value:'560',unit:'px'}` | px / vh | `display:free` only: the canvas height (`--fw-free-h`). |
+| `free_stack` | select | `'md'` | `md` `sm` `never` | `display:free` only: stack the children below 992px (`md`), below 768px (`sm`) or never. |
+| `free_gap` | unit-input | `{value:'24',unit:'px'}` | px / rem | `display:free` only: the gap once stacked (`--fw-free-gap`). |
 | `grid_columns` | text | `3` | integer 1–12, `>12`, or a raw track template | Column count when `display:grid`. 1–12 use the cacheable `fw-grid-N` class; else an inline `grid-template-columns`. |
 | `grid_autofit` | switch | `no` | `yes` \| `no` | Auto-fit grid tracks (responsive card grids) instead of a fixed count. |
 | `grid_min` | unit-input | `''` | e.g. `240px` (`px rem em %`) | Min track width when `grid_autofit:yes`. |
@@ -164,3 +167,13 @@ the decision log *"Why the live editor wraps Flexbox/Grid/Block in a Section"*.)
   flexbox children pass through untouched. Classic Column drops still force `row > column` for
   back-compat — see [`row.md`](row.md) / [`column.md`](column.md).
 - `background` is a **background-pro** object; consult `../option-types/` for its shape.
+
+## Freeform (`display: 'free'`, roadmap 7h, Shortcodes 1.16.27 / Live Editor 0.3.34)
+- Classes `fw-free fw-free--stack-<md|sm|never>`, style `--fw-free-h` / `--fw-free-gap`; the `group_free` options show only for Freeform (`fxApplyModalVisibility`).
+- Each CHILD (any element or layout item) stores its box in the shared Advanced att **`free_box`** (type `hidden`): a JSON string `{"x":<% of canvas width>,"y":<px from top>,"w":<% width, 0 = auto>,"z":<layer>}`. `sc_free_box()` parses + clamps it; `sc_build_wrapper_attr()` adds class `fw-free-item` and `--fw-x/--fw-y/--fw-w/--fw-z/--fw-o` (`o` = y*100+x, the stacked reading order); `sc_needs_wrapper()` returns true for a placed item so a bare element (e.g. an unstyled heading) still gets a wrapper.
+- CSS (`flexbox/static/css/styles.css`): above the breakpoint children are `position:absolute` from the vars and the canvas has `min-height`; below it the canvas is a flex column ordered by `--fw-o`. Rules carry extra specificity to beat the divider-lift and the Live Editor's `[data-fw-item-id]{min-height}`.
+- Building with an agent: set the parent `display:'free'` and give each child `free_box` (keep text items clear of each other vertically; the editor user drags to fine-tune).
+```json
+{ "type":"flexbox", "atts":{ "html_tag":"section", "display":"free", "free_height":{"value":"520","unit":"px"}, "free_stack":"md" },
+  "_items":[ { "type":"simple", "shortcode":"special_heading", "atts":{ "title":"Freeform sections", "free_box":"{\"x\":8,\"y\":60,\"w\":50,\"z\":2}" } } ] }
+```

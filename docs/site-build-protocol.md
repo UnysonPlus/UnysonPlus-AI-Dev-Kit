@@ -419,6 +419,20 @@ the gap always goes upstream**:
    (`send-finding.mjs --motion-gap`). Reported frequency is what promotes an effect into the engine, so a
    gap you absorbed silently is one you will meet again, on the next site, and write again.
 
+**Step 0 is already done for entrances (roadmap 10, capture service 1.13.24+).** The capture records the source's
+load and in-view entrances on a virtual clock (`motion.json`) and the converter places them as native Interactions;
+what it could not place is in `motion-report.json`. So for motion, start by MEASURING the conversion, not by eye:
+
+```
+node motion-verify.mjs <source url> <converted page url> capture-out/<site>/motion-check      --report=capture-out/<site>/motion-report.json --fixture=<neutral id>
+```
+
+Paste its summary line ("6/7 match · 0 drift · 1 missing · …") and read every non-match row: a **missing** row names
+why (usually merged text), a **drift** row names what is off (delay / duration / curve / start state / trigger). Only
+those rows go through steps 1–3 below. `motion-gaps.json` holds them as `--motion-gap` tuples; `--send` files them once
+the person has agreed to share findings. Details: [`extensions/site-converter.md`](extensions/site-converter.md) →
+Recorded motion.
+
 **Say which step each motion took.** "Motion done" is not a report; "three native, one fallback
 (`upw-fb-01`, reported)" is. The `tried` field exists for the same reason — it is what distinguishes
 *nothing fit* from *nobody looked*.

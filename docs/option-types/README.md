@@ -28,6 +28,7 @@ Highlights from the per-type files:
 |---|---|
 | `compact-color.md` | `{predefined:'text-<slug>'\|'bg-<slug>'\|'', custom:'#hex'\|''}` (preset wins) |
 | `unit-input.md` | `{value:'<num-string>', unit:'<unit>'}` |
+| `vector-svg.md` | sanitised SVG markup string (drawing editor) |
 | `responsive.md` | `{base:{value,unit}, md:{…}, lg:{…}}` (mobile-first) |
 | `typography.md` | `{family, variation, size, 'line-height', 'letter-spacing', color}` |
 | `multi-picker.md` | `{'<picker_id>':'<choice>', '<choice>':{…revealed…}}` |

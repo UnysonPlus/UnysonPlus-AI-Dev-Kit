@@ -7832,3 +7832,52 @@ But the instinct was not wrong, only the mechanism: those covers *are* mishandle
 where the source darkens it heavily, and the body copy sits on bright reflections at poor contrast.
 **Read the mapping before theorising about the render; then read the render before believing the
 mapping is enough.**
+
+## Recorded motion (roadmap 10: capture service 1.13.24, Site Converter 1.12.13)
+
+**Record (10a) — `motion-record.mjs`.** `recordMotion({ browser, url, step=25, shots?, viewShots? })`, run by `capture.mjs`
+on the home page BEFORE `renderPage` (skip with `--no-motion` / `UPW_NO_MOTION=1`). An init script installs an in-page
+virtual clock (`performance.now`, `Date.now`, timers, `requestAnimationFrame` move only on `M.advance(dt)`); every
+`document.getAnimations()` animation is held paused and set from that clock, but only while the PAGE has it playing (its
+`play / pause / reverse / finish / cancel / currentTime` are wrapped, so an animation a library builds paused, as the
+Animation Engine does, is not played by the recorder; at its end the real `finish()` runs so chained steps continue).
+Chrome's own virtual time was tried and rejected: CSS animations ignore it, and freezing their timeline also stops the
+frames that deliver IntersectionObserver callbacks. Clock starts at the `load` event; LOAD phase ≥1.5 s until 0.7 s
+quiet; VIEW phases scroll 70% of the viewport each (the scroll happens inside the step's evaluate: a lone
+`window.scrollTo` evaluate blocks). Candidates: `getAnimations()` targets + elements with opacity < .99 / transform /
+blur / hidden + class/style mutations (MutationObserver on `document`). Each element's own transform matrix
+(+ `translate/scale/rotate` properties), opacity and blur are sampled; `analyse()` takes the last continuous run before
+rest (gaps ≤ 4 steps bridge an overshoot peak) → `{ phase, delay, duration, from{opacity,x,y,scale,rotate,blur}, ease,
+easeRms, easeSource, source: css-animation|css-transition|web-animation|script, frames }`; exact timing from the
+animation's own timing when one finite animation explains it, else a curve fit against `engine-easings.json` (generated
+from `easing-defs.php`; regenerate when it changes). `unmatched`: loop (still moving at the end), exit, clip-path.
+`staggers`: siblings with equal motion and evenly spaced delays. `layout0` / `layout`: each element's page y at the clock
+start / end. Output `motion.json`; `stampInPage` puts `data-sc-motion="ph=load;d=0.2;du=0.8;e=classic_out;o=0;x=0;y=40;
+s=1;r=0;b=0;src=css-animation"` on the live elements (path + tag + text check), so the JS extraction and rendered.html
+both carry it.
+
+**Convert (10b).** PHP `Stitch::motion_of` → block / list / cell `motion` (beside `reveal`) → `Mapper::apply_motion` →
+`upw_interactions = { mode: load|view, <mode>: { steps: { s1: { target:self, direction:from, x,y,scale,rotate,opacity,
+blur, duration, delay, ease, … }, s2/s3: { target:none } }, leave:'keep' (view) } }` (clamped to the field ranges;
+`Mapper::motion_interaction` is public). It runs before `apply_reveal`, which then stands down for that node. Section
+heads take the first part's `motion` like its `reveal`. **Catch-all:** `FW_Site_Converter_Motion::apply_to_bundle` (run
+by `Sources::build_from_html`) matches every stamp the routes did not carry to the node with the same text (whitespace
+removed; `title/subtitle/text/content/label/desc/description/caption/button_label/quote` atts, NOT `heading` which is a
+level): a wrapper tag → outermost layout node, a text tag → innermost element; a node's own single text field also
+matches (a heading by its title). Report in `files['motion-report.json']` `{ stamped, pages:[{ applied, already,
+unplaced:[{tag,text,why}] }] }`. JS twins: `motionOf` (capture-extract) → `motionInteraction` / `applyMotion` (to-pages),
+and `applyRecordedMotion` (motion-record.mjs, run by capture.mjs on the home page before pages.json is written →
+`motion-report.json`).
+
+**Verify (10c) — `motion-verify.mjs <src> <converted> <out> [--report=motion-report.json] [--fixture=id] [--send]`.**
+Records both, pairs by text (exact, else prefix), compares delay / duration (±80 ms), curve RMS (≤ 0.05), start state
+(0.05 / 4 px / 0.02 / 2° / 1 px) and trigger (a view motion that plays on load because the element is on screen at the
+clock start in the conversion is a layout note, not a failure). Writes `motion-verify.html` (table + side-by-side frame
+strips), `motion-verify.json`, `motion-gaps.json`.
+
+**Gaps (10d).** `motion-gaps.json` = `send-finding.mjs --motion-gap` tuples (`fixture, surface, motion, tried, outcome,
+fallback, note`) for missing / drift / not-expressible motion; `--send` files them (one consent per session).
+
+**Fixture / test.** `motion-fixtures/fixture-motion-01/` (page with known motion + `raw-series.json`);
+`node --test motion-record.test.mjs` (7 tests, no browser). Measured on it: the conversion matches 6/7 (timing 0–25 ms,
+curve ≤ 0.003); the 7th is a paragraph merged into the heading's subtitle, reported as missing with that reason.
