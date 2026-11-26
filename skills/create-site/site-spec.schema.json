@@ -272,6 +272,43 @@
         }
       }
     },
+    "offering": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "What the business actually sells, and the figures behind it — ONLY as supplied. This is the field the `services` and `pricing` page shapes read; without it they have nothing to put on the page, and build rule 4 forbids filling them in. It is also what a PARTICIPATORY signature moment is made of (a rate explainer, a size picker, a comparison the visitor switches), so an empty `offering` caps the design jury's Creativity score — see docs/site-creator/design-jury.md. List what is absent in `missing` as `offering.items` / `offering.pricing` / `offering.figures`.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "The services or products, in the order they should appear. Each: {name, summary, detail?}.",
+          "items": {
+            "type": "object"
+          }
+        },
+        "pricing": {
+          "type": "array",
+          "description": "Real prices as supplied. Each: {label, amount, unit?, period?, includes?, note?}. NEVER populated by the build.",
+          "items": {
+            "type": "object"
+          }
+        },
+        "pricing_model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "How the price is arrived at, where there is no table: 'quote', 'hourly', 'per-item', 'tiered', 'from'. Decides whether the Pricing page is a table or an explanation."
+        },
+        "figures": {
+          "type": "array",
+          "description": "The numbers a visitor would want to move or compare — terms, sizes, rates, capacities, lead times. Each: {label, values[], unit?, assumes?}. This is the raw material of a participatory signature moment.",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
     "seo": {
       "type": [
         "object",

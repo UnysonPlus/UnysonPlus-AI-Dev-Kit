@@ -46,7 +46,7 @@ upw_div_section(array(
   ), array(
     'direction'     => array('base' => 'column', 'md' => '', 'lg' => ''),  // stacked, not side by side
     'align_items'   => array('base' => 'center'),
-    'gap'           => array('base' => 'gap-4'),
+    'gap'           => array('base' => '4'),
     'content_width' => array('preset' => 'narrow'),   // measure: a centred line past ~60ch is hard to read
     'content_align' => 'center',
   )),
@@ -119,7 +119,7 @@ upw_div_section(array(
     ), array(
       'direction'   => array('base' => 'column', 'md' => '', 'lg' => ''),
       'align_items' => array('base' => 'start'),
-      'gap'         => array('base' => 'gap-4'),
+      'gap'         => array('base' => '4'),
     )),
     upw_element('media_image', array(          // the tag is media_image — `image` renders as literal text
       'image'         => array('attachment_id' => '', 'url' => '{{image_url}}'),
@@ -188,14 +188,22 @@ upw_div_section(array(
   ), array(
     'direction'     => array('base' => 'column', 'md' => '', 'lg' => ''),
     'align_items'   => array('base' => 'start'),
-    'gap'           => array('base' => 'gap-5'),
+    'gap'           => array('base' => '5'),
     'content_width' => array('preset' => 'medium'),
     'content_align' => 'left',
   )),
 ), array(
-  'min_height'  => array('base' => array('value' => 80, 'unit' => 'vh')),
-  'align_items' => array('base' => 'end'),      // the type sits low in the band — the editorial signature
-  'variant'     => '{{surface}}',
+  'min_height'      => array('base' => array('value' => 80, 'unit' => 'vh')),
+  // The type sits low in the band — the editorial signature. A section-tag Div is
+  // display:BLOCK by default, where align-items / justify-content do nothing at all,
+  // so the band must be made a flex column first. And in a COLUMN flex the vertical
+  // axis is the MAIN one: `justify_content` is what moves the type down;
+  // `align_items: end` would push it to the right edge, which is the opposite of
+  // flush left.
+  'display'         => 'flex',
+  'direction'       => array('base' => 'column', 'md' => '', 'lg' => ''),
+  'justify_content' => array('base' => 'end'),
+  'variant'         => '{{surface}}',
 ));
 ```
 
@@ -246,7 +254,7 @@ upw_div_section(array(
   ), array(
     'direction'     => array('base' => 'column', 'md' => '', 'lg' => ''),
     'align_items'   => array('base' => 'center'),
-    'gap'           => array('base' => 'gap-4'),
+    'gap'           => array('base' => '4'),
     'content_width' => array('preset' => 'narrow'),
   )),
 ), array(
@@ -290,7 +298,12 @@ duplicate-in-the-wrong-place the format forbids.
 
 The vocabularies above are the **shipped defaults**, and two of them are derived, not fixed:
 
-- `gap-0` … `gap-5` are the Gap Scale slugs.
+- **The `gap` value is a BARE Gap-Scale slug — `'0'` … `'5'`, `'[40px]'` — never `'gap-5'`.** This
+  line used to read "`gap-0` … `gap-5` are the Gap Scale slugs", and that is where the mistake came
+  from: the view prefixes `fw-gap-` itself, so `'gap-5'` emits `fw-gap-gap-5`, matches no rule, and
+  the computed gap is `normal`. **Every card grid built from these recipes had no gutter at all** —
+  three 427px cards abutting, one card's last word running into the next card's first — with no
+  error and nothing from `layout-audit.mjs`. Same for `row_gap` and `col_gap`.
 - `narrow` / `medium` / `wide` are the three built-in Container Widths (768 / 896 / 1024px). Their **slugs derive from the preset NAMES**, so a site whose Container Width library has been renamed or extended has different slugs — read the site's own library rather than assuming these three.
 - `btn-primary` / `btn-link` / `btn-lg` are Theme Settings → Buttons presets, which a site may also rename.
 

@@ -91,6 +91,16 @@ The pricing table's layout comes from the offer's shape: plans with feature list
 service menu with a price per line is a **list**. Reading the page shape off the content rather than
 defaulting to cards is the same rule the converter learned the hard way.
 
+**Both this shape and Services read `offering` from the spec** — `offering.items`,
+`offering.pricing`, `offering.pricing_model`, `offering.figures`. With `offering` empty there is
+nothing to put on either page and [rule 4](../../skills/create-site/build-rules.md) forbids filling
+them, so:
+
+- **`pricing_model` without `pricing`** → no table. The page explains *what moves the number* — the
+  variables a quote depends on, with no figures — and the gap goes in `missing`.
+- **Neither** → do not ship a Pricing page at all. An empty page in the nav is worse than one fewer
+  page, and the honest answer is to tell the person that three real prices would give them one.
+
 ### Contact
 
 ```

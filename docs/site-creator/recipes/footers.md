@@ -70,7 +70,8 @@ $mf = array(
       $el('social_icons'),                            // profiles come from Theme Settings → Social
     ),
     'main_footer_col_2' => array(
-      $el('heading', array('heading_text' => '{{col_2_title}}', 'heading_level' => 'h2')),
+      // h3, not h2 — see the note under the slot table.
+      $el('heading', array('heading_text' => '{{col_2_title}}', 'heading_level' => 'h3')),
       $el('menu', array('menu_id' => '{{footer_menu_id}}')),
     ),
     // …columns 3 and 4, same shape
@@ -84,6 +85,13 @@ fw_set_db_settings_option('main_footer_columns', $mf);
 | `{{brand_blurb}}` | one or two sentences | omit the `text` element; the logo alone is fine |
 | `{{col_N_title}}` | 1–3 words | omit the `heading`; an untitled link column is a guessing game |
 | `{{footer_menu_id}}` | a **menu term ID** | the column renders empty |
+
+**A footer column title is an `h3`, not an `h2`.** The `heading` element takes the global type scale
+for whatever level you give it, and on any style with a real display scale an `h2` is the *subhead*
+size — 32px against 16px links, a 2× jump that reads as a mistake rather than as a hierarchy. `h3`
+also keeps the document outline honest: the page's own `h2`s are its sections, and the footer is not
+six more of them. Where a style wants a different footer type treatment, it belongs in
+`main_footer_custom_styling`, not in the heading level.
 
 **`main_footer_auto => 'yes'` ignores your split entirely.** It makes the columns content-sized and
 distributes them by `main_footer_justify` instead. That is the right choice when the source hugs its

@@ -118,6 +118,26 @@ plays at them, and reserve the scroll-driven option for when the idea genuinely 
 One warning, because this is where it goes wrong: an interaction nobody notices is worse than a static
 section. Label it, place it on the path, and make its first state obviously operable.
 
+### A participatory moment needs facts, and a thin spec forbids them
+
+Every example above is made of the subject's own numbers — a term, a rate, a size, a price, a set of
+options. [Build rule 4](../../skills/create-site/build-rules.md) forbids inventing any of them. So a
+spec whose `missing[]` includes the figures **cannot** carry a participatory moment, and the build is
+left with the scroll-driven list, which fails test 1 above.
+
+That is a real outcome, not a hypothetical, and it has a required response rather than a workaround:
+
+- **Do not invent the numbers to earn the score.** A rate explainer running on figures nobody gave
+  you is the worst thing on this page, dressed as the best.
+- **Do not pretend the scroll reveal qualifies.** Score Creativity for what it is — a competent page
+  with no idea in it — and name the cause.
+- **Say which facts would unlock it**, in the `missing` report, as specifically as you can: *"three
+  representative monthly figures and the terms they assume would make the rate explainer buildable,
+  and it is the one thing that would move this site from 6 to 8 on Creativity."*
+
+A person who learns that supplying three numbers is worth two points will usually supply them. A
+person who is handed a 6 with no explanation will conclude the tool is mediocre.
+
 > **The advantage worth using.** The open libraries hand-roll every one of these in a 3D library from
 > scratch, which is why their sites are beautiful and unmaintainable. The machinery is already in the
 > framework and already editable in the builder — so the cost here is *choosing well*, not building it.

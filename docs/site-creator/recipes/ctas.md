@@ -60,7 +60,7 @@ upw_div_section(array(
   ), array(
     'direction'     => array('base' => 'column', 'md' => '', 'lg' => ''),
     'align_items'   => array('base' => 'center'),
-    'gap'           => array('base' => 'gap-4'),
+    'gap'           => array('base' => '4'),
     'content_width' => array('preset' => 'narrow'),
     'content_align' => 'center',
   )),
@@ -175,7 +175,7 @@ upw_flexbox(array(
   'direction'       => array('base' => 'column', 'md' => 'row', 'lg' => ''),   // stacked on phones
   'justify_content' => array('base' => 'center'),
   'align_items'     => array('base' => 'center'),
-  'gap'             => array('base' => 'gap-3'),
+  'gap'             => array('base' => '3'),
 ));
 ```
 

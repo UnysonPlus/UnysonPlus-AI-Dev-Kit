@@ -49,10 +49,14 @@ $hm['main_right']  = array(array('element_type' => array(
 fw_set_db_settings_option('header_main', $hm);
 
 // 2 · The treatment — this is the only line that differs between the four variants.
+//     The `group` wrappers in options.php are PRESENTATION, not storage: a group's
+//     options are saved at the PARENT's level, so there is no `group_header_layout`
+//     key to write into. `header_design` is nested inside the multi-picker's chosen
+//     mode (`header_mode['top']`), not beside it.
 $hl = (array) fw_get_db_settings_option('header_layout', array());
-$hl['group_header_layout']['header_mode'] = array('mode' => 'top');
-$hl['group_header_layout']['header_design'] = array('design' => '{{design}}');   // classic|pill|card|centered
-$hl['group_header_layout']['header_position'] = '{{position}}';                  // static|sticky|overlay
+$hl['header_mode']['mode'] = 'top';
+$hl['header_mode']['top']['header_design'] = array('design' => '{{design}}');   // classic|pill|card|centered
+$hl['header_position'] = '{{position}}';                                        // static|sticky|overlay — TOP level
 fw_set_db_settings_option('header_layout', $hl);
 
 // 3 · Menu type belongs to header_menu, not to the slot.
@@ -70,8 +74,13 @@ fw_set_db_settings_option('header_menu', $hmenu);
 | `{{position}}` | `static` · `sticky` · `overlay` | `static` |
 | `{{link_color_preset}}` / `{{menu_size}}` | a colour preset slug / a bare number for the `rem` unit-input | theme defaults |
 
-### Three gotchas that are not obvious
+### Four gotchas that are not obvious
 
+- **A `group` in `options.php` is not a level in the saved value.** This block used to write
+  `$hl['group_header_layout']['header_design']`, which stores a key nothing ever reads: the header
+  silently keeps its defaults on every page, and there is no error to explain it. Groups are
+  presentation; their options save at the parent's level. The same applies to every other
+  `group_*` wrapper in the theme's option files.
 - **`cta_style` needs the `btn-` prefix.** `'btn-primary'` works; `'primary'` is **dropped silently** and
   the CTA falls back to a bare `.btn`. The header CTA is the one button on every page, so this is a
   site-wide defect that looks like a theming mistake.

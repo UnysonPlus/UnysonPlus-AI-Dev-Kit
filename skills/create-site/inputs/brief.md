@@ -13,7 +13,7 @@ Turn the sentence into a [site spec](../site-spec.schema.json), agree it, then b
 
 ## Intake
 
-Ask for what you cannot infer, in one round rather than an interrogation. Six things decide the site:
+Ask for what you cannot infer, in one round rather than an interrogation. Seven things decide the site:
 
 1. **The business** — name, what it does, where. Without a name there is no site; everything else can
    be `null` and listed in `missing`.
@@ -26,7 +26,15 @@ Ask for what you cannot infer, in one round rather than an interrogation. Six th
    the header button.
 5. **Real content** — any copy, photos, logo, testimonials they already have. **Ask explicitly for
    testimonials and numbers**, because their absence is what decides whether a proof band exists.
-6. **Where it is built** — which install.
+6. **What they sell, and the figures behind it** → `offering`. The services or products, real prices
+   (or the pricing model where there is no table), and the numbers a visitor would compare — terms,
+   sizes, rates, lead times. Ask for this even when they did not ask for a Pricing page: it is what
+   the Services and Pricing shapes are made of, and it is the raw material of a **participatory
+   signature moment**, which is the difference between a site that scores and one that does not
+   ([design-jury.md](../../../docs/site-creator/design-jury.md)). Tell them that, briefly — "three
+   representative figures would let me build the thing people remember" gets an answer; asking for
+   "pricing data" does not.
+7. **Where it is built** — which install.
 
 Anything they do not answer goes in `missing[]`. Do not re-ask twice; record and move on.
 

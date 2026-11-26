@@ -30,6 +30,14 @@ Pages are created as **drafts**. The spec's `build.publish` defaults to `draft` 
 Publishing is the person's decision, and it is the one action that cannot be quietly undone — a page
 that went live for ten minutes may be in a search index, a cache or someone's inbox.
 
+**The one exception, and it is forced by the gate.** On a **localhost** install, publish — then say
+so. The [ship gate](../../docs/site-creator/ship-gate.md) has to measure a *rendered* page
+(Lighthouse mobile, accessibility, SEO, and "open it and look at it"), none of which runs against a
+draft behind a login; a draft also cannot be the front page, so the site has no home page to measure.
+The reason this rule exists — that a published page may reach an index, a cache or an inbox — cannot
+happen on an install that is not reachable off the machine. On a staging or live site the rule stands
+unchanged: build drafts, and let the person publish.
+
 ## 4 · No invented content. None.
 
 The rule most likely to be broken, because breaking it makes everything look better.
@@ -48,6 +56,26 @@ slot degrades to nothing rather than to filler.
 > A page with five honest sections is finished. A page with eight, three of them invented, is a
 > liability with a nice screenshot.
 
+### What this rule does NOT forbid: writing the words
+
+Every item above is a **claim about this business**. None of them is "a sentence". A page needs
+prose, and `missing[]` carrying `content.copy` does not mean the build ships empty bands.
+
+The line is the one [`inputs/brief.md`](inputs/brief.md) draws — **shape yes, facts never**:
+
+- **Allowed.** A headline, a standfirst, a section introduction, an explanation of what the trade
+  does and how the process works, the ordinary domain knowledge any customer could look up. *"A
+  broker works the other way round from a dealership: you find the car, we take the figures to the
+  lenders."* That asserts nothing about this company that is not true of the category.
+- **Forbidden.** Anything only this business could know or be held to — what it has done, who for,
+  how fast, how much, since when, how many, with which accreditation.
+
+The test is not "did I write this" but **"could this sentence be wrong about them?"** If it could,
+it is a fact and it needs supplying. If it could not, it is the writing you were asked for.
+
+And "no lorem" means exactly that: Lorem ipsum, and filler written to *look* like prose while saying
+nothing. Real sentences that carry real domain meaning are the opposite of filler.
+
 ## 5 · SEO is configured from real details
 
 Native Unyson+ / theme SEO, filled from the business facts in the spec — not generated plausible text.
@@ -56,17 +84,28 @@ misinformation about a real place.
 
 Where the spec has `null`, leave it empty and list it in `missing`.
 
-## 6 · Regenerate the preset CSS
+## 6 · Regenerate the CSS, and know which file comes from where
 
-**The failure unique to programmatic building.** Preset CSS lives in a generated
-`uploads/**/unysonplus/css/presets-*.css` that a programmatic write does **not** rebuild — only the
-admin save flow does.
+**The failure unique to programmatic building** is a database holding a perfect palette while the site
+serves Bootstrap's blue-and-grey. Two different generated files are involved, and they rebuild by
+different mechanisms — conflating them is how an agent ends up debugging the wrong layer.
 
-So after writing `button_colors`, `button_sizes` or any Components preset: delete the generated files
-and call `unysonplus_hf_regenerate_css()`.
+| File | Holds | Rebuilt by |
+| --- | --- | --- |
+| `uploads/**/unysonplus/css/unysonplus-generated.css` | the colour tokens and the header / footer CSS | **`unysonplus_hf_regenerate_css()`** |
+| `uploads/**/unysonplus/css/presets-{hash}.css` | the **preset** rules — `.btn-{slug}`, `.section--{slug}`, box / icon-badge / container-width presets | **the next front-end request**, via `unysonplus_ensure_preset_css_file()` |
 
-Skip it and the site serves Bootstrap's blue-and-grey while the database holds a perfect palette. It
-looks like the style failed to apply, and it sends you debugging the wrong layer entirely.
+The preset file is content-hash-addressed: changing a preset changes the hash, the new file is written
+on the next request, and stale hashes are purged automatically. So:
+
+- **After writing `button_colors`, `button_sizes`, `section_style_presets` or any other Components
+  preset:** delete the generated files, call `unysonplus_hf_regenerate_css()`, then **load one
+  front-end page**. Only that last step produces `presets-*.css`.
+- **Do not read an empty `css/` directory as a failed write.** Immediately after the regen call it
+  legitimately contains `unysonplus-generated.css` and nothing else; a single `curl` of the home page
+  is what fills it.
+- **Check the RENDERED button, not the stored option** — the ship gate's check 3 says the same thing,
+  and it is the only verification that covers both files at once.
 
 ## 7 · Media is sideloaded, never hotlinked
 

@@ -37,6 +37,7 @@ upw_div_section(array(
   upw_grid(array(
     upw_element('icon_box', array(
       'icon'          => array('type' => 'svg', 'svg-source' => 'library', 'svg-id' => 'lucide/{{icon_1}}'),
+      'icon_color'    => array('predefined' => '', 'custom' => '{{icon_hex}}'),   // ALWAYS set it — see below
       'title'         => '{{title_1}}',
       'title_tag'     => 'h3',                     // under the band's h2 — keep the outline in order
       'content'       => '<p>{{body_1}}</p>',      // content is a wp-editor: HTML, not plain text
@@ -47,7 +48,7 @@ upw_div_section(array(
     )),
     // …items 2 and 3, same shape
   ), 3, array(
-    'gap'                 => array('base' => 'gap-4'),
+    'gap'                 => array('base' => '4'),
     'responsive_collapse' => 'yes',               // the default; stacks on phones
   )),
 ), array(
@@ -62,6 +63,20 @@ upw_div_section(array(
 | `{{title_N}}` | 1–4 words | the box renders icon-only, which is a different design; fill it |
 | `{{body_N}}` | one line | the box is title-only, which is fine and often better |
 | `{{surface}}` | a Section-Style slug or `''` | Default |
+
+**A `gap` value is a bare scale slug — `'4'`, not `'gap-4'`.** The view prefixes `fw-gap-` itself, so
+`'gap-4'` emits the class `fw-gap-gap-4`, which matches no rule: the computed gap is `normal` and
+**the cards abut with no gutter at all**. It is silent — no error, no warning, and `layout-audit.mjs`
+does not catch touching text columns — and it looked like this on a real build: three 427px cards
+edge to edge, one card's last word reading straight into the next card's first. The scale is the gap
+scale (`0 1 2 3 4 [32px] [40px] 5 …`, where `4` = 1.5rem and `5` = 3rem), and the same rule applies
+to `row_gap` and `col_gap`.
+
+**Set `icon_color`, every time.** `icon-box/static/css/styles.css` gives `.icon-box__icon` a hardcoded
+default of **`color: #5bcc92`** — a mint green that has nothing to do with the theme palette. Leave
+the option unset and every icon on every icon row renders green, whatever the style: it is the single
+most visible way a generated page announces that a design system was never applied. Pass the style's
+primary (or ink, where the style wants the icons quiet).
 
 **The icon value is an object, not a string.** `'icon' => 'zap'` silently renders nothing. Lucide is
 `{ "type":"svg", "svg-source":"library", "svg-id":"lucide/<name>" }`; no icon is
@@ -207,7 +222,7 @@ upw_grid(array(
   upw_element('icon_box', array(/* … */)),
   upw_element('icon_box', array(/* … */)),
 ), '1fr 1fr', array(
-  'gap'                 => array('base' => 'gap-4'),
+  'gap'                 => array('base' => '4'),
   'grid_row_height'     => array('value' => '', 'unit' => 'px'),   // fill only if a tile must span rows
   'responsive_collapse' => 'yes',
 ));

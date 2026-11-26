@@ -52,6 +52,12 @@ Route on what the person gave you. They are different builds, not different wrap
 2. **Fill `missing` honestly.** Every fact you could not establish goes in `missing[]`. This is the
    field that stops the build inventing: no testimonials, no metrics, no opening hours, no service
    areas that nobody told you. A page whose proof is missing ships *without a proof band*.
+2b. **Permalinks, before anything else is written.** Set the permalink structure and confirm an inner
+   page returns 200. Chrome and menus store `get_permalink()` output at write time, so doing this
+   later leaves `?page_id=N` baked into the header CTA and every footer link. On a subdirectory
+   install also confirm `.htaccess` exists — `flush_rules(true)` does not always write it, and the
+   symptom is a home page that loads and **every other page 404ing**. See
+   [programmatic-setup.md §10](../../docs/theme-settings/programmatic-setup.md).
 3. **Design system first.** Apply the style: palette, type, buttons, shape, surfaces, rhythm — Theme
    Settings, before any page exists. **Measure the palette before you write it** — background against
    foreground, and every role both as a fill and as text (build rule 10). A third of the style briefs

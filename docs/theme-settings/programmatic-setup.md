@@ -40,8 +40,21 @@ Match the source's content max-width (default `lg` is **1170px**; `max-w-7xl`=12
 ```php
 $gl = (array) fw_get_db_settings_option('general_layout', array());
 $gl['layout_container_width'] = array('base'=>array('value'=>'100','unit'=>'%'),'md'=>array('value'=>'720','unit'=>'px'),'lg'=>array('value'=>'1280','unit'=>'px'));
+// Set these two as well — both default to something a style usually has to change:
+$gl['layout_container_gutter'] = array('value'=>'1.5','unit'=>'rem');  // Content SIDE padding. Default EMPTY.
+$gl['layout_roundness']        = 'sharp';                              // --radius token: sharp|subtle|rounded|soft. Default `subtle`.
+$gl['layout_section_spacing']  = 'cozy';                               // compact (0.75x) | cozy | spacious (1.5x)
 fw_set_db_settings_option('general_layout', $gl);
 ```
+
+> **`layout_container_gutter` is not optional.** `layout_container_width` sets `base` to `100%`, so
+> below the `md` breakpoint the only thing holding content off the screen edge is the gutter. Leave it
+> empty and a phone gets text flush to both edges. Set it with the width, in the same write.
+>
+> **`layout_roundness` is the one a zero-radius style forgets.** It feeds the `--radius` token that
+> everything the style did *not* explicitly set reads from, so a Swiss or brutalist build that sets
+> `border_radius: 0` on buttons and box presets and leaves this at `subtle` still rounds the rest —
+> which is exactly the "one rounded control in a zero-radius style" the ship gate looks for.
 
 ## 3.5 Buttons — `button_colors` + `button_sizes` (Components design-system — do this in PHASE 2)
 Buttons are a **design-system** concern, not a per-section CSS patch: the Components → Buttons presets
@@ -160,10 +173,61 @@ It prints after all theme + plugin styles (so it wins the cascade). Use it only 
 expresses — see [misc.md](misc.md).
 
 ## 8. Section padding (in the page-builder tree, not Theme Settings)
-Section `padding_top`/`padding_bottom` are **responsive spacing-class** controls: value =
-`{ base:'pt-9', md:'', lg:'' }` where the slug's number is the spacing scale (**0**=0, **5**=3rem/48px,
-**9**=5rem/80px, 12=8rem). Prefix `pt`/`pb`. So `py-20`(80px)=`pt-9`/`pb-9`, `py-10`(40px)≈`pt-5`.
+
+**Two different options, and the modern one is not the one this section used to describe.**
+
+**A Div / Flexbox** (`upw_div_section`, `upw_flexbox`, `upw_grid` — the modern default) has ONE
+composite `spacing` option holding full Bootstrap utility class names:
+
+```php
+$e = array('all'=>'','top'=>'','right'=>'','bottom'=>'','left'=>'');
+'spacing' => array(
+  'margin'   => $e,
+  'padding'  => array('all'=>'','top'=>'pt-11','right'=>'','bottom'=>'pb-11','left'=>''),
+  'advanced' => array('md'=>array('margin'=>$e,'padding'=>$e),   // responsive infix: pt-md-9
+                      'lg'=>array('margin'=>$e,'padding'=>$e),
+                      'xl'=>array('margin'=>$e,'padding'=>$e)),
+),
+```
+
+**The classic `upw_section`** has the separate `padding_top` / `padding_bottom` **responsive
+spacing-class** controls: `{ base:'pt-9', md:'', lg:'' }`.
+
+The scale (`unysonplus_default_spacing_scale()`, overridable in Theme Settings → General → Spacing):
+**0**=0, 1=.25rem, 2=.5rem, 3=1rem, 4=1.5rem, `[32px]`, `[40px]`, **5**=3rem/48px, 6=3.5rem, 7=4rem,
+8=4.5rem, **9**=5rem/80px, 10=6rem, 11=7rem/112px, 12=8rem/128px. Prefix `pt`/`pb`.
+
+## 9. Per-page SEO (the extension's meta keys)
+The SEO extension stores its per-post title and description in **underscore-prefixed** post meta. The
+un-prefixed spellings are the admin list-table COLUMN ids, so writing to those stores meta nothing reads:
+
+```php
+update_post_meta( $post_id, '_fw_seo_title',       'Car finance in Manchester, arranged by a broker' );
+update_post_meta( $post_id, '_fw_seo_description', 'A broker for car finance in the North West. …' );
+```
+
+Leave a field empty rather than generating plausible text, and do not emit a `LocalBusiness` schema
+without a real address — a structured claim about a place that does not exist is worse than no schema.
+
+## 10. Permalinks come FIRST, not last
+Set the permalink structure in phase 0, **before** chrome. The header CTA, footer links and menu items
+all store `get_permalink()` output at write time, so building chrome against the default
+`?page_id=N` URLs bakes those in and nothing later rewrites them.
+
+```php
+global $wp_rewrite;
+update_option( 'permalink_structure', '/%postname%/' );
+$wp_rewrite->set_permalink_structure( '/%postname%/' );
+$wp_rewrite->flush_rules( true );
+```
+
+> **On a SUBDIRECTORY install, check `.htaccess` exists afterwards.** `flush_rules(true)` only writes
+> it when the file is writable and `got_mod_rewrite()` is true; on XAMPP with no file present it
+> silently writes nothing. The symptom is distinctive and easy to misread: the home page returns 200
+> and **every inner page 404s**. The file needs `RewriteBase /<slug>/` and
+> `RewriteRule . /<slug>/index.php [L]`, not the document-root defaults.
 
 ## Order + verify
-Colors → Typography → Container width → Header (logo/main/menu/topbar) → Footer → THEN page sections.
+Permalinks → Colors → Typography → Container width + gutter + roundness → Header (logo/main/menu/topbar)
+→ Footer → THEN page sections.
 Regenerate CSS + clear caches, then verify **region-by-region** against the source (see the protocol).
