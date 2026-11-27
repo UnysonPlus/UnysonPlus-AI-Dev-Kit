@@ -112,6 +112,11 @@ tell of a generator following a template instead of reading the page.
 
 ## The rules that make a page cohere
 
+**A band's background goes edge to edge; only its content is contained.** A surface that stops at
+the container width is not a band, it is a box with the page visible down both sides, and it undoes
+the rhythm the next rule describes. See
+[`recipes/components.md`](recipes/components.md) — the option defaults to off.
+
 **Alternate surfaces, do not decorate with them.** Light → Alt → Light → Dark, where the Dark band is
 the CTA. Surface changes are the page's rhythm; a different surface on every band is noise and the CTA
 stops reading as a moment.

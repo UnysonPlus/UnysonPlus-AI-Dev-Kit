@@ -188,7 +188,14 @@
       "properties": {
         "style": {
           "type": "string",
-          "description": "A style id (e.g. 'monochrome', 'modern-dark'), or 'custom' with `style_notes`."
+          "description": "A style id (e.g. 'monochrome', 'modern-dark'), or 'custom' with `style_notes`. Chosen via docs/site-creator/styles/choosing.md - route on what the visitor is risking, not on the industry, and read that file's traps before settling on swiss, terminal, neumorphism or any of the expressive set."
+        },
+        "style_reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "One line: why this style, in the routing protocol's terms (stake, content shape, audience, theatre level). Recorded so a later session does not re-litigate the choice, and so a wrong pick is visible as a wrong argument rather than as an unexplained value."
         },
         "style_notes": {
           "type": [

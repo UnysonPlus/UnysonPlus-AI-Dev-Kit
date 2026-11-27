@@ -20,8 +20,20 @@ block.
   than asking the questions a second time. A spec handed to you already has its `missing[]` filled in.
 - [Composition](../../docs/site-creator/composition.md) — the order, and which archetypes each page
   shape wants.
-- [Styles](../../docs/site-creator/styles/README.md) — the design directions and what each one sets.
-- [Recipes](../../docs/site-creator/recipes/README.md) — what each section archetype is.
+- [Styles](../../docs/site-creator/styles/README.md) — the design directions and what each one sets,
+  and [choosing](../../docs/site-creator/styles/choosing.md) — **which one**. Route on what the visitor
+  is risking, not on the industry, and read the traps: several styles apply perfectly and are still the
+  wrong answer. Picking the style is a step 1 decision, not a step 3 one.
+- [Components](../../docs/site-creator/recipes/components.md) — the patterns, dividers, presets and
+  motion modules a build is supposed to use, and **the Animation Engine switch**: it ships INACTIVE,
+  so every motion module is silently absent until step 3 turns it on. A build of flat rectangles has
+  not been restrained, it has been unaware.
+- [Logo](../../docs/site-creator/recipes/logo.md) — a site whose brand mark is its name in the body
+  font looks unfinished whatever the style does. `brand.logo` missing is a reason to **make one**, not
+  a reason to skip it.
+- [Recipes](../../docs/site-creator/recipes/README.md) — what each section archetype is, including
+  [imagery](../../docs/site-creator/recipes/imagery.md): where the photographs come from. A build
+  that ships bare text because it had no image source has misread rule 4, not obeyed it.
 - [The design jury](../../docs/site-creator/design-jury.md) — **how good it has to be**: the rubric,
   the theatre levels (Full / Measured / Quiet, defaulting to Measured) and the one signature moment.
   Read it with the build rules, not after building — it decides what the build is allowed to spend.
@@ -58,8 +70,13 @@ Route on what the person gave you. They are different builds, not different wrap
    install also confirm `.htaccess` exists — `flush_rules(true)` does not always write it, and the
    symptom is a home page that loads and **every other page 404ing**. See
    [programmatic-setup.md §10](../../docs/theme-settings/programmatic-setup.md).
-3. **Design system first.** Apply the style: palette, type, buttons, shape, surfaces, rhythm — Theme
-   Settings, before any page exists. **Measure the palette before you write it** — background against
+3. **Design system first.** Name the style, its register and the reason in one line
+   ([choosing.md](../../docs/site-creator/styles/choosing.md)), then apply it: palette, type, buttons,
+   shape, surfaces, rhythm — Theme Settings, before any page exists. **Make the logo here too**, with
+   the design system's own type and colour ([recipes/logo.md](../../docs/site-creator/recipes/logo.md)),
+   and **activate the Animation Engine** ([recipes/components.md](../../docs/site-creator/recipes/components.md)
+   § Step 0) — it ships inactive, and a build that skips this silently loses every motion module
+   without one error to show for it. **Measure the palette before you write it** — background against
    foreground, and every role both as a fill and as text (build rule 10). A third of the style briefs
    name an accent that fails as given, so the brief's table is a starting point, not a guarantee.
    Then **regenerate the preset CSS** (see build-rules.md); a
@@ -68,9 +85,18 @@ Route on what the person gave you. They are different builds, not different wrap
 4. **Chrome second.** Header and footer are Theme Settings and site-wide. One of each.
 5. **Pages, section by section.** Page shape from composition.md, variant from the style's section
    treatments table, slots from the spec. Finish a band before starting the next.
-6. **Motion last**, in the style's register. One idea per section.
+6. **Motion last**, in the style's register. One idea per section — and **name the signature moment**
+   (build rule 12). A build that cannot name one has not earned a pass at the gate.
 7. **The ship gate.** [ship-gate.md](../../docs/site-creator/ship-gate.md). A page that fails does not
-   ship — and a created page has no source to excuse a gap against.
+   ship — and a created page has no source to excuse a gap against. Run the audit on **every** page,
+   not just the home page; it is the primary lens for a created site and exits non-zero on a blocking
+   finding:
+
+   ```bash
+   node tools/measure/layout-audit.mjs <url> --widths 1440,390
+   ```
+
+   Then name the signature moment (check 5). A build that cannot name one does not pass.
 8. **Report what you did not do.** The `missing` list, in plain language, as the last thing you say.
    "I left the testimonials out because you have not given me any" is a useful sentence; silently
    shipping three invented ones is the worst outcome this skill can produce.

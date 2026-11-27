@@ -38,6 +38,7 @@ Four templates in [the format](README.md), covering the gaps the CRM set does no
 | [Professional service](professional-service.md) | consultancies, accountants, architects, agencies — **shipped**, as a CRM industry | credentials and case studies — both are checkable claims, and a client usually has to agree to be named |
 | [Ecommerce](ecommerce.md) | shops on WooCommerce | delivery costs, returns terms and stock — the first two are consumer-law problems, not copy problems |
 | [SaaS / product](saas.md) | apps, developer tools, plugins | prices — a plausible figure on a pricing page will be quoted back at the business |
+| [Lending](lending.md) | car finance, personal and payday loans, brokers — with a **home-page pattern** from a study of lending templates | the rate, the proof numbers and the authorisation — a calculator with an invented rate is a regulated claim |
 
 **Professional service is live.** It shipped as the ninth CRM industry at
 `create.unysonplus.com/crm/professional-service/`, built from the template above. That is the route for

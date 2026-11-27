@@ -83,10 +83,65 @@ function upw_flexbox( $items, $atts = array() ) {
 	return array( 'type' => 'flexbox', '_items' => $items, 'atts' => $atts );
 }
 
-/** A modern SECTION band — a Flexbox tagged <section>, block flow, content contained to the site width by
- *  default. The Div-first replacement for upw_section(): children (elements or nested Divs) go in $items. */
+/**
+ * A modern SECTION band — a Flexbox tagged <section>, content contained to the site width by default.
+ * The Div-first replacement for upw_section(): children (elements or nested Divs) go in $items.
+ *
+ * TWO THINGS THAT SILENTLY DO NOTHING HERE, both found by measuring a built page rather than by
+ * reading the options:
+ *
+ * 1. `gap` ON A BLOCK BAND. This used to force `display: block` unconditionally. The flexbox element
+ *    happily accepts a `gap` att and emits `fw-gap-N` -> `row-gap: 56px`, and `row-gap` does nothing
+ *    whatsoever on a block container. So every band that asked for a gap got its spacing from
+ *    whatever stray margins its children happened to carry instead. The band now switches to a flex
+ *    column WHEN AND ONLY WHEN the caller passes a gap: a stacked band lays out identically either
+ *    way, so this changes nothing for callers that never asked, and starts honouring the ones that
+ *    did. (Flex also stops adjacent margins collapsing, which is why it is not the blanket default:
+ *    an existing build that leaned on collapsed margins would grow.)
+ *
+ * 2. `padding_top` / `padding_bottom` ARE NOT OPTIONS ON A FLEXBOX. The Styling tab exposes ONE
+ *    composite `spacing` option (margin + padding), whose value is a map of Bootstrap-style utility
+ *    CLASS NAMES from the site's spacing scale -- not pixel numbers. `padding_top => '96'` is an
+ *    unknown key, dropped without a word, and the band renders the stock 64px while the build
+ *    reports a rhythm it does not have. Use upw_pad() below.
+ */
 function upw_div_section( $items, $atts = array() ) {
-	return upw_flexbox( $items, array_merge( array( 'html_tag' => 'section', 'display' => 'block' ), $atts ) );
+	// 3. A BAND'S BACKGROUND IS FULL-BLEED. `full_width` defaults to 'no', which contains the whole
+	//    section INCLUDING its background, so a tinted or coloured band renders as a floating box
+	//    with the page showing down both sides instead of as a band. That is the single thing that
+	//    most makes a generated page look unfinished, and it is a default rather than a decision.
+	//    'yes' is what the option's own help calls "the classic full-bleed hero / colour-band
+	//    pattern": the background spans the window, the CONTENT stays contained to the site width.
+	//    Pass full_width => 'no' deliberately for the rare card-like band that should float.
+	$base = array( 'html_tag' => 'section', 'display' => 'block', 'full_width' => 'yes' );
+	if ( isset( $atts['gap'] ) && '' !== $atts['gap'] ) {
+		$base['display']   = 'flex';
+		$base['direction'] = array( 'base' => 'column', 'md' => '', 'lg' => '' );
+	}
+	return upw_flexbox( $items, array_merge( $base, $atts ) );
+}
+
+/**
+ * Build a `spacing` att — the ONLY way to set a band's padding (see the note above).
+ *
+ * $top / $bottom are spacing-scale SLUGS, not pixels: the scale is Theme Settings > General >
+ * Spacing (`unysonplus_get_spacing_scale()`), Bootstrap's 0-5 plus the theme's larger steps. On the
+ * stock scale 7 = 4rem, 10 = 6rem, 12 = 8rem. Pass '' to leave a side at the theme default.
+ *
+ *   upw_div_section( $items, array_merge( upw_pad( '10', '10' ), array( 'gap' => '5' ) ) )
+ */
+function upw_pad( $top = '', $bottom = '', $left = '', $right = '' ) {
+	$empty = array( 'all' => '', 'top' => '', 'right' => '', 'bottom' => '', 'left' => '' );
+	return array( 'spacing' => array(
+		'margin'  => $empty,
+		'padding' => array(
+			'all'    => '',
+			'top'    => '' === $top    ? '' : 'pt-' . $top,
+			'right'  => '' === $right  ? '' : 'pe-' . $right,
+			'bottom' => '' === $bottom ? '' : 'pb-' . $bottom,
+			'left'   => '' === $left   ? '' : 'ps-' . $left,
+		),
+	) );
 }
 
 /** A GRID Div (columns). $cols = a number (equal columns) or a raw grid-template-columns value ('1fr 2fr').

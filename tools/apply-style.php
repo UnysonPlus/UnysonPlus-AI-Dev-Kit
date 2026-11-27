@@ -1131,6 +1131,16 @@ $gl['layout_container_width'] = array(
 	'md'   => array( 'value' => '720', 'unit' => 'px' ),
 	'lg'   => array( 'value' => (string) $S['container'], 'unit' => 'px' ),
 );
+// The gutter is NOT optional, and it has to be written in the same breath as the width above.
+// `base` is 100%, so below the md breakpoint the gutter is the ONLY thing holding content off the
+// screen edge — leave it empty (its default) and every phone gets the headline flush to both sides.
+// This tool wrote the width and skipped the gutter, so every site it stood up had that bug.
+$gl['layout_container_gutter'] = array( 'value' => '1.5', 'unit' => 'rem' );
+// Roundness feeds the --radius token that everything the style did NOT explicitly set reads from.
+// A zero-radius style that sets border_radius:0 on its buttons and boxes and leaves this at the
+// default `subtle` still rounds all the rest — the "one rounded control in a sharp style" the ship
+// gate looks for. Derive it from the style's own radius instead of leaving the default in place.
+$gl['layout_roundness'] = ( (int) $S['radius'] === 0 ) ? 'sharp' : ( (int) $S['radius'] >= 16 ? 'soft' : 'subtle' );
 $plan['general_layout'] = $gl;
 
 /* 5a - The PAGE background. A section with the Default variant wears no surface preset, so it falls
@@ -1172,10 +1182,54 @@ if ( isset( $S['footer'] ) ) {
 // capture previews, that silently contaminates the next preview - monochrome's invert-on-dark rule was
 // found still live after modern-dark had been applied. A preset must fully determine the look, so
 // anything it does not set is CLEARED rather than inherited.
+// The style owns a MARKED BLOCK inside custom_css, not the whole option. Assigning the key outright
+// (what this did until now) also deleted whatever the SITE had put there - verified live: a build's
+// own stylesheet vanished the next time a style was re-applied, with no warning and nothing to
+// recover it from. Replacing only the block keeps the property the note above is protecting - the
+// style still fully determines its own rules, and anything it does not set is cleared - while a
+// re-run stops being destructive to rules it never wrote.
+// Every style carries the PHONE GUTTER fix, because every Div-first site needs it and no style is
+// the reason it is missing. frontend-grid.css says an ancestor that has already applied the site
+// container and its gutter should tell descendants not to subtract it twice, and signals that with
+// `--container-gutter-spent`. `.fw-page-builder-content` is on that list but applies NO padding of
+// its own (measured: 0, full viewport width), so it claims a gutter it never spent, `.fw-contained`
+// resolves `100% - 2 * 0px`, and every heading and paragraph sits flush to both phone edges.
+// Reproduced on two independent fresh installs, caught both times by layout-audit as a GUTTER
+// finding. The real fix is in the shipped stylesheet and needs its own regression pass; until then
+// this makes every site this tool stands up correct, rather than leaving each build to rediscover it.
+// Scoped below the container width so the desktop measure is untouched.
+// Plain lengths, no max()/env(): the asset optimizer's combine step silently dropped the rule when
+// it was written as max(24px,env(safe-area-inset-left)) — the style's other rule survived in the
+// same bundle, so it is this value syntax, not media queries, that it cannot carry.
+$gutter_fix = '@media (max-width:1248px){.fw-page-builder-content>.fw-flexbox.fw-contained{'
+	. 'padding-left:24px;padding-right:24px}}'
+	// A style's radius is written onto the Section Style presets, which is right for a contained box
+	// and wrong for a band whose background runs edge to edge: the window clips the top corners and
+	// the bottom ones show as two odd notches against the next band.
+	. '.fw-flexbox.fw-full-bleed{border-radius:0}';
 $css_for_style             = isset( $S['css'] ) ? (string) $S['css'] : '';
+$css_for_style             = trim( $css_for_style . "
+" . $gutter_fix );
 $mc                        = (array) fw_get_db_settings_option( 'misc_custom_css', array() );
-$mc['custom_css']          = $css_for_style;
+$prev_css                  = isset( $mc['custom_css'] ) ? (string) $mc['custom_css'] : '';
+// NO ANGLE BRACKETS IN THESE MARKERS. The theme runs site Custom CSS through wp_strip_all_tags()
+// before folding it into the presets stylesheet, and strip_tags() treats a '<' as an opening tag and
+// discards everything up to the next '>'. An earlier marker of the form '>>> ... <<<' therefore ate
+// the whole rule that followed it, as far as the first child combinator in a selector — the CSS was
+// stored perfectly, read back short, and vanished with no error anywhere. Found by a cold rebuild.
+$mark_open                 = '/* [design-system CSS: written by apply-style.php, edits here are overwritten] */';
+$mark_close                = '/* [end design-system CSS] */';
+$kept                      = trim( preg_replace(
+	'/' . preg_quote( $mark_open, '/' ) . '.*?' . preg_quote( $mark_close, '/' ) . '/s', '', $prev_css
+) );
+$block                     = ( '' === $css_for_style ) ? '' : $mark_open . "
+" . $css_for_style . "
+" . $mark_close;
+$mc['custom_css']          = trim( $block . ( '' !== $kept ? "
+
+" . $kept : '' ) );
 $plan['misc_custom_css']   = $mc;
+if ( '' !== $kept ) { $notes[] = 'kept ' . strlen( $kept ) . " bytes of the site's own custom CSS"; }
 $notes[]                   = '' === $css_for_style
 	? 'style CSS cleared (this style defines none)'
 	: 'style CSS written: ' . strlen( $css_for_style ) . ' bytes';

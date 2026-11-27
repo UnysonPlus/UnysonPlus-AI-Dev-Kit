@@ -151,6 +151,9 @@ and looked at.
 | [`ctas.md`](ctas.md) | Conversion blocks |
 | [`footers.md`](footers.md) | Site footer — Theme Settings chrome, not a page section |
 | [`marquees.md`](marquees.md) | Moving logo / word strips |
+| [`imagery.md`](imagery.md) | Where a site's photographs come from, and which picks are usable |
+| [`components.md`](components.md) | The parts a build is supposed to use — patterns, dividers, presets, motion — and the Animation Engine switch that silently disables half of them |
+| [`logo.md`](logo.md) | The brand mark — why `missing[]` is not a reason to ship the site title in the body font |
 
 Order follows measured demand — heroes dominate by a wide margin — not alphabetical tidiness. The plan
 these sit under is the [AI Website Creator roadmap](https://docs.unysonplus.com/ai-dev-kit/ai-website-creator).

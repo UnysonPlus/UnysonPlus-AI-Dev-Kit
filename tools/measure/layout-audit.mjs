@@ -14,6 +14,9 @@
 //   CRAMPED    a heading or paragraph with less than --tight px to the next block below it.
 //   RHYTHM     a section whose top / bottom padding is far from the page's usual section padding (info).
 //
+// A deliberate overlap (an overlapping picture pair, a badge on a photograph) is exempt ONLY inside a
+// container with the class `upw-overlap-ok`, and is reported as INFO with its count.
+//
 //   node layout-audit.mjs <url> [--widths 1440,390] [--clear 40] [--gutter 12] [--tight 8] [--root main]
 //
 // --clear is a DESIGN threshold, not a technical one: 24px of air under a divider measures as "not
@@ -66,6 +69,7 @@ const audit = (o) => {
     .filter((el, _, all) => !all.some((o2) => o2 !== el && el.contains(o2)));
 
   const findings = [];
+  let deliberate = 0;
   const inter = (a, b) => Math.min(a.r, b.r) - Math.max(a.x, b.x) > 2 && Math.min(a.b, b.b) - Math.max(a.y, b.y) > 2;
 
   // COLLISION with shape dividers.
@@ -105,6 +109,11 @@ const audit = (o) => {
       const a = leaves[i], b = leaves[j];
       if (a.contains(b) || b.contains(a)) continue;
       const ra = R(a), rb = R(b);
+      // A DELIBERATE overlap (an overlapping picture pair, a badge on a photo) is a design device, not
+      // a defect — but only when the builder said so: both leaves must sit inside one container
+      // carrying the class `upw-overlap-ok`. It is counted and printed, never silently dropped.
+      const okA = a.closest('.upw-overlap-ok');
+      if (okA && okA === b.closest('.upw-overlap-ok')) { if (inter(ra, rb)) deliberate++; continue; }
       if (inter(ra, rb)) {
         findings.push({ kind: 'OVERLAP', where: '', what: label(a), detail: 'overlaps ' + label(b) });
         if (findings.filter((f) => f.kind === 'OVERLAP').length > 12) { i = leaves.length; break; }
@@ -149,7 +158,7 @@ const audit = (o) => {
     if (mt && Math.abs(p.t - mt) / mt > 0.4) findings.push({ kind: 'RHYTHM', where: p.b.id ? '#' + p.b.id : '', what: 'padding-top ' + Math.round(p.t) + 'px', detail: 'page median ' + Math.round(mt) + 'px' });
     if (mb && Math.abs(p.bo - mb) / mb > 0.4) findings.push({ kind: 'RHYTHM', where: p.b.id ? '#' + p.b.id : '', what: 'padding-bottom ' + Math.round(p.bo) + 'px', detail: 'page median ' + Math.round(mb) + 'px' });
   }
-  return { vw, rows, findings };
+  return { vw, rows, findings, deliberate };
 };
 
 const b = await launchBrowser();
@@ -168,6 +177,7 @@ try {
     const f = res.findings.sort((x, y) => order.indexOf(x.kind) - order.indexOf(y.kind));
     if (!f.length) console.log('  ✓ nothing to report');
     for (const x of f) console.log(`  ${x.kind.padEnd(9)} ${x.where ? x.where + ' ' : ''}${x.what} — ${x.detail}`);
+    if (res.deliberate) console.log(`  INFO      ${res.deliberate} deliberate overlap(s) inside .upw-overlap-ok — look at them, the audit did not`);
     failed += f.filter((x) => ['COLLISION', 'OVERLAP', 'GUTTER'].includes(x.kind)).length;
   }
 } finally { await closeQuiet(b); }

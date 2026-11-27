@@ -86,9 +86,32 @@ reload:
 
 Test it in the OS setting, not by reading the code.
 
-### 5 · It is scored, not just measured
+### 5 · The framework was actually used, and the signature moment is named
 
-Checks 1–4 and the standards run tell you the page is real, consistent and reachable. None of them
+Build rule 12 has always been mandatory and has always been skippable, because nothing asked for its
+output. It does now, and the answer is **one sentence written down**, not a feeling:
+
+> *The three offers arrive one after another, staggered 120ms — which is what a broker does.*
+
+**No sentence, no pass.** A build with nothing to put here has not been restrained; it has shipped a
+template. The moment must satisfy all four tests in [`design-jury.md`](design-jury.md) § The signature
+moment — it belongs to this business, it sits on the path the visitor already takes, it survives
+reduced motion, and it is built from the framework's own machinery.
+
+Two failures that produce a blank here, both of them silent:
+
+- **The Animation Engine is inactive.** It ships that way in the core plugin, so every motion module
+  is absent with no error to show for it. Check it in a FRESH request —
+  `fw()->extensions->get('animation-engine')` — because the request that activates it still reports
+  inactive, which is an easy false negative to believe.
+- **The component library went untouched.** Patterns, dividers, box presets, surfaces
+  ([`recipes/components.md`](recipes/components.md)) are one option away from any band, and a build
+  that used none of them will look generated whatever its contrast scores say. Name which bands
+  carry what, and for each band that carries nothing, why.
+
+### 6 · It is scored, not just measured
+
+Checks 1–5 and the standards run tell you the page is real, consistent and reachable. None of them
 tells you it is any **good** — a created page can pass every number here and still be a forgettable
 template, and nothing else in the pipeline will ever say so.
 
@@ -106,9 +129,14 @@ it* — from an aspiration into something with a pass mark.
 
 ## Running it
 
+**Run the audit on EVERY page, not the home page.** It is the primary lens for a created site, it
+needs no source, and it exits non-zero on a blocking finding so a build step can gate on it. Skipping
+it is how a heading ends up 22px under an 80px shape divider — measured, blocking, and invisible to
+everyone who merely looked at the screenshot.
+
 ```bash
-# spacing and collisions, desktop + phone — no source needed
-node tools/measure/layout-audit.mjs <url>
+# spacing and collisions, desktop + phone — no source needed. EVERY page.
+for p in "" about/ services/ pricing/ contact/; do node tools/measure/layout-audit.mjs <base>/$p; done
 
 # the style's container width actually rendered
 node tools/measure/container-check.mjs <url>

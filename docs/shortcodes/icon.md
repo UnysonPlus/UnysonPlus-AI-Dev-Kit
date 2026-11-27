@@ -32,3 +32,15 @@ A single standalone icon (font icon, Lucide SVG, emoji or custom SVG) with an op
 - `icon_color` recolors font icons and `currentColor` SVGs; pasted emoji have fixed colors.
 - `icon_size` normalises inline SVGs to `1em`, so one control resizes either icon kind.
 - Colors use the **compact color-preset** shape `{ predefined, custom }`, NOT a raw hex string. See `README.md`.
+
+## Programmatic gotcha: a library icon needs its markup
+
+A Lucide library pick is stored as `{ type:'svg', 'svg-source':'library', 'svg-id':'car', markup:'<svg…>' }`.
+The options form adds `markup` at SAVE time. Written programmatically with the id alone, **this
+element renders nothing** and raises no error. Resolve it when building:
+
+```php
+'icon' => array( 'type' => 'svg', 'svg-source' => 'library', 'svg-id' => 'car',
+                 'markup' => fw_icon_lucide_markup( 'car' ) ),
+```
+

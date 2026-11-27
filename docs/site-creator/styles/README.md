@@ -1,6 +1,11 @@
 <!-- SPDX-License-Identifier: CC-BY-NC-SA-4.0 -->
 # Styles — the model
 
+> **Which style?** [`choosing.md`](choosing.md) is the routing protocol — route on what the visitor is
+> risking, not on the industry — plus the traps (the styles that apply perfectly and are usually the
+> wrong answer). Read it with the spec, before building: styles differ in their section treatments, so
+> changing one later means rebuilding the pages.
+
 A **style** is a named design direction a person can ask for: *"make it monochrome editorial"*. This
 file is the contract every style in this folder follows, so the picker can list them and the create-site
 flow can apply one without special-casing.
@@ -161,6 +166,9 @@ The recipes' bar, applied to a whole site rather than a section:
 | [`swiss.md`](swiss.md) | Swiss grid — visible grid, three type sizes, one structural colour |
 | [`terminal.md`](terminal.md) | Terminal — monospace throughout, near-black ground, phosphor accent |
 | [`luxury.md`](luxury.md) | Luxury — warm stone, muted metallic, space as the material |
+
+Choosing between them — and between the thirty briefs in [`prompts/`](prompts/README.md) — is
+[`choosing.md`](choosing.md).
 
 The rest of the seeded set is listed in the
 [AI Website Creator roadmap](https://docs.unysonplus.com/ai-dev-kit/ai-website-creator), Phase 2.

@@ -76,6 +76,23 @@ it is a fact and it needs supplying. If it could not, it is the writing you were
 And "no lorem" means exactly that: Lorem ipsum, and filler written to *look* like prose while saying
 nothing. Real sentences that carry real domain meaning are the opposite of filler.
 
+### What this rule does NOT forbid: pictures
+
+The same test applies, and it clears stock photography. **A photograph of the subject matter is not
+a claim about this business.** Keys changing hands on a car-finance site does not assert whose
+customer that is, any more than a photograph of a desk asserts whose desk it is. It cannot be
+*wrong about them*, so it is not a fact and it is not withheld.
+
+Read this rule as banning invented facts, never as a reason to ship bare text. A build that reaches
+the jury with no photographs anywhere has misread it, and loses on Design for a gap it had a tool to
+fill: the kit's stock search is one command away, carries the licence with each result, and is
+documented in [`recipes/imagery.md`](../../docs/site-creator/recipes/imagery.md). Two or three real
+images across a site is the target.
+
+What stays forbidden is a picture that *does* claim something: a face presented as a customer or a
+member of staff, a photographed testimonial, a screenshot of results nobody supplied, a visible
+trademark (which the Pixabay licence does not cover in any case).
+
 ## 5 · SEO is configured from real details
 
 Native Unyson+ / theme SEO, filled from the business facts in the spec — not generated plausible text.
@@ -113,8 +130,12 @@ A logo or image referenced by a URL from somewhere else, or by an attachment id 
 renders **nothing** on the target site. Unyson+ re-resolves images from their `attachment_id` on the
 current site at render time.
 
-Sideload into the target site's Media Library so a real id exists there. A text logo is a perfectly
-good fallback and is what the theme falls back to anyway.
+Sideload into the target site's Media Library so a real id exists there.
+
+**The theme's text-logo fallback is a safety net, not the plan.** A site whose brand mark is its name
+in the body font reads as unfinished whatever the style does, and `brand.logo` sitting in `missing[]`
+is a reason to **make one** — see [recipes/logo.md](../../docs/site-creator/recipes/logo.md). A
+wordmark drawn from the business name claims nothing about the business, so rule 4 does not reach it.
 
 ## 8 · Localhost is fair game; anything else is not
 

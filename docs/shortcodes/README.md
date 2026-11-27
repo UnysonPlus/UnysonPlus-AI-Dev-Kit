@@ -151,7 +151,7 @@ renders as literal `[image]` text).
 **CTA / actions:** `button` · `call-to-action` · `badge` · `newsletter`
 **Cards / features:** `icon-box` · `feature-list` · `image-box` · `image-content` · `flip-box` · `pricing-table` · `team-member` · `testimonials` · `comparison-table` · `table`
 **Media:** `image` (tag `media_image`) · `media-video` · `gallery` · `carousel` · `before-after` · `image-hotspots` · `lottie` · `video-popup` · `audio-player` · `logo-grid` · `avatar` · `featured-image`
-**Shortcodes Library elements (not bundled — Unyson+ → Shortcodes → Shortcodes Library → Install; source `UnysonPlus-Library/shortcodes/`):** `instagram` (Instagram Feed)
+**Shortcodes Library elements (not bundled — Unyson+ → Shortcodes → Shortcodes Library → Install; source `UnysonPlus-Library/shortcodes/`):** `instagram` (Instagram Feed), [`loan_calculator`](loan-calculator.md) (Loan Calculator)
 **Data / display:** `counter` · `countdown` · `progress` · `star-rating` · `calendar` · `map` · `business-info` · `tag-list`
 **Interactive:** `accordion` · `tabs` · `tooltip` · `modal-popup` · `scroll-indicator` · `scroll-to-top` · `menu-toggle`
 **Icons / social:** `icon` · `vector-shape` (tag `vector_shape`) · `social-icons` · `social-share` · `notification`
